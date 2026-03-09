@@ -2,7 +2,7 @@
 const FINNHUB_KEY = 'd6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg';
 const TWELVE_DATA_KEY = process.env.TWELVE_DATA_KEY || '';
 const SPARKLINE_POINTS = 12;
-const SPARKLINE_TTL_MS = 60 * 60 * 1000; // 趋势线缓存 1 小时
+const SPARKLINE_TTL_MS = 6 * 60 * 60 * 1000; // 趋势线缓存 6 小时
 
 // 函数实例内存缓存：复用 warm instance 避免重复打 Twelve Data
 const _sparklineCache = {};

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #f5f5f7;
+            --bg-card: rgba(255, 255, 255, 0.9);
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #aeaeb2;
+            --accent: #0071e3;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --border: rgba(0, 0, 0, 0.08);
+            --shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+            --blur: blur(20px);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #000000;
+            --bg-card: rgba(28, 28, 30, 0.9);
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --text-tertiary: #636366;
+            --border: rgba(255, 255, 255, 0.12);
+            --shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== 天气背景场景 ========== */
+        .weather-scene {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        /* 所有天气都用深色渐变保证文字可读 */
+        .weather-scene.clear-day {
+            background: linear-gradient(180deg, #1e3a5f 0%, #3d6a9c 30%, #5a8fc4 60%, #7eb3e0 100%);
+        }
+
+        .weather-scene.clear-night {
+            background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 40%, #415a77 100%);
+        }
+
+        .weather-scene.cloudy {
+            background: linear-gradient(180deg, #3d4f5f 0%, #5a6c7a 40%, #7a8c98 100%);
+        }
+
+        .weather-scene.rainy {
+            background: linear-gradient(180deg, #2c3e50 0%, #4a6572 50%, #6a8a99 100%);
+        }
+
+        .weather-scene.foggy {
+            background: linear-gradient(180deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
+        }
+
+        /* 太阳 */
+        .sun {
+            position: absolute;
+            top: 8%; right: 12%;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(255,255,200,0.9) 0%, rgba(255,200,100,0.6) 40%, transparent 70%);
+            border-radius: 50%;
+            animation: sunPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { transform: scale(1); filter: blur(0px); }
+            50% { transform: scale(1.1); filter: blur(2px); }
+        }
+
+        /* 月亮 */
+        .moon {
+            position: absolute;
+            top: 10%; right: 15%;
+            width: 70px; height: 70px;
+            background: radial-gradient(circle at 35% 35%, #f5f5f5 0%, #e0e0e0 50%, #c0c0c0 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 50px 20px rgba(255,255,255,0.1);
+            display: none;
+        }
+
+        /* 星星 */
+        .stars { position: absolute; width: 100%; height: 100%; }
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* 云朵 */
+        .clouds { position: absolute; width: 100%; height: 100%; }
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 100px;
+            filter: blur(3px);
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: inherit;
+            border-radius: 50%;
+        }
+        .cloud-1 { width: 140px; height: 45px; top: 18%; animation: cloudMove 28s linear infinite; }
+        .cloud-1::before { width: 55px; height: 55px; top: -28px; left: 25px; }
+        .cloud-1::after { width: 75px; height: 75px; top: -38px; left: 60px; }
+
+        .cloud-2 { width: 170px; height: 55px; top: 38%; animation: cloudMove 38s linear infinite; animation-delay: -12s; opacity: 0.7; }
+        .cloud-2::before { width: 65px; height: 65px; top: -32px; left: 35px; }
+        .cloud-2::after { width: 90px; height: 90px; top: -45px; left: 80px; }
+
+        .cloud-3 { width: 110px; height: 38px; top: 58%; animation: cloudMove 32s linear infinite; animation-delay: -22s; opacity: 0.5; }
+        .cloud-3::before { width: 45px; height: 45px; top: -22px; left: 18px; }
+        .cloud-3::after { width: 60px; height: 60px; top: -30px; left: 45px; }
+
+        @keyframes cloudMove {
+            0% { left: -250px; }
+            100% { left: 100vw; }
+        }
+
+        /* 雨 */
+        .rain { position: absolute; width: 100%; height: 100%; }
+        .raindrop {
+            position: absolute;
+            width: 2px; height: 18px;
+            background: linear-gradient(transparent, rgba(255,255,255,0.5));
+            animation: rainFall 0.7s linear infinite;
+        }
+        @keyframes rainFall {
+            0% { transform: translateY(-20px); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* 雾 */
+        .fog {
+            position: absolute;
+            width: 200%; height: 100%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 75%, transparent 100%);
+            animation: fogMove 25s linear infinite;
+            display: none;
+        }
+        @keyframes fogMove {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0%); }
+        }
+
+        /* 其他页面背景 */
+        .page-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .market-bg { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .news-bg { background: linear-gradient(135deg, #1a1a2a 0%, #2d3748 100%); }
+        .flight-bg { background: linear-gradient(135deg, #0c4a6e 0%, #075985 50%, #0369a1 100%); }
+
+        /* Tab Navigation */
+        .tab-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 100;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border-top: 1px solid var(--border);
+            padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+            display: flex;
+            justify-content: space-around;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 18px;
+            border: none;
+            background: none;
+            color: var(--text-tertiary);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .tab-item i { font-size: 24px; }
+        .tab-item.active { color: var(--accent); }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: calc(14px + env(safe-area-inset-top));
+            right: 16px;
+            z-index: 101;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Pages */
+        .pages { position: relative; z-index: 1; padding-bottom: 100px; }
+        .page { display: none; min-height: 100vh; }
+        .page.active { display: block; }
+        .page-content { padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ========== WEATHER ========== */
+        .weather-header {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 70px 20px 40px;
+            color: white;
+        }
+        .weather-header .location { font-size: 34px; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 10px; }
+
+        .weather-content { position: relative; z-index: 2; padding: 0 16px 20px; }
+
+        .weather-card {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .weather-card .card-title { color: rgba(255,255,255,0.7); }
+
+        /* Hourly */
+        .hourly-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .hourly-scroll::-webkit-scrollbar { display: none; }
+        .hourly-item { flex-shrink: 0; text-align: center; padding: 14px 12px; min-width: 65px; border-radius: 32px; background: rgba(255,255,255,0.12); }
+        .hourly-item.now { background: rgba(255,255,255,0.3); }
+        .hourly-time { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
+        .hourly-icon { width: 38px; height: 38px; margin: 0 auto 10px; }
+        .hourly-icon img { width: 100%; height: 100%; }
+        .hourly-temp { font-size: 18px; font-weight: 600; }
+
+        /* Daily */
+        .daily-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .daily-item:last-child { border-bottom: none; }
+        .daily-day { width: 60px; font-weight: 500; font-size: 16px; }
+        .daily-icon { width: 38px; height: 38px; margin-right: 14px; }
+        .daily-icon img { width: 100%; height: 100%; }
+        .daily-temps { flex: 1; display: flex; align-items: center; gap: 12px; }
+        .daily-low { width: 38px; text-align: right; opacity: 0.6; font-size: 16px; }
+        .daily-bar { flex: 1; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #74b9ff 0%, #ffeaa7 50%, #fd79a8 100%); }
+        .daily-high { width: 38px; font-size: 16px; }
+
+        /* Weather Grid */
+        .weather-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .weather-detail-card {
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(20px);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 18px;
+            color: white;
+        }
+        .weather-detail-card .label { font-size: 14px; opacity: 0.7; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .weather-detail-card .value { font-size: 34px; font-weight: 600; }
+        .weather-detail-card .unit { font-size: 18px; opacity: 0.7; }
+        .weather-detail-card .desc { font-size: 15px; opacity: 0.7; margin-top: 6px; }
+
+        /* AQI */
+        .aqi-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+        .aqi-value { font-size: 44px; font-weight: 600; }
+        .aqi-level { font-size: 20px; opacity: 0.8; }
+        .aqi-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #32d74b 0%, #ffd60a 25%, #ff9f0a 50%, #ff453a 75%, #bf5af2 100%); margin: 16px 0; position: relative; }
+        .aqi-indicator { position: absolute; top: -6px; width: 20px; height: 20px; background: white; border-radius: 50%; border: 3px solid #333; transform: translateX(-50%); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .aqi-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; font-size: 14px; }
+        .aqi-details div { padding: 12px; background: rgba(255,255,255,0.08); border-radius: 10px; text-align: center; }
+        .aqi-details strong { display: block; font-size: 18px; margin-top: 4px; }
+
+        /* Life Index */
+        .life-index-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; text-align: center; }
+        .life-index-item { padding: 16px 8px; background: rgba(255,255,255,0.08); border-radius: 16px; }
+        .life-index-item i { font-size: 24px; margin-bottom: 10px; display: block; }
+        .life-index-item .name { font-size: 12px; opacity: 0.7; margin-bottom: 6px; }
+        .life-index-item .level { font-size: 14px; font-weight: 600; }
+
+        /* ========== MARKET ========== */
+        .page-header { padding: 60px 20px 30px; color: white; }
+        .page-header h1 { font-size: 34px; font-weight: 700; }
+        .page-header .subtitle { font-size: 16px; opacity: 0.8; margin-top: 8px; }
+
+        .market-item { display: flex; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
+        .market-item:last-child { border-bottom: none; }
+        .market-info { flex: 1; }
+        .market-name { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .market-flag { font-size: 22px; }
+        .market-index { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+        .market-chart { width: 80px; height: 30px; margin: 0 16px; }
+        .market-values { text-align: right; min-width: 90px; }
+        .market-price { font-size: 17px; font-weight: 600; font-family: 'SF Mono', Monaco, monospace; }
+        .market-change { font-size: 15px; font-weight: 500; margin-top: 4px; }
+        .market-change.up { color: var(--success); }
+        .market-change.down { color: var(--danger); }
+
+        .market-analysis { padding: 24px; background: rgba(0, 113, 227, 0.08); border-radius: 18px; border-left: 5px solid var(--accent); }
+        [data-theme="dark"] .market-analysis { background: rgba(0, 113, 227, 0.15); }
+        .market-analysis-title { font-size: 16px; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+        .market-analysis-content { font-size: 15px; line-height: 1.8; color: var(--text-secondary); }
+        .market-analysis-content p { margin-bottom: 16px; }
+        .market-analysis-content p:last-child { margin-bottom: 0; }
+
+        /* Logic Chain - 重新设计 */
+        .logic-chain { margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 14px; }
+        .logic-chain-title { font-size: 13px; color: var(--text-tertiary); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .logic-chain-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .logic-chain-item { padding: 10px 16px; background: var(--accent); color: white; border-radius: 24px; font-size: 14px; font-weight: 500; }
+        .logic-chain-arrow { color: var(--text-tertiary); font-size: 18px; }
+
+        /* 操作建议 - 重新设计 */
+        .advice-card { padding: 24px; }
+        .advice-card .card-title { margin-bottom: 20px; }
+        .advice-content { font-size: 15px; line-height: 1.9; color: var(--text-secondary); }
+        .advice-content ul { margin: 16px 0; padding-left: 24px; }
+        .advice-content li { margin-bottom: 12px; }
+        .advice-content p { margin-bottom: 16px; }
+
+        /* 市场详细分析卡片 */
+        .market-section { margin-bottom: 16px; }
+        .market-section:last-child { margin-bottom: 0; }
+        .market-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .market-section-title { font-size: 17px; font-weight: 600; }
+        .market-status { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .market-status.bullish { background: rgba(52, 199, 89, 0.15); color: var(--success); }
+        .market-status.bearish { background: rgba(255, 59, 48, 0.15); color: var(--danger); }
+        .market-status.neutral { background: rgba(255, 204, 0, 0.15); color: #f5a623; }
+        .market-section-summary { font-size: 15px; color: var(--text-secondary); margin-bottom: 10px; }
+        .market-section-details { font-size: 14px; color: var(--text-tertiary); line-height: 1.7; }
+        .market-section-details li { margin-bottom: 6px; }
+        .market-section-meta { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; }
+        .market-section-meta span { color: var(--text-tertiary); }
+        .market-section-meta strong { color: var(--text-secondary); }
+
+        /* 操作建议详细 */
+        .advice-summary { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; padding: 16px; background: rgba(0, 113, 227, 0.08); border-radius: 12px; }
+        .advice-positions { margin-bottom: 20px; }
+        .advice-position { padding: 16px; background: var(--bg-primary); border-radius: 12px; margin-bottom: 12px; }
+        [data-theme="dark"] .advice-position { background: rgba(255,255,255,0.05); }
+        .advice-position:last-child { margin-bottom: 0; }
+        .advice-position-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .advice-position-asset { font-size: 15px; font-weight: 600; }
+        .advice-position-action { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .advice-position-action.buy { background: rgba(52, 199, 89, 0.15); color: var(--success); }
+        .advice-position-action.sell { background: rgba(255, 59, 48, 0.15); color: var(--danger); }
+        .advice-position-action.hold { background: rgba(255, 204, 0, 0.15); color: #f5a623; }
+        .advice-position-action.wait { background: rgba(142, 142, 147, 0.15); color: var(--text-tertiary); }
+        .advice-position-reasoning { font-size: 14px; color: var(--text-secondary); margin-bottom: 6px; }
+        .advice-position-level { font-size: 13px; color: var(--text-tertiary); }
+        .advice-risks { padding: 16px; background: rgba(255, 59, 48, 0.08); border-radius: 12px; border-left: 4px solid var(--danger); }
+        .advice-risks-title { font-size: 14px; font-weight: 600; color: var(--danger); margin-bottom: 10px; }
+        .advice-risks-list { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .advice-risks-list li { margin-bottom: 6px; }
+
+        /* ========== NEWS ========== */
+        .news-article { padding: 24px 0; border-bottom: 1px solid var(--border); }
+        .news-article:first-child { padding-top: 0; }
+        .news-article:last-child { border-bottom: none; padding-bottom: 0; }
+        .news-image { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; background: var(--border); }
+        .news-source { font-size: 13px; color: var(--accent); font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .news-title { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 14px; }
+        .news-summary { font-size: 16px; line-height: 1.75; color: var(--text-secondary); margin-bottom: 16px; }
+        .news-full { font-size: 15px; line-height: 1.85; color: var(--text-secondary); display: none; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+        .news-full.expanded { display: block; }
+        .news-full ul, .news-full ol { margin: 14px 0; padding-left: 24px; }
+        .news-full li { margin-bottom: 10px; }
+        .news-full p { margin-bottom: 14px; }
+        .news-actions { display: flex; gap: 20px; margin-top: 16px; }
+        .news-expand, .news-link { font-size: 15px; color: var(--accent); background: none; border: none; cursor: pointer; font-weight: 600; padding: 0; text-decoration: none; }
+
+        /* ========== FLIGHT ========== */
+        .flight-tool { background: var(--bg-card); border-radius: 24px; padding: 32px; text-align: center; border: 1px solid var(--border); }
+        .flight-tool-icon { width: 90px; height: 90px; margin: 0 auto 22px; background: linear-gradient(135deg, #0071e3, #00c6fb); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; }
+        .flight-tool h2 { font-size: 24px; font-weight: 600; margin-bottom: 12px; }
+        .flight-tool p { font-size: 16px; color: var(--text-secondary); margin-bottom: 26px; }
+        .flight-tool-btn { display: inline-block; padding: 16px 36px; background: var(--accent); color: white; border-radius: 16px; text-decoration: none; font-weight: 600; font-size: 17px; }
+
+        .flight-route { display: flex; align-items: center; padding: 22px; background: rgba(255,255,255,0.08); border-radius: 18px; margin-bottom: 16px; color: white; }
+        .flight-route-info { flex: 1; }
+        .flight-route-cities { font-size: 20px; font-weight: 600; }
+        .flight-route-date { font-size: 15px; opacity: 0.7; margin-top: 6px; }
+        .flight-route-price { font-size: 28px; font-weight: 700; color: var(--success); }
+    </style>
+</head>
+<body>
+    <!-- Weather Scene -->
+    <div class="weather-scene clear-day" id="weatherScene">
+        <div class="sun"></div>
+        <div class="moon"></div>
+        <div class="stars" id="stars"></div>
+        <div class="clouds">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+        </div>
+        <div class="rain" id="rain"></div>
+        <div class="fog" id="fog"></div>
+    </div>
+
+    <div class="page-bg market-bg" id="bg-market"></div>
+    <div class="page-bg news-bg" id="bg-news"></div>
+    <div class="page-bg flight-bg" id="bg-flight"></div>
+
+    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></button>
+
+    <div class="pages">
+        <!-- Weather -->
+        <div class="page active" id="page-weather">
+            <div class="weather-header">
+                <div class="location" id="location">上海 · 闵行</div>
+                <div class="temp-main" id="tempMain">7°</div>
+                <div class="condition" id="condition">多云</div>
+                <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
+            </div>
+            <div class="weather-content">
+                <div class="weather-card">
+                    <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
+                    <div class="hourly-scroll" id="hourlyScroll"></div>
+                </div>
+                <div class="weather-card">
+                    <div class="card-title"><i class="fas fa-calendar"></i> 7日预报</div>
+                    <div id="dailyForecast"></div>
+                </div>
+                <div class="weather-grid" id="weatherGrid"></div>
+                <div class="weather-card" style="margin-top:16px">
+                    <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
+                    <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
+                    <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
+                    <div class="aqi-details">
+                        <div>PM2.5<strong id="pm25">12</strong></div>
+                        <div>PM10<strong id="pm10">23</strong></div>
+                        <div>O₃<strong id="o3">76</strong></div>
+                        <div>SO₂<strong id="so2">6</strong></div>
+                        <div>NO₂<strong id="no2">13</strong></div>
+                        <div>CO<strong id="co">0.6</strong></div>
+                    </div>
+                </div>
+                <div class="weather-card">
+                    <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
+                    <div class="life-index-grid" id="lifeIndex"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market -->
+        <div class="page" id="page-market">
+            <div class="page-header"><h1>📊 市场行情</h1><div class="subtitle" id="marketDate">2026年3月9日</div></div>
+            <div class="page-content">
+                <div class="card"><div id="marketList"></div></div>
+                <div class="card">
+                    <div class="market-analysis">
+                        <div class="market-analysis-title"><i class="fas fa-brain"></i> 宏观概览</div>
+                        <div class="market-analysis-content" id="macroSummary"><p>加载中...</p></div>
+                    </div>
+                    <div class="logic-chain">
+                        <div class="logic-chain-title">核心逻辑链</div>
+                        <div class="logic-chain-flow" id="logicChain"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom:20px"><i class="fas fa-chart-pie"></i> 各市场分析</div>
+                    <div id="marketAnalysis"></div>
+                </div>
+                <div class="card advice-card">
+                    <div class="card-title"><i class="fas fa-lightbulb"></i> 操作建议</div>
+                    <div id="marketAdvice"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- News -->
+        <div class="page" id="page-news">
+            <div class="page-header"><h1>📰 今日要闻</h1><div class="subtitle" id="newsDate">2026年3月9日</div></div>
+            <div class="page-content">
+                <div class="card"><div id="newsList"><p style="color:var(--text-tertiary)">加载中...</p></div></div>
+            </div>
+        </div>
+
+        <!-- Flight -->
+        <div class="page" id="page-flight">
+            <div class="page-header"><h1>✈️ 航班</h1></div>
+            <div class="page-content">
+                <div class="flight-tool">
+                    <div class="flight-tool-icon"><i class="fas fa-book-open"></i></div>
+                    <h2>FlightLog Generator</h2>
+                    <p>上传飞行记录截图，AI 识别生成专业 PDF 日志</p>
+                    <a href="#" class="flight-tool-btn"><i class="fas fa-arrow-right"></i> 打开工具</a>
+                </div>
+                <div class="card" style="margin-top:20px; background:transparent; border:none; box-shadow:none; padding:0;">
+                    <div class="card-title" style="color:white"><i class="fas fa-chart-line"></i> 航班监控</div>
+                    <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">上海 → 卢布尔雅那</div><div class="flight-route-date">2026年6月13日</div></div><div class="flight-route-price">¥--</div></div>
+                    <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">杜布罗夫尼克 → 上海</div><div class="flight-route-date">2026年6月23日</div></div><div class="flight-route-price">¥--</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="tab-nav">
+        <button class="tab-item active" data-page="weather"><i class="fas fa-cloud-sun"></i><span>天气</span></button>
+        <button class="tab-item" data-page="market"><i class="fas fa-chart-line"></i><span>市场</span></button>
+        <button class="tab-item" data-page="news"><i class="fas fa-newspaper"></i><span>要闻</span></button>
+        <button class="tab-item" data-page="flight"><i class="fas fa-plane"></i><span>航班</span></button>
+    </nav>
+
+    <script>
+        const ICON_BASE = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg/';
+        const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','FOG':'fog','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
+        const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
+
+        let theme = localStorage.getItem('theme') || (new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'dark' : 'light');
+        const applyTheme = () => { document.documentElement.setAttribute('data-theme', theme); document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; };
+        const toggleTheme = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', theme); applyTheme(); };
+        applyTheme();
+
+        document.querySelectorAll('.tab-item').forEach(t => t.addEventListener('click', () => {
+            const p = t.dataset.page;
+            document.querySelectorAll('.tab-item').forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+            document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+            document.getElementById(`page-${p}`).classList.add('active');
+            document.getElementById('weatherScene').style.opacity = p === 'weather' ? 1 : 0;
+            ['market','news','flight'].forEach(n => { const e = document.getElementById(`bg-${n}`); if(e) e.style.opacity = n === p ? 1 : 0; });
+        }));
+
+        function updateScene(skycon) {
+            const s = document.getElementById('weatherScene');
+            const isNight = skycon.includes('NIGHT'), isRain = skycon.includes('RAIN'), isFog = skycon.includes('FOG') || skycon.includes('HAZE'), isCloudy = skycon.includes('CLOUDY');
+            s.className = 'weather-scene ' + (isNight ? 'clear-night' : isRain ? 'rainy' : isFog ? 'foggy' : isCloudy ? 'cloudy' : 'clear-day');
+            document.querySelector('.sun').style.display = (!isNight && !isRain && !isFog) ? 'block' : 'none';
+            document.querySelector('.moon').style.display = isNight ? 'block' : 'none';
+            document.getElementById('fog').style.display = isFog ? 'block' : 'none';
+            document.getElementById('stars').innerHTML = '';
+            document.getElementById('rain').innerHTML = '';
+            if (isNight) { for(let i=0;i<60;i++) { const st=document.createElement('div'); st.className='star'; st.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*70}%;animation-delay:${Math.random()*2}s`; document.getElementById('stars').appendChild(st); } }
+            if (isRain) { for(let i=0;i<100;i++) { const d=document.createElement('div'); d.className='raindrop'; d.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*0.7}s;animation-duration:${0.5+Math.random()*0.3}s`; document.getElementById('rain').appendChild(d); } }
+        }
+
+        async function loadWeather() {
+            try {
+                // 实时获取彩云天气（通过 API 代理）
+                const r = await fetch('/api/weather?lon=121.405&lat=31.123');
+                if (!r.ok) return;
+                const d = (await r.json()).result;
+                updateScene(d.realtime.skycon);
+                document.getElementById('tempMain').textContent = Math.round(d.realtime.temperature) + '°';
+                document.getElementById('condition').textContent = d.hourly?.description || '多云';
+                const t0 = d.daily?.temperature?.[0];
+                if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
+
+                // Hourly
+                if (d.hourly?.temperature) {
+                    document.getElementById('hourlyScroll').innerHTML = d.hourly.temperature.slice(0,24).map((h,i) => {
+                        const t = new Date(h.datetime), ts = i===0 ? '现在' : t.getHours()+':00', sk = d.hourly.skycon?.[i]?.value || 'CLEAR_DAY';
+                        return `<div class="hourly-item ${i===0?'now':''}"><div class="hourly-time">${ts}</div><div class="hourly-icon"><img src="${getIcon(sk)}"></div><div class="hourly-temp">${Math.round(h.value)}°</div></div>`;
+                    }).join('');
+                }
+
+                // Daily
+                if (d.daily?.temperature) {
+                    const dn = ['周日','周一','周二','周三','周四','周五','周六'];
+                    document.getElementById('dailyForecast').innerHTML = d.daily.temperature.slice(0,7).map((x,i) => {
+                        const dt = new Date(x.date), nm = i===0 ? '今天' : dn[dt.getDay()], sk = d.daily.skycon?.[i]?.value || 'CLEAR_DAY';
+                        return `<div class="daily-item"><div class="daily-day">${nm}</div><div class="daily-icon"><img src="${getIcon(sk)}"></div><div class="daily-temps"><span class="daily-low">${Math.round(x.min)}°</span><div class="daily-bar"></div><span class="daily-high">${Math.round(x.max)}°</span></div></div>`;
+                    }).join('');
+                }
+
+                // Details
+                const rt = d.realtime;
+                const getDir = deg => ['北','东北','东','东南','南','西南','西','西北'][Math.round(deg/45)%8] + '风';
+                document.getElementById('weatherGrid').innerHTML = [
+                    {icon:'fa-temperature-half',label:'体感温度',val:Math.round(rt.apparent_temperature),unit:'°',desc:rt.life_index?.comfort?.desc||''},
+                    {icon:'fa-droplet',label:'湿度',val:Math.round(rt.humidity*100),unit:'%'},
+                    {icon:'fa-wind',label:'风速',val:rt.wind.speed.toFixed(1),unit:' km/h',desc:getDir(rt.wind.direction)},
+                    {icon:'fa-eye',label:'能见度',val:rt.visibility.toFixed(1),unit:' km'},
+                    {icon:'fa-gauge',label:'气压',val:Math.round(rt.pressure/100),unit:' hPa'},
+                    {icon:'fa-sun',label:'紫外线',val:rt.life_index?.ultraviolet?.index||0,unit:'',desc:rt.life_index?.ultraviolet?.desc||'无'}
+                ].map(x => `<div class="weather-detail-card"><div class="label"><i class="fas ${x.icon}"></i> ${x.label}</div><div class="value">${x.val}<span class="unit">${x.unit}</span></div>${x.desc?`<div class="desc">${x.desc}</div>`:''}</div>`).join('');
+
+                // AQI
+                const aqi = rt.air_quality?.aqi?.chn || 24;
+                document.getElementById('aqiValue').textContent = aqi;
+                document.getElementById('aqiLevel').textContent = rt.air_quality?.description?.chn || '优';
+                document.getElementById('aqiIndicator').style.left = Math.min(aqi/3,100) + '%';
+                ['pm25','pm10','o3','so2','no2','co'].forEach(k => { const el = document.getElementById(k); if(el) el.textContent = rt.air_quality?.[k] ?? '--'; });
+
+                // Life
+                if (d.daily?.life_index) {
+                    const li = d.daily.life_index;
+                    document.getElementById('lifeIndex').innerHTML = [
+                        {icon:'fa-sun',name:'紫外线',level:li.ultraviolet?.[0]?.desc||'--'},
+                        {icon:'fa-car',name:'洗车',level:li.carWashing?.[0]?.desc||'--'},
+                        {icon:'fa-shirt',name:'穿衣',level:li.dressing?.[0]?.desc||'--'},
+                        {icon:'fa-face-smile',name:'舒适度',level:li.comfort?.[0]?.desc||'--'},
+                        {icon:'fa-virus',name:'感冒',level:li.coldRisk?.[0]?.desc||'--'}
+                    ].map(x => `<div class="life-index-item"><i class="fas ${x.icon}"></i><div class="name">${x.name}</div><div class="level">${x.level}</div></div>`).join('');
+                }
+            } catch(e) { console.error('Weather error:', e); }
+        }
+
+        async function loadMarket() {
+            try {
+                // 实时获取市场数据 + 静态分析内容
+                const [liveRes, staticRes] = await Promise.all([
+                    fetch('/api/market'),
+                    fetch('data/market.json?' + Date.now())
+                ]);
+                const live = liveRes.ok ? await liveRes.json() : {};
+                const staticData = staticRes.ok ? await staticRes.json() : {};
+                const d = { ...staticData, ...live }; // 实时数据覆盖静态价格，保留 analysis 等
+                document.getElementById('marketDate').textContent = d.date || '';
+                const ms = [{k:'spx',f:'🇺🇸',n:'标普500',i:'S&P 500'},{k:'ndx',f:'🇺🇸',n:'纳斯达克100',i:'NDX'},{k:'dji',f:'🇺🇸',n:'道琼斯',i:'Dow Jones'},{k:'hsi',f:'🇭🇰',n:'恒生指数',i:'Hang Seng'},{k:'hstec',f:'🇭🇰',n:'恒生科技',i:'HS Tech'},{k:'sse',f:'🇨🇳',n:'上证指数',i:'SSE'},{k:'gold',f:'🥇',n:'黄金',i:'COMEX'},{k:'btc',f:'₿',n:'比特币',i:'BTC/USD'}];
+                document.getElementById('marketList').innerHTML = ms.filter(m=>d[m.k]).map(m => {
+                    const it = d[m.k], cls = it.change >= 0 ? 'up' : 'down', sgn = it.change >= 0 ? '+' : '';
+                    
+                    return `<div class="market-item"><div class="market-info"><div class="market-name"><span class="market-flag">${m.f}</span>${m.n}</div><div class="market-index">${m.i}</div></div><div class="market-values"><div class="market-price">${it.price}</div><div class="market-change ${cls}">${sgn}${it.change}%</div></div></div>`;
+                }).join('');
+                // 宏观概览
+                if (d.macro_summary) document.getElementById('macroSummary').innerHTML = `<p>${d.macro_summary}</p>`;
+                
+                // 逻辑链
+                if (d.logic_chain) document.getElementById('logicChain').innerHTML = d.logic_chain.map((x,i) => `<span class="logic-chain-item">${x}</span>${i<d.logic_chain.length-1?'<span class="logic-chain-arrow">→</span>':''}`).join('');
+                
+                // 各市场详细分析
+                if (d.market_analysis) {
+                    const statusText = {bullish:'看涨',bearish:'看跌',neutral:'中性'};
+                    document.getElementById('marketAnalysis').innerHTML = Object.values(d.market_analysis).map(m => `
+                        <div class="market-section">
+                            <div class="market-section-header">
+                                <div class="market-section-title">${m.title}</div>
+                                <span class="market-status ${m.status}">${statusText[m.status]||m.status}</span>
+                            </div>
+                            <div class="market-section-summary">${m.summary}</div>
+                            <ul class="market-section-details">${m.details.map(d=>`<li>${d}</li>`).join('')}</ul>
+                            <div class="market-section-meta">
+                                <span>驱动因素: <strong>${m.catalyst}</strong></span>
+                                <span>关注: <strong>${m.next_watch}</strong></span>
+                            </div>
+                        </div>
+                    `).join('<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">');
+                }
+                
+                // 操作建议
+                if (d.advice) {
+                    const actionClass = {减仓观望:'sell','持有/小幅加仓':'buy',持有:'hold',观望:'wait'};
+                    document.getElementById('marketAdvice').innerHTML = `
+                        <div class="advice-summary">💡 ${d.advice.summary}</div>
+                        <div class="advice-positions">
+                            ${d.advice.positions.map(p => `
+                                <div class="advice-position">
+                                    <div class="advice-position-header">
+                                        <span class="advice-position-asset">${p.asset}</span>
+                                        <span class="advice-position-action ${actionClass[p.action]||'hold'}">${p.action}</span>
+                                    </div>
+                                    <div class="advice-position-reasoning">${p.reasoning}</div>
+                                    <div class="advice-position-level">📍 ${p.level}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="advice-risks">
+                            <div class="advice-risks-title">⚠️ 风险提示</div>
+                            <ul class="advice-risks-list">${d.advice.risks.map(r=>`<li>${r}</li>`).join('')}</ul>
+                        </div>
+                    `;
+                }
+            } catch(e) { console.error('Market error:', e); }
+        }
+
+        function createSparkline(data, isUp) {
+            const w=80, h=30, min=Math.min(...data), max=Math.max(...data), range=max-min||1;
+            const pts = data.map((v,i) => `${(i/(data.length-1))*w},${h-(((v-min)/range)*h)}`).join(' ');
+            const color = isUp ? '#34c759' : '#ff3b30';
+            return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${color}" stroke-width="2" points="${pts}"/></svg>`;
+        }
+
+        async function loadNews() {
+            try {
+                const r = await fetch('data/news.json?' + Date.now());
+                if (!r.ok) { document.getElementById('newsList').innerHTML = '<p style="color:var(--text-tertiary)">加载失败</p>'; return; }
+                const d = await r.json();
+                document.getElementById('newsDate').textContent = d.date || '';
+                if (!d.items || d.items.length === 0) { document.getElementById('newsList').innerHTML = '<p style="color:var(--text-tertiary)">暂无新闻</p>'; return; }
+                document.getElementById('newsList').innerHTML = d.items.map((x,i) => `<article class="news-article">${x.image?`<img class="news-image" src="${x.image}" alt="" loading="lazy">`:''}<div class="news-source">${x.source}</div><h2 class="news-title">${x.title}</h2><p class="news-summary">${x.summary}</p><div class="news-full" id="nf-${i}">${x.full_content||''}</div><div class="news-actions">${x.full_content?`<button class="news-expand" onclick="toggleNews(${i})">展开全文</button>`:''}<a href="${x.url||'#'}" target="_blank" class="news-link">查看原文 →</a></div></article>`).join('');
+            } catch(e) { console.error('News error:', e); document.getElementById('newsList').innerHTML = '<p style="color:var(--text-tertiary)">加载出错</p>'; }
+        }
+
+        function toggleNews(i) {
+            const f = document.getElementById(`nf-${i}`), b = f.parentElement.querySelector('.news-expand');
+            if (f.classList.contains('expanded')) { f.classList.remove('expanded'); b.textContent = '展开全文'; }
+            else { f.classList.add('expanded'); b.textContent = '收起'; }
+        }
+
+        loadWeather(); loadMarket(); loadNews();
+        setInterval(() => { loadWeather(); loadMarket(); loadNews(); }, 5 * 60 * 1000);
+    </script>
+</body>
+</html>

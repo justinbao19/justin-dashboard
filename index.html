@@ -355,28 +355,143 @@
             border-radius: 18px;
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.14);
+            border-left: 3px solid rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(14px);
             color: white;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.4s ease, background 0.4s ease;
+        }
+        /* 情绪色系 */
+        .mood-bull {
+            border-left-color: #34d399;
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(255,255,255,0.08) 100%);
+        }
+        .mood-risk {
+            border-left-color: #f87171;
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.14) 0%, rgba(255,255,255,0.08) 100%);
+        }
+        .mood-neutral {
+            border-left-color: #60a5fa;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(255,255,255,0.08) 100%);
+        }
+        /* 交易主线固定蓝色 */
+        .mood-theme {
+            border-left-color: #818cf8;
+            background: linear-gradient(135deg, rgba(129, 140, 248, 0.1) 0%, rgba(255,255,255,0.08) 100%);
+        }
+        /* 风险卡片色系 */
+        .risk-medium {
+            border-left-color: #fbbf24;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(255,255,255,0.08) 100%);
+        }
+        .risk-high {
+            border-left-color: #f87171;
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.16) 0%, rgba(255,255,255,0.08) 100%);
+            box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25);
+        }
+        .risk-low {
+            border-left-color: #34d399;
+            background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(255,255,255,0.08) 100%);
         }
         .market-summary-label {
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             font-size: 12px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             opacity: 0.72;
             margin-bottom: 10px;
         }
+        .summary-icon {
+            font-style: normal;
+            font-size: 13px;
+            line-height: 1;
+        }
+        .market-summary-value-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
         .market-summary-value {
             display: block;
             font-size: 24px;
             line-height: 1.2;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 0;
         }
         .market-summary-meta {
             font-size: 14px;
             line-height: 1.6;
             color: rgba(255, 255, 255, 0.76);
+        }
+        /* 涨跌比例条 */
+        .breadth-bar-wrap {
+            margin-top: 12px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(248, 113, 113, 0.45);
+            overflow: hidden;
+        }
+        .breadth-bar-fill {
+            height: 100%;
+            background: #34d399;
+            border-radius: 2px;
+            transition: width 0.6s ease;
+            width: 0%;
+        }
+        /* 主线分类 tag */
+        .theme-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            background: rgba(129, 140, 248, 0.25);
+            color: #c4b5fd;
+            border: 1px solid rgba(129, 140, 248, 0.35);
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+        .theme-tag.tag-geo { background: rgba(251, 146, 60, 0.2); color: #fed7aa; border-color: rgba(251,146,60,0.35); }
+        .theme-tag.tag-policy { background: rgba(52, 211, 153, 0.18); color: #a7f3d0; border-color: rgba(52,211,153,0.35); }
+        .theme-tag.tag-macro { background: rgba(96, 165, 250, 0.2); color: #bfdbfe; border-color: rgba(96,165,250,0.35); }
+        /* 风险级别 badge */
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-top: 3px;
+            background: rgba(251, 191, 36, 0.2);
+            color: #fde68a;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+        }
+        .risk-badge.badge-high {
+            background: rgba(248, 113, 113, 0.22);
+            color: #fca5a5;
+            border-color: rgba(248, 113, 113, 0.45);
+            animation: risk-pulse 2s ease-in-out infinite;
+        }
+        .risk-badge.badge-low {
+            background: rgba(52, 211, 153, 0.18);
+            color: #a7f3d0;
+            border-color: rgba(52, 211, 153, 0.4);
+        }
+        @keyframes risk-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
         .market-card-header {
             display: flex;
@@ -1038,19 +1153,28 @@
                 <div class="page-content market-page-content">
                     <div class="market-dashboard">
                         <div class="market-summary-bar">
-                            <div class="market-summary-item">
-                                <span class="market-summary-label">市场状态</span>
+                            <div class="market-summary-item" id="summaryCardMood">
+                                <span class="market-summary-label"><span class="summary-icon" id="moodIcon">⚡</span>市场状态</span>
                                 <strong class="market-summary-value" id="marketMood">等待更新</strong>
                                 <div class="market-summary-meta" id="marketBreadth">正在读取市场广度</div>
+                                <div class="breadth-bar-wrap">
+                                    <div class="breadth-bar-fill" id="breadthBarFill"></div>
+                                </div>
                             </div>
-                            <div class="market-summary-item">
-                                <span class="market-summary-label">交易主线</span>
-                                <strong class="market-summary-value" id="marketTheme">等待更新</strong>
+                            <div class="market-summary-item mood-theme" id="summaryCardTheme">
+                                <span class="market-summary-label"><span class="summary-icon">🧭</span>交易主线</span>
+                                <div class="market-summary-value-row">
+                                    <strong class="market-summary-value" id="marketTheme">等待更新</strong>
+                                    <span class="theme-tag" id="themeTag"></span>
+                                </div>
                                 <div class="market-summary-meta" id="marketThemeDetail">正在整理宏观脉络</div>
                             </div>
-                            <div class="market-summary-item">
-                                <span class="market-summary-label">风险关注</span>
-                                <strong class="market-summary-value" id="marketRisk">等待更新</strong>
+                            <div class="market-summary-item" id="summaryCardRisk">
+                                <span class="market-summary-label"><span class="summary-icon" id="riskIcon">⚠️</span>风险关注</span>
+                                <div class="market-summary-value-row">
+                                    <strong class="market-summary-value" id="marketRisk">等待更新</strong>
+                                    <span class="risk-badge" id="riskBadge"></span>
+                                </div>
                                 <div class="market-summary-meta" id="marketRiskDetail">正在读取风险提示</div>
                             </div>
                         </div>
@@ -1274,6 +1398,43 @@
                 document.getElementById('marketThemeDetail').textContent = primaryThemeDetail;
                 document.getElementById('marketRisk').textContent = primaryRisk;
                 document.getElementById('marketRiskDetail').textContent = primaryRiskDetail;
+
+                // 卡片1 — 情绪色系 + icon + 涨跌比例条
+                const moodCard = document.getElementById('summaryCardMood');
+                const moodClass = marketMood.includes('升温') ? 'mood-risk' : marketMood.includes('回暖') ? 'mood-bull' : 'mood-neutral';
+                moodCard.className = `market-summary-item ${moodClass}`;
+                document.getElementById('moodIcon').textContent = marketMood.includes('升温') ? '📉' : marketMood.includes('回暖') ? '📈' : '⚡';
+                if (trackedMarkets.length > 0) {
+                    document.getElementById('breadthBarFill').style.width = `${(risingCount / trackedMarkets.length * 100).toFixed(0)}%`;
+                }
+
+                // 卡片2 — 主线关键词分类 tag
+                const themeTagEl = document.getElementById('themeTag');
+                const themeText = primaryTheme + (d.macro_summary || '');
+                let tagClass = '', tagLabel = '';
+                if (/伊朗|战争|冲突|地缘|霍尔木兹|军事|制裁/.test(themeText)) {
+                    tagClass = 'tag-geo'; tagLabel = '地缘';
+                } else if (/两会|政策|降准|降息|刺激|财政|央行|美联储/.test(themeText)) {
+                    tagClass = 'tag-policy'; tagLabel = '政策';
+                } else if (/通胀|CPI|PMI|GDP|经济|衰退|复苏|汇率/.test(themeText)) {
+                    tagClass = 'tag-macro'; tagLabel = '宏观';
+                }
+                if (tagLabel) { themeTagEl.textContent = tagLabel; themeTagEl.className = `theme-tag ${tagClass}`; }
+                else { themeTagEl.textContent = ''; themeTagEl.className = 'theme-tag'; }
+
+                // 卡片3 — 风险级别推断 + badge + 色系
+                const riskCard = document.getElementById('summaryCardRisk');
+                const riskBadgeEl = document.getElementById('riskBadge');
+                const isHighRisk = /破|升级|暴跌|崩溃|危机|战争/.test(primaryRisk + primaryRiskDetail);
+                const isLowRisk = /稳定|温和|可控|低风险/.test(primaryRisk + primaryRiskDetail);
+                let riskLevel, riskCardClass, badgeClass;
+                if (isHighRisk) { riskLevel = '高风险'; riskCardClass = 'risk-high'; badgeClass = 'badge-high'; }
+                else if (isLowRisk) { riskLevel = '低风险'; riskCardClass = 'risk-low'; badgeClass = 'badge-low'; }
+                else { riskLevel = '中等风险'; riskCardClass = 'risk-medium'; badgeClass = ''; }
+                riskCard.className = `market-summary-item ${riskCardClass}`;
+                riskBadgeEl.textContent = riskLevel;
+                riskBadgeEl.className = `risk-badge ${badgeClass}`.trim();
+                document.getElementById('riskIcon').textContent = isHighRisk ? '🔴' : isLowRisk ? '🟢' : '⚠️';
                 document.getElementById('marketListNote').textContent = `${trackedMarkets.length}项资产实时跟踪 · 7D 趋势`;
                 document.getElementById('marketList').innerHTML = trackedMarkets.map(m => {
                     const it = d[m.k], cls = it.change >= 0 ? 'up' : 'down', sgn = it.change >= 0 ? '+' : '';

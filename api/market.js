@@ -2,6 +2,17 @@
 const FINNHUB_KEY = 'd6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg';
 const TWELVE_DATA_KEY = process.env.TWELVE_DATA_KEY || '';
 const SPARKLINE_POINTS = 12;
+const SPARKLINE_TTL_MS = 60 * 60 * 1000; // 趋势线缓存 1 小时
+
+// 函数实例内存缓存：复用 warm instance 避免重复打 Twelve Data
+const _sparklineCache = {};
+function cacheGet(key) {
+  const e = _sparklineCache[key];
+  if (!e) return undefined;
+  if (Date.now() - e.ts > SPARKLINE_TTL_MS) { delete _sparklineCache[key]; return undefined; }
+  return e.val;
+}
+function cacheSet(key, val) { _sparklineCache[key] = { val, ts: Date.now() }; }
 
 async function fetchJson(url, init) {
   const r = await fetch(url, init);
@@ -75,19 +86,29 @@ async function fetchFinnhubCandles(symbol, multiplier = 1, decimals = 2) {
   } catch { return null; }
 }
 
-async function fetchCoinGeckoSparkline(coinId) {
-  try {
-    const d = await fetchJson(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7&interval=daily`);
-    return normalizeSparkline(d.prices?.map(p => p[1]), 1, 2);
-  } catch { return null; }
-}
-
 async function fetchTwelveDataSparkline(symbol, multiplier = 1, decimals = 2) {
   if (!TWELVE_DATA_KEY) return null;
+  const cacheKey = `td:${symbol}:${multiplier}:${decimals}`;
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return cached;
   try {
     const d = await fetchJson(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(symbol)}&interval=1day&outputsize=14&order=ASC&apikey=${TWELVE_DATA_KEY}`);
     if (!Array.isArray(d.values)) return null;
-    return normalizeSparkline(d.values.map(v => v.close), multiplier, decimals);
+    const result = normalizeSparkline(d.values.map(v => v.close), multiplier, decimals);
+    if (result) cacheSet(cacheKey, result);
+    return result;
+  } catch { return null; }
+}
+
+async function fetchCoinGeckoSparklineWithCache(coinId) {
+  const cacheKey = `cg:${coinId}`;
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return cached;
+  try {
+    const d = await fetchJson(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7&interval=daily`);
+    const result = normalizeSparkline(d.prices?.map(p => p[1]), 1, 2);
+    if (result) cacheSet(cacheKey, result);
+    return result;
   } catch { return null; }
 }
 
@@ -105,7 +126,7 @@ function fmt(price, prefix = '', decimals = 0) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=60'); // 缓存1分钟
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
   
   try {
     // 并行获取所有数据
@@ -126,13 +147,13 @@ export default async function handler(req, res) {
       fetchPreferredSparkline({ twelveSymbol: 'SPY', finnhubSymbol: 'SPY', multiplier: 10, decimals: 0 }),
       fetchPreferredSparkline({ twelveSymbol: 'QQQ', finnhubSymbol: 'QQQ', multiplier: 41, decimals: 0 }),
       fetchPreferredSparkline({ twelveSymbol: 'DIA', finnhubSymbol: 'DIA', multiplier: 100, decimals: 0 }),
-      fetchPreferredSparkline({ twelveSymbol: 'HSI' }),
-      fetchPreferredSparkline({ twelveSymbol: 'HSTECH' }),
-      fetchPreferredSparkline({ twelveSymbol: '000001.SS' }),
+      fetchPreferredSparkline({ twelveSymbol: 'EWH' }),      // iShares MSCI HK ETF 替代 HSI 趋势
+      fetchPreferredSparkline({ twelveSymbol: 'MCHI' }),     // iShares MSCI China ETF 替代 HSTECH 趋势
+      fetchPreferredSparkline({ twelveSymbol: 'ASHR' }),     // A-share ETF 替代 SSE 趋势
       fetchPreferredSparkline({ twelveSymbol: 'GLD', finnhubSymbol: 'GLD', multiplier: 5.85, decimals: 2 }),
       fetchPreferredSparkline({ twelveSymbol: 'USO', finnhubSymbol: 'USO', multiplier: 0.62, decimals: 2 }),
-      fetchCoinGeckoSparkline('bitcoin'),
-      fetchCoinGeckoSparkline('ethereum')
+      fetchCoinGeckoSparklineWithCache('bitcoin'),
+      fetchCoinGeckoSparklineWithCache('ethereum')
     ]);
     
     const now = new Date();

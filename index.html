@@ -20,6 +20,11 @@
             --border: rgba(0, 0, 0, 0.08);
             --shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
             --blur: blur(20px);
+            --market-card-bg: rgba(255,255,255,0.95);
+            --market-card-border: rgba(0,0,0,0.07);
+            --market-section-bg: rgba(0,0,0,0.03);
+            --market-meta-bg: rgba(0,113,227,0.05);
+            --market-chain-bg: rgba(0,0,0,0.035);
         }
 
         [data-theme="dark"] {
@@ -30,6 +35,11 @@
             --text-tertiary: #636366;
             --border: rgba(255, 255, 255, 0.12);
             --shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+            --market-card-bg: rgba(28,28,30,0.95);
+            --market-card-border: rgba(255,255,255,0.10);
+            --market-section-bg: rgba(255,255,255,0.04);
+            --market-meta-bg: rgba(255,255,255,0.06);
+            --market-chain-bg: rgba(255,255,255,0.05);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -177,7 +187,8 @@
             opacity: 0;
             transition: opacity 0.5s ease;
         }
-        .market-bg { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .market-bg { background: var(--bg-primary); }
+        [data-theme="dark"] .market-bg { background: linear-gradient(180deg, #06080f 0%, #000000 70%); }
         .news-bg { background: linear-gradient(135deg, #1a1a2a 0%, #2d3748 100%); }
         .flight-bg { background: linear-gradient(135deg, #0c4a6e 0%, #075985 50%, #0369a1 100%); }
 
@@ -217,15 +228,24 @@
             z-index: 101;
             width: 44px; height: 44px;
             border-radius: 50%;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
+            background: var(--bg-card);
+            backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
+            box-shadow: var(--shadow);
+            transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .theme-toggle:hover {
+            color: var(--accent);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        [data-theme="dark"] .theme-toggle:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         }
 
         /* Pages */
@@ -340,129 +360,231 @@
         .life-index-item .name { font-size: 12px; opacity: 0.7; margin-bottom: 6px; }
         .life-index-item .level { font-size: 14px; font-weight: 600; }
 
+        /* General page header — used by news/flight with dark backgrounds */
+        .page-header { padding: 52px 20px 28px; color: white; }
+        .page-header h1 { font-size: 32px; font-weight: 700; }
+        .page-header .subtitle { font-size: 14px; opacity: 0.75; margin-top: 7px; }
+
         /* ========== MARKET ========== */
-        .page-header { padding: 60px 20px 30px; color: white; }
-        .page-header h1 { font-size: 34px; font-weight: 700; }
-        .page-header .subtitle { font-size: 16px; opacity: 0.8; margin-top: 8px; }
+        /* Market page header — overrides the white-text default used by news/flight */
+        .market-page-header { padding: 44px 20px 24px; }
+        .market-page-header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .market-page-header h1 i { font-size: 22px; color: var(--accent); }
+        .market-page-header .subtitle {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            opacity: 1;
+        }
+        .market-header-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .market-refresh-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+            flex-shrink: 0;
+        }
+        .market-refresh-btn:hover {
+            color: var(--accent);
+            background: var(--market-meta-bg);
+            border-color: rgba(0,113,227,0.25);
+        }
+        .market-refresh-btn:disabled {
+            cursor: default;
+            opacity: 0.5;
+        }
+        .market-refresh-btn.spinning i {
+            animation: spin-icon 0.65s linear infinite;
+        }
+        @keyframes spin-icon {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .market-refresh-hint {
+            font-size: 11px;
+            color: var(--success);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .market-refresh-hint.visible {
+            opacity: 1;
+        }
 
         .market-dashboard { display: grid; gap: 20px; }
-        .market-summary-bar {
-            display: grid;
-            gap: 12px;
-        }
+
+        /* Summary bar — 3 KPI cards */
+        .market-summary-bar { display: grid; gap: 12px; }
         .market-summary-item {
-            padding: 18px 20px;
-            border-radius: 18px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-left: 3px solid rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(14px);
-            color: white;
+            padding: 16px 18px;
+            border-radius: 16px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--market-card-border);
             position: relative;
             overflow: hidden;
-            transition: border-color 0.4s ease, background 0.4s ease;
+            isolation: isolate;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
         }
-        /* 情绪色系 */
+        .market-summary-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at top left, var(--summary-glow, rgba(0,113,227,0.10)) 0%, transparent 58%);
+            opacity: 0.9;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .market-summary-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: inset 0 0 0 1px var(--summary-ring, rgba(0,113,227,0.16));
+            pointer-events: none;
+            z-index: 0;
+        }
+        .market-summary-item > * {
+            position: relative;
+            z-index: 1;
+        }
+        .market-summary-item:hover {
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transform: translateY(-1px);
+        }
+        [data-theme="dark"] .market-summary-item:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+        }
+        /* Semantic whole-card treatment — subtle frame + corner glow */
         .mood-bull {
-            border-left-color: #34d399;
-            background: linear-gradient(135deg, rgba(52, 211, 153, 0.12) 0%, rgba(255,255,255,0.08) 100%);
+            --summary-ring: rgba(52,199,89,0.18);
+            --summary-glow: rgba(52,199,89,0.10);
         }
         .mood-risk {
-            border-left-color: #f87171;
-            background: linear-gradient(135deg, rgba(248, 113, 113, 0.14) 0%, rgba(255,255,255,0.08) 100%);
+            --summary-ring: rgba(255,59,48,0.18);
+            --summary-glow: rgba(255,59,48,0.10);
         }
         .mood-neutral {
-            border-left-color: #60a5fa;
-            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(255,255,255,0.08) 100%);
+            --summary-ring: rgba(142,142,147,0.18);
+            --summary-glow: rgba(142,142,147,0.09);
         }
-        /* 交易主线固定蓝色 */
         .mood-theme {
-            border-left-color: #818cf8;
-            background: linear-gradient(135deg, rgba(129, 140, 248, 0.1) 0%, rgba(255,255,255,0.08) 100%);
+            --summary-ring: rgba(0,113,227,0.18);
+            --summary-glow: rgba(0,113,227,0.10);
         }
-        /* 风险卡片色系 */
         .risk-medium {
-            border-left-color: #fbbf24;
-            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(255,255,255,0.08) 100%);
+            --summary-ring: rgba(245,158,11,0.20);
+            --summary-glow: rgba(245,158,11,0.10);
         }
         .risk-high {
-            border-left-color: #f87171;
-            background: linear-gradient(135deg, rgba(248, 113, 113, 0.16) 0%, rgba(255,255,255,0.08) 100%);
-            box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.25);
+            --summary-ring: rgba(255,59,48,0.20);
+            --summary-glow: rgba(255,59,48,0.11);
         }
         .risk-low {
-            border-left-color: #34d399;
-            background: linear-gradient(135deg, rgba(52, 211, 153, 0.08) 0%, rgba(255,255,255,0.08) 100%);
+            --summary-ring: rgba(52,199,89,0.20);
+            --summary-glow: rgba(52,199,89,0.10);
         }
+
         .market-summary-label {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            letter-spacing: 0.08em;
+            gap: 6px;
+            font-size: 11px;
+            letter-spacing: 0.07em;
             text-transform: uppercase;
-            opacity: 0.72;
+            color: var(--text-tertiary);
+            font-weight: 600;
             margin-bottom: 10px;
         }
-        .summary-icon {
-            font-style: normal;
-            font-size: 13px;
-            line-height: 1;
-        }
+        .market-summary-label i { font-size: 11px; width: 12px; text-align: center; }
         .market-summary-value-row {
             display: flex;
             align-items: flex-start;
             gap: 8px;
             flex-wrap: wrap;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .market-summary-value {
             display: block;
-            font-size: 24px;
-            line-height: 1.2;
+            font-size: 19px;
+            line-height: 1.3;
             font-weight: 600;
-            margin-bottom: 0;
+            color: var(--text-primary);
         }
         .market-summary-meta {
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.76);
+            color: var(--text-secondary);
         }
-        /* 涨跌比例条 */
+        /* Breadth bar */
         .breadth-bar-wrap {
-            margin-top: 12px;
-            height: 4px;
-            border-radius: 2px;
-            background: rgba(248, 113, 113, 0.45);
+            margin-top: 10px;
+            height: 3px;
+            border-radius: 999px;
+            background: var(--border);
             overflow: hidden;
         }
         .breadth-bar-fill {
             height: 100%;
-            background: #34d399;
-            border-radius: 2px;
-            transition: width 0.6s ease;
+            background: var(--success);
+            border-radius: 999px;
+            transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
             width: 0%;
         }
-        /* 主线分类 tag */
+        /* Theme tag */
         .theme-tag {
             display: inline-flex;
             align-items: center;
             padding: 2px 8px;
             border-radius: 20px;
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 0.04em;
-            background: rgba(129, 140, 248, 0.25);
-            color: #c4b5fd;
-            border: 1px solid rgba(129, 140, 248, 0.35);
+            background: rgba(0,113,227,0.08);
+            color: var(--accent);
+            border: 1px solid rgba(0,113,227,0.18);
             white-space: nowrap;
             flex-shrink: 0;
-            margin-top: 3px;
+            margin-top: 4px;
         }
-        .theme-tag.tag-geo { background: rgba(251, 146, 60, 0.2); color: #fed7aa; border-color: rgba(251,146,60,0.35); }
-        .theme-tag.tag-policy { background: rgba(52, 211, 153, 0.18); color: #a7f3d0; border-color: rgba(52,211,153,0.35); }
-        .theme-tag.tag-macro { background: rgba(96, 165, 250, 0.2); color: #bfdbfe; border-color: rgba(96,165,250,0.35); }
-        /* 风险级别 badge */
+        .theme-tag.tag-geo {
+            background: rgba(245,158,11,0.08);
+            color: #b45309;
+            border-color: rgba(245,158,11,0.22);
+        }
+        [data-theme="dark"] .theme-tag.tag-geo { color: #fbbf24; background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.22); }
+        .theme-tag.tag-policy {
+            background: rgba(16,185,129,0.08);
+            color: #047857;
+            border-color: rgba(16,185,129,0.22);
+        }
+        [data-theme="dark"] .theme-tag.tag-policy { color: #34d399; background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.22); }
+        .theme-tag.tag-macro {
+            background: rgba(99,102,241,0.08);
+            color: #4338ca;
+            border-color: rgba(99,102,241,0.2);
+        }
+        [data-theme="dark"] .theme-tag.tag-macro { color: #818cf8; background: rgba(129,140,248,0.1); border-color: rgba(129,140,248,0.22); }
+        /* Risk badge */
         .risk-badge {
             display: inline-flex;
             align-items: center;
@@ -473,129 +595,125 @@
             letter-spacing: 0.04em;
             white-space: nowrap;
             flex-shrink: 0;
-            margin-top: 3px;
-            background: rgba(251, 191, 36, 0.2);
-            color: #fde68a;
-            border: 1px solid rgba(251, 191, 36, 0.4);
+            margin-top: 4px;
+            background: rgba(245,158,11,0.08);
+            color: #b45309;
+            border: 1px solid rgba(245,158,11,0.22);
         }
+        [data-theme="dark"] .risk-badge { color: #fbbf24; background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.22); }
         .risk-badge.badge-high {
-            background: rgba(248, 113, 113, 0.22);
-            color: #fca5a5;
-            border-color: rgba(248, 113, 113, 0.45);
-            animation: risk-pulse 2s ease-in-out infinite;
+            background: rgba(239,68,68,0.08);
+            color: #dc2626;
+            border-color: rgba(239,68,68,0.22);
+            animation: risk-pulse 2.5s ease-in-out infinite;
         }
+        [data-theme="dark"] .risk-badge.badge-high { color: #f87171; background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.25); }
         .risk-badge.badge-low {
-            background: rgba(52, 211, 153, 0.18);
-            color: #a7f3d0;
-            border-color: rgba(52, 211, 153, 0.4);
+            background: rgba(34,197,94,0.08);
+            color: #15803d;
+            border-color: rgba(34,197,94,0.22);
         }
+        [data-theme="dark"] .risk-badge.badge-low { color: #4ade80; background: rgba(74,222,128,0.1); border-color: rgba(74,222,128,0.22); }
         @keyframes risk-pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+            50% { opacity: 0.5; }
         }
+
         .market-card-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 18px;
+            gap: 10px;
+            margin-bottom: 16px;
         }
-        .market-card-note {
-            font-size: 13px;
-            color: var(--text-tertiary);
-            white-space: normal;
-        }
-        .market-main-grid {
+        .market-card-note { font-size: 12px; color: var(--text-tertiary); }
+
+        /* Market main grid */
+        .market-main-grid { display: grid; gap: 20px; }
+        .market-overview-card {
             display: grid;
-            gap: 20px;
+            gap: 14px;
+            align-content: start;
         }
+
+        /* Market items list */
         #marketList { display: grid; gap: 8px; }
         .market-item {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(78px, 92px) auto;
+            grid-template-columns: minmax(0, 1fr) minmax(74px, 94px) auto;
             align-items: center;
             gap: 8px 12px;
             padding: 12px 14px;
             border: 1px solid var(--border);
             border-radius: 14px;
-            background: rgba(0, 0, 0, 0.02);
+            background: var(--bg-card);
             min-width: 0;
+            cursor: default;
+            transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
         }
-        [data-theme="dark"] .market-item { background: rgba(255,255,255,0.03); }
+        .market-item:hover {
+            background: var(--market-section-bg);
+            border-color: rgba(0,113,227,0.28);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            transform: translateY(-1px);
+        }
+        [data-theme="dark"] .market-item:hover {
+            box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+        }
         .market-info { min-width: 0; }
         .market-name {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
             min-width: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: var(--text-primary);
         }
-        .market-flag { font-size: 18px; }
+        .market-flag { font-size: 16px; line-height: 1; flex-shrink: 0; }
         .market-index {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-tertiary);
             margin-top: 3px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .market-chart {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 0;
-        }
-        .market-sparkline {
-            width: 100%;
-            height: 28px;
-            display: block;
-        }
-        .market-sparkline-svg {
-            width: 100%;
-            height: 100%;
-            overflow: visible;
-        }
+        .market-chart { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+        .market-sparkline { width: 100%; height: 28px; display: block; }
+        .market-sparkline-svg { width: 100%; height: 100%; overflow: visible; }
         .market-sparkline-line {
             fill: none;
-            stroke-width: 2.25;
+            stroke-width: 2;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
         .market-sparkline-line.up { stroke: var(--success); }
         .market-sparkline-line.down { stroke: var(--danger); }
         .market-sparkline-line.flat { stroke: var(--text-tertiary); opacity: 0.8; }
-        .market-sparkline-area {
-            opacity: 0.14;
-        }
+        .market-sparkline-area { opacity: 0.1; }
         .market-sparkline-area.up { fill: var(--success); }
         .market-sparkline-area.down { fill: var(--danger); }
         .market-sparkline-area.flat { fill: var(--text-tertiary); }
         .market-sparkline-empty {
+            height: 28px;
+            border-radius: 4px;
+            background: var(--border);
             position: relative;
-            border-radius: 999px;
-            background:
-                linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.06) 22%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 78%, transparent 100%);
-        }
-        [data-theme="dark"] .market-sparkline-empty {
-            background:
-                linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 22%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 78%, transparent 100%);
+            overflow: hidden;
         }
         .market-sparkline-empty::after {
             content: '';
             position: absolute;
-            left: 0;
-            right: 0;
             top: 50%;
-            border-top: 1px dashed rgba(0, 0, 0, 0.18);
+            left: 0; right: 0;
+            border-top: 1px dashed var(--text-tertiary);
+            opacity: 0.35;
             transform: translateY(-50%);
-        }
-        [data-theme="dark"] .market-sparkline-empty::after {
-            border-top-color: rgba(255,255,255,0.18);
         }
         .market-chart-label {
             font-size: 10px;
@@ -606,94 +724,363 @@
             text-align: center;
             display: none;
         }
-        .market-values { text-align: right; min-width: 82px; }
+        .market-values { text-align: right; min-width: 80px; }
         .market-price {
-            font-size: 17px;
+            font-size: 15px;
             font-weight: 600;
-            font-family: 'SF Mono', Monaco, monospace;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
             white-space: nowrap;
+            color: var(--text-primary);
         }
-        .market-change { font-size: 13px; font-weight: 500; margin-top: 4px; }
+        .market-change { font-size: 12px; font-weight: 600; margin-top: 3px; }
         .market-change.up { color: var(--success); }
         .market-change.down { color: var(--danger); }
 
-        .market-analysis { padding: 24px; background: rgba(0, 113, 227, 0.08); border-radius: 18px; border-left: 5px solid var(--accent); }
-        [data-theme="dark"] .market-analysis { background: rgba(0, 113, 227, 0.15); }
-        .market-analysis-title { font-size: 16px; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
-        .market-analysis-content { font-size: 15px; line-height: 1.8; color: var(--text-secondary); }
-        .market-analysis-content p { margin-bottom: 16px; }
+        /* Macro overview block */
+        .market-analysis {
+            padding: 18px 20px;
+            background:
+                radial-gradient(circle at top left, rgba(0,113,227,0.08) 0%, transparent 60%),
+                var(--market-meta-bg);
+            border-radius: 14px;
+            border: 1px solid rgba(0,113,227,0.14);
+            box-shadow: inset 0 0 0 1px rgba(0,113,227,0.08);
+        }
+        [data-theme="dark"] .market-analysis {
+            background:
+                radial-gradient(circle at top left, rgba(64,156,255,0.12) 0%, transparent 60%),
+                var(--market-meta-bg);
+            border-color: rgba(64,156,255,0.18);
+            box-shadow: inset 0 0 0 1px rgba(64,156,255,0.08);
+        }
+        .market-analysis-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .market-analysis-content { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+        .market-analysis-content p { margin-bottom: 12px; }
         .market-analysis-content p:last-child { margin-bottom: 0; }
 
-        /* Logic Chain - 重新设计 */
-        .logic-chain { margin-top: 20px; padding: 20px; background: var(--bg-card); border-radius: 14px; }
-        .logic-chain-title { font-size: 13px; color: var(--text-tertiary); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .logic-chain-flow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-        .logic-chain-item { padding: 10px 16px; background: var(--accent); color: white; border-radius: 24px; font-size: 14px; font-weight: 500; }
-        .logic-chain-arrow { color: var(--text-tertiary); font-size: 18px; }
-
-        /* 操作建议 - 重新设计 */
-        .advice-card { padding: 24px; }
-        .advice-card .card-title { margin-bottom: 20px; }
-        .advice-content { font-size: 15px; line-height: 1.9; color: var(--text-secondary); }
-        .advice-content ul { margin: 16px 0; padding-left: 24px; }
-        .advice-content li { margin-bottom: 12px; }
-        .advice-content p { margin-bottom: 16px; }
-
-        /* 市场详细分析卡片 */
-        .market-section {
-            margin-bottom: 16px;
-            padding: 20px;
-            border-radius: 18px;
-            background: rgba(0, 0, 0, 0.03);
+        /* Logic Chain — numbered steps */
+        .logic-chain {
+            margin-top: 14px;
+            padding: 16px 18px;
+            background: var(--market-chain-bg);
+            border-radius: 14px;
             border: 1px solid var(--border);
         }
-        [data-theme="dark"] .market-section { background: rgba(255,255,255,0.03); }
-        .market-section:last-child { margin-bottom: 0; }
-        .market-section-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-        .market-section-title { font-size: 17px; font-weight: 600; }
-        .market-status { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-        .market-status.bullish { background: rgba(52, 199, 89, 0.15); color: var(--success); }
-        .market-status.bearish { background: rgba(255, 59, 48, 0.15); color: var(--danger); }
-        .market-status.neutral { background: rgba(255, 204, 0, 0.15); color: #f5a623; }
-        .market-section-summary { font-size: 15px; color: var(--text-secondary); margin-bottom: 10px; }
-        .market-section-details { font-size: 14px; color: var(--text-tertiary); line-height: 1.7; }
-        .market-section-details li { margin-bottom: 6px; }
+        .logic-chain-title {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 600;
+        }
+        .logic-chain-flow { display: flex; flex-direction: column; gap: 0; }
+        .logic-chain-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .step-number {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+        .step-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            padding: 2px 0 0;
+            line-height: 1.4;
+        }
+        .step-connector {
+            width: 2px;
+            height: 16px;
+            background: var(--border);
+            margin: 2px 0 2px 9px;
+            flex-shrink: 0;
+        }
+
+        .market-overview-insights {
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--border);
+        }
+        .market-overview-insights-title {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .market-overview-insights-grid {
+            display: grid;
+            gap: 10px;
+        }
+        .market-overview-insight {
+            padding: 12px 13px;
+            border-radius: 12px;
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+        }
+        .market-overview-insight-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .market-overview-insight-value {
+            font-size: 13px;
+            line-height: 1.65;
+            color: var(--text-secondary);
+        }
+
+        /* Advice card */
+        .advice-card { padding: 24px; }
+        .advice-card .card-title { margin-bottom: 18px; }
+        .market-advice-card {
+            display: grid;
+            align-content: start;
+        }
+        .advice-sections {
+            display: grid;
+            gap: 14px;
+        }
+        .advice-section-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .advice-summary {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            padding: 12px 14px;
+            background: var(--market-section-bg);
+            border-radius: 12px;
+            line-height: 1.7;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .advice-summary i { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+        .advice-positions {
+            display: grid;
+            gap: 8px;
+        }
+        .advice-position {
+            padding: 12px 14px;
+            background: var(--market-card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--market-card-border);
+            transition: box-shadow 0.15s ease;
+        }
+        .advice-position:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        [data-theme="dark"] .advice-position:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .advice-position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 7px;
+            gap: 8px;
+        }
+        .advice-position-asset { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .advice-position-action {
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .advice-position-action.buy  { background: rgba(52,199,89,0.1); color: var(--success); border: 1px solid rgba(52,199,89,0.22); }
+        .advice-position-action.sell { background: rgba(255,59,48,0.08); color: var(--danger); border: 1px solid rgba(255,59,48,0.22); }
+        .advice-position-action.hold { background: rgba(245,158,11,0.08); color: #b45309; border: 1px solid rgba(245,158,11,0.22); }
+        [data-theme="dark"] .advice-position-action.hold { color: #fbbf24; }
+        .advice-position-action.wait { background: var(--market-section-bg); color: var(--text-tertiary); border: 1px solid var(--border); }
+        .advice-position-reasoning { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.6; }
+        .advice-position-level { display: none; }
+        .advice-key-levels {
+            display: grid;
+            gap: 8px;
+        }
+        .advice-key-level-item {
+            display: grid;
+            gap: 6px;
+            padding: 11px 12px;
+            border-radius: 12px;
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+        }
+        .advice-key-level-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .advice-key-level-asset {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .advice-key-level-chip {
+            font-size: 11px;
+            color: var(--accent);
+            background: rgba(0,113,227,0.08);
+            border: 1px solid rgba(0,113,227,0.16);
+            border-radius: 999px;
+            padding: 2px 8px;
+            white-space: nowrap;
+        }
+        .advice-key-level-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .advice-risks {
+            padding: 16px 16px 14px;
+            background:
+                radial-gradient(circle at top left, rgba(255,59,48,0.09) 0%, transparent 58%),
+                rgba(255,59,48,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,59,48,0.16);
+            box-shadow: inset 0 0 0 1px rgba(255,59,48,0.06);
+        }
+        [data-theme="dark"] .advice-risks {
+            background:
+                radial-gradient(circle at top left, rgba(255,99,90,0.14) 0%, transparent 58%),
+                rgba(255,59,48,0.09);
+            border-color: rgba(255,99,90,0.2);
+            box-shadow: inset 0 0 0 1px rgba(255,99,90,0.08);
+        }
+        .advice-risks-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--danger);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .advice-risks-list {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.75;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 8px;
+        }
+        .advice-risks-list li {
+            margin-bottom: 0;
+            padding-left: 16px;
+            position: relative;
+        }
+        .advice-risks-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.72em;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.6;
+        }
+
+        /* Market section analysis cards */
+        .market-section {
+            padding: 18px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .market-section:first-child { padding-top: 0; }
+        .market-section:last-child { border-bottom: none; padding-bottom: 0; }
+        .market-section-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+        .market-section-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .market-status {
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .market-status.bullish { background: rgba(52,199,89,0.08); color: var(--success); border: 1px solid rgba(52,199,89,0.2); }
+        .market-status.bearish { background: rgba(255,59,48,0.08); color: var(--danger); border: 1px solid rgba(255,59,48,0.2); }
+        .market-status.neutral { background: rgba(245,158,11,0.08); color: #b45309; border: 1px solid rgba(245,158,11,0.2); }
+        [data-theme="dark"] .market-status.neutral { color: #fbbf24; }
+        .market-section-summary { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.65; }
+        .market-section-details { font-size: 13px; color: var(--text-tertiary); line-height: 1.7; padding-left: 16px; }
+        .market-section-details li { margin-bottom: 4px; }
         .market-section-meta {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-top: 14px;
-            font-size: 13px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+            font-size: 12px;
         }
         .market-section-meta span {
             display: block;
-            padding: 12px 14px;
-            background: rgba(0, 113, 227, 0.06);
-            border-radius: 12px;
+            padding: 10px 12px;
+            background: var(--market-meta-bg);
+            border-radius: 10px;
+            color: var(--text-tertiary);
+            border: 1px solid var(--border);
         }
-        [data-theme="dark"] .market-section-meta span { background: rgba(255,255,255,0.04); }
-        .market-section-meta span { color: var(--text-tertiary); }
         .market-section-meta strong { color: var(--text-secondary); }
 
-        /* 操作建议详细 */
-        .advice-summary { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px; padding: 16px; background: rgba(0, 113, 227, 0.08); border-radius: 12px; }
-        .advice-positions { margin-bottom: 20px; }
-        .advice-position { padding: 16px; background: var(--bg-primary); border-radius: 12px; margin-bottom: 12px; }
-        [data-theme="dark"] .advice-position { background: rgba(255,255,255,0.05); }
-        .advice-position:last-child { margin-bottom: 0; }
-        .advice-position-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .advice-position-asset { font-size: 15px; font-weight: 600; }
-        .advice-position-action { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
-        .advice-position-action.buy { background: rgba(52, 199, 89, 0.15); color: var(--success); }
-        .advice-position-action.sell { background: rgba(255, 59, 48, 0.15); color: var(--danger); }
-        .advice-position-action.hold { background: rgba(255, 204, 0, 0.15); color: #f5a623; }
-        .advice-position-action.wait { background: rgba(142, 142, 147, 0.15); color: var(--text-tertiary); }
-        .advice-position-reasoning { font-size: 14px; color: var(--text-secondary); margin-bottom: 6px; }
-        .advice-position-level { font-size: 13px; color: var(--text-tertiary); }
-        .advice-risks { padding: 16px; background: rgba(255, 59, 48, 0.08); border-radius: 12px; border-left: 4px solid var(--danger); }
-        .advice-risks-title { font-size: 14px; font-weight: 600; color: var(--danger); margin-bottom: 10px; }
-        .advice-risks-list { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
-        .advice-risks-list li { margin-bottom: 6px; }
+        /* Loading skeleton */
+        .skeleton {
+            background: var(--border);
+            border-radius: 6px;
+            animation: skeleton-pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes skeleton-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.38; }
+        }
+        .skeleton-line { height: 13px; margin-bottom: 8px; }
+        .skeleton-line.w-80 { width: 80%; }
+        .skeleton-line.w-60 { width: 60%; }
+        .skeleton-line.w-40 { width: 40%; }
 
         /* ========== NEWS ========== */
         .news-article { padding: 24px 0; border-bottom: 1px solid var(--border); }
@@ -724,6 +1111,16 @@
         .flight-route-date { font-size: 15px; opacity: 0.7; margin-top: 6px; }
         .flight-route-price { font-size: 28px; font-weight: 700; color: var(--success); }
 
+        /* Tablet: 2-col summary bar */
+        @media (min-width: 640px) {
+            .market-summary-bar {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .market-summary-bar .market-summary-item:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+
         @media (min-width: 900px) {
             .weather-content,
             .page-content {
@@ -741,66 +1138,57 @@
             .market-summary-bar {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
+            .market-summary-bar .market-summary-item:last-child {
+                grid-column: auto;
+            }
 
             .market-main-grid {
-                grid-template-columns: minmax(0, 8fr) minmax(320px, 5fr);
+                grid-template-columns: minmax(0, 8fr) minmax(320px, 4.6fr);
                 align-items: start;
             }
 
-            .market-card-note {
-                white-space: nowrap;
-            }
+            .market-card-note { white-space: nowrap; }
 
             #marketList {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 12px;
-            }
-
-            .market-item {
-                grid-template-columns: minmax(0, 1fr) minmax(110px, 140px) auto;
-                align-items: center;
-                gap: 12px 16px;
-                padding: 16px;
-                border-radius: 18px;
-            }
-
-            .market-name {
-                font-size: 17px;
                 gap: 10px;
             }
 
-            .market-flag {
-                font-size: 22px;
+            .market-item {
+                grid-template-columns: minmax(0, 1fr) minmax(96px, 120px) auto;
+                gap: 10px 14px;
+                padding: 14px 16px;
+                border-radius: 16px;
             }
 
-            .market-index {
-                font-size: 13px;
-                margin-top: 4px;
+            .market-name { font-size: 15px; gap: 8px; }
+            .market-flag { font-size: 18px; }
+            .market-index { font-size: 12px; margin-top: 3px; }
+            .market-sparkline { height: 30px; }
+            .market-chart-label { font-size: 10px; display: block; }
+            .market-values { min-width: 90px; }
+            .market-price { font-size: 17px; }
+            .market-change { font-size: 13px; margin-top: 4px; }
+
+            /* Logic chain goes horizontal on desktop */
+            .logic-chain-flow { flex-direction: row; align-items: flex-start; flex-wrap: wrap; gap: 4px; }
+            .logic-chain-step { flex-direction: column; align-items: center; max-width: 90px; text-align: center; gap: 6px; }
+            .step-text { font-size: 12px; padding: 0; }
+            .step-connector {
+                width: 28px;
+                height: 2px;
+                background: var(--border);
+                margin: 9px 0 0;
+                flex-shrink: 0;
             }
 
-            .market-sparkline {
-                height: 32px;
+            .advice-risks {
+                padding: 18px 18px 16px;
             }
 
-            .market-chart-label {
-                font-size: 11px;
-                display: block;
+            .market-overview-insights-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
-
-            .market-values {
-                min-width: 104px;
-            }
-
-            .market-price {
-                font-size: 20px;
-            }
-
-            .market-change {
-                font-size: 15px;
-                margin-top: 6px;
-            }
-
-            .market-chart { grid-column: auto; }
         }
 
         @media (min-width: 1200px) {
@@ -941,12 +1329,20 @@
                 padding-top: 0;
             }
 
+            .market-page-header {
+                padding: 36px 4px 20px;
+            }
+
+            .market-page-header h1 {
+                font-size: 36px;
+            }
+
             .market-dashboard {
-                gap: 24px;
+                gap: 22px;
             }
 
             .market-summary-item {
-                min-height: 140px;
+                min-height: 130px;
             }
 
             .market-list-card,
@@ -1018,19 +1414,19 @@
 
         @media (min-width: 1440px) {
             #marketList {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-template-columns: repeat(4, minmax(0, 1fr));
             }
 
             .market-summary-item {
-                padding: 20px 22px;
+                padding: 18px 22px;
             }
 
             .market-summary-value {
-                font-size: 28px;
+                font-size: 21px;
             }
 
             .market-main-grid {
-                grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr);
+                grid-template-columns: minmax(0, 8fr) minmax(340px, 4.2fr);
                 gap: 24px;
             }
 
@@ -1038,7 +1434,20 @@
             .market-analysis-card,
             .market-overview-card,
             .market-advice-card {
-                padding: 28px;
+                padding: 26px;
+            }
+
+            .market-item {
+                grid-template-columns: minmax(0, 1fr) minmax(100px, 126px) auto;
+                padding: 14px 16px;
+            }
+
+            .market-price { font-size: 18px; }
+            .market-change { font-size: 13px; }
+            .market-name { font-size: 15px; }
+            .market-flag { font-size: 18px; }
+            .market-overview-insights-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
 
             .weather-layout {
@@ -1080,7 +1489,10 @@
 
             .market-item {
                 grid-template-columns: minmax(0, 1fr) minmax(120px, 150px) auto;
+                padding: 16px 18px;
             }
+
+            .market-price { font-size: 19px; }
         }
     </style>
 </head>
@@ -1149,12 +1561,21 @@
         <!-- Market -->
         <div class="page" id="page-market">
             <div class="page-shell">
-                <div class="page-header"><h1>📊 市场行情</h1><div class="subtitle" id="marketDate">2026年3月9日</div></div>
+                <div class="page-header market-page-header">
+                    <h1><i class="fas fa-chart-line"></i> 市场行情</h1>
+                    <div class="market-header-meta">
+                        <span class="subtitle" id="marketDate">2026年3月9日</span>
+                        <button class="market-refresh-btn" id="marketRefreshBtn" onclick="refreshMarketPrices()" title="刷新实时行情">
+                            <i class="fas fa-rotate-right"></i>
+                        </button>
+                        <span class="market-refresh-hint" id="marketRefreshHint"></span>
+                    </div>
+                </div>
                 <div class="page-content market-page-content">
                     <div class="market-dashboard">
                         <div class="market-summary-bar">
                             <div class="market-summary-item" id="summaryCardMood">
-                                <span class="market-summary-label"><span class="summary-icon" id="moodIcon">⚡</span>市场状态</span>
+                                <span class="market-summary-label"><i class="fas fa-arrow-trend-up" id="moodIconEl"></i>市场状态</span>
                                 <strong class="market-summary-value" id="marketMood">等待更新</strong>
                                 <div class="market-summary-meta" id="marketBreadth">正在读取市场广度</div>
                                 <div class="breadth-bar-wrap">
@@ -1162,7 +1583,7 @@
                                 </div>
                             </div>
                             <div class="market-summary-item mood-theme" id="summaryCardTheme">
-                                <span class="market-summary-label"><span class="summary-icon">🧭</span>交易主线</span>
+                                <span class="market-summary-label"><i class="fas fa-compass"></i>交易主线</span>
                                 <div class="market-summary-value-row">
                                     <strong class="market-summary-value" id="marketTheme">等待更新</strong>
                                     <span class="theme-tag" id="themeTag"></span>
@@ -1170,7 +1591,7 @@
                                 <div class="market-summary-meta" id="marketThemeDetail">正在整理宏观脉络</div>
                             </div>
                             <div class="market-summary-item" id="summaryCardRisk">
-                                <span class="market-summary-label"><span class="summary-icon" id="riskIcon">⚠️</span>风险关注</span>
+                                <span class="market-summary-label"><i class="fas fa-triangle-exclamation" id="riskIconEl"></i>风险关注</span>
                                 <div class="market-summary-value-row">
                                     <strong class="market-summary-value" id="marketRisk">等待更新</strong>
                                     <span class="risk-badge" id="riskBadge"></span>
@@ -1183,27 +1604,48 @@
                                 <div class="card-title"><i class="fas fa-wave-square"></i> 重点行情</div>
                                 <div class="market-card-note" id="marketListNote">正在同步关键资产</div>
                             </div>
-                            <div id="marketList"></div>
+                            <div id="marketList">
+                                <div class="skeleton skeleton-line w-80"></div>
+                                <div class="skeleton skeleton-line w-60"></div>
+                                <div class="skeleton skeleton-line w-80"></div>
+                            </div>
                         </div>
                         <div class="market-main-grid">
                             <div class="card market-overview-card">
                                 <div class="market-analysis">
                                     <div class="market-analysis-title"><i class="fas fa-brain"></i> 宏观概览</div>
-                                    <div class="market-analysis-content" id="macroSummary"><p>加载中...</p></div>
+                                    <div class="market-analysis-content" id="macroSummary">
+                                        <div class="skeleton skeleton-line w-80"></div>
+                                        <div class="skeleton skeleton-line w-60"></div>
+                                        <div class="skeleton skeleton-line w-40"></div>
+                                    </div>
                                 </div>
                                 <div class="logic-chain">
                                     <div class="logic-chain-title">核心逻辑链</div>
                                     <div class="logic-chain-flow" id="logicChain"></div>
                                 </div>
+                                <div class="market-overview-insights">
+                                    <div class="market-overview-insights-title"><i class="fas fa-binoculars"></i> 市场观察</div>
+                                    <div class="market-overview-insights-grid" id="marketOverviewInsights">
+                                        <div class="skeleton skeleton-line w-80"></div>
+                                        <div class="skeleton skeleton-line w-60"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card advice-card market-advice-card">
                                 <div class="card-title"><i class="fas fa-lightbulb"></i> 操作建议</div>
-                                <div id="marketAdvice"></div>
+                                <div id="marketAdvice">
+                                    <div class="skeleton skeleton-line w-80"></div>
+                                    <div class="skeleton skeleton-line w-60"></div>
+                                </div>
                             </div>
                         </div>
                         <div class="card market-analysis-card">
-                            <div class="card-title" style="margin-bottom:20px"><i class="fas fa-chart-pie"></i> 各市场分析</div>
-                            <div id="marketAnalysis"></div>
+                            <div class="card-title" style="margin-bottom:18px"><i class="fas fa-chart-pie"></i> 各市场分析</div>
+                            <div id="marketAnalysis">
+                                <div class="skeleton skeleton-line w-60"></div>
+                                <div class="skeleton skeleton-line w-80"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1371,90 +1813,133 @@
             } catch(e) { console.error('Weather error:', e); }
         }
 
+        let _marketStaticCache = {};
+
+        async function refreshMarketPrices() {
+            const btn = document.getElementById('marketRefreshBtn');
+            const hint = document.getElementById('marketRefreshHint');
+            if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
+            try {
+                const liveRes = await fetch('/api/market?' + Date.now());
+                const live = liveRes.ok ? await liveRes.json() : {};
+                const d = { ..._marketStaticCache, ...live };
+                applyMarketPrices(d);
+                if (hint) {
+                    hint.textContent = '已更新';
+                    hint.classList.add('visible');
+                    setTimeout(() => hint.classList.remove('visible'), 2500);
+                }
+            } catch(e) {
+                console.error('Refresh error:', e);
+            } finally {
+                if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+            }
+        }
+
+        function applyMarketPrices(d) {
+            document.getElementById('marketDate').textContent = d.date || '';
+            const ms = [{k:'spx',f:'🇺🇸',n:'标普500',i:'S&P 500'},{k:'ndx',f:'🇺🇸',n:'纳斯达克100',i:'NDX'},{k:'dji',f:'🇺🇸',n:'道琼斯',i:'Dow Jones'},{k:'hsi',f:'🇭🇰',n:'恒生指数',i:'Hang Seng'},{k:'hstec',f:'🇭🇰',n:'恒生科技',i:'HS Tech'},{k:'sse',f:'🇨🇳',n:'上证指数',i:'SSE'},{k:'gold',f:'🥇',n:'黄金',i:'COMEX'},{k:'btc',f:'₿',n:'比特币',i:'BTC/USD'}];
+            const trackedMarkets = ms.filter(m=>d[m.k]);
+            const risingCount = trackedMarkets.filter(m => d[m.k].change > 0).length;
+            const fallingCount = trackedMarkets.filter(m => d[m.k].change < 0).length;
+            const flatCount = trackedMarkets.length - risingCount - fallingCount;
+            const marketMood = risingCount > fallingCount ? '风险偏好回暖' : risingCount < fallingCount ? '避险情绪升温' : '市场分化延续';
+            const primaryTheme = d.logic_chain?.[0] || d.macro_summary?.split('。')[0] || '等待新主线';
+            const primaryThemeDetail = d.macro_summary || '当前没有更多宏观摘要';
+            const primaryRisk = d.advice?.risks?.[0]?.split('→')[0]?.trim() || '留意外部波动';
+            const primaryRiskDetail = d.advice?.risks?.[0]?.split('→')[1]?.trim() || d.advice?.summary || '等待风险提示更新';
+            document.getElementById('marketMood').textContent = marketMood;
+            document.getElementById('marketBreadth').textContent = `${trackedMarkets.length}项核心资产跟踪中，${risingCount}涨 ${fallingCount}跌${flatCount ? `，${flatCount}平` : ''}`;
+            document.getElementById('marketTheme').textContent = primaryTheme;
+            document.getElementById('marketThemeDetail').textContent = primaryThemeDetail;
+            document.getElementById('marketRisk').textContent = primaryRisk;
+            document.getElementById('marketRiskDetail').textContent = primaryRiskDetail;
+
+            // 卡片1 — 情绪色系 + icon + 涨跌比例条
+            const moodCard = document.getElementById('summaryCardMood');
+            const moodClass = marketMood.includes('升温') ? 'mood-risk' : marketMood.includes('回暖') ? 'mood-bull' : 'mood-neutral';
+            moodCard.className = `market-summary-item ${moodClass}`;
+            const moodIconEl = document.getElementById('moodIconEl');
+            if (moodIconEl) moodIconEl.className = marketMood.includes('升温') ? 'fas fa-arrow-trend-down' : marketMood.includes('回暖') ? 'fas fa-arrow-trend-up' : 'fas fa-minus';
+            if (trackedMarkets.length > 0) {
+                document.getElementById('breadthBarFill').style.width = `${(risingCount / trackedMarkets.length * 100).toFixed(0)}%`;
+            }
+
+            // 卡片2 — 主线关键词分类 tag
+            const themeTagEl = document.getElementById('themeTag');
+            const themeText = primaryTheme + (d.macro_summary || '');
+            let tagClass = '', tagLabel = '';
+            if (/伊朗|战争|冲突|地缘|霍尔木兹|军事|制裁/.test(themeText)) {
+                tagClass = 'tag-geo'; tagLabel = '地缘';
+            } else if (/两会|政策|降准|降息|刺激|财政|央行|美联储/.test(themeText)) {
+                tagClass = 'tag-policy'; tagLabel = '政策';
+            } else if (/通胀|CPI|PMI|GDP|经济|衰退|复苏|汇率/.test(themeText)) {
+                tagClass = 'tag-macro'; tagLabel = '宏观';
+            }
+            if (tagLabel) { themeTagEl.textContent = tagLabel; themeTagEl.className = `theme-tag ${tagClass}`; }
+            else { themeTagEl.textContent = ''; themeTagEl.className = 'theme-tag'; }
+
+            // 卡片3 — 风险级别推断 + badge + 色系
+            const riskCard = document.getElementById('summaryCardRisk');
+            const riskBadgeEl = document.getElementById('riskBadge');
+            const isHighRisk = /破|升级|暴跌|崩溃|危机|战争/.test(primaryRisk + primaryRiskDetail);
+            const isLowRisk = /稳定|温和|可控|低风险/.test(primaryRisk + primaryRiskDetail);
+            let riskLevel, riskCardClass, badgeClass;
+            if (isHighRisk) { riskLevel = '高风险'; riskCardClass = 'risk-high'; badgeClass = 'badge-high'; }
+            else if (isLowRisk) { riskLevel = '低风险'; riskCardClass = 'risk-low'; badgeClass = 'badge-low'; }
+            else { riskLevel = '中等风险'; riskCardClass = 'risk-medium'; badgeClass = ''; }
+            riskCard.className = `market-summary-item ${riskCardClass}`;
+            riskBadgeEl.textContent = riskLevel;
+            riskBadgeEl.className = `risk-badge ${badgeClass}`.trim();
+            const riskIconEl = document.getElementById('riskIconEl');
+            if (riskIconEl) riskIconEl.className = isHighRisk ? 'fas fa-circle-exclamation' : isLowRisk ? 'fas fa-circle-check' : 'fas fa-triangle-exclamation';
+
+            // 行情列表
+            document.getElementById('marketListNote').textContent = `${trackedMarkets.length}项资产实时跟踪 · 7D 趋势`;
+            document.getElementById('marketList').innerHTML = trackedMarkets.map(m => {
+                const it = d[m.k], cls = it.change >= 0 ? 'up' : 'down', sgn = it.change >= 0 ? '+' : '';
+                const hasSparkline = Array.isArray(it.sparkline) && it.sparkline.length > 1;
+                const sparkline = hasSparkline
+                    ? createSparkline(it.sparkline, cls === 'up' ? 'up' : 'down')
+                    : '<div class="market-sparkline market-sparkline-empty" aria-hidden="true"></div>';
+                const trendLabel = hasSparkline ? '7D 趋势' : '趋势待补充';
+                return `<div class="market-item" data-symbol="${m.k}"><div class="market-info"><div class="market-name"><span class="market-flag">${m.f}</span>${m.n}</div><div class="market-index">${m.i}</div></div><div class="market-chart">${sparkline}<div class="market-chart-label">${trendLabel}</div></div><div class="market-values"><div class="market-price">${it.price}</div><div class="market-change ${cls}">${sgn}${it.change}%</div></div></div>`;
+            }).join('');
+        }
+
         async function loadMarket() {
             try {
-                // 实时获取市场数据 + 静态分析内容
+                // 初始加载：实时价格 + 静态分析内容（策略分析每日更新，不需要手动刷新）
                 const [liveRes, staticRes] = await Promise.all([
                     fetch('/api/market?' + Date.now()),
                     fetch('data/market.json?' + Date.now())
                 ]);
                 const live = liveRes.ok ? await liveRes.json() : {};
-                const staticData = staticRes.ok ? await staticRes.json() : {};
-                const d = { ...staticData, ...live }; // 实时数据覆盖静态价格，保留 analysis 等
-                document.getElementById('marketDate').textContent = d.date || '';
-                const ms = [{k:'spx',f:'🇺🇸',n:'标普500',i:'S&P 500'},{k:'ndx',f:'🇺🇸',n:'纳斯达克100',i:'NDX'},{k:'dji',f:'🇺🇸',n:'道琼斯',i:'Dow Jones'},{k:'hsi',f:'🇭🇰',n:'恒生指数',i:'Hang Seng'},{k:'hstec',f:'🇭🇰',n:'恒生科技',i:'HS Tech'},{k:'sse',f:'🇨🇳',n:'上证指数',i:'SSE'},{k:'gold',f:'🥇',n:'黄金',i:'COMEX'},{k:'btc',f:'₿',n:'比特币',i:'BTC/USD'}];
-                const trackedMarkets = ms.filter(m=>d[m.k]);
-                const risingCount = trackedMarkets.filter(m => d[m.k].change > 0).length;
-                const fallingCount = trackedMarkets.filter(m => d[m.k].change < 0).length;
-                const flatCount = trackedMarkets.length - risingCount - fallingCount;
-                const marketMood = risingCount > fallingCount ? '风险偏好回暖' : risingCount < fallingCount ? '避险情绪升温' : '市场分化延续';
-                const primaryTheme = d.logic_chain?.[0] || d.macro_summary?.split('。')[0] || '等待新主线';
-                const primaryThemeDetail = d.macro_summary || '当前没有更多宏观摘要';
-                const primaryRisk = d.advice?.risks?.[0]?.split('→')[0]?.trim() || '留意外部波动';
-                const primaryRiskDetail = d.advice?.risks?.[0]?.split('→')[1]?.trim() || d.advice?.summary || '等待风险提示更新';
-                document.getElementById('marketMood').textContent = marketMood;
-                document.getElementById('marketBreadth').textContent = `${trackedMarkets.length}项核心资产跟踪中，${risingCount}涨 ${fallingCount}跌${flatCount ? `，${flatCount}平` : ''}`;
-                document.getElementById('marketTheme').textContent = primaryTheme;
-                document.getElementById('marketThemeDetail').textContent = primaryThemeDetail;
-                document.getElementById('marketRisk').textContent = primaryRisk;
-                document.getElementById('marketRiskDetail').textContent = primaryRiskDetail;
-
-                // 卡片1 — 情绪色系 + icon + 涨跌比例条
-                const moodCard = document.getElementById('summaryCardMood');
-                const moodClass = marketMood.includes('升温') ? 'mood-risk' : marketMood.includes('回暖') ? 'mood-bull' : 'mood-neutral';
-                moodCard.className = `market-summary-item ${moodClass}`;
-                document.getElementById('moodIcon').textContent = marketMood.includes('升温') ? '📉' : marketMood.includes('回暖') ? '📈' : '⚡';
-                if (trackedMarkets.length > 0) {
-                    document.getElementById('breadthBarFill').style.width = `${(risingCount / trackedMarkets.length * 100).toFixed(0)}%`;
-                }
-
-                // 卡片2 — 主线关键词分类 tag
-                const themeTagEl = document.getElementById('themeTag');
-                const themeText = primaryTheme + (d.macro_summary || '');
-                let tagClass = '', tagLabel = '';
-                if (/伊朗|战争|冲突|地缘|霍尔木兹|军事|制裁/.test(themeText)) {
-                    tagClass = 'tag-geo'; tagLabel = '地缘';
-                } else if (/两会|政策|降准|降息|刺激|财政|央行|美联储/.test(themeText)) {
-                    tagClass = 'tag-policy'; tagLabel = '政策';
-                } else if (/通胀|CPI|PMI|GDP|经济|衰退|复苏|汇率/.test(themeText)) {
-                    tagClass = 'tag-macro'; tagLabel = '宏观';
-                }
-                if (tagLabel) { themeTagEl.textContent = tagLabel; themeTagEl.className = `theme-tag ${tagClass}`; }
-                else { themeTagEl.textContent = ''; themeTagEl.className = 'theme-tag'; }
-
-                // 卡片3 — 风险级别推断 + badge + 色系
-                const riskCard = document.getElementById('summaryCardRisk');
-                const riskBadgeEl = document.getElementById('riskBadge');
-                const isHighRisk = /破|升级|暴跌|崩溃|危机|战争/.test(primaryRisk + primaryRiskDetail);
-                const isLowRisk = /稳定|温和|可控|低风险/.test(primaryRisk + primaryRiskDetail);
-                let riskLevel, riskCardClass, badgeClass;
-                if (isHighRisk) { riskLevel = '高风险'; riskCardClass = 'risk-high'; badgeClass = 'badge-high'; }
-                else if (isLowRisk) { riskLevel = '低风险'; riskCardClass = 'risk-low'; badgeClass = 'badge-low'; }
-                else { riskLevel = '中等风险'; riskCardClass = 'risk-medium'; badgeClass = ''; }
-                riskCard.className = `market-summary-item ${riskCardClass}`;
-                riskBadgeEl.textContent = riskLevel;
-                riskBadgeEl.className = `risk-badge ${badgeClass}`.trim();
-                document.getElementById('riskIcon').textContent = isHighRisk ? '🔴' : isLowRisk ? '🟢' : '⚠️';
-                document.getElementById('marketListNote').textContent = `${trackedMarkets.length}项资产实时跟踪 · 7D 趋势`;
-                document.getElementById('marketList').innerHTML = trackedMarkets.map(m => {
-                    const it = d[m.k], cls = it.change >= 0 ? 'up' : 'down', sgn = it.change >= 0 ? '+' : '';
-                    const hasSparkline = Array.isArray(it.sparkline) && it.sparkline.length > 1;
-                    const sparkline = hasSparkline
-                        ? createSparkline(it.sparkline, cls === 'up' ? 'up' : 'down')
-                        : '<div class="market-sparkline market-sparkline-empty" aria-hidden="true"></div>';
-                    const trendLabel = hasSparkline ? '7D 趋势' : '趋势待补充';
-                    return `<div class="market-item" data-symbol="${m.k}"><div class="market-info"><div class="market-name"><span class="market-flag">${m.f}</span>${m.n}</div><div class="market-index">${m.i}</div></div><div class="market-chart">${sparkline}<div class="market-chart-label">${trendLabel}</div></div><div class="market-values"><div class="market-price">${it.price}</div><div class="market-change ${cls}">${sgn}${it.change}%</div></div></div>`;
-                }).join('');
+                _marketStaticCache = staticRes.ok ? await staticRes.json() : {};
+                const d = { ..._marketStaticCache, ...live };
+                applyMarketPrices(d);
                 // 宏观概览
                 if (d.macro_summary) document.getElementById('macroSummary').innerHTML = `<p>${d.macro_summary}</p>`;
                 
-                // 逻辑链
-                if (d.logic_chain) document.getElementById('logicChain').innerHTML = d.logic_chain.map((x,i) => `<span class="logic-chain-item">${x}</span>${i<d.logic_chain.length-1?'<span class="logic-chain-arrow">→</span>':''}`).join('');
+                // 逻辑链 — 带序号步骤
+                if (d.logic_chain) document.getElementById('logicChain').innerHTML = d.logic_chain.map((x,i) => `<div class="logic-chain-step"><div class="step-number">${i+1}</div><div class="step-text">${x}</div></div>${i<d.logic_chain.length-1?'<div class="step-connector"></div>':''}`).join('');
                 
+                const marketAnalysisItems = d.market_analysis ? Object.values(d.market_analysis) : [];
+
+                // 左栏市场观察
+                if (marketAnalysisItems.length) {
+                    document.getElementById('marketOverviewInsights').innerHTML = marketAnalysisItems.slice(0, 3).map(m => `
+                        <div class="market-overview-insight">
+                            <div class="market-overview-insight-label">${m.title}</div>
+                            <div class="market-overview-insight-value">${m.next_watch || m.catalyst || m.summary}</div>
+                        </div>
+                    `).join('');
+                }
+
                 // 各市场详细分析
                 if (d.market_analysis) {
                     const statusText = {bullish:'看涨',bearish:'看跌',neutral:'中性'};
-                    document.getElementById('marketAnalysis').innerHTML = Object.values(d.market_analysis).map(m => `
+                    document.getElementById('marketAnalysis').innerHTML = marketAnalysisItems.map(m => `
                         <div class="market-section">
                             <div class="market-section-header">
                                 <div class="market-section-title">${m.title}</div>
@@ -1473,23 +1958,45 @@
                 // 操作建议
                 if (d.advice) {
                     const actionClass = {减仓观望:'sell','持有/小幅加仓':'buy',持有:'hold',观望:'wait'};
+                    const riskBrief = (d.advice.risks || []).slice(0, 3);
                     document.getElementById('marketAdvice').innerHTML = `
-                        <div class="advice-summary">💡 ${d.advice.summary}</div>
-                        <div class="advice-positions">
-                            ${d.advice.positions.map(p => `
-                                <div class="advice-position">
-                                    <div class="advice-position-header">
-                                        <span class="advice-position-asset">${p.asset}</span>
-                                        <span class="advice-position-action ${actionClass[p.action]||'hold'}">${p.action}</span>
-                                    </div>
-                                    <div class="advice-position-reasoning">${p.reasoning}</div>
-                                    <div class="advice-position-level">📍 ${p.level}</div>
+                        <div class="advice-sections">
+                            <div class="advice-section">
+                                <div class="advice-section-label"><i class="fas fa-compass-drafting"></i>整体判断</div>
+                                <div class="advice-summary"><i class="fas fa-circle-info"></i><span>${d.advice.summary}</span></div>
+                            </div>
+                            <div class="advice-section">
+                                <div class="advice-section-label"><i class="fas fa-layer-group"></i>仓位建议</div>
+                                <div class="advice-positions">
+                                    ${d.advice.positions.map(p => `
+                                        <div class="advice-position">
+                                            <div class="advice-position-header">
+                                                <span class="advice-position-asset">${p.asset}</span>
+                                                <span class="advice-position-action ${actionClass[p.action]||'hold'}">${p.action}</span>
+                                            </div>
+                                            <div class="advice-position-reasoning">${p.reasoning}</div>
+                                        </div>
+                                    `).join('')}
                                 </div>
-                            `).join('')}
-                        </div>
-                        <div class="advice-risks">
-                            <div class="advice-risks-title">⚠️ 风险提示</div>
-                            <ul class="advice-risks-list">${d.advice.risks.map(r=>`<li>${r}</li>`).join('')}</ul>
+                            </div>
+                            <div class="advice-section">
+                                <div class="advice-section-label"><i class="fas fa-location-dot"></i>关键位置</div>
+                                <div class="advice-key-levels">
+                                    ${d.advice.positions.map(p => `
+                                        <div class="advice-key-level-item">
+                                            <div class="advice-key-level-top">
+                                                <span class="advice-key-level-asset">${p.asset}</span>
+                                                <span class="advice-key-level-chip">Key Level</span>
+                                            </div>
+                                            <div class="advice-key-level-text">${p.level}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="advice-risks">
+                                <div class="advice-risks-title"><i class="fas fa-triangle-exclamation"></i>风险摘要</div>
+                                <ul class="advice-risks-list">${riskBrief.map(r=>`<li>${r}</li>`).join('')}</ul>
+                            </div>
                         </div>
                     `;
                 }

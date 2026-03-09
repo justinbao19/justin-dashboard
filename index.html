@@ -1146,6 +1146,31 @@
         .flight-route-date { font-size: 15px; opacity: 0.7; margin-top: 6px; }
         .flight-route-price { font-size: 28px; font-weight: 700; color: var(--success); }
 
+        /* METAR 机场天气 */
+        .metar-card { padding: 20px; border-radius: 18px; }
+        .metar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .metar-toggle { background: rgba(255,255,255,0.2); border: none; padding: 6px 14px; border-radius: 20px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .metar-toggle:hover { background: rgba(255,255,255,0.3); }
+        .metar-toggle.decoded { background: var(--accent); }
+        .metar-content { color: white; }
+        .metar-station { margin-bottom: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 14px; }
+        .metar-station-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .metar-station-name { font-size: 18px; font-weight: 600; }
+        .metar-station-code { font-size: 14px; opacity: 0.7; }
+        .metar-raw { font-family: 'SF Mono', Monaco, monospace; font-size: 13px; line-height: 1.6; word-break: break-all; opacity: 0.9; }
+        .metar-decoded { display: none; }
+        .metar-decoded-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .metar-decoded-item { padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .metar-decoded-label { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+        .metar-decoded-value { font-size: 15px; font-weight: 600; }
+        .metar-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .metar-footer span { font-size: 13px; opacity: 0.6; }
+        .metar-refresh { background: none; border: none; color: white; opacity: 0.6; cursor: pointer; padding: 8px; }
+        .metar-refresh:hover { opacity: 1; }
+        .metar-loading { text-align: center; padding: 30px; opacity: 0.6; }
+        .metar-content.decoded-mode .metar-raw { display: none; }
+        .metar-content.decoded-mode .metar-decoded { display: block; }
+
         /* Tablet: 2-col summary bar */
         @media (min-width: 640px) {
             .market-summary-bar {
@@ -1697,7 +1722,7 @@
             </div>
         </div>
 
-        <!-- Flight -->
+        <!-- Flight / METAR -->
         <div class="page" id="page-flight">
             <div class="page-shell">
                 <div class="page-header"><h1>✈️ 航班</h1></div>
@@ -1708,10 +1733,20 @@
                         <p>上传飞行记录截图，AI 识别生成专业 PDF 日志</p>
                         <a href="https://flight-log-generator.vercel.app/" target="_blank" rel="noopener noreferrer" class="flight-tool-btn"><i class="fas fa-arrow-right"></i> 打开工具</a>
                     </div>
-                    <div class="card flight-routes-card" style="margin-top:20px; background:transparent; border:none; box-shadow:none; padding:0;">
-                        <div class="card-title" style="color:white"><i class="fas fa-chart-line"></i> 航班监控</div>
-                        <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">上海 → 卢布尔雅那</div><div class="flight-route-date">2026年6月13日</div></div><div class="flight-route-price">¥--</div></div>
-                        <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">杜布罗夫尼克 → 上海</div><div class="flight-route-date">2026年6月23日</div></div><div class="flight-route-price">¥--</div></div>
+                    <div class="card metar-card" style="margin-top:20px; background:rgba(255,255,255,0.1); backdrop-filter:blur(10px);">
+                        <div class="metar-header">
+                            <div class="card-title" style="color:white; margin:0;"><i class="fas fa-cloud-sun-rain"></i> 机场气象 METAR</div>
+                            <button class="metar-toggle" id="metarToggle" onclick="toggleMetarMode()">
+                                <span class="metar-toggle-label" id="metarModeLabel">RAW</span>
+                            </button>
+                        </div>
+                        <div id="metarContent" class="metar-content">
+                            <div class="metar-loading">加载中...</div>
+                        </div>
+                        <div class="metar-footer">
+                            <span id="metarTime">--</span>
+                            <button class="metar-refresh" onclick="loadMetar()"><i class="fas fa-sync-alt"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2071,8 +2106,70 @@
             else { f.classList.add('expanded'); b.textContent = '收起'; }
         }
 
-        loadWeather(); loadMarket(); loadNews();
+        // METAR 机场天气
+        const AIRPORTS = {
+            'ZSSS': { name: '上海虹桥', code: 'SHA' },
+            'ZSPD': { name: '上海浦东', code: 'PVG' }
+        };
+        let metarMode = 'raw';
+        let metarData = {};
+
+        async function loadMetar() {
+            try {
+                const r = await fetch('/api/metar?stations=ZSSS,ZSPD');
+                if (!r.ok) throw new Error('Failed to fetch');
+                metarData = await r.json();
+                renderMetar();
+                const now = new Date();
+                document.getElementById('metarTime').textContent = `更新于 ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+            } catch(e) {
+                document.getElementById('metarContent').innerHTML = '<div class="metar-loading">获取失败，请重试</div>';
+            }
+        }
+
+        function renderMetar() {
+            const content = document.getElementById('metarContent');
+            content.className = 'metar-content' + (metarMode === 'decoded' ? ' decoded-mode' : '');
+            
+            let html = '';
+            for (const [icao, data] of Object.entries(metarData)) {
+                const airport = AIRPORTS[icao] || { name: icao, code: icao };
+                const d = data.decoded || {};
+                html += `
+                    <div class="metar-station">
+                        <div class="metar-station-header">
+                            <span class="metar-station-name">${airport.name}</span>
+                            <span class="metar-station-code">${icao} / ${airport.code}</span>
+                        </div>
+                        <div class="metar-raw">${data.raw || 'N/A'}</div>
+                        <div class="metar-decoded">
+                            <div class="metar-decoded-grid">
+                                <div class="metar-decoded-item"><div class="metar-decoded-label">风</div><div class="metar-decoded-value">${d.wind || 'N/A'}</div></div>
+                                <div class="metar-decoded-item"><div class="metar-decoded-label">能见度</div><div class="metar-decoded-value">${d.visibility || 'N/A'}</div></div>
+                                <div class="metar-decoded-item"><div class="metar-decoded-label">云</div><div class="metar-decoded-value">${d.clouds || 'N/A'}</div></div>
+                                <div class="metar-decoded-item"><div class="metar-decoded-label">温度/露点</div><div class="metar-decoded-value">${d.temperature || 'N/A'} / ${d.dewpoint || 'N/A'}</div></div>
+                                <div class="metar-decoded-item"><div class="metar-decoded-label">气压</div><div class="metar-decoded-value">${d.pressure || 'N/A'}</div></div>
+                                <div class="metar-decoded-item"><div class="metar-decoded-label">趋势</div><div class="metar-decoded-value">${d.remarks || '无变化'}</div></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            content.innerHTML = html || '<div class="metar-loading">无数据</div>';
+        }
+
+        function toggleMetarMode() {
+            metarMode = metarMode === 'raw' ? 'decoded' : 'raw';
+            const btn = document.getElementById('metarToggle');
+            const label = document.getElementById('metarModeLabel');
+            label.textContent = metarMode === 'raw' ? 'RAW' : '解码';
+            btn.classList.toggle('decoded', metarMode === 'decoded');
+            renderMetar();
+        }
+
+        loadWeather(); loadMarket(); loadNews(); loadMetar();
         setInterval(() => { loadWeather(); loadMarket(); loadNews(); }, 5 * 60 * 1000);
+        setInterval(() => { loadMetar(); }, 10 * 60 * 1000); // METAR 每10分钟刷新
     </script>
 </body>
 </html>

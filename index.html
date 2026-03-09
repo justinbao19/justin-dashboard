@@ -232,6 +232,11 @@
         .pages { position: relative; z-index: 1; padding-bottom: 100px; }
         .page { display: none; min-height: 100vh; }
         .page.active { display: block; }
+        .page-shell,
+        .weather-layout {
+            width: min(100%, 1560px);
+            margin: 0 auto;
+        }
         .page-content { padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
 
         /* Cards */
@@ -340,16 +345,160 @@
         .page-header h1 { font-size: 34px; font-weight: 700; }
         .page-header .subtitle { font-size: 16px; opacity: 0.8; margin-top: 8px; }
 
-        .market-item { display: flex; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--border); }
-        .market-item:last-child { border-bottom: none; }
-        .market-info { flex: 1; }
-        .market-name { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .market-flag { font-size: 22px; }
-        .market-index { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
-        .market-chart { width: 80px; height: 30px; margin: 0 16px; }
-        .market-values { text-align: right; min-width: 90px; }
-        .market-price { font-size: 17px; font-weight: 600; font-family: 'SF Mono', Monaco, monospace; }
-        .market-change { font-size: 15px; font-weight: 500; margin-top: 4px; }
+        .market-dashboard { display: grid; gap: 20px; }
+        .market-summary-bar {
+            display: grid;
+            gap: 12px;
+        }
+        .market-summary-item {
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(14px);
+            color: white;
+        }
+        .market-summary-label {
+            display: block;
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.72;
+            margin-bottom: 10px;
+        }
+        .market-summary-value {
+            display: block;
+            font-size: 24px;
+            line-height: 1.2;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .market-summary-meta {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.76);
+        }
+        .market-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .market-card-note {
+            font-size: 13px;
+            color: var(--text-tertiary);
+            white-space: normal;
+        }
+        .market-main-grid {
+            display: grid;
+            gap: 20px;
+        }
+        #marketList { display: grid; gap: 8px; }
+        .market-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(78px, 92px) auto;
+            align-items: center;
+            gap: 8px 12px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: rgba(0, 0, 0, 0.02);
+            min-width: 0;
+        }
+        [data-theme="dark"] .market-item { background: rgba(255,255,255,0.03); }
+        .market-info { min-width: 0; }
+        .market-name {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .market-flag { font-size: 18px; }
+        .market-index {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .market-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        .market-sparkline {
+            width: 100%;
+            height: 28px;
+            display: block;
+        }
+        .market-sparkline-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+        .market-sparkline-line {
+            fill: none;
+            stroke-width: 2.25;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .market-sparkline-line.up { stroke: var(--success); }
+        .market-sparkline-line.down { stroke: var(--danger); }
+        .market-sparkline-line.flat { stroke: var(--text-tertiary); opacity: 0.8; }
+        .market-sparkline-area {
+            opacity: 0.14;
+        }
+        .market-sparkline-area.up { fill: var(--success); }
+        .market-sparkline-area.down { fill: var(--danger); }
+        .market-sparkline-area.flat { fill: var(--text-tertiary); }
+        .market-sparkline-empty {
+            position: relative;
+            border-radius: 999px;
+            background:
+                linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.06) 22%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.06) 78%, transparent 100%);
+        }
+        [data-theme="dark"] .market-sparkline-empty {
+            background:
+                linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 22%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.05) 78%, transparent 100%);
+        }
+        .market-sparkline-empty::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            border-top: 1px dashed rgba(0, 0, 0, 0.18);
+            transform: translateY(-50%);
+        }
+        [data-theme="dark"] .market-sparkline-empty::after {
+            border-top-color: rgba(255,255,255,0.18);
+        }
+        .market-chart-label {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            display: none;
+        }
+        .market-values { text-align: right; min-width: 82px; }
+        .market-price {
+            font-size: 17px;
+            font-weight: 600;
+            font-family: 'SF Mono', Monaco, monospace;
+            white-space: nowrap;
+        }
+        .market-change { font-size: 13px; font-weight: 500; margin-top: 4px; }
         .market-change.up { color: var(--success); }
         .market-change.down { color: var(--danger); }
 
@@ -376,9 +525,16 @@
         .advice-content p { margin-bottom: 16px; }
 
         /* 市场详细分析卡片 */
-        .market-section { margin-bottom: 16px; }
+        .market-section {
+            margin-bottom: 16px;
+            padding: 20px;
+            border-radius: 18px;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+        [data-theme="dark"] .market-section { background: rgba(255,255,255,0.03); }
         .market-section:last-child { margin-bottom: 0; }
-        .market-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .market-section-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
         .market-section-title { font-size: 17px; font-weight: 600; }
         .market-status { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
         .market-status.bullish { background: rgba(52, 199, 89, 0.15); color: var(--success); }
@@ -387,7 +543,20 @@
         .market-section-summary { font-size: 15px; color: var(--text-secondary); margin-bottom: 10px; }
         .market-section-details { font-size: 14px; color: var(--text-tertiary); line-height: 1.7; }
         .market-section-details li { margin-bottom: 6px; }
-        .market-section-meta { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; }
+        .market-section-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+            font-size: 13px;
+        }
+        .market-section-meta span {
+            display: block;
+            padding: 12px 14px;
+            background: rgba(0, 113, 227, 0.06);
+            border-radius: 12px;
+        }
+        [data-theme="dark"] .market-section-meta span { background: rgba(255,255,255,0.04); }
         .market-section-meta span { color: var(--text-tertiary); }
         .market-section-meta strong { color: var(--text-secondary); }
 
@@ -439,6 +608,365 @@
         .flight-route-cities { font-size: 20px; font-weight: 600; }
         .flight-route-date { font-size: 15px; opacity: 0.7; margin-top: 6px; }
         .flight-route-price { font-size: 28px; font-weight: 700; color: var(--success); }
+
+        @media (min-width: 900px) {
+            .weather-content,
+            .page-content {
+                padding-left: 28px;
+                padding-right: 28px;
+            }
+
+            .page-header {
+                padding-left: 28px;
+                padding-right: 28px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .market-summary-bar {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .market-main-grid {
+                grid-template-columns: minmax(0, 8fr) minmax(320px, 5fr);
+                align-items: start;
+            }
+
+            .market-card-note {
+                white-space: nowrap;
+            }
+
+            #marketList {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .market-item {
+                grid-template-columns: minmax(0, 1fr) minmax(110px, 140px) auto;
+                align-items: center;
+                gap: 12px 16px;
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .market-name {
+                font-size: 17px;
+                gap: 10px;
+            }
+
+            .market-flag {
+                font-size: 22px;
+            }
+
+            .market-index {
+                font-size: 13px;
+                margin-top: 4px;
+            }
+
+            .market-sparkline {
+                height: 32px;
+            }
+
+            .market-chart-label {
+                font-size: 11px;
+                display: block;
+            }
+
+            .market-values {
+                min-width: 104px;
+            }
+
+            .market-price {
+                font-size: 20px;
+            }
+
+            .market-change {
+                font-size: 15px;
+                margin-top: 6px;
+            }
+
+            .market-chart { grid-column: auto; }
+        }
+
+        @media (min-width: 1200px) {
+            .pages {
+                padding-bottom: 132px;
+            }
+
+            .theme-toggle {
+                top: 24px;
+                right: 24px;
+                width: 52px;
+                height: 52px;
+                font-size: 22px;
+            }
+
+            .tab-nav {
+                left: 50%;
+                right: auto;
+                bottom: 24px;
+                transform: translateX(-50%);
+                width: auto;
+                padding: 12px;
+                gap: 4px;
+                border: 1px solid var(--border);
+                border-radius: 24px;
+                box-shadow: var(--shadow);
+                background: rgba(255, 255, 255, 0.78);
+            }
+
+            [data-theme="dark"] .tab-nav {
+                background: rgba(28, 28, 30, 0.82);
+            }
+
+            .tab-item {
+                min-width: 88px;
+                padding: 10px 18px;
+                border-radius: 16px;
+            }
+
+            .tab-item.active {
+                background: rgba(0, 113, 227, 0.12);
+            }
+
+            [data-theme="dark"] .tab-item.active {
+                background: rgba(0, 113, 227, 0.2);
+            }
+
+            .weather-layout {
+                display: grid;
+                grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+                gap: 40px;
+                align-items: start;
+                min-height: 100vh;
+                padding: 32px 24px 140px;
+            }
+
+            .weather-header {
+                position: sticky;
+                top: 24px;
+                text-align: left;
+                padding: 34px 8px 0;
+                max-width: 380px;
+            }
+
+            .weather-header .location {
+                font-size: 42px;
+            }
+
+            .weather-header .temp-main {
+                font-size: clamp(132px, 11vw, 176px);
+                letter-spacing: -10px;
+            }
+
+            .weather-header .condition {
+                font-size: 28px;
+            }
+
+            .weather-header .temp-range {
+                font-size: 22px;
+            }
+
+            .weather-content {
+                display: grid;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                gap: 24px;
+                align-content: start;
+                padding: 12px 0 0;
+            }
+
+            .weather-card,
+            .weather-grid {
+                margin-bottom: 0;
+            }
+
+            .weather-hourly-card {
+                grid-column: 1 / -1;
+            }
+
+            .weather-daily-card {
+                grid-column: span 6;
+            }
+
+            .weather-details-grid {
+                grid-column: span 6;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .weather-aqi-card {
+                grid-column: span 6;
+                margin-top: 0 !important;
+            }
+
+            .weather-life-card {
+                grid-column: span 6;
+            }
+
+            .aqi-details {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .page-shell {
+                padding: 24px 24px 140px;
+            }
+
+            .page-header {
+                padding: 12px 4px 28px;
+            }
+
+            .page-header h1 {
+                font-size: 40px;
+            }
+
+            .page-content {
+                padding: 0 4px;
+            }
+
+            .market-page-content {
+                padding-top: 0;
+            }
+
+            .market-dashboard {
+                gap: 24px;
+            }
+
+            .market-summary-item {
+                min-height: 140px;
+            }
+
+            .market-list-card,
+            .market-analysis-card,
+            .market-overview-card,
+            .market-advice-card {
+                margin-bottom: 0;
+            }
+
+            .news-page-content {
+                padding-top: 0;
+            }
+
+            .news-list-card {
+                padding: 32px;
+            }
+
+            #newsList {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 24px;
+            }
+
+            .news-article {
+                display: flex;
+                flex-direction: column;
+                min-height: 100%;
+                padding: 24px;
+                border: 1px solid var(--border);
+                border-radius: 20px;
+                background: rgba(255, 255, 255, 0.38);
+            }
+
+            [data-theme="dark"] .news-article {
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            .news-image {
+                height: 220px;
+            }
+
+            .news-actions {
+                margin-top: auto;
+                padding-top: 16px;
+            }
+
+            .flight-page-content {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+                gap: 24px;
+                align-items: stretch;
+            }
+
+            .flight-tool {
+                height: 100%;
+                padding: 40px;
+                text-align: left;
+            }
+
+            .flight-tool-icon {
+                margin: 0 0 22px;
+            }
+
+            .flight-routes-card {
+                margin-top: 0 !important;
+                height: 100%;
+            }
+        }
+
+        @media (min-width: 1440px) {
+            #marketList {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .market-summary-item {
+                padding: 20px 22px;
+            }
+
+            .market-summary-value {
+                font-size: 28px;
+            }
+
+            .market-main-grid {
+                grid-template-columns: minmax(0, 7fr) minmax(360px, 5fr);
+                gap: 24px;
+            }
+
+            .market-list-card,
+            .market-analysis-card,
+            .market-overview-card,
+            .market-advice-card {
+                padding: 28px;
+            }
+
+            .weather-layout {
+                grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+                gap: 48px;
+            }
+
+            .weather-content {
+                gap: 28px;
+            }
+
+            .weather-details-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                grid-column: span 6;
+            }
+
+            .weather-daily-card,
+            .weather-aqi-card {
+                grid-column: span 6;
+            }
+
+            .weather-life-card {
+                grid-column: 1 / -1;
+            }
+
+            .aqi-details {
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+            }
+
+            #newsList {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 1760px) {
+            #marketList {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .market-item {
+                grid-template-columns: minmax(0, 1fr) minmax(120px, 150px) auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -465,90 +993,125 @@
     <div class="pages">
         <!-- Weather -->
         <div class="page active" id="page-weather">
-            <div class="weather-header">
-                <div class="location" id="location">上海 · 闵行</div>
-                <div class="temp-main" id="tempMain">7°</div>
-                <div class="condition" id="condition">多云</div>
-                <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
-            </div>
-            <div class="weather-content">
-                <div class="weather-card">
-                    <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
-                    <div class="hourly-scroll" id="hourlyScroll"></div>
+            <div class="weather-layout">
+                <div class="weather-header">
+                    <div class="location" id="location">上海 · 闵行</div>
+                    <div class="temp-main" id="tempMain">7°</div>
+                    <div class="condition" id="condition">多云</div>
+                    <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
                 </div>
-                <div class="weather-card">
-                    <div class="card-title"><i class="fas fa-calendar"></i> 7日预报</div>
-                    <div id="dailyForecast"></div>
-                </div>
-                <div class="weather-grid" id="weatherGrid"></div>
-                <div class="weather-card" style="margin-top:16px">
-                    <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
-                    <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
-                    <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
-                    <div class="aqi-details">
-                        <div>PM2.5<strong id="pm25">12</strong></div>
-                        <div>PM10<strong id="pm10">23</strong></div>
-                        <div>O₃<strong id="o3">76</strong></div>
-                        <div>SO₂<strong id="so2">6</strong></div>
-                        <div>NO₂<strong id="no2">13</strong></div>
-                        <div>CO<strong id="co">0.6</strong></div>
+                <div class="weather-content">
+                    <div class="weather-card weather-hourly-card">
+                        <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
+                        <div class="hourly-scroll" id="hourlyScroll"></div>
                     </div>
-                </div>
-                <div class="weather-card">
-                    <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
-                    <div class="life-index-grid" id="lifeIndex"></div>
+                    <div class="weather-card weather-daily-card">
+                        <div class="card-title"><i class="fas fa-calendar"></i> 3日预报</div>
+                        <div id="dailyForecast"></div>
+                    </div>
+                    <div class="weather-grid weather-details-grid" id="weatherGrid"></div>
+                    <div class="weather-card weather-aqi-card" style="margin-top:16px">
+                        <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
+                        <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
+                        <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
+                        <div class="aqi-details">
+                            <div>PM2.5<strong id="pm25">12</strong></div>
+                            <div>PM10<strong id="pm10">23</strong></div>
+                            <div>O₃<strong id="o3">76</strong></div>
+                            <div>SO₂<strong id="so2">6</strong></div>
+                            <div>NO₂<strong id="no2">13</strong></div>
+                            <div>CO<strong id="co">0.6</strong></div>
+                        </div>
+                    </div>
+                    <div class="weather-card weather-life-card">
+                        <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
+                        <div class="life-index-grid" id="lifeIndex"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Market -->
         <div class="page" id="page-market">
-            <div class="page-header"><h1>📊 市场行情</h1><div class="subtitle" id="marketDate">2026年3月9日</div></div>
-            <div class="page-content">
-                <div class="card"><div id="marketList"></div></div>
-                <div class="card">
-                    <div class="market-analysis">
-                        <div class="market-analysis-title"><i class="fas fa-brain"></i> 宏观概览</div>
-                        <div class="market-analysis-content" id="macroSummary"><p>加载中...</p></div>
+            <div class="page-shell">
+                <div class="page-header"><h1>📊 市场行情</h1><div class="subtitle" id="marketDate">2026年3月9日</div></div>
+                <div class="page-content market-page-content">
+                    <div class="market-dashboard">
+                        <div class="market-summary-bar">
+                            <div class="market-summary-item">
+                                <span class="market-summary-label">市场状态</span>
+                                <strong class="market-summary-value" id="marketMood">等待更新</strong>
+                                <div class="market-summary-meta" id="marketBreadth">正在读取市场广度</div>
+                            </div>
+                            <div class="market-summary-item">
+                                <span class="market-summary-label">交易主线</span>
+                                <strong class="market-summary-value" id="marketTheme">等待更新</strong>
+                                <div class="market-summary-meta" id="marketThemeDetail">正在整理宏观脉络</div>
+                            </div>
+                            <div class="market-summary-item">
+                                <span class="market-summary-label">风险关注</span>
+                                <strong class="market-summary-value" id="marketRisk">等待更新</strong>
+                                <div class="market-summary-meta" id="marketRiskDetail">正在读取风险提示</div>
+                            </div>
+                        </div>
+                        <div class="card market-list-card">
+                            <div class="market-card-header">
+                                <div class="card-title"><i class="fas fa-wave-square"></i> 重点行情</div>
+                                <div class="market-card-note" id="marketListNote">正在同步关键资产</div>
+                            </div>
+                            <div id="marketList"></div>
+                        </div>
+                        <div class="market-main-grid">
+                            <div class="card market-overview-card">
+                                <div class="market-analysis">
+                                    <div class="market-analysis-title"><i class="fas fa-brain"></i> 宏观概览</div>
+                                    <div class="market-analysis-content" id="macroSummary"><p>加载中...</p></div>
+                                </div>
+                                <div class="logic-chain">
+                                    <div class="logic-chain-title">核心逻辑链</div>
+                                    <div class="logic-chain-flow" id="logicChain"></div>
+                                </div>
+                            </div>
+                            <div class="card advice-card market-advice-card">
+                                <div class="card-title"><i class="fas fa-lightbulb"></i> 操作建议</div>
+                                <div id="marketAdvice"></div>
+                            </div>
+                        </div>
+                        <div class="card market-analysis-card">
+                            <div class="card-title" style="margin-bottom:20px"><i class="fas fa-chart-pie"></i> 各市场分析</div>
+                            <div id="marketAnalysis"></div>
+                        </div>
                     </div>
-                    <div class="logic-chain">
-                        <div class="logic-chain-title">核心逻辑链</div>
-                        <div class="logic-chain-flow" id="logicChain"></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-title" style="margin-bottom:20px"><i class="fas fa-chart-pie"></i> 各市场分析</div>
-                    <div id="marketAnalysis"></div>
-                </div>
-                <div class="card advice-card">
-                    <div class="card-title"><i class="fas fa-lightbulb"></i> 操作建议</div>
-                    <div id="marketAdvice"></div>
                 </div>
             </div>
         </div>
 
         <!-- News -->
         <div class="page" id="page-news">
-            <div class="page-header"><h1>📰 今日要闻</h1><div class="subtitle" id="newsDate">2026年3月9日</div></div>
-            <div class="page-content">
-                <div class="card"><div id="newsList"><p style="color:var(--text-tertiary)">加载中...</p></div></div>
+            <div class="page-shell">
+                <div class="page-header"><h1>📰 今日要闻</h1><div class="subtitle" id="newsDate">2026年3月9日</div></div>
+                <div class="page-content news-page-content">
+                    <div class="card news-list-card"><div id="newsList"><p style="color:var(--text-tertiary)">加载中...</p></div></div>
+                </div>
             </div>
         </div>
 
         <!-- Flight -->
         <div class="page" id="page-flight">
-            <div class="page-header"><h1>✈️ 航班</h1></div>
-            <div class="page-content">
-                <div class="flight-tool">
-                    <div class="flight-tool-icon"><i class="fas fa-book-open"></i></div>
-                    <h2>FlightLog Generator</h2>
-                    <p>上传飞行记录截图，AI 识别生成专业 PDF 日志</p>
-                    <a href="#" class="flight-tool-btn"><i class="fas fa-arrow-right"></i> 打开工具</a>
-                </div>
-                <div class="card" style="margin-top:20px; background:transparent; border:none; box-shadow:none; padding:0;">
-                    <div class="card-title" style="color:white"><i class="fas fa-chart-line"></i> 航班监控</div>
-                    <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">上海 → 卢布尔雅那</div><div class="flight-route-date">2026年6月13日</div></div><div class="flight-route-price">¥--</div></div>
-                    <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">杜布罗夫尼克 → 上海</div><div class="flight-route-date">2026年6月23日</div></div><div class="flight-route-price">¥--</div></div>
+            <div class="page-shell">
+                <div class="page-header"><h1>✈️ 航班</h1></div>
+                <div class="page-content flight-page-content">
+                    <div class="flight-tool">
+                        <div class="flight-tool-icon"><i class="fas fa-book-open"></i></div>
+                        <h2>FlightLog Generator</h2>
+                        <p>上传飞行记录截图，AI 识别生成专业 PDF 日志</p>
+                        <a href="#" class="flight-tool-btn"><i class="fas fa-arrow-right"></i> 打开工具</a>
+                    </div>
+                    <div class="card flight-routes-card" style="margin-top:20px; background:transparent; border:none; box-shadow:none; padding:0;">
+                        <div class="card-title" style="color:white"><i class="fas fa-chart-line"></i> 航班监控</div>
+                        <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">上海 → 卢布尔雅那</div><div class="flight-route-date">2026年6月13日</div></div><div class="flight-route-price">¥--</div></div>
+                        <div class="flight-route"><div class="flight-route-info"><div class="flight-route-cities">杜布罗夫尼克 → 上海</div><div class="flight-route-date">2026年6月23日</div></div><div class="flight-route-price">¥--</div></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -564,7 +1127,9 @@
     <script>
         const ICON_BASE = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg/';
         const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','FOG':'fog','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
+        const DEFAULT_WEATHER_LOCATION = { lon: '121.405', lat: '31.123', displayName: '上海 · 闵行' };
         const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
+        let weatherLocationPromise = null;
 
         let theme = localStorage.getItem('theme') || (new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'dark' : 'light');
         const applyTheme = () => { document.documentElement.setAttribute('data-theme', theme); document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; };
@@ -594,10 +1159,36 @@
             if (isRain) { for(let i=0;i<100;i++) { const d=document.createElement('div'); d.className='raindrop'; d.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*0.7}s;animation-duration:${0.5+Math.random()*0.3}s`; document.getElementById('rain').appendChild(d); } }
         }
 
+        async function getWeatherLocation() {
+            if (!weatherLocationPromise) {
+                weatherLocationPromise = (async () => {
+                    try {
+                        const response = await fetch('/api/location');
+                        if (!response.ok) throw new Error('Failed to resolve location');
+                        const data = await response.json();
+                        if (!data?.lon || !data?.lat) return DEFAULT_WEATHER_LOCATION;
+                        return {
+                            lon: data.lon,
+                            lat: data.lat,
+                            displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName
+                        };
+                    } catch (error) {
+                        console.error('Location error:', error);
+                        return DEFAULT_WEATHER_LOCATION;
+                    }
+                })();
+            }
+            return weatherLocationPromise;
+        }
+
         async function loadWeather() {
             try {
-                // 实时获取彩云天气（通过 API 代理）
-                const r = await fetch('/api/weather?lon=121.405&lat=31.123');
+                document.getElementById('location').textContent = '正在定位...';
+                const location = await getWeatherLocation();
+                document.getElementById('location').textContent = location.displayName;
+
+                // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
+                const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
                 if (!r.ok) return;
                 const d = (await r.json()).result;
                 updateScene(d.realtime.skycon);
@@ -617,7 +1208,7 @@
                 // Daily
                 if (d.daily?.temperature) {
                     const dn = ['周日','周一','周二','周三','周四','周五','周六'];
-                    document.getElementById('dailyForecast').innerHTML = d.daily.temperature.slice(0,7).map((x,i) => {
+                    document.getElementById('dailyForecast').innerHTML = d.daily.temperature.slice(0,3).map((x,i) => {
                         const dt = new Date(x.date), nm = i===0 ? '今天' : dn[dt.getDay()], sk = d.daily.skycon?.[i]?.value || 'CLEAR_DAY';
                         return `<div class="daily-item"><div class="daily-day">${nm}</div><div class="daily-icon"><img src="${getIcon(sk)}"></div><div class="daily-temps"><span class="daily-low">${Math.round(x.min)}°</span><div class="daily-bar"></div><span class="daily-high">${Math.round(x.max)}°</span></div></div>`;
                     }).join('');
@@ -668,10 +1259,30 @@
                 const d = { ...staticData, ...live }; // 实时数据覆盖静态价格，保留 analysis 等
                 document.getElementById('marketDate').textContent = d.date || '';
                 const ms = [{k:'spx',f:'🇺🇸',n:'标普500',i:'S&P 500'},{k:'ndx',f:'🇺🇸',n:'纳斯达克100',i:'NDX'},{k:'dji',f:'🇺🇸',n:'道琼斯',i:'Dow Jones'},{k:'hsi',f:'🇭🇰',n:'恒生指数',i:'Hang Seng'},{k:'hstec',f:'🇭🇰',n:'恒生科技',i:'HS Tech'},{k:'sse',f:'🇨🇳',n:'上证指数',i:'SSE'},{k:'gold',f:'🥇',n:'黄金',i:'COMEX'},{k:'btc',f:'₿',n:'比特币',i:'BTC/USD'}];
-                document.getElementById('marketList').innerHTML = ms.filter(m=>d[m.k]).map(m => {
+                const trackedMarkets = ms.filter(m=>d[m.k]);
+                const risingCount = trackedMarkets.filter(m => d[m.k].change > 0).length;
+                const fallingCount = trackedMarkets.filter(m => d[m.k].change < 0).length;
+                const flatCount = trackedMarkets.length - risingCount - fallingCount;
+                const marketMood = risingCount > fallingCount ? '风险偏好回暖' : risingCount < fallingCount ? '避险情绪升温' : '市场分化延续';
+                const primaryTheme = d.logic_chain?.[0] || d.macro_summary?.split('。')[0] || '等待新主线';
+                const primaryThemeDetail = d.macro_summary || '当前没有更多宏观摘要';
+                const primaryRisk = d.advice?.risks?.[0]?.split('→')[0]?.trim() || '留意外部波动';
+                const primaryRiskDetail = d.advice?.risks?.[0]?.split('→')[1]?.trim() || d.advice?.summary || '等待风险提示更新';
+                document.getElementById('marketMood').textContent = marketMood;
+                document.getElementById('marketBreadth').textContent = `${trackedMarkets.length}项核心资产跟踪中，${risingCount}涨 ${fallingCount}跌${flatCount ? `，${flatCount}平` : ''}`;
+                document.getElementById('marketTheme').textContent = primaryTheme;
+                document.getElementById('marketThemeDetail').textContent = primaryThemeDetail;
+                document.getElementById('marketRisk').textContent = primaryRisk;
+                document.getElementById('marketRiskDetail').textContent = primaryRiskDetail;
+                document.getElementById('marketListNote').textContent = `${trackedMarkets.length}项资产实时跟踪 · 7D 趋势`;
+                document.getElementById('marketList').innerHTML = trackedMarkets.map(m => {
                     const it = d[m.k], cls = it.change >= 0 ? 'up' : 'down', sgn = it.change >= 0 ? '+' : '';
-                    
-                    return `<div class="market-item"><div class="market-info"><div class="market-name"><span class="market-flag">${m.f}</span>${m.n}</div><div class="market-index">${m.i}</div></div><div class="market-values"><div class="market-price">${it.price}</div><div class="market-change ${cls}">${sgn}${it.change}%</div></div></div>`;
+                    const hasSparkline = Array.isArray(it.sparkline) && it.sparkline.length > 1;
+                    const sparkline = hasSparkline
+                        ? createSparkline(it.sparkline, cls === 'up' ? 'up' : 'down')
+                        : '<div class="market-sparkline market-sparkline-empty" aria-hidden="true"></div>';
+                    const trendLabel = hasSparkline ? '7D 趋势' : '趋势待补充';
+                    return `<div class="market-item" data-symbol="${m.k}"><div class="market-info"><div class="market-name"><span class="market-flag">${m.f}</span>${m.n}</div><div class="market-index">${m.i}</div></div><div class="market-chart">${sparkline}<div class="market-chart-label">${trendLabel}</div></div><div class="market-values"><div class="market-price">${it.price}</div><div class="market-change ${cls}">${sgn}${it.change}%</div></div></div>`;
                 }).join('');
                 // 宏观概览
                 if (d.macro_summary) document.getElementById('macroSummary').innerHTML = `<p>${d.macro_summary}</p>`;
@@ -695,7 +1306,7 @@
                                 <span>关注: <strong>${m.next_watch}</strong></span>
                             </div>
                         </div>
-                    `).join('<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">');
+                    `).join('');
                 }
                 
                 // 操作建议
@@ -724,11 +1335,20 @@
             } catch(e) { console.error('Market error:', e); }
         }
 
-        function createSparkline(data, isUp) {
-            const w=80, h=30, min=Math.min(...data), max=Math.max(...data), range=max-min||1;
-            const pts = data.map((v,i) => `${(i/(data.length-1))*w},${h-(((v-min)/range)*h)}`).join(' ');
-            const color = isUp ? '#34c759' : '#ff3b30';
-            return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke="${color}" stroke-width="2" points="${pts}"/></svg>`;
+        function createSparkline(data, trend = 'flat') {
+            const values = (Array.isArray(data) ? data : []).map(Number).filter(v => Number.isFinite(v));
+            if (values.length < 2) return '<div class="market-sparkline market-sparkline-empty" aria-hidden="true"></div>';
+
+            const w = 120, h = 32, padX = 2, padY = 3;
+            const min = Math.min(...values), max = Math.max(...values), range = max - min || 1;
+            const points = values.map((v, i) => {
+                const x = padX + (i / (values.length - 1)) * (w - padX * 2);
+                const y = h - padY - (((v - min) / range) * (h - padY * 2));
+                return [x, y];
+            });
+            const pointString = points.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+            const areaString = `${padX},${h - padY} ${pointString} ${w - padX},${h - padY}`;
+            return `<div class="market-sparkline" aria-hidden="true"><svg class="market-sparkline-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polygon class="market-sparkline-area ${trend}" points="${areaString}"></polygon><polyline class="market-sparkline-line ${trend}" points="${pointString}"></polyline></svg></div>`;
         }
 
         async function loadNews() {

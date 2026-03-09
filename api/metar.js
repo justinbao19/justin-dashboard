@@ -26,8 +26,10 @@ function decodeMetar(raw) {
   
   try {
     const parts = raw.split(' ');
+    // METAR 格式: "METAR ZSSS..." 或 "ZSSS..."
+    const stationIdx = parts[0] === 'METAR' ? 1 : 0;
     const result = {
-      station: parts[0],
+      station: parts[stationIdx],
       time: '',
       wind: '',
       visibility: '',
@@ -139,12 +141,16 @@ export default async function handler(req, res) {
     
     const result = {};
     for (const line of lines) {
-      const station = line.split(' ')[0];
-      result[station] = {
-        raw: line,
-        decoded: decodeMetar(line),
-        fetchedAt: new Date().toISOString()
-      };
+      // METAR 格式: "METAR ZSSS 091330Z..." 或 "ZSSS 091330Z..."
+      const parts = line.split(' ');
+      const station = parts[0] === 'METAR' ? parts[1] : parts[0];
+      if (station && station.length === 4) {
+        result[station] = {
+          raw: line,
+          decoded: decodeMetar(line),
+          fetchedAt: new Date().toISOString()
+        };
+      }
     }
     
     res.status(200).json(result);

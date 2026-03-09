@@ -1375,7 +1375,7 @@
             try {
                 // 实时获取市场数据 + 静态分析内容
                 const [liveRes, staticRes] = await Promise.all([
-                    fetch('/api/market'),
+                    fetch('/api/market?' + Date.now()),
                     fetch('data/market.json?' + Date.now())
                 ]);
                 const live = liveRes.ok ? await liveRes.json() : {};

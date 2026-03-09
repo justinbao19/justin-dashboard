@@ -26,6 +26,22 @@
       "url": "https://cnbc.com"
     },
     {
+      "title": "比特币ETF单周净流出12亿美元：机构避险情绪升温",
+      "source": "CoinDesk",
+      "image": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80",
+      "summary": "美国现货比特币ETF连续5日净流出，累计12亿美元。机构投资者在地缘风险下选择降低风险敞口，BTC跌破$68,000。",
+      "full_content": "<p>美国现货比特币ETF本周遭遇大规模资金流出，连续5个交易日净流出，累计达12亿美元。</p><p><strong>流出详情：</strong></p><ul><li>贝莱德IBIT流出4.2亿美元</li><li>富达FBTC流出3.8亿美元</li><li>灰度GBTC流出2.1亿美元</li></ul><p><strong>市场分析：</strong>机构投资者在伊朗局势升级、通胀预期上升的背景下选择降低风险敞口。比特币从$73,000高点回落至$67,000附近。</p><p><strong>链上数据：</strong>交易所净流入增加，显示部分持有者正在获利了结或止损。</p>",
+      "url": "https://coindesk.com"
+    },
+    {
+      "title": "苹果WWDC 2026前瞻：iOS 20将深度整合AI助手",
+      "source": "Bloomberg",
+      "image": "https://images.unsplash.com/photo-1591337676887-a217a6970a8a?w=800&q=80",
+      "summary": "知情人士透露，苹果将在6月WWDC发布重大AI升级，Siri将获得类GPT能力，支持多轮对话和复杂任务处理。",
+      "full_content": "<p>据彭博社报道，苹果正在为6月的WWDC开发者大会准备重大AI升级。</p><p><strong>核心升级：</strong></p><ul><li>Siri将获得类GPT的对话能力</li><li>支持多轮复杂对话和上下文理解</li><li>深度整合第三方应用，可执行跨App任务</li><li>端侧AI处理，保护用户隐私</li></ul><p><strong>硬件配合：</strong>M4芯片的神经网络引擎将专门优化AI推理性能，iPhone 18系列预计搭载更强的NPU。</p><p><strong>市场反应：</strong>分析师认为，苹果的AI战略若成功，将重新定义智能手机交互方式，股价有望突破$200。</p>",
+      "url": "https://bloomberg.com"
+    },
+    {
       "title": "OpenClaw用户数突破500万：被称为AI界的Linux",
       "source": "The Verge",
       "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80",
@@ -34,5 +50,5 @@
       "url": "https://theverge.com"
     }
   ],
-  "updated_at": "2026-03-09T09:12:00+08:00"
+  "updated_at": "2026-03-09T18:50:00+08:00"
 }

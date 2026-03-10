@@ -1,54 +1,46 @@
 {
-  "date": "2026年3月9日",
+  "date": "2026年3月11日",
   "items": [
     {
-      "title": "美以对伊朗军事行动进入第9天：德黑兰燃油库遭袭",
-      "source": "Reuters",
+      "title": "美以对伊朗战争进入第11天：\"最猛烈空袭日\"",
+      "source": "CNN / Al Jazeera",
       "image": "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&q=80",
-      "summary": "以军扩大打击范围，轰炸德黑兰附近燃油库引发大火，浓烟笼罩首都。伊朗导弹误伤邻国，巴林海水淡化厂受损。",
-      "full_content": "<p>美国与以色列联合对伊朗的空袭行动已持续9天。以军今日轰炸了德黑兰附近的燃油库，引发大火，浓烟笼罩首都。</p><p>伊朗多处能源设施被毁，导弹还误伤了邻国：巴林海水淡化厂受损，卡塔尔、科威特、阿联酋均报告有导弹落入境内。</p><p>伊朗正准备宣布新任最高领袖。特朗普拒绝和谈，华盛顿出现大规模示威。</p><p><strong>影响：</strong>霍尔木兹海峡航运受阻，全球20%原油通道面临威胁，油价本周飙升13%。</p>",
-      "url": "https://reuters.com"
+      "summary": "国防部长赫格塞斯预告将发动开战以来最猛烈空袭。伊朗死亡1,255人，以色列13人，美军8人。",
+      "full_content": "<p>美以联军对伊朗的军事行动进入第11天。国防部长赫格塞斯（Pete Hegseth）宣布将发动\"开战以来最猛烈的空袭\"。</p><p><strong>伤亡统计：</strong></p><ul><li>伊朗：1,255人死亡</li><li>以色列：13人死亡（含特拉维夫机场附近1人）</li><li>美军：8人阵亡</li><li>海湾国家：14人死亡</li></ul><p>特朗普表态称战争\"即将结束\"，但补充说如有必要将加大打击力度。</p>",
+      "url": "https://www.cnn.com/2026/03/09/middleeast/us-israel-iran-middle-east-war-what-we-know-intl-hnk"
     },
     {
-      "title": "两会聚焦AI产业：政府工作报告首提万亿目标",
-      "source": "新华社",
-      "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
-      "summary": "政府工作报告首次将人工智能列为七大战略性新兴产业之首，提出2026年AI产业规模达1万亿元目标。",
-      "full_content": "<p>2026年全国两会进入第二周，政府工作报告首次将人工智能列为七大战略性新兴产业之首。</p><p><strong>核心目标：</strong></p><ul><li>2026年AI产业规模达到1万亿元</li><li>重点支持三大赛道：大模型、智能机器人、自动驾驶</li><li>强调发展与安全并重，加快AI立法进程</li></ul><p><strong>政策利好：</strong></p><ul><li>科技部将在北京、上海、深圳设立AI产业特区</li><li>放宽AI创业融资政策，简化审批流程</li><li>鼓励高校设立AI专业，培养复合型人才</li></ul>",
-      "url": "https://xinhuanet.com"
+      "title": "黎巴嫩人道主义危机加剧：70万人流离失所",
+      "source": "New York Times",
+      "image": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&q=80",
+      "summary": "以色列持续打击真主党目标，黎巴嫩领导人和援助机构警告人道危机正在恶化。",
+      "full_content": "<p>随着以色列扩大对真主党的军事行动，黎巴嫩正面临严重的人道主义危机。</p><p><strong>关键数据：</strong></p><ul><li>近70万人被迫离开家园</li><li>医疗和基础设施严重受损</li><li>援助机构呼吁国际社会紧急干预</li></ul><p>黎巴嫩政府已向联合国发出紧急求助。</p>",
+      "url": "https://www.nytimes.com/live/2026/03/10/world/iran-war-trump-us-israel"
     },
     {
-      "title": "美股本周收跌：通胀担忧+地缘风险双重打击",
-      "source": "CNBC",
+      "title": "全球油价剧烈波动：美国放松俄油出口限制",
+      "source": "Reuters",
       "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
-      "summary": "道指跌1.05%，标普跌0.43%，纳斯达克跌0.92%。伊朗战争推高油价引发通胀担忧，市场预期Fed将维持高利率更长时间。",
-      "full_content": "<p>美股三大指数本周全线收跌，结束了此前连续三周的涨势。</p><p><strong>收盘数据：</strong></p><ul><li>道琼斯工业指数：42,977.23 (-1.05%)</li><li>标普500指数：5,877.82 (-0.43%)</li><li>纳斯达克综合指数：18,322.54 (-0.92%)</li></ul><p><strong>核心逻辑：</strong>伊朗封锁霍尔木兹海峡，全球20%原油通道受阻，油价飙升13%，美国输入性通胀压力骤升，市场预期Fed将维持高利率更长时间。</p><p><strong>个股表现：</strong>科技股集体下挫，英伟达跌3.2%，苹果跌1.8%。能源股逆势上涨，埃克森美孚涨4.2%。</p>",
-      "url": "https://cnbc.com"
+      "summary": "为平抑油价，美国开始放松对俄罗斯石油出口的限制。布伦特原油从$120回落至$63附近。",
+      "full_content": "<p>中东紧张局势导致全球能源市场剧烈波动。</p><p><strong>市场动态：</strong></p><ul><li>布伦特原油从$120高点回落至$63</li><li>美国放松俄油出口限制以增加供应</li><li>霍尔木兹海峡航运仍受影响</li></ul><p>分析师认为油价短期内将保持波动。</p>",
+      "url": "https://www.reuters.com/"
     },
     {
-      "title": "比特币ETF单周净流出12亿美元：机构避险情绪升温",
-      "source": "CoinDesk",
-      "image": "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&q=80",
-      "summary": "美国现货比特币ETF连续5日净流出，累计12亿美元。机构投资者在地缘风险下选择降低风险敞口，BTC跌破$68,000。",
-      "full_content": "<p>美国现货比特币ETF本周遭遇大规模资金流出，连续5个交易日净流出，累计达12亿美元。</p><p><strong>流出详情：</strong></p><ul><li>贝莱德IBIT流出4.2亿美元</li><li>富达FBTC流出3.8亿美元</li><li>灰度GBTC流出2.1亿美元</li></ul><p><strong>市场分析：</strong>机构投资者在伊朗局势升级、通胀预期上升的背景下选择降低风险敞口。比特币从$73,000高点回落至$67,000附近。</p><p><strong>链上数据：</strong>交易所净流入增加，显示部分持有者正在获利了结或止损。</p>",
-      "url": "https://coindesk.com"
+      "title": "巴基斯坦、菲律宾推行四天工作制",
+      "source": "Indian Express",
+      "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
+      "summary": "两国政府宣布试行每周四天工作制，以应对能源成本上涨和提升工作效率。",
+      "full_content": "<p>巴基斯坦和菲律宾政府宣布将试行每周四天工作制。</p><p><strong>政策背景：</strong></p><ul><li>能源成本上涨推动政策改革</li><li>旨在提高生产效率、降低运营成本</li><li>多国关注试点成效</li></ul><p>此举被视为应对全球能源危机的创新举措。</p>",
+      "url": "https://indianexpress.com/article/education/today-news-headlines-for-school-assembly-10-march-2026-india-global-oil-prices-fluctuate-4-day-work-week-pakistan-philippines-fifa-update-10574860/"
     },
     {
-      "title": "苹果WWDC 2026前瞻：iOS 20将深度整合AI助手",
-      "source": "Bloomberg",
-      "image": "https://images.unsplash.com/photo-1591337676887-a217a6970a8a?w=800&q=80",
-      "summary": "知情人士透露，苹果将在6月WWDC发布重大AI升级，Siri将获得类GPT能力，支持多轮对话和复杂任务处理。",
-      "full_content": "<p>据彭博社报道，苹果正在为6月的WWDC开发者大会准备重大AI升级。</p><p><strong>核心升级：</strong></p><ul><li>Siri将获得类GPT的对话能力</li><li>支持多轮复杂对话和上下文理解</li><li>深度整合第三方应用，可执行跨App任务</li><li>端侧AI处理，保护用户隐私</li></ul><p><strong>硬件配合：</strong>M4芯片的神经网络引擎将专门优化AI推理性能，iPhone 18系列预计搭载更强的NPU。</p><p><strong>市场反应：</strong>分析师认为，苹果的AI战略若成功，将重新定义智能手机交互方式，股价有望突破$200。</p>",
-      "url": "https://bloomberg.com"
-    },
-    {
-      "title": "OpenClaw用户数突破500万：被称为AI界的Linux",
-      "source": "The Verge",
-      "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&q=80",
-      "summary": "开源AI助手平台增长迅猛，月活跃用户达120万。中国开发者贡献超40%代码，多家财富500强企业开始基于OpenClaw构建内部AI系统。",
-      "full_content": "<p>开源AI助手平台OpenClaw宣布全球用户数突破500万，月活跃用户达120万。该项目被《连线》杂志称为AI界的Linux。</p><p><strong>关键数据：</strong></p><ul><li>注册用户：500万+</li><li>月活跃用户：120万</li><li>GitHub Stars：45,000+</li><li>代码贡献者：2,800+</li></ul><p><strong>中国开发者贡献突出：</strong>超过40%的代码提交来自中国开发者。OpenClaw创始人表示，这证明了开源AI的力量。</p><p><strong>企业应用：</strong>多家企业已开始基于OpenClaw构建内部AI系统，主要应用场景包括：客服自动化、文档处理、代码辅助等。</p>",
-      "url": "https://theverge.com"
+      "title": "伊朗导弹误入阿塞拜疆领土：地区紧张升级",
+      "source": "BBC",
+      "image": "https://images.unsplash.com/photo-1569982175971-d92b01cf8694?w=800&q=80",
+      "summary": "阿塞拜疆指控伊朗无人机袭击其西部领土纳希切万，造成2人受伤，伊朗否认。",
+      "full_content": "<p>伊朗导弹和无人机\"误入\"多个邻国领土，引发地区紧张。</p><p><strong>事件详情：</strong></p><ul><li>阿塞拜疆：纳希切万地区2人受伤</li><li>塞浦路斯：英国空军基地遭无人机袭击</li><li>海湾国家：多国报告有导弹落入境内</li></ul><p>冲突外溢风险正在上升。</p>",
+      "url": "https://www.bbc.com/news/articles/c4g0pnnj8xyo"
     }
   ],
-  "updated_at": "2026-03-09T18:50:00+08:00"
+  "updated_at": "2026-03-11T02:28:26.719485"
 }

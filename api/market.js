@@ -59,6 +59,23 @@ async function fetchCoinGecko(coinId) {
   } catch { return null; }
 }
 
+async function fetchForexSina(pair) {
+  // 新浪外汇：fx_susdcny, fx_shkdcny, fx_seurcny, fx_sjpycny, fx_sgbpcny
+  try {
+    const r = await fetch(`https://hq.sinajs.cn/list=fx_s${pair}`, {
+      headers: { 'Referer': 'https://finance.sina.com.cn' }
+    });
+    const text = await r.text();
+    const line = text.split('"')[1];
+    if (!line) return null;
+    const parts = line.split(',');
+    // 格式：当前价,涨跌,涨跌幅,昨收,...
+    const price = parseFloat(parts[0]);
+    const change = parseFloat(parts[2]); // 涨跌幅百分比
+    return { price: Math.round(price * 10000) / 10000, change: Math.round(change * 100) / 100 };
+  } catch { return null; }
+}
+
 function normalizeSparkline(values, multiplier = 1, decimals = 2) {
   if (!Array.isArray(values)) return null;
   const clean = values
@@ -130,7 +147,7 @@ export default async function handler(req, res) {
   
   try {
     // 并行获取所有数据
-    const [qqq, spy, dia, hsi, hstec, sse, gld, uso, btc, eth] = await Promise.all([
+    const [qqq, spy, dia, hsi, hstec, sse, gld, uso, btc, eth, usdcny, hkdcny, eurcny, jpycny, gbpcny] = await Promise.all([
       fetchFinnhub('QQQ'),
       fetchFinnhub('SPY'),
       fetchFinnhub('DIA'),
@@ -140,7 +157,12 @@ export default async function handler(req, res) {
       fetchFinnhub('GLD'),
       fetchFinnhub('USO'),
       fetchCoinGecko('bitcoin'),
-      fetchCoinGecko('ethereum')
+      fetchCoinGecko('ethereum'),
+      fetchForexSina('usdcny'),
+      fetchForexSina('hkdcny'),
+      fetchForexSina('eurcny'),
+      fetchForexSina('jpycny'),
+      fetchForexSina('gbpcny')
     ]);
 
     const [spxSparkline, ndxSparkline, djiSparkline, hsiSparkline, hstecSparkline, sseSparkline, goldSparkline, oilSparkline, btcSparkline, ethSparkline] = await Promise.all([
@@ -173,6 +195,13 @@ export default async function handler(req, res) {
     if (uso) data.oil = { price: fmt(uso.price * 0.62, '$', 2), change: uso.change, sparkline: oilSparkline };
     if (btc) data.btc = { price: fmt(btc.price, '$'), change: btc.change, sparkline: btcSparkline };
     if (eth) data.eth = { price: fmt(eth.price, '$'), change: eth.change, sparkline: ethSparkline };
+    
+    // 汇率
+    if (usdcny) data.usdcny = { price: usdcny.price.toFixed(4), change: usdcny.change };
+    if (hkdcny) data.hkdcny = { price: hkdcny.price.toFixed(4), change: hkdcny.change };
+    if (eurcny) data.eurcny = { price: eurcny.price.toFixed(4), change: eurcny.change };
+    if (jpycny) data.jpycny = { price: (jpycny.price * 100).toFixed(4), change: jpycny.change }; // 100日元
+    if (gbpcny) data.gbpcny = { price: gbpcny.price.toFixed(4), change: gbpcny.change };
     
     res.status(200).json(data);
   } catch (error) {

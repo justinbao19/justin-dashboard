@@ -900,50 +900,73 @@
         
         /* F1 详情页 */
         .f1-back-btn {
-            background: none; border: none;
-            color: #e10600;
-            font-size: 14px;
+            background: rgba(255,255,255,0.1); 
+            border: none;
+            color: #fff;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
-            padding: 10px 0;
-            display: flex; align-items: center; gap: 6px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px;
+            transition: all 0.2s;
         }
-        .f1-detail-header { margin-bottom: 20px; }
-        .f1-detail-round { font-size: 12px; color: rgba(255,255,255,0.6); }
-        .f1-detail-name { font-size: 32px; font-weight: 700; color: #fff; margin: 8px 0 4px; }
-        .f1-detail-circuit { font-size: 16px; color: #e10600; font-weight: 500; }
-        .f1-detail-date { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .f1-back-btn:hover { background: rgba(255,255,255,0.2); }
+        .f1-detail-header { margin: 20px 0; }
+        .f1-detail-round { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .f1-detail-name { font-size: 36px; font-weight: 800; color: #fff; margin: 12px 0 8px; letter-spacing: -1px; }
+        .f1-detail-circuit { font-size: 16px; color: #e10600; font-weight: 600; }
+        .f1-detail-date { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 6px; }
         
         .f1-circuit-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin: 24px 0;
-            padding: 20px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 16px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 28px 0;
         }
-        .f1-stat { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
-        .f1-stat i { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 4px; }
-        .f1-stat-value { font-size: 24px; font-weight: 700; color: #fff; }
-        .f1-stat-label { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+        .f1-stat { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            padding: 16px 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .f1-stat i { color: #e10600; font-size: 16px; margin-bottom: 8px; }
+        .f1-stat-value { font-size: 22px; font-weight: 700; color: #fff; }
+        .f1-stat-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
         
-        .f1-weekend h3 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
-        .f1-sessions { display: flex; flex-direction: column; gap: 8px; }
+        .f1-weekend { margin-top: 24px; }
+        .f1-weekend h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; }
+        .f1-sessions { display: flex; flex-direction: column; gap: 10px; }
         .f1-session {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
+            padding: 16px;
             background: var(--bg-card);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid var(--border);
+            transition: all 0.2s;
         }
-        .f1-session-date { width: 50px; text-align: center; margin-right: 16px; }
+        .f1-session:hover { border-color: rgba(225,6,0,0.2); }
+        .f1-session-date { 
+            width: 48px; 
+            text-align: center; 
+            margin-right: 14px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 8px 0;
+        }
         .f1-session-date-day { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-        .f1-session-date-weekday { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; }
+        .f1-session-date-weekday { font-size: 9px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; }
         .f1-session-info { flex: 1; }
         .f1-session-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-        .f1-session-time { font-size: 12px; color: var(--text-tertiary); }
+        .f1-session-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+        .f1-session.race .f1-session-name { color: #e10600; }
+        .f1-session.race { border-left: 3px solid #e10600; }
         
         .f1-loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
         
@@ -2698,13 +2721,17 @@
                     const d = new Date(s.date_start);
                     const endTime = new Date(s.date_end);
                     const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} - ${String(endTime.getHours()).padStart(2,'0')}:${String(endTime.getMinutes()).padStart(2,'0')}`;
-                    return `<div class="f1-session">
+                    const isRace = s.type === 'Race' && s.name === 'Race';
+                    const isSprint = s.type === 'Race' && s.name === 'Sprint';
+                    const sessionClass = isRace ? 'race' : (isSprint ? 'sprint' : '');
+                    const icon = isRace ? '🏁' : (isSprint ? '⚡' : '');
+                    return `<div class="f1-session ${sessionClass}">
                         <div class="f1-session-date">
                             <div class="f1-session-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                             <div class="f1-session-date-weekday">${WEEKDAYS[d.getDay()]}</div>
                         </div>
                         <div class="f1-session-info">
-                            <div class="f1-session-name">${s.name}</div>
+                            <div class="f1-session-name">${icon} ${s.name}</div>
                             <div class="f1-session-time">${timeStr}</div>
                         </div>
                     </div>`;

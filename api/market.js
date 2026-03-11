@@ -61,6 +61,7 @@ async function fetchCoinGecko(coinId) {
 
 async function fetchForexSina(pair) {
   // 新浪外汇：fx_susdcny, fx_shkdcny, fx_seurcny, fx_sjpycny, fx_sgbpcny
+  // 返回格式：时间,当前价,卖出价,买入价,...
   try {
     const r = await fetch(`https://hq.sinajs.cn/list=fx_s${pair}`, {
       headers: { 'Referer': 'https://finance.sina.com.cn' }
@@ -69,10 +70,11 @@ async function fetchForexSina(pair) {
     const line = text.split('"')[1];
     if (!line) return null;
     const parts = line.split(',');
-    // 格式：当前价,涨跌,涨跌幅,昨收,...
-    const price = parseFloat(parts[0]);
-    const change = parseFloat(parts[2]); // 涨跌幅百分比
-    return { price: Math.round(price * 10000) / 10000, change: Math.round(change * 100) / 100 };
+    // parts[0]=时间, parts[1]=当前价, parts[5]=昨收
+    const price = parseFloat(parts[1]);
+    const prevClose = parseFloat(parts[5]);
+    const change = prevClose ? ((price - prevClose) / prevClose * 100) : 0;
+    return { price, change: Math.round(change * 100) / 100 };
   } catch { return null; }
 }
 

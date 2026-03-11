@@ -769,6 +769,132 @@
             .forex-price { font-size: 18px; }
         }
 
+        /* F1 页面样式 */
+        .f1-bg {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 300px;
+            background: linear-gradient(180deg, #e10600 0%, rgba(225,6,0,0.3) 50%, transparent 100%);
+            z-index: 0;
+        }
+        .f1-shell { position: relative; z-index: 1; }
+        .f1-header { padding: 20px 0 10px; }
+        .f1-header h1 { font-size: 28px; font-weight: 700; color: #fff; margin: 0; }
+        .f1-subtitle { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+        
+        .f1-next-race {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 24px;
+            margin: 16px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .f1-next-round { font-size: 12px; color: #e10600; font-weight: 600; text-transform: uppercase; }
+        .f1-next-name { font-size: 28px; font-weight: 700; color: #fff; margin: 8px 0 4px; }
+        .f1-next-location { font-size: 14px; color: #e10600; font-weight: 500; }
+        .f1-next-date { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        
+        .f1-countdown { margin: 20px 0; }
+        .f1-countdown-title { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
+        .f1-countdown-timer { display: flex; gap: 16px; }
+        .f1-countdown-unit { text-align: center; }
+        .f1-countdown-unit span { font-size: 32px; font-weight: 700; color: #fff; display: block; }
+        .f1-countdown-unit small { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+        
+        .f1-schedule-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .f1-schedule-btn:hover { background: rgba(255,255,255,0.2); }
+        
+        .f1-race-list { margin-top: 20px; }
+        .f1-race-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .f1-race-item:hover { border-color: #e10600; transform: translateX(4px); }
+        .f1-race-item.past { opacity: 0.5; }
+        
+        .f1-race-date {
+            width: 50px;
+            text-align: center;
+            margin-right: 16px;
+        }
+        .f1-race-date-day { font-size: 24px; font-weight: 700; color: var(--text-primary); }
+        .f1-race-date-month { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; }
+        
+        .f1-race-info { flex: 1; min-width: 0; }
+        .f1-race-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .f1-race-meta { font-size: 12px; color: #e10600; margin-top: 2px; }
+        .f1-race-meta span { color: var(--text-tertiary); }
+        
+        .f1-race-arrow { color: var(--text-tertiary); font-size: 14px; margin-left: 12px; }
+        
+        /* F1 详情页 */
+        .f1-back-btn {
+            background: none; border: none;
+            color: #e10600;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 10px 0;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .f1-detail-header { margin-bottom: 20px; }
+        .f1-detail-round { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .f1-detail-name { font-size: 32px; font-weight: 700; color: #fff; margin: 8px 0 4px; }
+        .f1-detail-circuit { font-size: 16px; color: #e10600; font-weight: 500; }
+        .f1-detail-date { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        
+        .f1-circuit-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin: 24px 0;
+            padding: 20px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+        }
+        .f1-stat { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+        .f1-stat i { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 4px; }
+        .f1-stat-value { font-size: 24px; font-weight: 700; color: #fff; }
+        .f1-stat-label { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+        
+        .f1-weekend h3 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
+        .f1-sessions { display: flex; flex-direction: column; gap: 8px; }
+        .f1-session {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .f1-session-date { width: 50px; text-align: center; margin-right: 16px; }
+        .f1-session-date-day { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .f1-session-date-weekday { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; }
+        .f1-session-info { flex: 1; }
+        .f1-session-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .f1-session-time { font-size: 12px; color: var(--text-tertiary); }
+        
+        .f1-loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
+
         /* Macro overview block */
         .market-analysis {
             padding: 18px 20px;
@@ -1817,13 +1943,77 @@
                 </div>
             </div>
         </div>
+
+        <!-- F1 -->
+        <div class="page" id="page-f1">
+            <div class="page-bg f1-bg"></div>
+            <div class="page-shell f1-shell">
+                <!-- 列表视图 -->
+                <div id="f1-list-view">
+                    <div class="f1-header">
+                        <h1>🏎️ F1 2026</h1>
+                        <div class="f1-subtitle">Upcoming Races</div>
+                    </div>
+                    
+                    <!-- 下一场比赛倒计时 -->
+                    <div class="f1-next-race" id="f1NextRace">
+                        <div class="f1-next-round" id="f1NextRound">Round --</div>
+                        <div class="f1-next-name" id="f1NextName">Loading...</div>
+                        <div class="f1-next-location" id="f1NextLocation">--</div>
+                        <div class="f1-next-date" id="f1NextDate">--</div>
+                        
+                        <div class="f1-countdown">
+                            <div class="f1-countdown-title" id="f1CountdownTitle">Practice 1 Starts in</div>
+                            <div class="f1-countdown-timer">
+                                <div class="f1-countdown-unit"><span id="f1CountDays">--</span><small>Days</small></div>
+                                <div class="f1-countdown-unit"><span id="f1CountHours">--</span><small>Hours</small></div>
+                                <div class="f1-countdown-unit"><span id="f1CountMins">--</span><small>Minutes</small></div>
+                            </div>
+                        </div>
+                        
+                        <button class="f1-schedule-btn" onclick="showF1Detail(window._f1NextMeeting)">
+                            <i class="fas fa-arrow-right"></i> Schedule
+                        </button>
+                    </div>
+                    
+                    <!-- 赛程列表 -->
+                    <div class="f1-race-list" id="f1RaceList">
+                        <div class="f1-loading">加载赛程中...</div>
+                    </div>
+                </div>
+                
+                <!-- 详情视图 -->
+                <div id="f1-detail-view" style="display:none;">
+                    <button class="f1-back-btn" onclick="hideF1Detail()"><i class="fas fa-arrow-left"></i> Back</button>
+                    
+                    <div class="f1-detail-header">
+                        <div class="f1-detail-round" id="f1DetailRound">Round --</div>
+                        <h2 class="f1-detail-name" id="f1DetailName">--</h2>
+                        <div class="f1-detail-circuit" id="f1DetailCircuit">--</div>
+                        <div class="f1-detail-date" id="f1DetailDate">--</div>
+                    </div>
+                    
+                    <div class="f1-circuit-stats" id="f1CircuitStats">
+                        <div class="f1-stat"><span class="f1-stat-value" id="f1StatLength">--</span><span class="f1-stat-label">KM</span></div>
+                        <div class="f1-stat"><i class="fas fa-repeat"></i><span class="f1-stat-value" id="f1StatLaps">--</span><span class="f1-stat-label">Laps</span></div>
+                        <div class="f1-stat"><i class="fas fa-route"></i><span class="f1-stat-value" id="f1StatTurns">--</span><span class="f1-stat-label">Turns</span></div>
+                        <div class="f1-stat"><i class="fas fa-gauge-high"></i><span class="f1-stat-value" id="f1StatSpeed">--</span><span class="f1-stat-label">KMPH</span></div>
+                    </div>
+                    
+                    <div class="f1-weekend">
+                        <h3>Race Weekend</h3>
+                        <div class="f1-sessions" id="f1Sessions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <nav class="tab-nav">
         <button class="tab-item active" data-page="weather"><i class="fas fa-cloud-sun"></i><span>天气</span></button>
         <button class="tab-item" data-page="market"><i class="fas fa-chart-line"></i><span>市场</span></button>
         <button class="tab-item" data-page="news"><i class="fas fa-newspaper"></i><span>要闻</span></button>
-        <button class="tab-item" data-page="flight"><i class="fas fa-plane"></i><span>航班</span></button>
+        <button class="tab-item" data-page="f1"><i class="fas fa-flag-checkered"></i><span>F1</span></button>
     </nav>
 
     <script>
@@ -2263,7 +2453,146 @@
             renderMetar();
         }
 
-        loadWeather(); loadMarket(); loadNews(); loadMetar();
+        // === F1 ===
+        let _f1Data = null;
+        window._f1NextMeeting = null;
+        
+        const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+        
+        async function loadF1() {
+            try {
+                const r = await fetch('/api/f1?year=2026');
+                if (!r.ok) throw new Error('API error');
+                _f1Data = await r.json();
+                renderF1List();
+                startF1Countdown();
+            } catch (e) {
+                console.error('F1 error:', e);
+                document.getElementById('f1RaceList').innerHTML = '<div class="f1-loading">无法加载赛程</div>';
+            }
+        }
+        
+        function renderF1List() {
+            if (!_f1Data || !_f1Data.calendar) return;
+            
+            const now = new Date();
+            const upcoming = _f1Data.calendar.filter(r => new Date(r.date_end) > now);
+            const past = _f1Data.calendar.filter(r => new Date(r.date_end) <= now);
+            
+            // 下一场比赛
+            if (upcoming.length > 0) {
+                const next = upcoming[0];
+                window._f1NextMeeting = next.meeting_key;
+                const startDate = new Date(next.date_start);
+                const endDate = new Date(next.date_end);
+                
+                document.getElementById('f1NextRound').textContent = `Round ${String(next.round).padStart(2,'0')}`;
+                document.getElementById('f1NextName').textContent = next.gp_name;
+                document.getElementById('f1NextLocation').textContent = next.location;
+                document.getElementById('f1NextDate').textContent = `${startDate.getDate()} - ${endDate.getDate()} ${MONTHS[startDate.getMonth()]}`;
+            }
+            
+            // 赛程列表
+            const listHtml = upcoming.map(r => {
+                const d = new Date(r.date_start);
+                return `<div class="f1-race-item" onclick="showF1Detail(${r.meeting_key})">
+                    <div class="f1-race-date">
+                        <div class="f1-race-date-day">${String(d.getDate()).padStart(2,'0')}</div>
+                        <div class="f1-race-date-month">${MONTHS[d.getMonth()]}</div>
+                    </div>
+                    <div class="f1-race-info">
+                        <div class="f1-race-name">${r.gp_name}</div>
+                        <div class="f1-race-meta">R${String(r.round).padStart(2,'0')} <span>• ${r.location}</span></div>
+                    </div>
+                    <div class="f1-race-arrow"><i class="fas fa-chevron-right"></i></div>
+                </div>`;
+            }).join('');
+            
+            document.getElementById('f1RaceList').innerHTML = listHtml || '<div class="f1-loading">暂无比赛</div>';
+        }
+        
+        function startF1Countdown() {
+            if (!_f1Data || !_f1Data.calendar) return;
+            
+            const updateCountdown = () => {
+                const now = new Date();
+                const upcoming = _f1Data.calendar.filter(r => new Date(r.date_start) > now);
+                if (upcoming.length === 0) return;
+                
+                const next = upcoming[0];
+                const nextStart = new Date(next.date_start);
+                const diff = nextStart - now;
+                
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    document.getElementById('f1CountDays').textContent = String(days).padStart(2,'0');
+                    document.getElementById('f1CountHours').textContent = String(hours).padStart(2,'0');
+                    document.getElementById('f1CountMins').textContent = String(mins).padStart(2,'0');
+                }
+            };
+            
+            updateCountdown();
+            setInterval(updateCountdown, 60000);
+        }
+        
+        async function showF1Detail(meetingKey) {
+            try {
+                const r = await fetch(`/api/f1?year=2026&meeting=${meetingKey}`);
+                if (!r.ok) throw new Error('API error');
+                const data = await r.json();
+                
+                // 填充详情
+                const race = _f1Data.calendar.find(r => r.meeting_key === meetingKey);
+                document.getElementById('f1DetailRound').textContent = `Round ${String(race?.round || 0).padStart(2,'0')}`;
+                document.getElementById('f1DetailName').textContent = data.gp_name;
+                document.getElementById('f1DetailCircuit').textContent = data.circuit_full;
+                
+                const startDate = new Date(data.sessions[0]?.date_start);
+                const endDate = new Date(data.sessions[data.sessions.length-1]?.date_end);
+                document.getElementById('f1DetailDate').textContent = `${startDate.getDate()} - ${endDate.getDate()} ${MONTHS[startDate.getMonth()]}`;
+                
+                // 赛道数据
+                document.getElementById('f1StatLength').textContent = data.length_km?.toFixed(3) || '--';
+                document.getElementById('f1StatLaps').textContent = data.laps || '--';
+                document.getElementById('f1StatTurns').textContent = data.turns || '--';
+                document.getElementById('f1StatSpeed').textContent = data.top_speed_kmh || '--';
+                
+                // 日程
+                const sessionsHtml = data.sessions.map(s => {
+                    const d = new Date(s.date_start);
+                    const endTime = new Date(s.date_end);
+                    const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} - ${String(endTime.getHours()).padStart(2,'0')}:${String(endTime.getMinutes()).padStart(2,'0')}`;
+                    return `<div class="f1-session">
+                        <div class="f1-session-date">
+                            <div class="f1-session-date-day">${String(d.getDate()).padStart(2,'0')}</div>
+                            <div class="f1-session-date-weekday">${WEEKDAYS[d.getDay()]}</div>
+                        </div>
+                        <div class="f1-session-info">
+                            <div class="f1-session-name">${s.name}</div>
+                            <div class="f1-session-time">${timeStr}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+                document.getElementById('f1Sessions').innerHTML = sessionsHtml;
+                
+                // 切换视图
+                document.getElementById('f1-list-view').style.display = 'none';
+                document.getElementById('f1-detail-view').style.display = 'block';
+            } catch (e) {
+                console.error('F1 detail error:', e);
+            }
+        }
+        
+        function hideF1Detail() {
+            document.getElementById('f1-list-view').style.display = 'block';
+            document.getElementById('f1-detail-view').style.display = 'none';
+        }
+
+        loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1();
         setInterval(() => { loadWeather(); loadMarket(); loadNews(); }, 5 * 60 * 1000);
         setInterval(() => { loadMetar(); }, 10 * 60 * 1000); // METAR 每10分钟刷新
     </script>

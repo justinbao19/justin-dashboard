@@ -2,45 +2,45 @@
   "date": "2026年3月11日",
   "items": [
     {
-      "title": "美以对伊朗战争进入第11天：\"最猛烈空袭日\"",
-      "source": "CNN / Al Jazeera",
-      "image": "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&q=80",
-      "summary": "国防部长赫格塞斯预告将发动开战以来最猛烈空袭。伊朗死亡1,255人，以色列13人，美军8人。",
-      "full_content": "<p>美以联军对伊朗的军事行动进入第11天。国防部长赫格塞斯（Pete Hegseth）宣布将发动\"开战以来最猛烈的空袭\"。</p><p><strong>伤亡统计：</strong></p><ul><li>伊朗：1,255人死亡</li><li>以色列：13人死亡（含特拉维夫机场附近1人）</li><li>美军：8人阵亡</li><li>海湾国家：14人死亡</li></ul><p>特朗普表态称战争\"即将结束\"，但补充说如有必要将加大打击力度。</p>",
-      "url": "https://www.cnn.com/2026/03/09/middleeast/us-israel-iran-middle-east-war-what-we-know-intl-hnk"
+      "title": "美以对伊朗战争进入第11天，美军承诺发动最密集空袭",
+      "source": "NPR",
+      "image": "https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=800&q=80",
+      "summary": "美国国防部长赫格塞斯宣布将对伊朗发动迄今最密集的空袭，派出最多战斗机和轰炸机。以色列同时加强对黎巴嫩真主党的打击。",
+      "full_content": "美以联军对伊朗的军事行动进入第11天。美国国防部长皮特·赫格塞斯在新闻发布会上表示，周二将是对伊朗境内最密集的打击日，军方正派出迄今最多的战斗机和轰炸机。与此同时，以色列加强了对黎巴嫩真主党大本营贝鲁特的打击。五角大楼透露，已有140名美国军人在此次战争中受伤，其中8人伤势严重。",
+      "url": "https://www.npr.org/2026/03/10/nx-s1-5742828/iran-war-us-trump"
     },
     {
-      "title": "黎巴嫩人道主义危机加剧：70万人流离失所",
-      "source": "New York Times",
-      "image": "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&q=80",
-      "summary": "以色列持续打击真主党目标，黎巴嫩领导人和援助机构警告人道危机正在恶化。",
-      "full_content": "<p>随着以色列扩大对真主党的军事行动，黎巴嫩正面临严重的人道主义危机。</p><p><strong>关键数据：</strong></p><ul><li>近70万人被迫离开家园</li><li>医疗和基础设施严重受损</li><li>援助机构呼吁国际社会紧急干预</li></ul><p>黎巴嫩政府已向联合国发出紧急求助。</p>",
-      "url": "https://www.nytimes.com/live/2026/03/10/world/iran-war-trump-us-israel"
+      "title": "特朗普暗示战争将很快结束，全球经济震荡",
+      "source": "纽约时报",
+      "image": "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&q=80",
+      "summary": "特朗普在佛罗里达新闻发布会上表示战斗将很快结束，但同时警告如有必要将加大对伊朗打击力度。全球股市和油价剧烈波动。",
+      "full_content": "美国总统特朗普周一在佛罗里达州的新闻发布会上发出混合信号，一方面表示战斗将很快结束，另一方面警告如有必要将加大对伊朗的打击力度。这一表态引发全球金融市场剧烈震荡，油价持续波动。黎巴嫩领导人和援助组织警告，以色列对真主党的持续打击正在引发日益严重的人道主义危机。",
+      "url": "https://www.nytimes.com/live/2026/03/09/world/iran-war-israel-trump-oil"
     },
     {
-      "title": "全球油价剧烈波动：美国放松俄油出口限制",
-      "source": "Reuters",
-      "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
-      "summary": "为平抑油价，美国开始放松对俄罗斯石油出口的限制。布伦特原油从$120回落至$63附近。",
-      "full_content": "<p>中东紧张局势导致全球能源市场剧烈波动。</p><p><strong>市场动态：</strong></p><ul><li>布伦特原油从$120高点回落至$63</li><li>美国放松俄油出口限制以增加供应</li><li>霍尔木兹海峡航运仍受影响</li></ul><p>分析师认为油价短期内将保持波动。</p>",
-      "url": "https://www.reuters.com/"
+      "title": "伊朗夜间向以色列发射导弹，以军打击贝鲁特真主党据点",
+      "source": "Times of Israel",
+      "image": "https://images.unsplash.com/photo-1569242840510-9fe6f0112cee?w=800&q=80",
+      "summary": "伊朗在夜间向以色列发射新一轮导弹，以色列国防军随后对真主党在贝鲁特的据点发动打击。此次伊朗袭击未造成人员伤亡。",
+      "full_content": "伊朗在周三凌晨向以色列发射新一轮导弹袭击，以色列方面报告未造成人员伤亡或直接命中。作为回应，以色列国防军对真主党在贝鲁特的据点发动打击。此外，澳大利亚宣布将庇护另外两名伊朗女足国家队成员。此前，伊朗对以色列的导弹袭击已造成11人死亡，其中一名男子在特拉维夫国际机场附近被弹片击中身亡。",
+      "url": "https://www.timesofisrael.com/liveblog-march-11-2026/"
     },
     {
-      "title": "巴基斯坦、菲律宾推行四天工作制",
+      "title": "巴基斯坦和菲律宾推行四天工作周，全球机票价格飙升",
       "source": "Indian Express",
-      "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
-      "summary": "两国政府宣布试行每周四天工作制，以应对能源成本上涨和提升工作效率。",
-      "full_content": "<p>巴基斯坦和菲律宾政府宣布将试行每周四天工作制。</p><p><strong>政策背景：</strong></p><ul><li>能源成本上涨推动政策改革</li><li>旨在提高生产效率、降低运营成本</li><li>多国关注试点成效</li></ul><p>此举被视为应对全球能源危机的创新举措。</p>",
+      "image": "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=800&q=80",
+      "summary": "巴基斯坦和菲律宾宣布推行四天工作周试点政策。受中东局势影响，全球航班票价持续上涨。",
+      "full_content": "在全球劳动制度改革浪潮中，巴基斯坦和菲律宾相继宣布推行四天工作周政策。与此同时，中东紧张局势导致航空公司调整航线，全球机票价格持续攀升。分析人士指出，这两项发展可能对亚洲地区的商业环境和旅游业产生深远影响。",
       "url": "https://indianexpress.com/article/education/today-news-headlines-for-school-assembly-10-march-2026-india-global-oil-prices-fluctuate-4-day-work-week-pakistan-philippines-fifa-update-10574860/"
     },
     {
-      "title": "伊朗导弹误入阿塞拜疆领土：地区紧张升级",
+      "title": "BBC地图详解：伊朗与中东地区空袭态势",
       "source": "BBC",
-      "image": "https://images.unsplash.com/photo-1569982175971-d92b01cf8694?w=800&q=80",
-      "summary": "阿塞拜疆指控伊朗无人机袭击其西部领土纳希切万，造成2人受伤，伊朗否认。",
-      "full_content": "<p>伊朗导弹和无人机\"误入\"多个邻国领土，引发地区紧张。</p><p><strong>事件详情：</strong></p><ul><li>阿塞拜疆：纳希切万地区2人受伤</li><li>塞浦路斯：英国空军基地遭无人机袭击</li><li>海湾国家：多国报告有导弹落入境内</li></ul><p>冲突外溢风险正在上升。</p>",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+      "summary": "阿塞拜疆指控伊朗无人机袭击其西部领土纳希切万致2人受伤，伊朗否认。3月1日英国在塞浦路斯空军基地遭真主党无人机袭击。",
+      "full_content": "BBC发布详细地图解析伊朗与中东地区的空袭态势。阿塞拜疆指控伊朗发射的无人机在其西部飞地纳希切万造成两人受伤，伊朗方面否认这一指控。此外，3月1日英国在塞浦路斯的空军基地遭到无人机袭击，英国官员认为该无人机由真主党发射。冲突已蔓延至更广泛的地区。",
       "url": "https://www.bbc.com/news/articles/c4g0pnnj8xyo"
     }
   ],
-  "updated_at": "2026-03-11T02:28:26.719485"
+  "updated_at": "2026-03-11T08:01:11.883021"
 }

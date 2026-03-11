@@ -1032,9 +1032,18 @@
         }
         .f1-standing-info { flex: 1; min-width: 0; }
         .f1-standing-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .f1-standing-code { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-left: 6px; }
         .f1-standing-team { font-size: 12px; margin-top: 2px; }
         .f1-standing-points { font-size: 18px; font-weight: 700; color: var(--text-primary); }
         .f1-standing-pts { font-size: 10px; color: var(--text-tertiary); margin-left: 3px; display: block; text-align: right; }
+        .f1-team-logo {
+            width: 48px;
+            height: 32px;
+            object-fit: contain;
+            margin-right: 12px;
+            filter: var(--team-logo-filter, none);
+        }
+        [data-theme="dark"] .f1-team-logo { filter: brightness(1.1); }
 
         /* Macro overview block */
         .market-analysis {
@@ -2615,31 +2624,47 @@
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         
-        // 2026 积分榜 (澳大利亚站后) - 按截图数据更新
+        // 2026 积分榜 (澳大利亚站后) - F1 官网数据
         const DRIVER_STANDINGS = [
-            { pos: 1, name: 'George Russell', team: 'Mercedes', color: '27F4D2', points: 25, photo: 'GEORUS01' },
-            { pos: 2, name: 'Andrea Kimi Antonelli', team: 'Mercedes', color: '27F4D2', points: 18, photo: 'ANDANT01' },
-            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', color: 'E80020', points: 15, photo: 'CHALEC01' },
-            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', color: 'E80020', points: 12, photo: 'LEWHAM01' },
-            { pos: 5, name: 'Lando Norris', team: 'McLaren', color: 'F47600', points: 10, photo: 'LANNOR01' },
-            { pos: 6, name: 'Max Verstappen', team: 'Red Bull Racing', color: '4781D7', points: 8, photo: 'MAXVER01' },
-            { pos: 7, name: 'Oliver Bearman', team: 'Haas', color: 'B6BABD', points: 6, photo: 'OLIBEA01' },
-            { pos: 8, name: 'Arvid Lindblad', team: 'Racing Bulls', color: '6692FF', points: 4, photo: 'ARVLIN01' },
-            { pos: 9, name: 'Gabriel Bortoleto', team: 'Audi', color: 'F50537', points: 2, photo: 'GABBOR01' },
-            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', color: '2596BE', points: 1, photo: 'PIEGAS01' },
+            { pos: 1, name: 'George Russell', team: 'Mercedes', color: '27F4D2', points: 25, code: 'GBR' },
+            { pos: 2, name: 'Kimi Antonelli', team: 'Mercedes', color: '27F4D2', points: 18, code: 'ITA' },
+            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', color: 'E80020', points: 15, code: 'MON' },
+            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', color: 'E80020', points: 12, code: 'GBR' },
+            { pos: 5, name: 'Lando Norris', team: 'McLaren', color: 'FF8000', points: 10, code: 'GBR' },
+            { pos: 6, name: 'Max Verstappen', team: 'Red Bull Racing', color: '3671C6', points: 8, code: 'NED' },
+            { pos: 7, name: 'Oliver Bearman', team: 'Haas F1 Team', color: 'B6BABD', points: 6, code: 'GBR' },
+            { pos: 8, name: 'Arvid Lindblad', team: 'Racing Bulls', color: '6692FF', points: 4, code: 'GBR' },
+            { pos: 9, name: 'Gabriel Bortoleto', team: 'Audi', color: 'FF0000', points: 2, code: 'BRA' },
+            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', color: '0093CC', points: 1, code: 'FRA' },
         ];
         
+        // 车队 Logo URL（F1 官方 CDN）
+        const TEAM_LOGOS = {
+            'Mercedes': 'https://media.formula1.com/content/dam/fom-website/teams/2026/mercedes-logo.png',
+            'Ferrari': 'https://media.formula1.com/content/dam/fom-website/teams/2026/ferrari-logo.png',
+            'McLaren': 'https://media.formula1.com/content/dam/fom-website/teams/2026/mclaren-logo.png',
+            'Red Bull Racing': 'https://media.formula1.com/content/dam/fom-website/teams/2026/red-bull-racing-logo.png',
+            'Haas F1 Team': 'https://media.formula1.com/content/dam/fom-website/teams/2026/haas-f1-team-logo.png',
+            'Racing Bulls': 'https://media.formula1.com/content/dam/fom-website/teams/2026/rb-logo.png',
+            'Audi': 'https://media.formula1.com/content/dam/fom-website/teams/2026/kick-sauber-logo.png',
+            'Alpine': 'https://media.formula1.com/content/dam/fom-website/teams/2026/alpine-logo.png',
+            'Williams': 'https://media.formula1.com/content/dam/fom-website/teams/2026/williams-logo.png',
+            'Cadillac': 'https://media.formula1.com/content/dam/fom-website/teams/2026/cadillac-logo.png',
+            'Aston Martin': 'https://media.formula1.com/content/dam/fom-website/teams/2026/aston-martin-logo.png',
+        };
+        
         const TEAM_STANDINGS = [
-            { pos: 1, name: 'Mercedes', car: 'F1 W17', color: '27F4D2', points: 43 },
-            { pos: 2, name: 'Ferrari', car: 'SF-26', color: 'E80020', points: 27 },
-            { pos: 3, name: 'McLaren', car: 'MCL40', color: 'F47600', points: 10 },
-            { pos: 4, name: 'Red Bull Racing', car: 'RB22', color: '4781D7', points: 8 },
-            { pos: 5, name: 'Haas', car: 'VF-26', color: 'B6BABD', points: 6 },
-            { pos: 6, name: 'Racing Bulls', car: 'VCARB 03', color: '6692FF', points: 4 },
-            { pos: 7, name: 'Audi', car: 'R26', color: 'F50537', points: 2 },
-            { pos: 8, name: 'Alpine', car: 'A526', color: '2596BE', points: 1 },
-            { pos: 9, name: 'Williams', car: 'FW47', color: '00A3E0', points: 0 },
-            { pos: 10, name: 'Aston Martin', car: 'AMR26', color: '229971', points: 0 },
+            { pos: 1, name: 'Mercedes', color: '27F4D2', points: 43 },
+            { pos: 2, name: 'Ferrari', color: 'E80020', points: 27 },
+            { pos: 3, name: 'McLaren', color: 'FF8000', points: 10 },
+            { pos: 4, name: 'Red Bull Racing', color: '3671C6', points: 8 },
+            { pos: 5, name: 'Haas F1 Team', color: 'B6BABD', points: 6 },
+            { pos: 6, name: 'Racing Bulls', color: '6692FF', points: 4 },
+            { pos: 7, name: 'Audi', color: 'FF0000', points: 2 },
+            { pos: 8, name: 'Alpine', color: '0093CC', points: 1 },
+            { pos: 9, name: 'Williams', color: '64C4FF', points: 0 },
+            { pos: 10, name: 'Cadillac', color: 'C4A35A', points: 0 },
+            { pos: 11, name: 'Aston Martin', color: '229971', points: 0 },
         ];
         
         let _f1StandingsMode = 'driver'; // 'driver' or 'team'
@@ -2789,31 +2814,29 @@
             const isDriver = _f1StandingsMode === 'driver';
             const data = isDriver ? DRIVER_STANDINGS : TEAM_STANDINGS;
             const items = _f1ShowAllDrivers ? data : data.slice(0, 5);
-            const photoBase = 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers';
             
-            document.getElementById('f1StandingsTitle').textContent = isDriver ? 'Driver Standings' : 'Team Standings';
+            document.getElementById('f1StandingsTitle').textContent = isDriver ? 'Driver Standings' : 'Constructor Standings';
             
             const html = items.map(d => {
                 const posClass = d.pos <= 3 ? 'top3' : '';
                 if (isDriver) {
-                    const photoUrl = `${photoBase}/${d.photo.charAt(0)}/${d.photo}_${d.name.split(' ').join('_')}/${d.photo.toLowerCase()}.png.transform/1col/image.png`;
                     return `<div class="f1-standing-item">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
                         <div class="f1-standing-color" style="background:#${d.color}"></div>
-                        <img class="f1-standing-photo" src="${photoUrl}" onerror="this.src='https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FORDRIV01_driver_fallback/fordriv01.png.transform/1col/image.png'" alt="">
                         <div class="f1-standing-info">
-                            <div class="f1-standing-name">${d.name}</div>
+                            <div class="f1-standing-name">${d.name} <span class="f1-standing-code">${d.code}</span></div>
                             <div class="f1-standing-team" style="color:#${d.color}">${d.team}</div>
                         </div>
                         <div class="f1-standing-points">${d.points}<span class="f1-standing-pts">PTS</span></div>
                     </div>`;
                 } else {
+                    const logoUrl = TEAM_LOGOS[d.name] || '';
                     return `<div class="f1-standing-item">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
                         <div class="f1-standing-color" style="background:#${d.color}"></div>
+                        <img class="f1-team-logo" src="${logoUrl}" onerror="this.style.display='none'" alt="">
                         <div class="f1-standing-info">
                             <div class="f1-standing-name">${d.name}</div>
-                            <div class="f1-standing-team" style="color:#${d.color}">${d.car}</div>
                         </div>
                         <div class="f1-standing-points">${d.points}<span class="f1-standing-pts">PTS</span></div>
                     </div>`;

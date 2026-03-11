@@ -831,6 +831,19 @@
         .f1-race-item:hover { border-color: #e10600; transform: translateX(4px); }
         .f1-race-item.past { opacity: 0.5; }
         
+        .f1-race-flag { font-size: 28px; margin-right: 12px; }
+        .f1-sprint-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e10600, #ff4444);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        
         .f1-race-date {
             width: 50px;
             text-align: center;
@@ -894,6 +907,59 @@
         .f1-session-time { font-size: 12px; color: var(--text-tertiary); }
         
         .f1-loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
+        
+        /* F1 Standings */
+        .f1-standings { margin-top: 24px; }
+        .f1-standings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .f1-standings h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0; }
+        .f1-standings-more {
+            background: none; border: none;
+            color: #e10600;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .f1-drivers { display: flex; flex-direction: column; gap: 8px; }
+        .f1-driver {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .f1-driver-pos {
+            width: 24px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-tertiary);
+        }
+        .f1-driver-pos.top3 { color: #e10600; }
+        .f1-driver-color {
+            width: 4px;
+            height: 32px;
+            border-radius: 2px;
+            margin-right: 12px;
+        }
+        .f1-driver-photo {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        .f1-driver-info { flex: 1; min-width: 0; }
+        .f1-driver-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .f1-driver-team { font-size: 11px; color: var(--text-tertiary); }
+        .f1-driver-points { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .f1-driver-pts-label { font-size: 10px; color: var(--text-tertiary); margin-left: 2px; }
 
         /* Macro overview block */
         .market-analysis {
@@ -1980,6 +2046,15 @@
                     <div class="f1-race-list" id="f1RaceList">
                         <div class="f1-loading">加载赛程中...</div>
                     </div>
+                    
+                    <!-- 车手积分榜 -->
+                    <div class="f1-standings">
+                        <div class="f1-standings-header">
+                            <h3>Driver Standings</h3>
+                            <button class="f1-standings-more" onclick="toggleF1Standings()">See All</button>
+                        </div>
+                        <div class="f1-drivers" id="f1Drivers"></div>
+                    </div>
                 </div>
                 
                 <!-- 详情视图 -->
@@ -2456,9 +2531,24 @@
         // === F1 ===
         let _f1Data = null;
         window._f1NextMeeting = null;
+        let _f1ShowAllDrivers = false;
         
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+        
+        // 2026 车手积分榜 (澳大利亚站后)
+        const DRIVER_STANDINGS = [
+            { pos: 1, name: 'Lando Norris', team: 'McLaren', color: 'F47600', points: 25, photo: 'LANNOR01' },
+            { pos: 2, name: 'Max Verstappen', team: 'Red Bull Racing', color: '4781D7', points: 18, photo: 'MAXVER01' },
+            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', color: 'E80020', points: 15, photo: 'CHALEC01' },
+            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', color: 'E80020', points: 12, photo: 'LEWHAM01' },
+            { pos: 5, name: 'Oscar Piastri', team: 'McLaren', color: 'F47600', points: 10, photo: 'OSCPIA01' },
+            { pos: 6, name: 'George Russell', team: 'Mercedes', color: '27F4D2', points: 8, photo: 'GEORUS01' },
+            { pos: 7, name: 'Carlos Sainz', team: 'Williams', color: '00A3E0', points: 6, photo: 'CARSAI01' },
+            { pos: 8, name: 'Andrea Kimi Antonelli', team: 'Mercedes', color: '27F4D2', points: 4, photo: 'ANDANT01' },
+            { pos: 9, name: 'Yuki Tsunoda', team: 'Red Bull Racing', color: '4781D7', points: 2, photo: 'YUKTSU01' },
+            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', color: '2596BE', points: 1, photo: 'PIEGAS01' },
+        ];
         
         async function loadF1() {
             try {
@@ -2466,6 +2556,7 @@
                 if (!r.ok) throw new Error('API error');
                 _f1Data = await r.json();
                 renderF1List();
+                renderF1Drivers();
                 startF1Countdown();
             } catch (e) {
                 console.error('F1 error:', e);
@@ -2496,14 +2587,16 @@
             // 赛程列表
             const listHtml = upcoming.map(r => {
                 const d = new Date(r.date_start);
+                const sprintBadge = r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
                 return `<div class="f1-race-item" onclick="showF1Detail(${r.meeting_key})">
+                    <div class="f1-race-flag">${r.country_flag || '🏁'}</div>
                     <div class="f1-race-date">
                         <div class="f1-race-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                         <div class="f1-race-date-month">${MONTHS[d.getMonth()]}</div>
                     </div>
                     <div class="f1-race-info">
-                        <div class="f1-race-name">${r.gp_name}</div>
-                        <div class="f1-race-meta">R${String(r.round).padStart(2,'0')} <span>• ${r.location}</span></div>
+                        <div class="f1-race-name">${r.gp_name} ${sprintBadge}</div>
+                        <div class="f1-race-meta">R${String(r.round).padStart(2,'0')} <span>• ${r.circuit}</span></div>
                     </div>
                     <div class="f1-race-arrow"><i class="fas fa-chevron-right"></i></div>
                 </div>`;
@@ -2590,6 +2683,34 @@
         function hideF1Detail() {
             document.getElementById('f1-list-view').style.display = 'block';
             document.getElementById('f1-detail-view').style.display = 'none';
+        }
+        
+        function renderF1Drivers() {
+            const drivers = _f1ShowAllDrivers ? DRIVER_STANDINGS : DRIVER_STANDINGS.slice(0, 5);
+            const photoBase = 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers';
+            
+            const html = drivers.map(d => {
+                const photoUrl = `${photoBase}/${d.photo.charAt(0)}/${d.photo}_${d.name.split(' ').join('_')}/${d.photo.toLowerCase()}.png.transform/1col/image.png`;
+                const posClass = d.pos <= 3 ? 'top3' : '';
+                return `<div class="f1-driver">
+                    <div class="f1-driver-pos ${posClass}">${d.pos}</div>
+                    <div class="f1-driver-color" style="background:#${d.color}"></div>
+                    <img class="f1-driver-photo" src="${photoUrl}" onerror="this.src='https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FORDRIV01_driver_fallback/fordriv01.png.transform/1col/image.png'" alt="">
+                    <div class="f1-driver-info">
+                        <div class="f1-driver-name">${d.name}</div>
+                        <div class="f1-driver-team">${d.team}</div>
+                    </div>
+                    <div class="f1-driver-points">${d.points}<span class="f1-driver-pts-label">PTS</span></div>
+                </div>`;
+            }).join('');
+            
+            document.getElementById('f1Drivers').innerHTML = html;
+            document.querySelector('.f1-standings-more').textContent = _f1ShowAllDrivers ? 'Show Less' : 'See All';
+        }
+        
+        function toggleF1Standings() {
+            _f1ShowAllDrivers = !_f1ShowAllDrivers;
+            renderF1Drivers();
         }
 
         loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1();

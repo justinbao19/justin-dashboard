@@ -2,7 +2,7 @@
 
 个人信息仪表盘，集成天气、市场行情、新闻资讯等模块。
 
-**线上地址**: https://justinbao-dashboard.vercel.app
+**线上地址**: https://justin-dashboard-xi.vercel.app
 
 ## 功能模块
 

@@ -803,7 +803,16 @@
         .f1-next-round { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .f1-next-name { font-size: 32px; font-weight: 800; color: #fff; margin: 10px 0 6px; letter-spacing: -0.5px; }
         .f1-next-location { font-size: 15px; color: #e10600; font-weight: 600; }
-        .f1-next-date { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+        .f1-next-date { 
+            font-size: 14px; 
+            color: white;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: rgba(225,6,0,0.85);
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 500;
+        }
         
         .f1-countdown { margin: 28px 0 20px; }
         .f1-countdown-title { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
@@ -915,10 +924,33 @@
         }
         .f1-back-btn:hover { background: rgba(255,255,255,0.2); }
         .f1-detail-header { margin: 20px 0; }
+        .f1-detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+        .f1-detail-info { flex: 1; }
         .f1-detail-round { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-        .f1-detail-name { font-size: 36px; font-weight: 800; color: #fff; margin: 12px 0 8px; letter-spacing: -1px; }
+        .f1-detail-name { font-size: 32px; font-weight: 800; color: #fff; margin: 12px 0 8px; letter-spacing: -1px; }
         .f1-detail-circuit { font-size: 16px; color: #e10600; font-weight: 600; }
-        .f1-detail-date { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+        .f1-detail-date { 
+            font-size: 14px; 
+            color: white;
+            margin-top: 10px;
+            padding: 6px 14px;
+            background: rgba(225,6,0,0.85);
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 500;
+        }
+        .f1-track-image {
+            width: 120px;
+            height: 100px;
+            flex-shrink: 0;
+        }
+        .f1-track-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+        }
         
         .f1-circuit-stats {
             display: grid;
@@ -978,18 +1010,33 @@
             align-items: center;
             margin-bottom: 12px;
         }
-        .f1-standings-title { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-            font-size: 16px; 
-            font-weight: 600; 
-            color: var(--text-primary); 
-            cursor: pointer;
-            transition: color 0.2s;
+        .f1-toggle-switch {
+            display: flex;
+            background: var(--border);
+            border-radius: 8px;
+            padding: 3px;
+            gap: 2px;
         }
-        .f1-standings-title:hover { color: #e10600; }
-        .f1-standings-title i { font-size: 12px; color: var(--text-tertiary); }
+        .f1-toggle-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .f1-toggle-btn.active {
+            background: #e10600;
+            color: white;
+            box-shadow: 0 2px 4px rgba(225,6,0,0.3);
+        }
+        .f1-toggle-btn:hover:not(.active) {
+            background: rgba(225,6,0,0.1);
+            color: #e10600;
+        }
         .f1-standings-more {
             background: none; border: none;
             color: #e10600;
@@ -1032,18 +1079,39 @@
         }
         .f1-standing-info { flex: 1; min-width: 0; }
         .f1-standing-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-        .f1-standing-code { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-left: 6px; }
+        .f1-standing-nat { 
+            font-size: 10px; 
+            color: var(--text-tertiary); 
+            font-weight: 500; 
+            margin-left: 6px;
+            padding: 2px 5px;
+            background: var(--border);
+            border-radius: 3px;
+        }
         .f1-standing-team { font-size: 12px; margin-top: 2px; }
         .f1-standing-points { font-size: 18px; font-weight: 700; color: var(--text-primary); }
         .f1-standing-pts { font-size: 10px; color: var(--text-tertiary); margin-left: 3px; display: block; text-align: right; }
+        .f1-driver-photo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+            margin-right: 12px;
+            object-fit: cover;
+            object-position: top center;
+        }
         .f1-team-logo {
-            width: 48px;
-            height: 32px;
+            width: 52px;
+            height: 36px;
             object-fit: contain;
             margin-right: 12px;
-            filter: var(--team-logo-filter, none);
+            background: #15151e;
+            border-radius: 6px;
+            padding: 4px;
         }
-        [data-theme="dark"] .f1-team-logo { filter: brightness(1.1); }
+        [data-theme="light"] .f1-team-logo { 
+            background: #1a1a2e;
+        }
 
         /* Macro overview block */
         .market-analysis {
@@ -2135,9 +2203,9 @@
                     <!-- 积分榜 -->
                     <div class="f1-standings">
                         <div class="f1-standings-header">
-                            <div class="f1-standings-title" onclick="toggleStandingsMode()">
-                                <span id="f1StandingsTitle">Driver Standings</span>
-                                <i class="fas fa-chevron-down"></i>
+                            <div class="f1-toggle-switch">
+                                <button id="f1ToggleDriver" class="f1-toggle-btn active" onclick="toggleStandingsMode('driver')">Drivers</button>
+                                <button id="f1ToggleTeam" class="f1-toggle-btn" onclick="toggleStandingsMode('team')">Constructors</button>
                             </div>
                             <button class="f1-standings-more" onclick="toggleF1Standings()">See All</button>
                         </div>
@@ -2150,14 +2218,21 @@
                     <button class="f1-back-btn" onclick="hideF1Detail()"><i class="fas fa-arrow-left"></i> Back</button>
                     
                     <div class="f1-detail-header">
-                        <div class="f1-detail-round" id="f1DetailRound">Round --</div>
-                        <h2 class="f1-detail-name" id="f1DetailName">--</h2>
-                        <div class="f1-detail-circuit" id="f1DetailCircuit">--</div>
-                        <div class="f1-detail-date" id="f1DetailDate">--</div>
+                        <div class="f1-detail-top">
+                            <div class="f1-detail-info">
+                                <div class="f1-detail-round" id="f1DetailRound">Round --</div>
+                                <h2 class="f1-detail-name" id="f1DetailName">--</h2>
+                                <div class="f1-detail-circuit" id="f1DetailCircuit">--</div>
+                                <div class="f1-detail-date" id="f1DetailDate">--</div>
+                            </div>
+                            <div class="f1-track-image">
+                                <img id="f1TrackImage" src="" alt="Track layout" onerror="this.style.display='none'">
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="f1-circuit-stats" id="f1CircuitStats">
-                        <div class="f1-stat"><span class="f1-stat-value" id="f1StatLength">--</span><span class="f1-stat-label">KM</span></div>
+                        <div class="f1-stat"><i class="fas fa-road"></i><span class="f1-stat-value" id="f1StatLength">--</span><span class="f1-stat-label">KM</span></div>
                         <div class="f1-stat"><i class="fas fa-repeat"></i><span class="f1-stat-value" id="f1StatLaps">--</span><span class="f1-stat-label">Laps</span></div>
                         <div class="f1-stat"><i class="fas fa-route"></i><span class="f1-stat-value" id="f1StatTurns">--</span><span class="f1-stat-label">Turns</span></div>
                         <div class="f1-stat"><i class="fas fa-gauge-high"></i><span class="f1-stat-value" id="f1StatSpeed">--</span><span class="f1-stat-label">KMPH</span></div>
@@ -2625,32 +2700,44 @@
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         
         // 2026 积分榜 (澳大利亚站后) - F1 官网数据
+        // 车手照片: team_id + driver_code
         const DRIVER_STANDINGS = [
-            { pos: 1, name: 'George Russell', team: 'Mercedes', color: '27F4D2', points: 25, code: 'GBR' },
-            { pos: 2, name: 'Kimi Antonelli', team: 'Mercedes', color: '27F4D2', points: 18, code: 'ITA' },
-            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', color: 'E80020', points: 15, code: 'MON' },
-            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', color: 'E80020', points: 12, code: 'GBR' },
-            { pos: 5, name: 'Lando Norris', team: 'McLaren', color: 'FF8000', points: 10, code: 'GBR' },
-            { pos: 6, name: 'Max Verstappen', team: 'Red Bull Racing', color: '3671C6', points: 8, code: 'NED' },
-            { pos: 7, name: 'Oliver Bearman', team: 'Haas F1 Team', color: 'B6BABD', points: 6, code: 'GBR' },
-            { pos: 8, name: 'Arvid Lindblad', team: 'Racing Bulls', color: '6692FF', points: 4, code: 'GBR' },
-            { pos: 9, name: 'Gabriel Bortoleto', team: 'Audi', color: 'FF0000', points: 2, code: 'BRA' },
-            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', color: '0093CC', points: 1, code: 'FRA' },
+            { pos: 1, name: 'George Russell', team: 'Mercedes', teamId: 'mercedes', driverCode: 'georus01', color: '27F4D2', points: 25, nat: 'GBR' },
+            { pos: 2, name: 'Kimi Antonelli', team: 'Mercedes', teamId: 'mercedes', driverCode: 'andant01', color: '27F4D2', points: 18, nat: 'ITA' },
+            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', teamId: 'ferrari', driverCode: 'chalec01', color: 'E80020', points: 15, nat: 'MON' },
+            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', teamId: 'ferrari', driverCode: 'lewham01', color: 'E80020', points: 12, nat: 'GBR' },
+            { pos: 5, name: 'Lando Norris', team: 'McLaren', teamId: 'mclaren', driverCode: 'lannor01', color: 'FF8000', points: 10, nat: 'GBR' },
+            { pos: 6, name: 'Max Verstappen', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'maxver01', color: '3671C6', points: 8, nat: 'NED' },
+            { pos: 7, name: 'Oliver Bearman', team: 'Haas F1 Team', teamId: 'haasf1team', driverCode: 'olibea01', color: 'B6BABD', points: 6, nat: 'GBR' },
+            { pos: 8, name: 'Arvid Lindblad', team: 'Racing Bulls', teamId: 'racingbulls', driverCode: 'arvlin01', color: '6692FF', points: 4, nat: 'GBR' },
+            { pos: 9, name: 'Gabriel Bortoleto', team: 'Audi', teamId: 'audi', driverCode: 'gabbor01', color: 'FF0000', points: 2, nat: 'BRA' },
+            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', teamId: 'alpine', driverCode: 'piegas01', color: '0093CC', points: 1, nat: 'FRA' },
         ];
         
-        // 车队 Logo URL（F1 官方 CDN）
+        // F1 2026 官方 CDN URL
+        const F1_CDN = 'https://media.formula1.com/image/upload';
+        
+        // 车队 Logo (2026 官方 CDN)
         const TEAM_LOGOS = {
-            'Mercedes': 'https://media.formula1.com/content/dam/fom-website/teams/2026/mercedes-logo.png',
-            'Ferrari': 'https://media.formula1.com/content/dam/fom-website/teams/2026/ferrari-logo.png',
-            'McLaren': 'https://media.formula1.com/content/dam/fom-website/teams/2026/mclaren-logo.png',
-            'Red Bull Racing': 'https://media.formula1.com/content/dam/fom-website/teams/2026/red-bull-racing-logo.png',
-            'Haas F1 Team': 'https://media.formula1.com/content/dam/fom-website/teams/2026/haas-f1-team-logo.png',
-            'Racing Bulls': 'https://media.formula1.com/content/dam/fom-website/teams/2026/rb-logo.png',
-            'Audi': 'https://media.formula1.com/content/dam/fom-website/teams/2026/kick-sauber-logo.png',
-            'Alpine': 'https://media.formula1.com/content/dam/fom-website/teams/2026/alpine-logo.png',
-            'Williams': 'https://media.formula1.com/content/dam/fom-website/teams/2026/williams-logo.png',
-            'Cadillac': 'https://media.formula1.com/content/dam/fom-website/teams/2026/cadillac-logo.png',
-            'Aston Martin': 'https://media.formula1.com/content/dam/fom-website/teams/2026/aston-martin-logo.png',
+            'Mercedes': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/mercedes/2026mercedeslogowhite.webp`,
+            'Ferrari': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/ferrari/2026ferrarilogowhite.webp`,
+            'McLaren': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/mclaren/2026mclarenlogowhite.webp`,
+            'Red Bull Racing': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/redbullracing/2026redbullracinglogowhite.webp`,
+            'Haas F1 Team': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/haasf1team/2026haasf1teamlogowhite.webp`,
+            'Racing Bulls': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/racingbulls/2026racingbullslogowhite.webp`,
+            'Audi': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/audi/2026audilogowhite.webp`,
+            'Alpine': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/alpine/2026alpinelogowhite.webp`,
+            'Williams': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/williams/2026williamslogowhite.webp`,
+            'Cadillac': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/cadillac/2026cadillaclogowhite.webp`,
+            'Aston Martin': `${F1_CDN}/c_lfill,w_96/q_auto/v1740000000/common/f1/2026/astonmartin/2026astonmartinlogowhite.webp`,
+        };
+        
+        // 车队 ID 映射
+        const TEAM_IDS = {
+            'Mercedes': 'mercedes', 'Ferrari': 'ferrari', 'McLaren': 'mclaren',
+            'Red Bull Racing': 'redbullracing', 'Haas F1 Team': 'haasf1team',
+            'Racing Bulls': 'racingbulls', 'Audi': 'audi', 'Alpine': 'alpine',
+            'Williams': 'williams', 'Cadillac': 'cadillac', 'Aston Martin': 'astonmartin'
         };
         
         const TEAM_STANDINGS = [
@@ -2666,6 +2753,18 @@
             { pos: 10, name: 'Cadillac', color: 'C4A35A', points: 0 },
             { pos: 11, name: 'Aston Martin', color: '229971', points: 0 },
         ];
+        
+        // 赛道图 URL 映射
+        const CIRCUIT_TRACKS = {
+            'shanghai': 'shanghai', 'bahrain': 'bahrain', 'jeddah': 'jeddah',
+            'melbourne': 'melbourne', 'suzuka': 'suzuka', 'monaco': 'monaco',
+            'barcelona': 'catalunya', 'silverstone': 'silverstone', 'spa': 'spa',
+            'monza': 'monza', 'singapore': 'singapore', 'austin': 'austin',
+            'mexico': 'mexicocity', 'interlagos': 'interlagos', 'las vegas': 'lasvegas',
+            'yas marina': 'abudhabi', 'imola': 'imola', 'miami': 'miami',
+            'montreal': 'montreal', 'spielberg': 'spielberg', 'budapest': 'hungaroring',
+            'zandvoort': 'zandvoort', 'baku': 'baku', 'lusail': 'lusail'
+        };
         
         let _f1StandingsMode = 'driver'; // 'driver' or 'team'
         
@@ -2775,6 +2874,15 @@
                 document.getElementById('f1StatTurns').textContent = data.turns || '--';
                 document.getElementById('f1StatSpeed').textContent = data.top_speed_kmh || '--';
                 
+                // 赛道图
+                const circuitLower = (data.circuit || '').toLowerCase().replace(/[^a-z]/g, '');
+                const trackKey = Object.keys(CIRCUIT_TRACKS).find(k => circuitLower.includes(k)) || '';
+                const trackId = CIRCUIT_TRACKS[trackKey] || circuitLower;
+                const trackUrl = `${F1_CDN}/c_fit,h_200/q_auto/v1740000000/common/f1/2026/track/2026track${trackId}detailed.webp`;
+                const trackImg = document.getElementById('f1TrackImage');
+                trackImg.src = trackUrl;
+                trackImg.style.display = 'block';
+                
                 // 日程
                 const sessionsHtml = data.sessions.map(s => {
                     const d = new Date(s.date_start);
@@ -2815,16 +2923,21 @@
             const data = isDriver ? DRIVER_STANDINGS : TEAM_STANDINGS;
             const items = _f1ShowAllDrivers ? data : data.slice(0, 5);
             
-            document.getElementById('f1StandingsTitle').textContent = isDriver ? 'Driver Standings' : 'Constructor Standings';
+            // 更新 toggle 状态
+            document.getElementById('f1ToggleDriver').classList.toggle('active', isDriver);
+            document.getElementById('f1ToggleTeam').classList.toggle('active', !isDriver);
             
             const html = items.map(d => {
                 const posClass = d.pos <= 3 ? 'top3' : '';
                 if (isDriver) {
+                    // 车手照片 URL
+                    const photoUrl = `${F1_CDN}/c_lfill,w_64/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/${d.teamId}/${d.driverCode}/2026${d.teamId}${d.driverCode}right.webp`;
                     return `<div class="f1-standing-item">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
                         <div class="f1-standing-color" style="background:#${d.color}"></div>
+                        <img class="f1-driver-photo" src="${photoUrl}" onerror="this.style.opacity='0.3'" alt="">
                         <div class="f1-standing-info">
-                            <div class="f1-standing-name">${d.name} <span class="f1-standing-code">${d.code}</span></div>
+                            <div class="f1-standing-name">${d.name} <span class="f1-standing-nat">${d.nat}</span></div>
                             <div class="f1-standing-team" style="color:#${d.color}">${d.team}</div>
                         </div>
                         <div class="f1-standing-points">${d.points}<span class="f1-standing-pts">PTS</span></div>
@@ -2834,7 +2947,7 @@
                     return `<div class="f1-standing-item">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
                         <div class="f1-standing-color" style="background:#${d.color}"></div>
-                        <img class="f1-team-logo" src="${logoUrl}" onerror="this.style.display='none'" alt="">
+                        <img class="f1-team-logo" src="${logoUrl}" onerror="this.style.opacity='0.3'" alt="">
                         <div class="f1-standing-info">
                             <div class="f1-standing-name">${d.name}</div>
                         </div>
@@ -2847,8 +2960,9 @@
             document.querySelector('.f1-standings-more').textContent = _f1ShowAllDrivers ? 'Show Less' : 'See All';
         }
         
-        function toggleStandingsMode() {
-            _f1StandingsMode = _f1StandingsMode === 'driver' ? 'team' : 'driver';
+        function toggleStandingsMode(mode) {
+            if (mode) _f1StandingsMode = mode;
+            else _f1StandingsMode = _f1StandingsMode === 'driver' ? 'team' : 'driver';
             _f1ShowAllDrivers = false;
             renderF1Standings();
         }

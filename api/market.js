@@ -147,7 +147,7 @@ export default async function handler(req, res) {
   
   try {
     // 并行获取所有数据
-    const [qqq, spy, dia, hsi, hstec, sse, gld, uso, btc, eth, usdcny, hkdcny, eurcny, jpycny, gbpcny] = await Promise.all([
+    const [qqq, spy, dia, hsi, hstec, sse, gld, uso, btc, eth, usdcny, hkdcny, eurcny, jpycny, gbpcny, thbcny] = await Promise.all([
       fetchFinnhub('QQQ'),
       fetchFinnhub('SPY'),
       fetchFinnhub('DIA'),
@@ -162,7 +162,8 @@ export default async function handler(req, res) {
       fetchForexSina('hkdcny'),
       fetchForexSina('eurcny'),
       fetchForexSina('jpycny'),
-      fetchForexSina('gbpcny')
+      fetchForexSina('gbpcny'),
+      fetchForexSina('thbcny')
     ]);
 
     const [spxSparkline, ndxSparkline, djiSparkline, hsiSparkline, hstecSparkline, sseSparkline, goldSparkline, oilSparkline, btcSparkline, ethSparkline] = await Promise.all([
@@ -196,12 +197,13 @@ export default async function handler(req, res) {
     if (btc) data.btc = { price: fmt(btc.price, '$'), change: btc.change, sparkline: btcSparkline };
     if (eth) data.eth = { price: fmt(eth.price, '$'), change: eth.change, sparkline: ethSparkline };
     
-    // 汇率
-    if (usdcny) data.usdcny = { price: usdcny.price.toFixed(4), change: usdcny.change };
-    if (hkdcny) data.hkdcny = { price: hkdcny.price.toFixed(4), change: hkdcny.change };
-    if (eurcny) data.eurcny = { price: eurcny.price.toFixed(4), change: eurcny.change };
-    if (jpycny) data.jpycny = { price: (jpycny.price * 100).toFixed(4), change: jpycny.change }; // 100日元
-    if (gbpcny) data.gbpcny = { price: gbpcny.price.toFixed(4), change: gbpcny.change };
+    // 汇率（1外币=X人民币）
+    if (usdcny) data.usdcny = { price: usdcny.price.toFixed(4) };
+    if (hkdcny) data.hkdcny = { price: hkdcny.price.toFixed(4) };
+    if (eurcny) data.eurcny = { price: eurcny.price.toFixed(4) };
+    if (jpycny) data.jpycny = { price: jpycny.price.toFixed(4) };
+    if (gbpcny) data.gbpcny = { price: gbpcny.price.toFixed(4) };
+    if (thbcny) data.thbcny = { price: thbcny.price.toFixed(4) };
     
     res.status(200).json(data);
   } catch (error) {

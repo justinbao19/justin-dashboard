@@ -741,7 +741,7 @@
         .forex-card .market-card-header { margin-bottom: 12px; }
         .forex-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 12px;
         }
         .forex-item {
@@ -758,17 +758,15 @@
             background: var(--market-section-bg);
             border-color: rgba(0,113,227,0.28);
         }
-        .forex-flag { font-size: 20px; margin-bottom: 6px; }
-        .forex-name { font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; }
-        .forex-price { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-        .forex-change { font-size: 11px; font-weight: 500; margin-top: 2px; }
-        .forex-change.up { color: var(--success); }
-        .forex-change.down { color: var(--danger); }
-        @media (max-width: 768px) {
+        .forex-flag { font-size: 22px; margin-bottom: 4px; }
+        .forex-name { font-size: 12px; color: var(--text-tertiary); font-weight: 500; }
+        .forex-price { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-top: 6px; letter-spacing: -0.5px; }
+        @media (max-width: 900px) {
             .forex-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 480px) {
             .forex-grid { grid-template-columns: repeat(2, 1fr); }
+            .forex-price { font-size: 18px; }
         }
 
         /* Macro overview block */
@@ -2032,25 +2030,23 @@
             const riskIconEl = document.getElementById('riskIconEl');
             if (riskIconEl) riskIconEl.className = isHighRisk ? 'fas fa-circle-exclamation' : isLowRisk ? 'fas fa-circle-check' : 'fas fa-triangle-exclamation';
 
-            // 汇率
+            // 汇率 - 常规显示（1外币=X人民币）
             const forexList = [
                 {k:'usdcny',f:'🇺🇸',n:'美元',u:'USD'},
                 {k:'hkdcny',f:'🇭🇰',n:'港币',u:'HKD'},
                 {k:'eurcny',f:'🇪🇺',n:'欧元',u:'EUR'},
-                {k:'jpycny',f:'🇯🇵',n:'日元',u:'JPY¥100'},
-                {k:'gbpcny',f:'🇬🇧',n:'英镑',u:'GBP'}
+                {k:'gbpcny',f:'🇬🇧',n:'英镑',u:'GBP'},
+                {k:'jpycny',f:'🇯🇵',n:'日元',u:'JPY'},
+                {k:'thbcny',f:'🇹🇭',n:'泰铢',u:'THB'}
             ];
             const forexEl = document.getElementById('forexList');
             if (forexEl) {
                 forexEl.innerHTML = forexList.filter(f=>d[f.k]).map(f => {
                     const it = d[f.k];
-                    const cls = it.change >= 0 ? 'up' : 'down';
-                    const sgn = it.change >= 0 ? '+' : '';
                     return `<div class="forex-item">
                         <span class="forex-flag">${f.f}</span>
                         <span class="forex-name">${f.u}</span>
                         <span class="forex-price">${it.price}</span>
-                        <span class="forex-change ${cls}">${sgn}${it.change}%</span>
                     </div>`;
                 }).join('');
             }

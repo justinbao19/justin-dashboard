@@ -978,7 +978,18 @@
             align-items: center;
             margin-bottom: 12px;
         }
-        .f1-standings h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0; }
+        .f1-standings-title { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            font-size: 16px; 
+            font-weight: 600; 
+            color: var(--text-primary); 
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .f1-standings-title:hover { color: #e10600; }
+        .f1-standings-title i { font-size: 12px; color: var(--text-tertiary); }
         .f1-standings-more {
             background: none; border: none;
             color: #e10600;
@@ -987,41 +998,43 @@
             cursor: pointer;
         }
         
-        .f1-drivers { display: flex; flex-direction: column; gap: 8px; }
-        .f1-driver {
+        .f1-standings-list { display: flex; flex-direction: column; gap: 8px; }
+        .f1-standing-item {
             display: flex;
             align-items: center;
-            padding: 12px 14px;
+            padding: 14px 16px;
             background: var(--bg-card);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid var(--border);
+            transition: all 0.2s;
         }
-        .f1-driver-pos {
-            width: 24px;
+        .f1-standing-item:hover { border-color: rgba(225,6,0,0.2); }
+        .f1-standing-pos {
+            width: 28px;
             font-size: 14px;
             font-weight: 700;
             color: var(--text-tertiary);
         }
-        .f1-driver-pos.top3 { color: #e10600; }
-        .f1-driver-color {
+        .f1-standing-pos.top3 { color: #e10600; }
+        .f1-standing-color {
             width: 4px;
-            height: 32px;
+            height: 36px;
             border-radius: 2px;
             margin-right: 12px;
         }
-        .f1-driver-photo {
-            width: 36px;
-            height: 36px;
+        .f1-standing-photo {
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--bg-tertiary);
-            margin-right: 10px;
+            margin-right: 12px;
             object-fit: cover;
         }
-        .f1-driver-info { flex: 1; min-width: 0; }
-        .f1-driver-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-        .f1-driver-team { font-size: 11px; color: var(--text-tertiary); }
-        .f1-driver-points { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-        .f1-driver-pts-label { font-size: 10px; color: var(--text-tertiary); margin-left: 2px; }
+        .f1-standing-info { flex: 1; min-width: 0; }
+        .f1-standing-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .f1-standing-team { font-size: 12px; margin-top: 2px; }
+        .f1-standing-points { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .f1-standing-pts { font-size: 10px; color: var(--text-tertiary); margin-left: 3px; display: block; text-align: right; }
 
         /* Macro overview block */
         .market-analysis {
@@ -2094,8 +2107,9 @@
                             <div class="f1-countdown-title" id="f1CountdownTitle">Practice 1 Starts in</div>
                             <div class="f1-countdown-timer">
                                 <div class="f1-countdown-unit"><span id="f1CountDays">--</span><small>Days</small></div>
-                                <div class="f1-countdown-unit"><span id="f1CountHours">--</span><small>Hours</small></div>
-                                <div class="f1-countdown-unit"><span id="f1CountMins">--</span><small>Minutes</small></div>
+                                <div class="f1-countdown-unit"><span id="f1CountHours">--</span><small>Hrs</small></div>
+                                <div class="f1-countdown-unit"><span id="f1CountMins">--</span><small>Mins</small></div>
+                                <div class="f1-countdown-unit"><span id="f1CountSecs">--</span><small>Secs</small></div>
                             </div>
                         </div>
                         
@@ -2109,13 +2123,16 @@
                         <div class="f1-loading">加载赛程中...</div>
                     </div>
                     
-                    <!-- 车手积分榜 -->
+                    <!-- 积分榜 -->
                     <div class="f1-standings">
                         <div class="f1-standings-header">
-                            <h3>Driver Standings</h3>
+                            <div class="f1-standings-title" onclick="toggleStandingsMode()">
+                                <span id="f1StandingsTitle">Driver Standings</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
                             <button class="f1-standings-more" onclick="toggleF1Standings()">See All</button>
                         </div>
-                        <div class="f1-drivers" id="f1Drivers"></div>
+                        <div class="f1-standings-list" id="f1StandingsList"></div>
                     </div>
                 </div>
                 
@@ -2598,19 +2615,34 @@
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         
-        // 2026 车手积分榜 (澳大利亚站后)
+        // 2026 积分榜 (澳大利亚站后) - 按截图数据更新
         const DRIVER_STANDINGS = [
-            { pos: 1, name: 'Lando Norris', team: 'McLaren', color: 'F47600', points: 25, photo: 'LANNOR01' },
-            { pos: 2, name: 'Max Verstappen', team: 'Red Bull Racing', color: '4781D7', points: 18, photo: 'MAXVER01' },
+            { pos: 1, name: 'George Russell', team: 'Mercedes', color: '27F4D2', points: 25, photo: 'GEORUS01' },
+            { pos: 2, name: 'Andrea Kimi Antonelli', team: 'Mercedes', color: '27F4D2', points: 18, photo: 'ANDANT01' },
             { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', color: 'E80020', points: 15, photo: 'CHALEC01' },
             { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', color: 'E80020', points: 12, photo: 'LEWHAM01' },
-            { pos: 5, name: 'Oscar Piastri', team: 'McLaren', color: 'F47600', points: 10, photo: 'OSCPIA01' },
-            { pos: 6, name: 'George Russell', team: 'Mercedes', color: '27F4D2', points: 8, photo: 'GEORUS01' },
-            { pos: 7, name: 'Carlos Sainz', team: 'Williams', color: '00A3E0', points: 6, photo: 'CARSAI01' },
-            { pos: 8, name: 'Andrea Kimi Antonelli', team: 'Mercedes', color: '27F4D2', points: 4, photo: 'ANDANT01' },
-            { pos: 9, name: 'Yuki Tsunoda', team: 'Red Bull Racing', color: '4781D7', points: 2, photo: 'YUKTSU01' },
+            { pos: 5, name: 'Lando Norris', team: 'McLaren', color: 'F47600', points: 10, photo: 'LANNOR01' },
+            { pos: 6, name: 'Max Verstappen', team: 'Red Bull Racing', color: '4781D7', points: 8, photo: 'MAXVER01' },
+            { pos: 7, name: 'Oliver Bearman', team: 'Haas', color: 'B6BABD', points: 6, photo: 'OLIBEA01' },
+            { pos: 8, name: 'Arvid Lindblad', team: 'Racing Bulls', color: '6692FF', points: 4, photo: 'ARVLIN01' },
+            { pos: 9, name: 'Gabriel Bortoleto', team: 'Audi', color: 'F50537', points: 2, photo: 'GABBOR01' },
             { pos: 10, name: 'Pierre Gasly', team: 'Alpine', color: '2596BE', points: 1, photo: 'PIEGAS01' },
         ];
+        
+        const TEAM_STANDINGS = [
+            { pos: 1, name: 'Mercedes', car: 'F1 W17', color: '27F4D2', points: 43 },
+            { pos: 2, name: 'Ferrari', car: 'SF-26', color: 'E80020', points: 27 },
+            { pos: 3, name: 'McLaren', car: 'MCL40', color: 'F47600', points: 10 },
+            { pos: 4, name: 'Red Bull Racing', car: 'RB22', color: '4781D7', points: 8 },
+            { pos: 5, name: 'Haas', car: 'VF-26', color: 'B6BABD', points: 6 },
+            { pos: 6, name: 'Racing Bulls', car: 'VCARB 03', color: '6692FF', points: 4 },
+            { pos: 7, name: 'Audi', car: 'R26', color: 'F50537', points: 2 },
+            { pos: 8, name: 'Alpine', car: 'A526', color: '2596BE', points: 1 },
+            { pos: 9, name: 'Williams', car: 'FW47', color: '00A3E0', points: 0 },
+            { pos: 10, name: 'Aston Martin', car: 'AMR26', color: '229971', points: 0 },
+        ];
+        
+        let _f1StandingsMode = 'driver'; // 'driver' or 'team'
         
         async function loadF1() {
             try {
@@ -2618,7 +2650,7 @@
                 if (!r.ok) throw new Error('API error');
                 _f1Data = await r.json();
                 renderF1List();
-                renderF1Drivers();
+                renderF1Standings();
                 startF1Countdown();
             } catch (e) {
                 console.error('F1 error:', e);
@@ -2683,15 +2715,17 @@
                     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
                     
                     document.getElementById('f1CountDays').textContent = String(days).padStart(2,'0');
                     document.getElementById('f1CountHours').textContent = String(hours).padStart(2,'0');
                     document.getElementById('f1CountMins').textContent = String(mins).padStart(2,'0');
+                    document.getElementById('f1CountSecs').textContent = String(secs).padStart(2,'0');
                 }
             };
             
             updateCountdown();
-            setInterval(updateCountdown, 60000);
+            setInterval(updateCountdown, 1000); // 每秒更新
         }
         
         async function showF1Detail(meetingKey) {
@@ -2751,32 +2785,54 @@
             document.getElementById('f1-detail-view').style.display = 'none';
         }
         
-        function renderF1Drivers() {
-            const drivers = _f1ShowAllDrivers ? DRIVER_STANDINGS : DRIVER_STANDINGS.slice(0, 5);
+        function renderF1Standings() {
+            const isDriver = _f1StandingsMode === 'driver';
+            const data = isDriver ? DRIVER_STANDINGS : TEAM_STANDINGS;
+            const items = _f1ShowAllDrivers ? data : data.slice(0, 5);
             const photoBase = 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers';
             
-            const html = drivers.map(d => {
-                const photoUrl = `${photoBase}/${d.photo.charAt(0)}/${d.photo}_${d.name.split(' ').join('_')}/${d.photo.toLowerCase()}.png.transform/1col/image.png`;
+            document.getElementById('f1StandingsTitle').textContent = isDriver ? 'Driver Standings' : 'Team Standings';
+            
+            const html = items.map(d => {
                 const posClass = d.pos <= 3 ? 'top3' : '';
-                return `<div class="f1-driver">
-                    <div class="f1-driver-pos ${posClass}">${d.pos}</div>
-                    <div class="f1-driver-color" style="background:#${d.color}"></div>
-                    <img class="f1-driver-photo" src="${photoUrl}" onerror="this.src='https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FORDRIV01_driver_fallback/fordriv01.png.transform/1col/image.png'" alt="">
-                    <div class="f1-driver-info">
-                        <div class="f1-driver-name">${d.name}</div>
-                        <div class="f1-driver-team">${d.team}</div>
-                    </div>
-                    <div class="f1-driver-points">${d.points}<span class="f1-driver-pts-label">PTS</span></div>
-                </div>`;
+                if (isDriver) {
+                    const photoUrl = `${photoBase}/${d.photo.charAt(0)}/${d.photo}_${d.name.split(' ').join('_')}/${d.photo.toLowerCase()}.png.transform/1col/image.png`;
+                    return `<div class="f1-standing-item">
+                        <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
+                        <div class="f1-standing-color" style="background:#${d.color}"></div>
+                        <img class="f1-standing-photo" src="${photoUrl}" onerror="this.src='https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/F/FORDRIV01_driver_fallback/fordriv01.png.transform/1col/image.png'" alt="">
+                        <div class="f1-standing-info">
+                            <div class="f1-standing-name">${d.name}</div>
+                            <div class="f1-standing-team" style="color:#${d.color}">${d.team}</div>
+                        </div>
+                        <div class="f1-standing-points">${d.points}<span class="f1-standing-pts">PTS</span></div>
+                    </div>`;
+                } else {
+                    return `<div class="f1-standing-item">
+                        <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
+                        <div class="f1-standing-color" style="background:#${d.color}"></div>
+                        <div class="f1-standing-info">
+                            <div class="f1-standing-name">${d.name}</div>
+                            <div class="f1-standing-team" style="color:#${d.color}">${d.car}</div>
+                        </div>
+                        <div class="f1-standing-points">${d.points}<span class="f1-standing-pts">PTS</span></div>
+                    </div>`;
+                }
             }).join('');
             
-            document.getElementById('f1Drivers').innerHTML = html;
+            document.getElementById('f1StandingsList').innerHTML = html;
             document.querySelector('.f1-standings-more').textContent = _f1ShowAllDrivers ? 'Show Less' : 'See All';
+        }
+        
+        function toggleStandingsMode() {
+            _f1StandingsMode = _f1StandingsMode === 'driver' ? 'team' : 'driver';
+            _f1ShowAllDrivers = false;
+            renderF1Standings();
         }
         
         function toggleF1Standings() {
             _f1ShowAllDrivers = !_f1ShowAllDrivers;
-            renderF1Drivers();
+            renderF1Standings();
         }
 
         loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1();

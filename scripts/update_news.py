@@ -237,6 +237,42 @@ def resolve_google_news_url(google_url: str) -> str:
     return google_url
 
 
+def get_article_summary(url: str) -> str:
+    """从新闻原文提取摘要"""
+    try:
+        # 如果是 Google News 链接，先解析
+        real_url = resolve_google_news_url(url) if "news.google.com" in url else url
+        
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        }
+        r = requests.get(real_url, headers=headers, timeout=10)
+        
+        # 1. 优先提取 og:description
+        match = re.search(r'<meta[^>]+(?:property=["\']og:description["\'][^>]+content=["\']([^"\']+)["\']|content=["\']([^"\']+)["\'][^>]+property=["\']og:description["\'])', r.text)
+        if match:
+            desc = match.group(1) or match.group(2)
+            if desc and len(desc) > 20:
+                return desc[:200].strip()
+        
+        # 2. 备选：meta description
+        match = re.search(r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']', r.text)
+        if match:
+            desc = match.group(1)
+            if desc and len(desc) > 20:
+                return desc[:200].strip()
+        
+        # 3. 提取第一段文字
+        match = re.search(r'<p[^>]*>([^<]{50,300})</p>', r.text)
+        if match:
+            text = re.sub(r'<[^>]+>', '', match.group(1))
+            return text[:200].strip()
+            
+    except Exception as e:
+        print(f"    ⚠️ 获取摘要失败: {e}")
+    return ""
+
+
 def get_article_image(url: str) -> str | None:
     """尝试从新闻原文获取图片"""
     try:
@@ -314,16 +350,21 @@ def update_news():
     
     print(f"  获取到 {len(news_items)} 条新闻")
     
-    # 处理新闻，添加图片
+    # 处理新闻，添加图片和摘要
     processed = []
     for item in news_items[:5]:  # Dashboard 只显示5条
         print(f"  处理: {item['title'][:30]}...")
+        
+        # 获取摘要
+        summary = get_article_summary(item["url"])
+        if summary:
+            print(f"    ✓ 摘要: {summary[:30]}...")
         
         processed.append({
             "title": item["title"],
             "source": item["source"],
             "image": find_image_for_news(item),
-            "summary": "",  # 可以后续用 AI 生成摘要
+            "summary": summary,
             "full_content": "",
             "url": item["url"]
         })

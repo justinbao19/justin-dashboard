@@ -906,6 +906,23 @@
             transition: all 0.2s;
         }
         .f1-race-item:hover .f1-race-arrow { opacity: 1; color: #e10600; transform: translateX(4px); }
+        .f1-race-more {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            background: rgba(225,6,0,0.1);
+            border: 1px solid rgba(225,6,0,0.2);
+            border-radius: 14px;
+            color: #e10600;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .f1-race-more:hover {
+            background: rgba(225,6,0,0.15);
+            border-color: rgba(225,6,0,0.3);
+        }
         
         /* F1 详情页 */
         .f1-back-btn {
@@ -2695,6 +2712,7 @@
         let _f1Data = null;
         window._f1NextMeeting = null;
         let _f1ShowAllDrivers = false;
+        let _f1ShowAllRaces = false;
         
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
@@ -2754,15 +2772,22 @@
             { pos: 11, name: 'Aston Martin', color: '229971', points: 0 },
         ];
         
-        // 赛道图 URL 映射
+        // 赛道 SVG 文件映射 (本地 /tracks/*.svg)
         const CIRCUIT_TRACKS = {
             'shanghai': 'shanghai', 'bahrain': 'bahrain', 'jeddah': 'jeddah',
-            'melbourne': 'melbourne', 'suzuka': 'suzuka', 'monaco': 'monaco',
-            'barcelona': 'catalunya', 'silverstone': 'silverstone', 'spa': 'spa',
-            'monza': 'monza', 'singapore': 'singapore', 'austin': 'austin',
-            'mexico': 'mexicocity', 'interlagos': 'interlagos', 'las vegas': 'lasvegas',
-            'yas marina': 'abudhabi', 'imola': 'imola', 'miami': 'miami',
-            'montreal': 'montreal', 'spielberg': 'spielberg', 'budapest': 'hungaroring',
+            'albert park': 'melbourne', 'melbourne': 'melbourne', 
+            'suzuka': 'suzuka', 'monaco': 'monaco',
+            'barcelona': 'catalunya', 'catalunya': 'catalunya',
+            'silverstone': 'silverstone', 'spa': 'spa', 'francorchamps': 'spa',
+            'monza': 'monza', 'singapore': 'singapore', 'marina bay': 'singapore',
+            'austin': 'austin', 'americas': 'austin',
+            'mexico': 'mexico', 'hermanos': 'mexico',
+            'interlagos': 'interlagos', 'sao paulo': 'interlagos',
+            'las vegas': 'lasvegas', 'yas marina': 'abudhabi', 'abu dhabi': 'abudhabi',
+            'imola': 'imola', 'miami': 'miami',
+            'montreal': 'montreal', 'gilles villeneuve': 'montreal',
+            'spielberg': 'spielberg', 'red bull ring': 'spielberg',
+            'budapest': 'hungaroring', 'hungaroring': 'hungaroring',
             'zandvoort': 'zandvoort', 'baku': 'baku', 'lusail': 'lusail'
         };
         
@@ -2802,8 +2827,9 @@
                 document.getElementById('f1NextDate').textContent = `${startDate.getDate()} - ${endDate.getDate()} ${MONTHS[startDate.getMonth()]}`;
             }
             
-            // 赛程列表
-            const listHtml = upcoming.map(r => {
+            // 赛程列表 - 默认显示5场
+            const displayRaces = _f1ShowAllRaces ? upcoming : upcoming.slice(0, 5);
+            const listHtml = displayRaces.map(r => {
                 const d = new Date(r.date_start);
                 const sprintBadge = r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
                 return `<div class="f1-race-item" onclick="showF1Detail(${r.meeting_key})">
@@ -2820,7 +2846,13 @@
                 </div>`;
             }).join('');
             
-            document.getElementById('f1RaceList').innerHTML = listHtml || '<div class="f1-loading">暂无比赛</div>';
+            // 展开/收起按钮
+            const moreBtn = upcoming.length > 5 ? `
+                <button class="f1-race-more" onclick="toggleF1Races()">
+                    ${_f1ShowAllRaces ? '收起' : `查看全部 ${upcoming.length} 场比赛`}
+                </button>` : '';
+            
+            document.getElementById('f1RaceList').innerHTML = (listHtml + moreBtn) || '<div class="f1-loading">暂无比赛</div>';
         }
         
         function startF1Countdown() {
@@ -2874,14 +2906,17 @@
                 document.getElementById('f1StatTurns').textContent = data.turns || '--';
                 document.getElementById('f1StatSpeed').textContent = data.top_speed_kmh || '--';
                 
-                // 赛道图
-                const circuitLower = (data.circuit || '').toLowerCase().replace(/[^a-z]/g, '');
+                // 赛道线图 (本地 SVG)
+                const circuitLower = (data.circuit || '').toLowerCase().replace(/[^a-z ]/g, '');
                 const trackKey = Object.keys(CIRCUIT_TRACKS).find(k => circuitLower.includes(k)) || '';
-                const trackId = CIRCUIT_TRACKS[trackKey] || circuitLower;
-                const trackUrl = `${F1_CDN}/c_fit,h_200/q_auto/v1740000000/common/f1/2026/track/2026track${trackId}detailed.webp`;
+                const trackId = CIRCUIT_TRACKS[trackKey] || '';
                 const trackImg = document.getElementById('f1TrackImage');
-                trackImg.src = trackUrl;
-                trackImg.style.display = 'block';
+                if (trackId) {
+                    trackImg.src = `/tracks/${trackId}.svg`;
+                    trackImg.style.display = 'block';
+                } else {
+                    trackImg.style.display = 'none';
+                }
                 
                 // 日程
                 const sessionsHtml = data.sessions.map(s => {
@@ -2970,6 +3005,11 @@
         function toggleF1Standings() {
             _f1ShowAllDrivers = !_f1ShowAllDrivers;
             renderF1Standings();
+        }
+        
+        function toggleF1Races() {
+            _f1ShowAllRaces = !_f1ShowAllRaces;
+            renderF1List();
         }
 
         loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1();

@@ -898,6 +898,22 @@
         .f1-race-meta { font-size: 12px; color: #e10600; margin-top: 3px; font-weight: 500; }
         .f1-race-meta span { color: var(--text-tertiary); font-weight: 400; }
         
+        .f1-race-track {
+            width: 48px;
+            height: 48px;
+            margin-left: auto;
+            margin-right: 8px;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+        .f1-race-track img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: invert(0.3);
+        }
+        .f1-race-item:hover .f1-race-track { opacity: 1; }
+        
         .f1-race-arrow { 
             color: var(--text-tertiary); 
             font-size: 12px; 
@@ -2832,6 +2848,10 @@
             const listHtml = displayRaces.map(r => {
                 const d = new Date(r.date_start);
                 const sprintBadge = r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
+                const circuitLower = (r.circuit || '').toLowerCase();
+                const trackKey = Object.keys(CIRCUIT_TRACKS).find(k => circuitLower.includes(k)) || '';
+                const trackId = CIRCUIT_TRACKS[trackKey] || '';
+                const trackImg = trackId ? `<div class="f1-race-track"><img src="/tracks/${trackId}.svg" alt=""></div>` : '';
                 return `<div class="f1-race-item" onclick="showF1Detail(${r.meeting_key})">
                     <div class="f1-race-flag">${r.country_flag || '🏁'}</div>
                     <div class="f1-race-date">
@@ -2842,6 +2862,7 @@
                         <div class="f1-race-name">${r.gp_name} ${sprintBadge}</div>
                         <div class="f1-race-meta">R${String(r.round).padStart(2,'0')} <span>• ${r.circuit}</span></div>
                     </div>
+                    ${trackImg}
                     <div class="f1-race-arrow"><i class="fas fa-chevron-right"></i></div>
                 </div>`;
             }).join('');

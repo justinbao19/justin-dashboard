@@ -1,41 +1,41 @@
 {
-  "date": "2026年3月11日",
+  "date": "2026年3月12日",
   "items": [
     {
-      "title": "美以对伊战争趋缓 油价回落",
-      "source": "Guardian/BBC",
+      "title": "32国释放石油储备 应对霍尔木兹海峡危机",
+      "source": "NYT/Reuters",
       "image": "https://images.unsplash.com/photo-1518611507436-f9221403cca2?w=1200&q=80",
-      "summary": "美国与以色列2月28日对伊朗发动军事打击后，国际油价曾飙升突破100美元/桶，创四年新高。以色列上周末袭击伊朗石油设施，德黑兰在中东多地发起报复行动。特朗普周一宣称战争已「非常完整」，市场对冲突不会长期化的预期升温，布伦特原油从高点回落至85美元/桶，较战前73美元仍高出16%。美股随之反弹，道指收涨248点至47989点，标普500涨0.4%至6823点。",
-      "url": "https://www.theguardian.com/business/2026/mar/09/iran-war-drives-oil-price-above-100-a-barrel-for-first-time-since-2022"
+      "summary": "美以对伊朗战争进入第12天，伊朗称已有超过1300名平民丧生、近万处民用设施遭袭。随着霍尔木兹海峡航运受阻，国际能源署宣布32个成员国联合释放战略石油储备，总量相当于全球12天的需求。中国虽非IEA成员，但近月来大量购入原油，战略储备已达12亿桶。布伦特原油价格剧烈波动，市场对冲突走向保持高度警惕。",
+      "url": "https://www.nytimes.com/live/2026/03/11/world/iran-war-news-trump-oil-israel"
     },
     {
-      "title": "中国出口激增22% 贸易顺差创历史新高",
-      "source": "CNBC/BBC",
-      "image": "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?w=1200&q=80",
-      "summary": "中国1-2月出口同比猛增22%，贸易顺差创历史最高纪录。数据显示，对欧盟出口增长27.8%，对东盟国家增长近30%，电子产品和制造业商品需求强劲。但对美出口下降超10%，反映特朗普关税影响。最高法院此前裁定特朗普依据《国际紧急经济权力法》加征的关税无效，目前对华关税维持在全球统一的10%水平。分析师预计3月数据将显示工厂抢出口效应。",
-      "url": "https://www.cnbc.com/2026/03/10/china-trade-balance-surplus-record-exports-tariffs-imports.html"
+      "title": "以色列大规模空袭黎巴嫩 报复真主党火箭攻击",
+      "source": "CNN/Al Jazeera",
+      "image": "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=1200&q=80",
+      "summary": "以色列周三宣布对黎巴嫩发动「大规模」空袭，回应伊朗支持的真主党数十枚火箭弹袭击。伊朗同日声称打击了以色列军事情报设施和海军基地，迪拜也传出爆炸声。印度外交部对一艘印度方向的泰国船只遇袭表示谴责，称冲突中的无辜生命损失「不可接受」。伊朗还警告谷歌、亚马逊、微软、英伟达等美国科技巨头，将其列为「合法打击目标」。",
+      "url": "https://www.cnn.com/2026/03/11/middleeast/us-israel-iran-middle-east-war-what-we-know-intl-hnk"
     },
     {
-      "title": "中朝恢复客运列车 6年来首次",
-      "source": "Reuters/Guardian",
-      "image": "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=1200&q=80",
-      "summary": "中国宣布3月12日起恢复北京-丹东-平壤客运列车服务，这是新冠疫情以来首次恢复、中断已达6年。官方表示此举将「进一步促进中朝旅游、贸易经济合作和民间交流」。分析指出，此举标志着北京正重建对朝鲜的影响力。金正恩近年来倾向莫斯科，向俄罗斯提供士兵和武器支持乌克兰战争，以换取食品和燃料，中国试图在外交上重新拉近与平壤的关系。",
-      "url": "https://www.reuters.com/world/asia-pacific/north-korea-china-resume-passenger-train-service-after-six-year-gap-2026-03-10/"
+      "title": "苹果发布入门款iPhone 17e",
+      "source": "Apple Newsroom",
+      "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=1200&q=80",
+      "summary": "苹果正式推出iPhone 17e，定位入门级市场。新机采用更环保的制造工艺，供应链中55%的电力来自风能和太阳能等可再生能源。苹果强调该机型在耐用性、可维修性和软件支持方面达到业界领先水平。这是苹果「e」系列的首款机型，旨在以更亲民的价格吸引预算敏感型消费者，同时保持苹果产品一贯的品质标准。",
+      "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-iphone-17e/"
     },
     {
-      "title": "Anthropic起诉五角大楼 被列为供应链风险",
-      "source": "Fortune/Wired",
+      "title": "五角大楼延长Anthropic AI使用期限",
+      "source": "Reuters",
       "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
-      "summary": "AI公司Anthropic在加州和华盛顿特区提起诉讼，挑战美国国防部将其列为「供应链风险」的决定。公司在法庭文件中透露，此标签已威胁到数亿美元的2026年国防相关收入，若合作伙伴全面断绝关系，损失可能达数十亿美元。多位来自OpenAI和谷歌的AI业界重要人物，包括谷歌首席科学家Jeff Dean，已提交支持Anthropic的法庭之友意见书。该案罕见地揭示了这家AI独角兽的财务状况。",
-      "url": "https://fortune.com/2026/03/10/will-ai-take-your-job-this-chart-in-an-economic-study-by-anthropic-may-give-you-a-hint-but-the-answer-is-complicated/"
+      "summary": "路透社获得的内部备忘录显示，美国国防部已通知高层领导，若被认定对国家安全至关重要，Anthropic的AI工具可在此前宣布的6个月淘汰期后继续使用。此举表明尽管Anthropic近期被列为「供应链风险」，五角大楼仍高度依赖其AI能力。该公司上周起诉国防部，称风险标签已威胁到数亿美元的国防相关收入。",
+      "url": "https://www.reuters.com/technology/"
     },
     {
-      "title": "前Meta AI负责人创业公司估值35亿美元",
-      "source": "New York Times",
+      "title": "Uber与Zoox签署多年合作 部署无人出租车",
+      "source": "Reuters",
       "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1200&q=80",
-      "summary": "图灵奖得主、前Meta首席AI科学家Yann LeCun创办的AMI Labs完成新一轮融资，公司估值达到35亿美元。AMI Labs首席执行官Alex LeBrun表示，公司目前专注于基础研究，未来将拓展至产品领域。其技术有望应用于医疗健康和机器人等多个领域。这是继Anthropic、OpenAI之后，又一位AI领域顶级学者创办的公司获得巨额估值，反映出市场对下一代AI技术的强烈期待。",
-      "url": "https://www.nytimes.com/2026/03/10/technology/ami-labs-yann-lecun-funding.html"
+      "summary": "Uber宣布与亚马逊旗下自动驾驶公司Zoox签署多年期合作协议，将在其叫车平台上部署Zoox专门设计的无人出租车。这是Zoox首次与第三方叫车服务合作，标志着其从技术研发向商业运营的重要转变。与此同时，英伟达宣布向「新云」公司Nebius投资20亿美元，持续加码AI数据中心建设。两笔交易反映出科技巨头在自动驾驶和AI基础设施领域的激烈竞争。",
+      "url": "https://www.reuters.com/technology/artificial-intelligence/"
     }
   ],
-  "updated_at": "2026-03-11T18:01:00+08:00"
+  "updated_at": "2026-03-12T08:00:00+08:00"
 }

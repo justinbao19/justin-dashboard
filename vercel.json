@@ -1,5 +1,9 @@
 {
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "framework": null
+  "version": 2,
+  "public": true,
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/tracks/(.*)", "dest": "/tracks/$1" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
 }

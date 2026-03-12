@@ -2,40 +2,40 @@
   "date": "2026年3月12日",
   "items": [
     {
-      "title": "32国释放石油储备 应对霍尔木兹海峡危机",
-      "source": "NYT/Reuters",
+      "title": "波斯湾再有3艘船只遇袭起火 战争持续升级",
+      "source": "ABC News/Al Jazeera",
       "image": "https://images.unsplash.com/photo-1518611507436-f9221403cca2?w=1200&q=80",
-      "summary": "美以对伊朗战争进入第12天，伊朗称已有超过1300名平民丧生、近万处民用设施遭袭。随着霍尔木兹海峡航运受阻，国际能源署宣布32个成员国联合释放战略石油储备，总量相当于全球12天的需求。中国虽非IEA成员，但近月来大量购入原油，战略储备已达12亿桶。布伦特原油价格剧烈波动，市场对冲突走向保持高度警惕。",
-      "url": "https://www.nytimes.com/live/2026/03/11/world/iran-war-news-trump-oil-israel"
+      "summary": "美以对伊朗战争进入第12天，波斯湾海域今日又有3艘船只被「不明抛射物」击中起火。伊朗官方称已有超过1300名平民丧生、近万处民用设施遭袭。以色列国防军同日宣布摧毁了黎巴嫩境内的真主党导弹发射器，回应此前的火箭弹袭击。地区局势持续恶化，霍尔木兹海峡航运安全面临严峻挑战，全球能源市场保持高度紧张。",
+      "url": "https://abcnews.com/International/live-updates/iran-live-updates/?id=130893022"
     },
     {
-      "title": "以色列大规模空袭黎巴嫩 报复真主党火箭攻击",
-      "source": "CNN/Al Jazeera",
-      "image": "https://images.unsplash.com/photo-1591696205602-2f950c417cb9?w=1200&q=80",
-      "summary": "以色列周三宣布对黎巴嫩发动「大规模」空袭，回应伊朗支持的真主党数十枚火箭弹袭击。伊朗同日声称打击了以色列军事情报设施和海军基地，迪拜也传出爆炸声。印度外交部对一艘印度方向的泰国船只遇袭表示谴责，称冲突中的无辜生命损失「不可接受」。伊朗还警告谷歌、亚马逊、微软、英伟达等美国科技巨头，将其列为「合法打击目标」。",
-      "url": "https://www.cnn.com/2026/03/11/middleeast/us-israel-iran-middle-east-war-what-we-know-intl-hnk"
+      "title": "印度股市大跌 战争阴云笼罩全球市场",
+      "source": "Times of India",
+      "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80",
+      "summary": "受美伊战争持续影响，印度股市周四开盘大跌。Nifty50指数跌破23600点，孟买证券交易所Sensex指数下跌超过900点。投资者对战争走向高度担忧，油价波动加剧市场避险情绪。分析师指出，若冲突持续扩大，新兴市场股市可能面临更大下行压力。与此同时，黄金价格继续攀升，避险资产受到追捧。",
+      "url": "https://timesofindia.indiatimes.com/business/india-business/stock-market-today-nifty50-bse-sensex-march-12-2026/"
     },
     {
-      "title": "苹果发布入门款iPhone 17e",
-      "source": "Apple Newsroom",
-      "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=1200&q=80",
-      "summary": "苹果正式推出iPhone 17e，定位入门级市场。新机采用更环保的制造工艺，供应链中55%的电力来自风能和太阳能等可再生能源。苹果强调该机型在耐用性、可维修性和软件支持方面达到业界领先水平。这是苹果「e」系列的首款机型，旨在以更亲民的价格吸引预算敏感型消费者，同时保持苹果产品一贯的品质标准。",
-      "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-iphone-17e/"
+      "title": "中国全国人大闭幕 通过十五五规划纲要",
+      "source": "人民日报/新华社",
+      "image": "https://images.unsplash.com/photo-1529068755536-a5ade0dcb4e8?w=1200&q=80",
+      "summary": "十四届全国人大四次会议今日在北京人民大会堂闭幕。会议审议通过了政府工作报告和「十五五」规划纲要（2026-2030年），为中国未来五年发展绘制蓝图。代表们还审议通过了最高人民法院和最高人民检察院的工作报告。此次两会在复杂国际形势下召开，规划纲要强调科技自主、扩大内需和高质量发展。",
+      "url": "http://en.people.cn/n3/2026/0312/c90000-20435301.html"
     },
     {
-      "title": "五角大楼延长Anthropic AI使用期限",
-      "source": "Reuters",
-      "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
-      "summary": "路透社获得的内部备忘录显示，美国国防部已通知高层领导，若被认定对国家安全至关重要，Anthropic的AI工具可在此前宣布的6个月淘汰期后继续使用。此举表明尽管Anthropic近期被列为「供应链风险」，五角大楼仍高度依赖其AI能力。该公司上周起诉国防部，称风险标签已威胁到数亿美元的国防相关收入。",
-      "url": "https://www.reuters.com/technology/"
+      "title": "特朗普习近平峰会临近 双方议程仍不明朗",
+      "source": "纽约时报",
+      "image": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=1200&q=80",
+      "summary": "据纽约时报报道，特朗普与习近平的高峰会晤日益临近，但中方分析人士坦言对美方议程「摸不透」。与此前中美领导人会晤不同，此次美国企业高管未获邀同行。中国正重建与朝鲜的紧密关系，金正恩近日致信习近平称两国「社会主义共同事业」合作将「更加紧密」。中美关系走向成为全球关注焦点。",
+      "url": "https://www.nytimes.com/2026/03/11/world/asia/china-us-trump-ceos.html"
     },
     {
-      "title": "Uber与Zoox签署多年合作 部署无人出租车",
-      "source": "Reuters",
-      "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1200&q=80",
-      "summary": "Uber宣布与亚马逊旗下自动驾驶公司Zoox签署多年期合作协议，将在其叫车平台上部署Zoox专门设计的无人出租车。这是Zoox首次与第三方叫车服务合作，标志着其从技术研发向商业运营的重要转变。与此同时，英伟达宣布向「新云」公司Nebius投资20亿美元，持续加码AI数据中心建设。两笔交易反映出科技巨头在自动驾驶和AI基础设施领域的激烈竞争。",
-      "url": "https://www.reuters.com/technology/artificial-intelligence/"
+      "title": "中国紧急禁止3月燃油出口 应对能源危机",
+      "source": "Reuters/印度商业报",
+      "image": "https://images.unsplash.com/photo-1545259742-b4fd8fea67e6?w=1200&q=80",
+      "summary": "据路透社援引消息人士报道，中国已下令立即禁止3月份的燃油出口。此举被视为应对当前中东局势导致的能源供应紧张。中国虽非国际能源署成员，但近月来大量购入原油，战略储备已攀升至创纪录水平。分析人士指出，禁止出口将确保国内能源安全，但可能加剧亚洲地区燃油供应紧张，推高周边国家进口成本。",
+      "url": "https://www.thehindubusinessline.com/news/world/china-orders-immediate-ban-on-march-fuel-exports-sources-say/article70733781.ece"
     }
   ],
-  "updated_at": "2026-03-12T08:00:00+08:00"
+  "updated_at": "2026-03-12T18:01:00+08:00"
 }

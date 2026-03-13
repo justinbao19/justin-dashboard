@@ -1,41 +1,41 @@
 {
-  "date": "2026年3月13日",
+  "date": "2026年3月14日",
   "items": [
     {
-      "title": "伊朗霍尔木兹海峡布雷 以色列持续空袭贝鲁特德黑兰",
-      "source": "纽约时报/The Hindu",
-      "image": "https://images.unsplash.com/photo-1518611507436-f9221403cca2?w=1200&q=80",
-      "summary": "美伊战争进入第13天，美国官员证实伊朗正使用小型船只在霍尔木兹海峡布设水雷，严重威胁全球石油运输通道。与此同时，以色列空军对黎巴嫩首都贝鲁特和伊朗首都德黑兰发动新一轮空袭，爆炸声彻夜不断。波斯湾又有两艘外国油轮遭袭爆炸，造成至少1人死亡。国际油价飙升至每桶100美元以上，全球能源市场陷入恐慌。",
-      "url": "https://www.nytimes.com/live/2026/03/12/world/iran-war-news-trump-oil-israel"
-    },
-    {
-      "title": "苹果发布M5 MacBook Air和iPhone 17e 强化AI功能",
-      "source": "Apple Newsroom",
-      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&q=80",
-      "summary": "苹果公司今日正式发布搭载M5芯片的全新MacBook Air，号称「为全球最受欢迎的笔电带来卓越性能和扩展AI能力」。同时发布的还有iPhone 17e，起售价599美元，提供黑、白、粉三色及256GB/512GB存储选项。这是苹果「入门级」iPhone产品线的重大升级，将苹果智能（Apple Intelligence）带给更多用户。两款新品将于本月晚些时候开始发货。",
-      "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-the-new-macbook-air-with-m5/"
-    },
-    {
-      "title": "美伊战争6天花费113亿美元 五角大楼向国会报告",
+      "title": "以色列对伊朗基础设施发动「大规模空袭」",
       "source": "纽约时报",
+      "image": "https://images.unsplash.com/photo-1518611507436-f9221403cca2?w=1200&q=80",
+      "summary": "以色列军方宣布对伊朗发动「广泛的打击波」，目标锁定伊朗关键基础设施。美国中央司令部指挥官透露，目前有超过5万名美军士兵、200架战斗机、两艘航母及多架轰炸机参与作战行动。周日一架伊朗无人机袭击造成4名美军士兵阵亡，美方已公布遇难者姓名。战事进入第14天，中东局势持续恶化。",
+      "url": "https://www.nytimes.com/live/2026/03/03/world/iran-war-israel-lebanon-trump"
+    },
+    {
+      "title": "美军误炸伊朗小学致165人死亡 参议员要求调查",
+      "source": "美联社",
       "image": "https://images.unsplash.com/photo-1569025690938-a00729c9e1f4?w=1200&q=80",
-      "summary": "美国国防部向国会报告称，对伊战争前6天已耗资113亿美元，且这一数字尚未包含与军事集结相关的诸多开支。五角大楼官员坦承实际成本可能更高。与此同时，美军一架空中加油机在伊拉克境内坠毁。初步调查显示，此前造成平民伤亡的学校误炸事件系美方使用过时目标数据所致，推翻了特朗普政府此前将责任推给伊朗的说法。",
-      "url": "https://www.nytimes.com/live/2026/03/11/world/iran-war-news-trump-oil-israel"
+      "summary": "据美国官员透露，美军在冲突初期使用「过时情报」，导致一枚导弹误中伊朗一所小学，造成超过165人死亡，其中多数为儿童。此前特朗普政府曾将责任推给伊朗，但新证据推翻了这一说法。多名参议员已要求国防部长赫格塞斯作出解释。这一悲剧性误炸引发国际社会强烈谴责，反战呼声持续高涨。",
+      "url": "https://apnews.com/article/iran-us-school-hegseth-trump-2ffff06808f7a584b0a03831897ab0b8"
     },
     {
-      "title": "迪拜遭伊朗袭击爆炸 海湾局势急剧升级",
-      "source": "Indian Express/BBC",
+      "title": "伊朗战争冲击全球经济 石油贸易几近瘫痪",
+      "source": "CNN/CBS",
       "image": "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&q=80",
-      "summary": "迪拜今日传出多起爆炸声，伊朗加大对海湾合作委员会（GCC）国家的攻击力度。印度在联合国安理会与多国共同提交决议案，谴责伊朗对GCC成员国及约旦的袭击行为。海湾地区安全形势急剧恶化，多国发布旅行警告。俄罗斯原本预算乌拉尔原油价格为每桶59美元，但盟友伊朗遇袭已将油价推高至80美元以上，克里姆林宫态度微妙。",
-      "url": "https://indianexpress.com/article/education/today-news-headlines-for-school-assembly-march-13-2026-explosions-rock-dubai-as-iran-steps-up-attacks-in-gulf-10578425/"
+      "summary": "美伊战争进入第14天，伊朗持续在霍尔木兹海峡制造紧张局势，全球石油贸易遭受严重冲击。伊朗对海湾国家和海上目标的袭击范围不断扩大，国际油价剧烈波动。分析师警告，若冲突持续，全球经济将面临衰退风险。与此同时，特朗普表示伊朗国家足球队仍「欢迎」参加今年在美国举办的世界杯。",
+      "url": "https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-12-26"
     },
     {
-      "title": "东盟紧急召开外长视频会议 讨论西亚危机",
-      "source": "The Hindu",
+      "title": "密歇根犹太教堂遇袭 凶手系黎巴嫩裔美国公民",
+      "source": "纽约时报",
       "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&q=80",
-      "summary": "西亚战事不断扩大，东盟决定今日召开经济部长会议，并同日举行外长视频会议紧急磋商应对之策。这场冲突已对全球供应链和能源安全造成严重冲击，东南亚国家担忧波及本地区经济。与会各国将讨论能源储备、航运安全及人道主义援助等议题。分析人士指出，若战争持续，亚洲新兴经济体将面临通胀压力和增长放缓的双重挑战。",
-      "url": "https://www.thehindu.com/news/top-news-of-the-day-march-12-2026/article70735065.ece"
+      "summary": "美国国土安全部证实，密歇根州犹太教堂袭击案嫌疑人为一名41岁的黎巴嫩裔归化美国公民，该嫌疑人在袭击中被击毙。联邦调查人员仍在追查作案动机。这起发生在「以色列圣殿」犹太教堂的袭击事件震惊全美，引发对中东战争外溢至美国本土的担忧。当局已加强全国犹太社区的安保措施。",
+      "url": "https://www.nytimes.com/live/2026/03/12/us/temple-israel-michigan-shooting"
+    },
+    {
+      "title": "特朗普幕僚争夺战争走向话语权 退出策略难觅",
+      "source": "路透社",
+      "image": "https://images.unsplash.com/photo-1501466044931-62695aada8e9?w=1200&q=80",
+      "summary": "路透社独家报道称，随着伊朗战争陷入僵局，特朗普政府内部对战争结束方式产生严重分歧。多名高级幕僚正在争夺影响总统决策的主导权。目前看不到明确的「退出路径」，五角大楼警告战争成本将持续攀升。分析人士指出，这场冲突正成为特朗普第二任期最大的外交政策考验。",
+      "url": "https://www.reuters.com/world/us/with-iran-war-exit-elusive-trump-aides-vie-affect-outcome-2026-03-13/"
     }
   ],
-  "updated_at": "2026-03-13T08:00:00+08:00"
+  "updated_at": "2026-03-14T00:05:00+08:00"
 }

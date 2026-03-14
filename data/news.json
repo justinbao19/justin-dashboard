@@ -2,40 +2,40 @@
   "date": "2026年3月14日",
   "items": [
     {
-      "title": "伊朗战争僵局：白宫幕僚争夺战争走向话语权",
-      "source": "路透社",
+      "title": "美以伊朗战争第14天：美军加油机坠毁致6人遇难",
+      "source": "CNN",
       "image": "https://images.unsplash.com/photo-1501466044931-62695aada8e9?w=1200&q=80",
-      "summary": "路透社独家披露，美伊战争进入第14天，特朗普政府内部对如何结束战争产生严重分歧。高级幕僚争相影响总统决策，但「退出路径」仍不明朗。战事持续蔓延至整个中东地区，五角大楼警告军事开支将进一步攀升。分析人士指出，这场冲突已成为特朗普第二任期最严峻的外交考验，其公开表态反复摇摆正反映出幕后的激烈博弈。",
-      "url": "https://www.reuters.com/world/us/with-iran-war-exit-elusive-trump-aides-vie-affect-outcome-2026-03-13/"
+      "summary": "美以对伊朗战争进入第14天，美国中央司令部证实一架空中加油机在伊拉克坠毁，机上6名美军人员全部遇难。与此同时，以色列对德黑兰发动新一轮空袭，伊朗则持续封锁霍尔木兹海峡进行报复。据统计，两周战事已造成超过2000人死亡，包括军事人员与平民。布伦特原油价格飙升至每桶103美元，全球经济承受巨大压力。",
+      "url": "https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-13-26"
     },
     {
-      "title": "伊朗新最高领袖首次表态：霍尔木兹海峡将持续封锁",
+      "title": "特朗普发出最后通牒：一周内「非常猛烈」打击伊朗",
       "source": "路透社",
       "image": "https://images.unsplash.com/photo-1518611507436-f9221403cca2?w=1200&q=80",
-      "summary": "伊朗新任最高领袖在战争爆发后首次公开讲话中强硬表态，宣布将继续封锁霍尔木兹海峡。与此同时，以色列总理内塔尼亚胡向伊朗发出「含蓄威胁」，称伊朗已「今非昔比」，并警告真主党将为其侵略付出沉重代价。全球石油贸易因海峡封锁几近瘫痪，国际油价持续剧烈震荡，能源危机阴云笼罩全球市场。",
-      "url": "https://www.reuters.com/world/iran-war-live-six-tankers-attacked-gulf-strait-hormuz-2026-03-12/"
+      "summary": "特朗普宣称美军已摧毁伊朗哈尔克岛上「每一个军事目标」，并威胁若霍尔木兹海峡航道不解封，将在未来一周对伊朗石油基础设施发动更猛烈打击。他提出可派美军护航船只通过海峡，并称伊朗的海上攻击是「垂死挣扎」。国防部长赫格塞斯誓言将「重新开放」海峡，但分析人士对短期内解决危机持悲观态度。",
+      "url": "https://www.reuters.com/world/middle-east/both-sides-dig-iran-war-approaches-two-week-mark-2026-03-13/"
     },
     {
-      "title": "Adobe CEO宣布离职 AI颠覆冲击传统软件巨头",
-      "source": "路透社",
-      "image": "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=1200&q=80",
-      "summary": "Adobe长期掌门人宣布将卸任CEO职务，消息公布后公司股价应声下跌。业内分析认为，此次高层变动反映出AI技术对传统软件行业的深刻冲击——生成式AI工具正在颠覆创意软件市场格局。Adobe近年来虽积极布局AI功能，但面对OpenAI、Midjourney等新兴势力的竞争压力与日俱增。这一人事变动标志着科技行业「AI转型」浪潮进入新阶段。",
-      "url": "https://www.reuters.com/technology/"
-    },
-    {
-      "title": "美股剧烈分化：科技股反弹 道指因利率担忧回落",
-      "source": "TheStreet",
+      "title": "美股连续三周下跌 标普500创2026年新低",
+      "source": "CNBC",
       "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80",
-      "summary": "周五美股呈现「冰火两重天」格局。纳斯达克指数终结连跌走势，收涨0.62%，英伟达等半导体股在供应链利好消息刺激下反弹1-2%。然而道指承压下行，科技权重股Salesforce跌逾3%，微软、苹果、亚马逊均录得跌幅。市场关注焦点转向今日公布的PCE通胀数据及第四季度GDP修正值，若经济增长持续疲软叠加能源成本飙升，「滞胀」叙事或将主导二季度行情。",
-      "url": "https://www.thestreet.com/markets/stock-market-today-march-13-2026"
+      "summary": "美股周五收盘延续颓势，标普500指数创下2026年以来新低，本周累计下跌1.6%，录得近一年来首次连续三周下跌。道琼斯指数本周跌幅约2%，纳斯达克下跌1.3%。中东局势持续紧张推高油价，叠加通胀数据预期不佳，投资者风险偏好大幅下降。市场目前高度关注即将公布的PCE通胀数据及GDP修正值。",
+      "url": "https://www.cnbc.com/2026/03/12/stock-market-today-live-updates.html"
     },
     {
-      "title": "字节跳动获取英伟达顶级AI芯片 引发供应链关注",
-      "source": "华尔街日报",
+      "title": "英伟达GTC 2026大会下周开幕 黄仁勋将发表主旨演讲",
+      "source": "TechCrunch",
       "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
-      "summary": "据华尔街日报报道，中国科技巨头字节跳动已成功获取英伟达最先进的AI芯片。在美国对华芯片出口管制持续收紧的背景下，这一消息引发业界高度关注。分析人士指出，字节跳动可能通过「第三方渠道」或在管制生效前囤货获得这批芯片。此事或将促使美国政府进一步加强出口管制执法力度，中美科技博弈再添新变数。",
-      "url": "https://www.reuters.com/technology/"
+      "summary": "英伟达年度GPU技术大会（GTC 2026）将于下周一在加州圣何塞开幕，CEO黄仁勋将于当地时间上午11点发表主旨演讲。作为英伟达旗舰级年度盛会，GTC历来是发布新产品、宣布重要合作、展望计算未来的重要舞台。业界普遍预期黄仁勋将公布下一代AI芯片路线图及与主要云厂商的深化合作，AI服务器市场规模预计2026年将达5659亿美元。",
+      "url": "https://techcrunch.com/2026/03/12/how-to-watch-jensen-huangs-nvidia-gtc-2026-keynote/"
+    },
+    {
+      "title": "特朗普政府推进「创世纪计划」 加速AI与量子技术发展",
+      "source": "Axios",
+      "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&q=80",
+      "summary": "据Axios报道，特朗普政府正大力推进名为「创世纪计划」的科技战略，旨在利用AI和新兴技术革新能源、药物研发、国家安全和科学研究等领域。计划目标包括在2026年底前完成量子技术突破、扩大技术人才队伍、制定新型超级计算机蓝图。与此同时，云计算巨头们预计2026年基础设施投资将超6000亿美元，同比增长约36%。",
+      "url": "https://techstartups.com/2026/03/13/top-tech-news-today-march-13-2026/"
     }
   ],
-  "updated_at": "2026-03-14T00:15:00+08:00"
+  "updated_at": "2026-03-14T08:00:00+08:00"
 }

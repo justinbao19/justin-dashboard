@@ -1,36 +1,45 @@
 {
-  "date": "2026年3月16日",
+  "lastUpdated": "2026-03-16T18:02:00+08:00",
   "items": [
     {
-      "title": "美以对伊朗战争第16天：死亡人数达1444人 特朗普警告北约保护霍尔木兹海峡",
-      "source": "半岛电视台",
-      "image": "https://images.unsplash.com/photo-1569974507005-6dc61f97fb5c?w=1200&q=80",
-      "summary": "美以对伊朗军事行动进入第16天，伊朗死亡人数升至1444人，以色列15人、美军13人阵亡，海湾国家19人遇难。美以联军继续打击伊斯法罕等目标。伊朗外长表示对「愿意谈判安全通行」的国家开放，暗示霍尔木兹海峡封锁可能松动。特朗普向北约发出警告，呼吁盟国派军舰护航。特朗普接受NBC采访称伊朗「想要达成协议」，但条件「还不够好」，战争短期内难以结束。"
+      "id": 1,
+      "title": "美以对伊朗战争进入第三周",
+      "summary": "美国与以色列对伊朗的军事行动已进入第16天。以色列空袭伊斯法罕造成15人死亡，伊朗则对以色列和海湾国家发动报复性打击。迪拜机场因无人机袭击关闭，阿布扎比郊区一名巴勒斯坦平民遭导弹袭击身亡。伊朗外长谴责以色列袭击燃料储存设施为「生态灭绝」，同时表示愿与各国讨论霍尔木兹海峡安全通行问题。",
+      "source": "Al Jazeera / NYT",
+      "url": "https://www.aljazeera.com/news/2026/3/15/iran-war-what-is-happening-on-day-16-of-us-israel-attacks",
+      "timestamp": "2026-03-16T17:00:00+08:00"
     },
     {
-      "title": "NVIDIA GTC 2026今日开幕 黄仁勋将发布新一代AI服务器芯片",
-      "source": "NVIDIA官方博客",
-      "image": "https://images.unsplash.com/photo-1591405351990-4726e331f141?w=1200&q=80",
-      "summary": "NVIDIA年度GTC大会今日在圣何塞SAP中心开幕，CEO黄仁勋将于美西时间上午11点发表主旨演讲。市场预期本次大会将发布面向「智能体AI」的新型服务器芯片和机架级解决方案，标志NVIDIA从单一GPU向CPU和完整系统的战略转型。华尔街分析师普遍看好，认为GTC或成为市场催化剂。大会为期四天（3月16-19日），将展示开源AI模型、自动驾驶技术和物理仿真等前沿成果。"
+      "id": 2,
+      "title": "特朗普施压北约与中国协助打通霍尔木兹海峡",
+      "summary": "随着中东战事进入第三周，特朗普总统向北约盟国和中国施压，要求协助确保霍尔木兹海峡的航行安全。特朗普警告称，拒绝帮助将对「北约的未来非常不利」。然而多国对此要求态度冷淡。与此同时，特朗普团队调整宣传策略，强调「必胜」论述以挽回参议院中动摇的支持。",
+      "source": "New York Times",
+      "url": "https://www.nytimes.com/live/2026/03/16/world/iran-war-trump-oil-lebanon",
+      "timestamp": "2026-03-16T17:50:00+08:00"
     },
     {
-      "title": "F1中国大奖赛：19岁新星Antonelli夺首冠 汉密尔顿获法拉利最佳成绩",
-      "source": "路透社",
-      "image": "https://images.unsplash.com/photo-1504707748692-419802f1f7e2?w=1200&q=80",
-      "summary": "2026年F1中国大奖赛今日在上海国际赛车场落幕，梅赛德斯19岁意大利新星Kimi Antonelli强势夺冠，拿下职业生涯首个分站冠军，也是F1历史上最年轻的大奖赛冠军之一。梅赛德斯车队老板沃尔夫赛后试图降温，表示不希望外界对新人期望过高。刘易斯·汉密尔顿为法拉利拿下本赛季最佳成绩，感叹「首冠就在眼前」。Antonelli的表现让他直接进入年度冠军争夺行列。"
+      "id": 3,
+      "title": "鸿海利润不及预期引发AI服务器需求担忧",
+      "summary": "英伟达主要代工合作伙伴鸿海精密（富士康）公布季度利润同比下降2.4%，低于市场预期。这一数据引发市场对AI服务器需求可能放缓的担忧。作为全球最大电子代工厂商，鸿海是AI基础设施建设的关键供应商，其业绩表现被视为AI产业景气度的重要风向标。",
+      "source": "Bloomberg",
+      "url": "https://www.bloomberg.com/news/articles/2026-03-16/nvidia-partner-hon-hai-s-profit-miss-raises-ai-demand-fears",
+      "timestamp": "2026-03-16T15:00:00+08:00"
     },
     {
-      "title": "IEA警告：全球石油供应3月将骤降800万桶/日 中东减产超千万桶",
-      "source": "路透社",
-      "image": "https://images.unsplash.com/photo-1501466044931-62695aada8e9?w=1200&q=80",
-      "summary": "国际能源署（IEA）最新报告显示，受美以对伊朗战争影响，全球石油供应预计3月下降800万桶/日，中东主要产油国已减产至少1000万桶/日。霍尔木兹海峡封锁导致全球约20%的石油运输受阻。油价持续高位震荡，布伦特原油逼近历史高点。IEA呼吁各国释放战略储备以稳定市场，但警告若冲突升级，能源危机将进一步恶化。欧洲多国已启动能源应急预案。"
+      "id": 4,
+      "title": "字节跳动因版权纠纷暂停AI视频模型发布",
+      "summary": "据The Information报道，字节跳动已暂停其最新AI视频生成模型的发布计划，原因是遭遇版权争议。此举反映出AI生成内容领域日益紧张的知识产权问题。随着各大科技公司竞相推出视频AI工具，如何在创新与版权保护之间取得平衡成为行业共同面临的挑战。",
+      "source": "Reuters / The Information",
+      "url": "https://www.reuters.com/technology/",
+      "timestamp": "2026-03-16T15:00:00+08:00"
     },
     {
-      "title": "Meta计划大规模裁员 AI成本飙升压缩利润空间",
-      "source": "路透社",
-      "image": "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1200&q=80",
-      "summary": "路透社独家报道，Meta正计划大规模裁员，原因是AI基础设施成本持续攀升，严重压缩公司利润空间。消息人士透露，此次裁员规模可能是继2022-2023年「效率年」后最大的一轮人员调整。Meta近年在AI领域投入数百亿美元建设数据中心和GPU集群，但AI产品变现进度落后于预期。扎克伯格此前承诺2026年将是「AI货币化元年」，但市场对此存疑。股价盘后微跌。"
+      "id": 5,
+      "title": "印度医院火灾致10人死亡 卢比汇率跌至92.43",
+      "summary": "印度奥里萨邦卡塔克市一家医院ICU发生火灾，造成10名患者死亡、11名医护人员受伤。首席部长已下令调查事故原因。同日，印度卢比兑美元汇率下跌13派萨至92.43，创下新低。另外，印度37个联邦院席位的选举投票在10个邦同步进行，执政党BJP将全部议员转移至帕拉迪普以确保投票纪律。",
+      "source": "Times Now / The Hindu",
+      "url": "https://www.timesnownews.com/india/breaking-news-today-live-updates-march-16-2026-parliament-budget-session-rajya-sabha-election-maharashtra-odisha-tamil-nadu-west-bengal-assam-bihar-chhattisgarh-haryana-himachal-pradesh-telangana-liveblog-153843742",
+      "timestamp": "2026-03-16T17:55:00+08:00"
     }
-  ],
-  "updated_at": "2026-03-16T08:00:00+08:00"
+  ]
 }

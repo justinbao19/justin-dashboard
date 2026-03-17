@@ -1,45 +1,45 @@
 {
-  "lastUpdated": "2026-03-17T08:00:00+08:00",
+  "lastUpdated": "2026-03-17T18:02:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美以对伊战争第17天：以色列空袭德黑兰，特朗普称「战争将很快结束」",
-      "summary": "美以对伊朗军事行动进入第17天。以色列宣布对德黑兰发动新一轮空袭，伊朗随即回应「敌对目标」。迪拜机场因燃料储罐遭无人机袭击再度停航。特朗普表示战争将「很快结束」，同时宣布推迟原定3月底的访华行程「一个月左右」。据CNN报道，自冲突以来已有13名美军阵亡、约200人受伤。特朗普批评北约盟国拒绝协助护航霍尔木兹海峡。",
-      "source": "Al Jazeera / CNN / Guardian",
-      "url": "https://www.aljazeera.com/news/2026/3/16/iran-war-what-is-happening-on-day-17-of-us-israel-attacks",
-      "timestamp": "2026-03-17T07:45:00+08:00"
+      "title": "伊朗战争第17天：特朗普批盟国不帮忙，推迟访华行程",
+      "summary": "美以对伊军事行动进入第17天。特朗普公开批评北约盟国拒绝协助重开霍尔木兹海峡护航任务，称「我很失望」。他同时宣布因中东局势需「留在国内坐镇」，原定3月底的访华行程将推迟。伊朗继续向邻国发射无人机，以色列北部多地遭火箭弹袭击致8人受伤。据人权组织统计，冲突至今已造成1330名平民死亡，其中包括206名儿童。特朗普被问及伊朗最高领袖穆杰塔巴·哈梅内伊状况时表示「不清楚他是死是活」。",
+      "source": "NYT / CNN / Euronews",
+      "url": "https://www.nytimes.com/live/2026/03/16/world/iran-war-trump-oil-lebanon",
+      "timestamp": "2026-03-17T18:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "美联储本周议息：伊朗战争令降息前景更加渺茫",
-      "summary": "美联储FOMC将于周二（3月17日）启动为期两天的政策会议，周三公布利率决议及经济预测摘要（SEP）。受伊朗战事推高油价影响，市场普遍预期联储将维持3.5%-3.75%利率区间不变，CME FedWatch显示99.2%概率按兵不动。分析师指出，鉴于通胀压力上升，2026年全年可能仅有一次25个基点降息，甚至完全不降息。",
-      "source": "CBS News / Kiplinger / USA Today",
-      "url": "https://www.cbsnews.com/news/federal-reserve-interest-rate-decision-iran-war/",
-      "timestamp": "2026-03-17T07:30:00+08:00"
+      "title": "中东局势推高油价，美股下跌、国债收益率上升",
+      "summary": "中东关键基础设施遭袭推动油价再度攀升，布伦特原油维持高位。受此影响，美股周一下跌，美国国债收益率上升。投资者担忧能源成本高企将加剧通胀压力，削弱美联储本周降息的可能性。亚洲市场周二开盘谨慎乐观，伊拉克石油部长称巴格达正与伊朗协商，允许部分油轮通过霍尔木兹海峡，市场对航道恢复通航的预期有所改善。",
+      "source": "Bloomberg / ABC",
+      "url": "https://www.bloomberg.com/news/articles/2026-03-16/stock-market-today-dow-s-p-live-updates-",
+      "timestamp": "2026-03-17T17:30:00+08:00"
     },
     {
       "id": 3,
-      "title": "苹果发布iPhone 17e及多款新品：599美元起，搭载A19芯片",
-      "summary": "苹果正式发布iPhone 17e，定位为iPhone 17系列中更亲民的机型。新机搭载A19芯片，支持MagSafe，起步存储256GB，美国售价599美元起。CNET评测称其「以入门价格提供旗舰体验」。同日上市的还有搭载M5芯片的MacBook Air与MacBook Pro、M4版iPad Air、全新MacBook Neo，以及首款Studio Display XDR。",
-      "source": "Apple Newsroom / CNET",
+      "title": "苹果发布iPhone 17e：A19芯片、599美元起，主打性价比",
+      "summary": "苹果正式发布iPhone 17e，定位为iPhone 17系列中更亲民的机型。新机搭载A19芯片和16核神经引擎，针对大型生成式模型进行优化，支持Apple Intelligence及其他AI功能。起步存储256GB，美国售价599美元起，支持MagSafe。分析认为这是苹果回应中端市场竞争的关键一步，尤其针对安卓阵营的AI手机攻势。",
+      "source": "Apple Newsroom",
       "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-iphone-17e/",
-      "timestamp": "2026-03-17T06:00:00+08:00"
+      "timestamp": "2026-03-17T14:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "油价回落提振亚洲股市：霍尔木兹海峡通航希望升温",
-      "summary": "受油价回落提振，亚洲股市周二开盘看涨。彭博社报道，市场对霍尔木兹海峡恢复通航的预期改善，更多油轮有望通过该关键航道。此前中东紧张局势曾推动布伦特原油突破100美元关口。分析人士认为，若海峡局势缓和，能源价格回落将为全球央行提供更大政策空间。",
-      "source": "Bloomberg",
-      "url": "https://www.bloomberg.com/news/articles/2026-03-16/stock-market-today-dow-s-p-live-updates-",
-      "timestamp": "2026-03-17T06:30:00+08:00"
+      "title": "韩国KAIST研发端侧AI芯片「SoulMate」：可在设备上训练模型",
+      "summary": "韩国科学技术院（KAIST）研究团队开发出一款名为「SoulMate」的AI芯片，能够在本地设备上完成模型训练，无需依赖云端。这一突破有望让用户拥有真正「属于自己」的个人AI助手，数据完全留在设备端，隐私性大幅提升。研究人员表示该芯片可应用于智能手机、可穿戴设备等多种场景，未来将与三星等厂商探讨商业化合作。",
+      "source": "Korea JoongAng Daily",
+      "url": "https://koreajoongangdaily.joins.com/news/2026-03-17/business/tech/KAISTcreated-SoulMate-to-live-on-your-device-as-personal-AI/2546659",
+      "timestamp": "2026-03-17T16:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "特朗普称伊朗最高领袖哈梅内伊「生死未卜」",
-      "summary": "特朗普在接受记者提问时表示，「不清楚」伊朗最高领袖穆杰塔巴·哈梅内伊「是死是活」。这一表态引发广泛关注。伊朗方面否认与美方存在直接接触的报道。与此同时，伊朗当天继续向邻国发射无人机，以色列北部多地拉响警报，至少8人在火箭弹袭击中受伤。",
-      "source": "Euronews / Haaretz",
-      "url": "https://www.euronews.com/2026/03/16/gulf-states-report-drone-attacks-early-on-monday-as-iran-war-enters-day-17",
-      "timestamp": "2026-03-17T07:00:00+08:00"
+      "title": "伊朗宣布逮捕10名外国间谍，美驻巴格达使馆遇袭视频曝光",
+      "summary": "伊朗当局宣布逮捕10名涉嫌从事间谍活动的外国人，但未透露国籍及具体指控。与此同时，美国驻巴格达大使馆遭袭击的视频在社交媒体曝光。俄罗斯方面称夜间击落206架乌克兰无人机，其中43架飞向莫斯科地区。分析人士指出，中东和东欧两大热点地区的紧张态势正相互交织，给全球安全格局带来更大不确定性。",
+      "source": "ABC / Pravda",
+      "url": "https://www.abc.net.au/news/2026-03-17/middle-east-live-updates-march-17-2026/106462358",
+      "timestamp": "2026-03-17T17:00:00+08:00"
     }
   ]
 }

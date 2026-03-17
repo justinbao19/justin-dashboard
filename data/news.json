@@ -1,45 +1,45 @@
 {
-  "lastUpdated": "2026-03-16T18:02:00+08:00",
+  "lastUpdated": "2026-03-17T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美以对伊朗战争进入第三周",
-      "summary": "美国与以色列对伊朗的军事行动已进入第16天。以色列空袭伊斯法罕造成15人死亡，伊朗则对以色列和海湾国家发动报复性打击。迪拜机场因无人机袭击关闭，阿布扎比郊区一名巴勒斯坦平民遭导弹袭击身亡。伊朗外长谴责以色列袭击燃料储存设施为「生态灭绝」，同时表示愿与各国讨论霍尔木兹海峡安全通行问题。",
-      "source": "Al Jazeera / NYT",
-      "url": "https://www.aljazeera.com/news/2026/3/15/iran-war-what-is-happening-on-day-16-of-us-israel-attacks",
-      "timestamp": "2026-03-16T17:00:00+08:00"
+      "title": "美以对伊战争第17天：以色列空袭德黑兰，特朗普称「战争将很快结束」",
+      "summary": "美以对伊朗军事行动进入第17天。以色列宣布对德黑兰发动新一轮空袭，伊朗随即回应「敌对目标」。迪拜机场因燃料储罐遭无人机袭击再度停航。特朗普表示战争将「很快结束」，同时宣布推迟原定3月底的访华行程「一个月左右」。据CNN报道，自冲突以来已有13名美军阵亡、约200人受伤。特朗普批评北约盟国拒绝协助护航霍尔木兹海峡。",
+      "source": "Al Jazeera / CNN / Guardian",
+      "url": "https://www.aljazeera.com/news/2026/3/16/iran-war-what-is-happening-on-day-17-of-us-israel-attacks",
+      "timestamp": "2026-03-17T07:45:00+08:00"
     },
     {
       "id": 2,
-      "title": "特朗普施压北约与中国协助打通霍尔木兹海峡",
-      "summary": "随着中东战事进入第三周，特朗普总统向北约盟国和中国施压，要求协助确保霍尔木兹海峡的航行安全。特朗普警告称，拒绝帮助将对「北约的未来非常不利」。然而多国对此要求态度冷淡。与此同时，特朗普团队调整宣传策略，强调「必胜」论述以挽回参议院中动摇的支持。",
-      "source": "New York Times",
-      "url": "https://www.nytimes.com/live/2026/03/16/world/iran-war-trump-oil-lebanon",
-      "timestamp": "2026-03-16T17:50:00+08:00"
+      "title": "美联储本周议息：伊朗战争令降息前景更加渺茫",
+      "summary": "美联储FOMC将于周二（3月17日）启动为期两天的政策会议，周三公布利率决议及经济预测摘要（SEP）。受伊朗战事推高油价影响，市场普遍预期联储将维持3.5%-3.75%利率区间不变，CME FedWatch显示99.2%概率按兵不动。分析师指出，鉴于通胀压力上升，2026年全年可能仅有一次25个基点降息，甚至完全不降息。",
+      "source": "CBS News / Kiplinger / USA Today",
+      "url": "https://www.cbsnews.com/news/federal-reserve-interest-rate-decision-iran-war/",
+      "timestamp": "2026-03-17T07:30:00+08:00"
     },
     {
       "id": 3,
-      "title": "鸿海利润不及预期引发AI服务器需求担忧",
-      "summary": "英伟达主要代工合作伙伴鸿海精密（富士康）公布季度利润同比下降2.4%，低于市场预期。这一数据引发市场对AI服务器需求可能放缓的担忧。作为全球最大电子代工厂商，鸿海是AI基础设施建设的关键供应商，其业绩表现被视为AI产业景气度的重要风向标。",
-      "source": "Bloomberg",
-      "url": "https://www.bloomberg.com/news/articles/2026-03-16/nvidia-partner-hon-hai-s-profit-miss-raises-ai-demand-fears",
-      "timestamp": "2026-03-16T15:00:00+08:00"
+      "title": "苹果发布iPhone 17e及多款新品：599美元起，搭载A19芯片",
+      "summary": "苹果正式发布iPhone 17e，定位为iPhone 17系列中更亲民的机型。新机搭载A19芯片，支持MagSafe，起步存储256GB，美国售价599美元起。CNET评测称其「以入门价格提供旗舰体验」。同日上市的还有搭载M5芯片的MacBook Air与MacBook Pro、M4版iPad Air、全新MacBook Neo，以及首款Studio Display XDR。",
+      "source": "Apple Newsroom / CNET",
+      "url": "https://www.apple.com/newsroom/2026/03/apple-introduces-iphone-17e/",
+      "timestamp": "2026-03-17T06:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "字节跳动因版权纠纷暂停AI视频模型发布",
-      "summary": "据The Information报道，字节跳动已暂停其最新AI视频生成模型的发布计划，原因是遭遇版权争议。此举反映出AI生成内容领域日益紧张的知识产权问题。随着各大科技公司竞相推出视频AI工具，如何在创新与版权保护之间取得平衡成为行业共同面临的挑战。",
-      "source": "Reuters / The Information",
-      "url": "https://www.reuters.com/technology/",
-      "timestamp": "2026-03-16T15:00:00+08:00"
+      "title": "油价回落提振亚洲股市：霍尔木兹海峡通航希望升温",
+      "summary": "受油价回落提振，亚洲股市周二开盘看涨。彭博社报道，市场对霍尔木兹海峡恢复通航的预期改善，更多油轮有望通过该关键航道。此前中东紧张局势曾推动布伦特原油突破100美元关口。分析人士认为，若海峡局势缓和，能源价格回落将为全球央行提供更大政策空间。",
+      "source": "Bloomberg",
+      "url": "https://www.bloomberg.com/news/articles/2026-03-16/stock-market-today-dow-s-p-live-updates-",
+      "timestamp": "2026-03-17T06:30:00+08:00"
     },
     {
       "id": 5,
-      "title": "印度医院火灾致10人死亡 卢比汇率跌至92.43",
-      "summary": "印度奥里萨邦卡塔克市一家医院ICU发生火灾，造成10名患者死亡、11名医护人员受伤。首席部长已下令调查事故原因。同日，印度卢比兑美元汇率下跌13派萨至92.43，创下新低。另外，印度37个联邦院席位的选举投票在10个邦同步进行，执政党BJP将全部议员转移至帕拉迪普以确保投票纪律。",
-      "source": "Times Now / The Hindu",
-      "url": "https://www.timesnownews.com/india/breaking-news-today-live-updates-march-16-2026-parliament-budget-session-rajya-sabha-election-maharashtra-odisha-tamil-nadu-west-bengal-assam-bihar-chhattisgarh-haryana-himachal-pradesh-telangana-liveblog-153843742",
-      "timestamp": "2026-03-16T17:55:00+08:00"
+      "title": "特朗普称伊朗最高领袖哈梅内伊「生死未卜」",
+      "summary": "特朗普在接受记者提问时表示，「不清楚」伊朗最高领袖穆杰塔巴·哈梅内伊「是死是活」。这一表态引发广泛关注。伊朗方面否认与美方存在直接接触的报道。与此同时，伊朗当天继续向邻国发射无人机，以色列北部多地拉响警报，至少8人在火箭弹袭击中受伤。",
+      "source": "Euronews / Haaretz",
+      "url": "https://www.euronews.com/2026/03/16/gulf-states-report-drone-attacks-early-on-monday-as-iran-war-enters-day-17",
+      "timestamp": "2026-03-17T07:00:00+08:00"
     }
   ]
 }

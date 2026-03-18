@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-18T09:20:00+08:00",
+  "lastUpdated": "2026-03-18T18:04:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美以对伊战争第18天：福特号航母因火灾撤离，海峡危机持续",
-      "summary": "美以对伊朗军事行动进入第18天。美军福特号航空母舰因舰上发生火灾，预计将临时撤往港口维修。霍尔木兹海峡持续封锁，中东石油出口量较2月骤降逾60%，创全球史上最大供应中断。伊朗继续向以色列和周边海湾国家发射导弹和无人机。特朗普向北约和中国施压，要求协助重开海峡通航，同时表示「战争即将结束」，但未给出具体时间表。",
-      "image": "https://images.unsplash.com/photo-1580227974546-fbd48825d991?w=800&h=450&fit=crop",
-      "source": "Reuters / Al Jazeera / NBC",
-      "url": "https://www.aljazeera.com/news/2026/3/17/iran-war-what-is-happening-on-day-18-of-us-israel-attacks",
-      "timestamp": "2026-03-18T08:00:00+08:00"
+      "title": "伊朗安全委员会秘书长拉里贾尼遭以色列空袭身亡",
+      "summary": "伊朗最高国家安全委员会秘书长阿里·拉里贾尼（Ali Larijani）在以色列空袭中身亡，其子莫尔塔扎及多名保镖同时遇难。拉里贾尼是自战争爆发首日最高领袖哈梅内伊遇难以来，伊朗阵亡的最高级别官员。他曾担任议会议长15年，被视为伊朗「幕后权力操盘手」。与此同时，伊朗巴斯基民兵司令戈拉姆礼萨·索莱马尼也在空袭中丧生。伊朗军方誓言将进行「决定性」报复。",
+      "image": "",
+      "source": "Reuters / BBC / Guardian",
+      "url": "https://www.bbc.com/news/articles/c24deezq6meo",
+      "timestamp": "2026-03-18T17:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "特朗普因中东战争推迟访华，中美「重启」计划延后",
-      "summary": "原定于3月31日至4月2日的特朗普访华行程宣布推迟约一个月。这将是其第二任期首次北京之行。白宫表示推迟系因总统需「留在国内处理中东事务」，中方则强调两国元首直接会晤对解决双边问题至关重要。中美关系原本有望借此峰会「重启」，如今再添变数。",
-      "image": "https://images.unsplash.com/photo-1508433957232-3107f5fd5995?w=800&h=450&fit=crop",
-      "source": "NYT / Reuters / ChinaPulse",
-      "url": "https://www.nytimes.com/2026/03/16/world/middleeast/trump-visit-xi-china-iran.html",
-      "timestamp": "2026-03-18T07:30:00+08:00"
+      "title": "伊朗发射集束导弹袭击特拉维夫，造成2人死亡",
+      "summary": "伊朗伊斯兰革命卫队向以色列发动大规模报复性袭击，使用携带集束弹头的弹道导弹攻击特拉维夫地区。袭击造成拉马特甘市一对七旬夫妇遇难，另有多人受轻伤。伊朗称此次攻击是为「复仇」拉里贾尼遇刺。多枚导弹采用多弹头设计以规避防空系统，特拉维夫火车站等地点受损。这是美以对伊战争进入第18天以来最激烈的一次直接袭击。",
+      "image": "",
+      "source": "Reuters / Al Jazeera / NYT",
+      "url": "https://www.aljazeera.com/news/2026/3/18/iran-launches-revenge-missile-attack-on-israel-after-assassinations",
+      "timestamp": "2026-03-18T16:30:00+08:00"
     },
     {
       "id": 3,
-      "title": "中国年初大幅增加原油战略储备，但按兵不动",
-      "summary": "据Reuters报道，2026年前两个月中国大举增加原油战略库存，进口量和国内产量均超过炼厂加工需求。分析认为，北京正为中东局势恶化做准备，但目前尚未动用这些储备。在霍尔木兹海峡被封、全球油价高企的背景下，中国充裕的库存或成为关键筹码。",
-      "image": "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&h=450&fit=crop",
-      "source": "Reuters / Trade Compliance Resource Hub",
-      "url": "https://www.reuters.com/world/china/",
-      "timestamp": "2026-03-18T07:00:00+08:00"
+      "title": "巴基斯坦空袭喀布尔康复中心，塔利班称408人遇难",
+      "summary": "巴基斯坦对阿富汗首都喀布尔发动空袭，击中一处戒毒康复中心，阿富汗塔利班政府称造成408人死亡、250人受伤。巴方坚称目标为弹药库，否认医院遇袭。这是两周内巴基斯坦第三次空袭喀布尔。塔利班发言人警告将进行报复，两国关系急剧恶化，或将引发全面战争。巴阿边境冲突已持续数周，巴方指控塔利班庇护恐怖组织TTP（巴基斯坦塔利班）。",
+      "image": "",
+      "source": "Reuters / NYT / PBS",
+      "url": "https://www.reuters.com/world/asia-pacific/afghan-taliban-says-400-killed-250-injured-pakistan-air-strike-kabul-hospital-2026-03-17/",
+      "timestamp": "2026-03-18T15:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "沙特呼吁穆斯林今晚观测新月，开斋节或于19日到来",
-      "summary": "沙特最高法院呼吁全国穆斯林于3月18日傍晚观测伊历1447年沙瓦尔月新月。若新月被目击到，开斋节（Eid ul-Fitr）将于3月19日（周四）正式开始。斋月期间中东冲突不断升级，多国穆斯林在战火中坚持封斋和祈祷。全球约20亿穆斯林即将迎来这一重要节日。",
-      "image": "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&h=450&fit=crop",
-      "source": "Times of India",
-      "url": "https://timesofindia.indiatimes.com/world/middle-east/eid-ul-fitr-2026-moon-sighted-in-saudi-arabia-ksa-supreme-court-calls-muslims-to-spot-shawwal-ah-1447-crescent-on-march-18/articleshow/129618909.cms",
-      "timestamp": "2026-03-18T06:00:00+08:00"
+      "title": "迪拜机场恢复有限航班运营，伊朗无人机袭击海湾持续",
+      "summary": "在伊朗无人机袭击导致燃料库起火后，迪拜国际机场于周一恢复有限航班运营。阿联酋防空系统此前拦截了6枚弹道导弹和21架无人机。机场附近及迪拜河港区建筑均受波及，4名外籍工人受伤。阿联酋一度关闭领空，多家航空公司取消或绕飞海湾航线。伊朗对阿联酋富查伊拉石油枢纽的袭击仍在持续，该地区石油设施多次起火。国际航空业正面临中东上空最严重的安全危机。",
+      "image": "",
+      "source": "CNBC / Al Jazeera / HT",
+      "url": "https://www.cnbc.com/2026/03/17/uae-airspace-closure-dubai-airport-drone-strike-middle-east-flights.html",
+      "timestamp": "2026-03-18T14:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "世界棒球经典赛：委内瑞拉逆转意大利，决赛对阵美国",
-      "summary": "2026年世界棒球经典赛半决赛在迈阿密举行，委内瑞拉队在第7局落后时连得3分，以4比2逆转击败意大利队，晋级决赛。委内瑞拉将在总决赛中对阵东道主美国队，这也是经典赛历史上首次南美球队闯入决赛。",
-      "image": "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&h=450&fit=crop",
-      "source": "Yahoo Sports",
-      "url": "https://sports.yahoo.com/mlb/live/world-baseball-classic-venezuela-beats-italy-with-3-run-7th-inning-rally-to-advance-and-face-team-usa-in-final-230000658.html",
-      "timestamp": "2026-03-18T05:00:00+08:00"
+      "title": "油价飙升至103美元，霍尔木兹海峡护航联盟难成形",
+      "summary": "受伊朗对阿联酋发动新一轮袭击影响，国际油价周二上涨超3%，WTI原油突破103美元/桶。油价较美以空袭伊朗前已累计上涨约40%，峰值曾触及126美元。特朗普政府试图组建盟国联合舰队护送油轮通过霍尔木兹海峡，但北约盟友态度消极。霍尔木兹海峡承载全球约五分之一的石油和液化天然气运输，其封锁已造成中东石油出口量骤降逾60%，全球能源市场持续动荡。",
+      "image": "",
+      "source": "Reuters / CNBC / CNN",
+      "url": "https://www.cnbc.com/2026/03/17/oil-prices-wti-brent-hormuz-coalition-shipping-trump.html",
+      "timestamp": "2026-03-18T13:00:00+08:00"
     }
   ]
 }

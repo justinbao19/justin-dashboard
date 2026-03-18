@@ -867,6 +867,35 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
         .f1-race-item.past { opacity: 0.4; }
+        .f1-race-item.canceled { 
+            opacity: 0.5; 
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                -45deg,
+                var(--bg-card),
+                var(--bg-card) 10px,
+                rgba(128,128,128,0.05) 10px,
+                rgba(128,128,128,0.05) 20px
+            );
+        }
+        .f1-race-item.canceled .f1-race-name { text-decoration: line-through; color: var(--text-tertiary); }
+        .f1-race-item.canceled .f1-race-meta { color: var(--text-tertiary); }
+        .f1-canceled-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: var(--danger);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 4px;
+            margin-left: 8px;
+            text-decoration: none !important;
+        }
+        .f1-canceled-reason {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
         
         .f1-race-flag { font-size: 32px; margin-right: 14px; }
         .f1-sprint-badge {
@@ -2992,6 +3021,12 @@
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         
+        // 取消的比赛（meeting_key 列表）
+        const CANCELED_RACES = {
+            1282: '中东冲突',  // Bahrain GP
+            1283: '中东冲突'   // Saudi Arabian GP
+        };
+        
         // 2026 赛季分站成绩数据
         const RACE_RESULTS_2026 = {
             'georus01': [
@@ -3149,9 +3184,10 @@
             const upcoming = _f1Data.calendar.filter(r => new Date(r.date_end) > now);
             const past = _f1Data.calendar.filter(r => new Date(r.date_end) <= now);
             
-            // 下一场比赛
-            if (upcoming.length > 0) {
-                const next = upcoming[0];
+            // 下一场比赛（跳过取消的）
+            const nextRaces = upcoming.filter(r => !CANCELED_RACES[r.meeting_key]);
+            if (nextRaces.length > 0) {
+                const next = nextRaces[0];
                 window._f1NextMeeting = next.meeting_key;
                 const startDate = new Date(next.date_start);
                 const endDate = new Date(next.date_end);
@@ -3166,23 +3202,29 @@
             const displayRaces = _f1ShowAllRaces ? upcoming : upcoming.slice(0, 5);
             const listHtml = displayRaces.map(r => {
                 const d = new Date(r.date_start);
-                const sprintBadge = r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
+                const isCanceled = CANCELED_RACES[r.meeting_key];
+                const canceledClass = isCanceled ? ' canceled' : '';
+                const canceledBadge = isCanceled ? '<span class="f1-canceled-badge">CANCELED</span>' : '';
+                const canceledReason = isCanceled ? `<div class="f1-canceled-reason">⚠️ ${CANCELED_RACES[r.meeting_key]}</div>` : '';
+                const sprintBadge = !isCanceled && r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
                 const circuitLower = (r.circuit || '').toLowerCase();
                 const trackKey = Object.keys(CIRCUIT_TRACKS).find(k => circuitLower.includes(k)) || '';
                 const trackId = CIRCUIT_TRACKS[trackKey] || '';
-                const trackImg = trackId ? `<div class="f1-race-track"><img src="/tracks/${trackId}.svg" alt=""></div>` : '';
-                return `<div class="f1-race-item" onclick="showF1Detail(${r.meeting_key})">
+                const trackImg = trackId && !isCanceled ? `<div class="f1-race-track"><img src="/tracks/${trackId}.svg" alt=""></div>` : '';
+                const clickHandler = isCanceled ? '' : `onclick="showF1Detail(${r.meeting_key})"`;
+                return `<div class="f1-race-item${canceledClass}" ${clickHandler}>
                     <div class="f1-race-flag">${r.country_flag || '🏁'}</div>
                     <div class="f1-race-date">
                         <div class="f1-race-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                         <div class="f1-race-date-month">${MONTHS[d.getMonth()]}</div>
                     </div>
                     <div class="f1-race-info">
-                        <div class="f1-race-name">${r.gp_name} ${sprintBadge}</div>
+                        <div class="f1-race-name">${r.gp_name} ${sprintBadge}${canceledBadge}</div>
                         <div class="f1-race-meta">R${String(r.round).padStart(2,'0')} <span>• ${r.circuit}</span></div>
+                        ${canceledReason}
                     </div>
                     ${trackImg}
-                    <div class="f1-race-arrow"><i class="fas fa-chevron-right"></i></div>
+                    ${isCanceled ? '' : '<div class="f1-race-arrow"><i class="fas fa-chevron-right"></i></div>'}
                 </div>`;
             }).join('');
             
@@ -3200,7 +3242,7 @@
             
             const updateCountdown = () => {
                 const now = new Date();
-                const upcoming = _f1Data.calendar.filter(r => new Date(r.date_start) > now);
+                const upcoming = _f1Data.calendar.filter(r => new Date(r.date_start) > now && !CANCELED_RACES[r.meeting_key]);
                 if (upcoming.length === 0) return;
                 
                 const next = upcoming[0];

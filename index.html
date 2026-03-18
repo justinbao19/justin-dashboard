@@ -1145,6 +1145,205 @@
         [data-theme="light"] .f1-team-logo { 
             background: #1a1a2e;
         }
+        
+        /* F1 Driver Detail Page */
+        .f1-driver-detail {
+            display: none;
+            padding: 0 16px 24px;
+        }
+        .f1-driver-detail.active { display: block; }
+        .f1-driver-hero {
+            position: relative;
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .f1-driver-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            z-index: 1;
+        }
+        .f1-driver-hero-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .f1-driver-hero-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            object-position: top center;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+        .f1-driver-hero-info { flex: 1; color: #fff; }
+        .f1-driver-hero-number {
+            font-size: 48px;
+            font-weight: 800;
+            opacity: 0.3;
+            position: absolute;
+            right: 20px;
+            top: 10px;
+        }
+        .f1-driver-hero-name { font-size: 28px; font-weight: 700; }
+        .f1-driver-hero-team { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+        .f1-driver-hero-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+        }
+        .f1-driver-stat {
+            text-align: center;
+        }
+        .f1-driver-stat-value { font-size: 24px; font-weight: 700; }
+        .f1-driver-stat-label { font-size: 11px; opacity: 0.6; text-transform: uppercase; }
+        
+        /* Points Chart */
+        .f1-points-chart {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        .f1-chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .f1-chart-svg {
+            width: 100%;
+            height: 120px;
+        }
+        .f1-chart-line {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .f1-chart-area {
+            opacity: 0.2;
+        }
+        .f1-chart-dot {
+            r: 5;
+            stroke: #fff;
+            stroke-width: 2;
+        }
+        .f1-chart-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+        
+        /* Race Results Table */
+        .f1-results-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        .f1-results-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .f1-results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .f1-results-table th {
+            text-align: left;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        .f1-results-table td {
+            padding: 12px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+        .f1-results-table tr:last-child td { border-bottom: none; }
+        .f1-result-pos {
+            font-weight: 700;
+            width: 40px;
+        }
+        .f1-result-pos.p1 { color: #ffd700; }
+        .f1-result-pos.p2 { color: #c0c0c0; }
+        .f1-result-pos.p3 { color: #cd7f32; }
+        .f1-result-pos.points { color: var(--success); }
+        .f1-result-race { font-weight: 500; }
+        .f1-result-flag { margin-right: 8px; }
+        .f1-result-points { 
+            font-weight: 600; 
+            text-align: right;
+            color: var(--text-primary);
+        }
+        .f1-result-qual {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        /* Career Stats */
+        .f1-career-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .f1-career-stat {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .f1-career-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .f1-career-stat-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        
+        /* Back button */
+        .f1-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .f1-back-btn:hover { background: rgba(255,255,255,0.15); }
+        
+        /* Standings item clickable */
+        .f1-standing-item.clickable { cursor: pointer; }
+        .f1-standing-item.clickable:hover { 
+            transform: translateX(4px);
+            border-color: rgba(225,6,0,0.4);
+        }
 
         /* Macro overview block */
         .market-analysis {
@@ -2246,7 +2445,67 @@
                     </div>
                 </div>
                 
-                <!-- 详情视图 -->
+                <!-- 车手详情页 -->
+                <div id="f1-driver-detail" class="f1-driver-detail">
+                    <button class="f1-back-btn" onclick="hideDriverDetail()"><i class="fas fa-arrow-left"></i> 返回积分榜</button>
+                    
+                    <div class="f1-driver-hero" id="driverHero">
+                        <div class="f1-driver-hero-content">
+                            <img class="f1-driver-hero-photo" id="driverHeroPhoto" src="" alt="">
+                            <div class="f1-driver-hero-info">
+                                <div class="f1-driver-hero-number" id="driverNumber">--</div>
+                                <div class="f1-driver-hero-name" id="driverName">--</div>
+                                <div class="f1-driver-hero-team" id="driverTeam">--</div>
+                                <div class="f1-driver-hero-stats">
+                                    <div class="f1-driver-stat">
+                                        <div class="f1-driver-stat-value" id="driverStandingPos">--</div>
+                                        <div class="f1-driver-stat-label">排名</div>
+                                    </div>
+                                    <div class="f1-driver-stat">
+                                        <div class="f1-driver-stat-value" id="driverTotalPoints">--</div>
+                                        <div class="f1-driver-stat-label">积分</div>
+                                    </div>
+                                    <div class="f1-driver-stat">
+                                        <div class="f1-driver-stat-value" id="driverWins2026">--</div>
+                                        <div class="f1-driver-stat-label">本赛季冠军</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 积分走势图 -->
+                    <div class="f1-points-chart">
+                        <div class="f1-chart-title">📈 2026 赛季积分走势</div>
+                        <svg class="f1-chart-svg" id="driverPointsChart" viewBox="0 0 300 120"></svg>
+                        <div class="f1-chart-labels" id="driverChartLabels"></div>
+                    </div>
+                    
+                    <!-- 分站成绩 -->
+                    <div class="f1-results-card">
+                        <div class="f1-results-title">🏁 2026 赛季分站成绩</div>
+                        <table class="f1-results-table">
+                            <thead>
+                                <tr>
+                                    <th>分站</th>
+                                    <th>排位</th>
+                                    <th>冲刺</th>
+                                    <th>正赛</th>
+                                    <th>积分</th>
+                                </tr>
+                            </thead>
+                            <tbody id="driverResultsBody"></tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 生涯统计 -->
+                    <div class="f1-results-card">
+                        <div class="f1-results-title">🏆 职业生涯统计</div>
+                        <div class="f1-career-grid" id="driverCareerStats"></div>
+                    </div>
+                </div>
+                
+                <!-- 赛事详情视图 -->
                 <div id="f1-detail-view" style="display:none;">
                     <button class="f1-back-btn" onclick="hideF1Detail()"><i class="fas fa-arrow-left"></i> Back</button>
                     
@@ -2733,6 +2992,64 @@
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         
+        // 2026 赛季分站成绩数据
+        const RACE_RESULTS_2026 = {
+            'georus01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 1, sprint: null, result: 1, points: 25 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 2, sprint: 1, result: 2, points: 26 }
+            ],
+            'andant01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 2, sprint: null, result: 2, points: 18 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 1, sprint: 4, result: 1, points: 29 }
+            ],
+            'chalec01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 3, sprint: null, result: 3, points: 15 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 3, sprint: 2, result: 4, points: 22 }
+            ],
+            'lewham01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 4, sprint: null, result: 4, points: 12 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 4, sprint: 3, result: 3, points: 21 }
+            ],
+            'olibea01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 7, sprint: null, result: 7, points: 6 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 6, sprint: 6, result: 5, points: 11 }
+            ],
+            'lannor01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 5, sprint: null, result: 5, points: 10 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 8, sprint: null, result: 'DNF', points: 5 }
+            ],
+            'maxver01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 6, sprint: null, result: 6, points: 8 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 10, sprint: 8, result: 'DNF', points: 0 }
+            ],
+            'lialaw01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 9, sprint: null, result: 10, points: 1 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 7, sprint: 5, result: 6, points: 7 }
+            ],
+            'yuktsu01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 8, sprint: null, result: 8, points: 4 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 12, sprint: 7, result: 11, points: 0 }
+            ],
+            'oscpia01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 10, sprint: null, result: 9, points: 2 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 9, sprint: null, result: 'DNF', points: 1 }
+            ]
+        };
+        
+        // 车手生涯数据
+        const DRIVER_CAREER = {
+            'georus01': { number: 63, debut: 2019, wins: 4, podiums: 18, poles: 5, fastestLaps: 8, championships: 0, races: 120 },
+            'andant01': { number: 12, debut: 2026, wins: 1, podiums: 2, poles: 1, fastestLaps: 0, championships: 0, races: 2 },
+            'chalec01': { number: 16, debut: 2018, wins: 8, podiums: 42, poles: 27, fastestLaps: 11, championships: 0, races: 145 },
+            'lewham01': { number: 44, debut: 2007, wins: 105, podiums: 202, poles: 104, fastestLaps: 67, championships: 7, races: 356 },
+            'olibea01': { number: 87, debut: 2024, wins: 0, podiums: 1, poles: 0, fastestLaps: 0, championships: 0, races: 28 },
+            'lannor01': { number: 4, debut: 2019, wins: 4, podiums: 28, poles: 10, fastestLaps: 9, championships: 0, races: 122 },
+            'maxver01': { number: 1, debut: 2015, wins: 63, podiums: 112, poles: 45, fastestLaps: 35, championships: 4, races: 210 },
+            'lialaw01': { number: 30, debut: 2023, wins: 0, podiums: 0, poles: 0, fastestLaps: 1, championships: 0, races: 18 },
+            'yuktsu01': { number: 22, debut: 2021, wins: 0, podiums: 1, poles: 0, fastestLaps: 1, championships: 0, races: 98 },
+            'oscpia01': { number: 81, debut: 2023, wins: 2, podiums: 12, poles: 2, fastestLaps: 3, championships: 0, races: 46 }
+        };
+        
         // 2026 积分榜 (中国站后 R2) - 2026-03-18 更新
         // 车手照片: team_id + driver_code
         const DRIVER_STANDINGS = [
@@ -2990,7 +3307,7 @@
                 if (isDriver) {
                     // 车手照片 URL
                     const photoUrl = `${F1_CDN}/c_lfill,w_64/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/${d.teamId}/${d.driverCode}/2026${d.teamId}${d.driverCode}right.webp`;
-                    return `<div class="f1-standing-item">
+                    return `<div class="f1-standing-item clickable" onclick="showDriverDetail('${d.driverCode}')">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
                         <div class="f1-standing-color" style="background:#${d.color}"></div>
                         <img class="f1-driver-photo" src="${photoUrl}" onerror="this.style.opacity='0.3'" alt="">
@@ -2999,6 +3316,7 @@
                             <div class="f1-standing-team" style="color:#${d.color}">${d.team}</div>
                         </div>
                         <div class="f1-standing-points">${d.points}<span class="f1-standing-pts">PTS</span></div>
+                        <i class="fas fa-chevron-right" style="color:var(--text-tertiary);margin-left:8px;font-size:12px;"></i>
                     </div>`;
                 } else {
                     const logoUrl = TEAM_LOGOS[d.name] || '';
@@ -3033,6 +3351,138 @@
         function toggleF1Races() {
             _f1ShowAllRaces = !_f1ShowAllRaces;
             renderF1List();
+        }
+        
+        // 车手详情页功能
+        function showDriverDetail(driverCode) {
+            const driver = DRIVER_STANDINGS.find(d => d.driverCode === driverCode);
+            if (!driver) return;
+            
+            const career = DRIVER_CAREER[driverCode] || {};
+            const results = RACE_RESULTS_2026[driverCode] || [];
+            
+            // 隐藏列表视图，显示详情
+            document.getElementById('f1-list-view').style.display = 'none';
+            document.getElementById('f1-driver-detail').classList.add('active');
+            
+            // 大头照 URL
+            const photoUrl = `${F1_CDN}/c_lfill,w_200/q_auto/v1740000000/common/f1/2026/${driver.teamId}/${driverCode}/2026${driver.teamId}${driverCode}right.webp`;
+            
+            // 填充英雄区
+            document.getElementById('driverHero').style.background = `linear-gradient(135deg, #${driver.color}88 0%, #${driver.color}22 100%)`;
+            document.getElementById('driverHeroPhoto').src = photoUrl;
+            document.getElementById('driverNumber').textContent = career.number || '--';
+            document.getElementById('driverName').textContent = driver.name;
+            document.getElementById('driverTeam').textContent = driver.team;
+            document.getElementById('driverStandingPos').textContent = 'P' + driver.pos;
+            document.getElementById('driverTotalPoints').textContent = driver.points;
+            
+            // 计算本赛季冠军数
+            const wins2026 = results.filter(r => r.result === 1).length;
+            document.getElementById('driverWins2026').textContent = wins2026;
+            
+            // 绘制积分走势图
+            renderPointsChart(results, driver.color);
+            
+            // 填充分站成绩表
+            renderRaceResults(results);
+            
+            // 填充生涯统计
+            renderCareerStats(career);
+        }
+        
+        function hideDriverDetail() {
+            document.getElementById('f1-driver-detail').classList.remove('active');
+            document.getElementById('f1-list-view').style.display = 'block';
+        }
+        
+        function renderPointsChart(results, color) {
+            const svg = document.getElementById('driverPointsChart');
+            const labels = document.getElementById('driverChartLabels');
+            
+            if (!results.length) {
+                svg.innerHTML = '<text x="150" y="60" text-anchor="middle" fill="var(--text-tertiary)">暂无数据</text>';
+                labels.innerHTML = '';
+                return;
+            }
+            
+            // 累计积分
+            let cumulative = 0;
+            const points = results.map(r => {
+                cumulative += r.points;
+                return cumulative;
+            });
+            
+            const maxPts = Math.max(...points, 1);
+            const w = 300, h = 100, padX = 30, padY = 10;
+            const stepX = (w - padX * 2) / Math.max(points.length - 1, 1);
+            
+            // 计算点位置
+            const pts = points.map((p, i) => ({
+                x: padX + i * stepX,
+                y: h - padY - (p / maxPts) * (h - padY * 2)
+            }));
+            
+            // 生成路径
+            const linePath = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ',' + p.y).join(' ');
+            const areaPath = linePath + ` L${pts[pts.length-1].x},${h-padY} L${pts[0].x},${h-padY} Z`;
+            
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#${color};stop-opacity:0.4"/>
+                        <stop offset="100%" style="stop-color:#${color};stop-opacity:0"/>
+                    </linearGradient>
+                </defs>
+                <path class="f1-chart-area" d="${areaPath}" fill="url(#chartGrad)"/>
+                <path class="f1-chart-line" d="${linePath}" stroke="#${color}"/>
+                ${pts.map((p, i) => `<circle class="f1-chart-dot" cx="${p.x}" cy="${p.y}" fill="#${color}"/>`).join('')}
+                ${pts.map((p, i) => `<text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="10" fill="var(--text-primary)" font-weight="600">${points[i]}</text>`).join('')}
+            `;
+            
+            // 标签
+            labels.innerHTML = results.map(r => `<span>${r.flag} R${r.round}</span>`).join('');
+        }
+        
+        function renderRaceResults(results) {
+            const tbody = document.getElementById('driverResultsBody');
+            
+            if (!results.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary)">暂无数据</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = results.map(r => {
+                const posClass = r.result === 1 ? 'p1' : r.result === 2 ? 'p2' : r.result === 3 ? 'p3' : (r.result <= 10 && r.result !== 'DNF') ? 'points' : '';
+                const resultText = r.result === 'DNF' ? '<span style="color:var(--danger)">DNF</span>' : 'P' + r.result;
+                return `<tr>
+                    <td class="f1-result-race"><span class="f1-result-flag">${r.flag}</span>${r.race}</td>
+                    <td class="f1-result-qual">P${r.qual}</td>
+                    <td>${r.sprint ? 'P' + r.sprint : '-'}</td>
+                    <td class="f1-result-pos ${posClass}">${resultText}</td>
+                    <td class="f1-result-points">+${r.points}</td>
+                </tr>`;
+            }).join('');
+        }
+        
+        function renderCareerStats(career) {
+            const container = document.getElementById('driverCareerStats');
+            
+            const stats = [
+                { label: '首秀', value: career.debut || '-' },
+                { label: '分站冠军', value: career.wins || 0 },
+                { label: '领奖台', value: career.podiums || 0 },
+                { label: '杆位', value: career.poles || 0 },
+                { label: '最快圈', value: career.fastestLaps || 0 },
+                { label: '世界冠军', value: career.championships || 0 }
+            ];
+            
+            container.innerHTML = stats.map(s => `
+                <div class="f1-career-stat">
+                    <div class="f1-career-stat-value">${s.value}</div>
+                    <div class="f1-career-stat-label">${s.label}</div>
+                </div>
+            `).join('');
         }
 
         loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1();

@@ -64,7 +64,10 @@ async function fetchForexSina(pair) {
   // 返回格式：时间,当前价,卖出价,买入价,...
   try {
     const r = await fetch(`https://hq.sinajs.cn/list=fx_s${pair}`, {
-      headers: { 'Referer': 'https://finance.sina.com.cn' }
+      headers: { 
+        'Referer': 'https://finance.sina.com.cn',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
     });
     const text = await r.text();
     const line = text.split('"')[1];
@@ -75,6 +78,24 @@ async function fetchForexSina(pair) {
     const prevClose = parseFloat(parts[5]);
     const change = prevClose ? ((price - prevClose) / prevClose * 100) : 0;
     return { price, change: Math.round(change * 100) / 100 };
+  } catch { return null; }
+}
+
+// 备用汇率源：Exchange Rate API (免费)
+async function fetchExchangeRateFallback() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/CNY');
+    const d = await r.json();
+    if (d.result !== 'success') return null;
+    const rates = d.rates;
+    return {
+      usdcny: rates.USD ? { price: (1 / rates.USD).toFixed(4) } : null,
+      hkdcny: rates.HKD ? { price: (1 / rates.HKD).toFixed(4) } : null,
+      eurcny: rates.EUR ? { price: (1 / rates.EUR).toFixed(4) } : null,
+      jpycny: rates.JPY ? { price: (1 / rates.JPY).toFixed(4) } : null,
+      gbpcny: rates.GBP ? { price: (1 / rates.GBP).toFixed(4) } : null,
+      thbcny: rates.THB ? { price: (1 / rates.THB).toFixed(4) } : null
+    };
   } catch { return null; }
 }
 
@@ -199,13 +220,26 @@ export default async function handler(req, res) {
     if (btc) data.btc = { price: fmt(btc.price, '$'), change: btc.change, sparkline: btcSparkline };
     if (eth) data.eth = { price: fmt(eth.price, '$'), change: eth.change, sparkline: ethSparkline };
     
-    // 汇率（1外币=X人民币）
+    // 汇率（1外币=X人民币）- 优先新浪，失败则用备用源
     if (usdcny) data.usdcny = { price: usdcny.price.toFixed(4) };
     if (hkdcny) data.hkdcny = { price: hkdcny.price.toFixed(4) };
     if (eurcny) data.eurcny = { price: eurcny.price.toFixed(4) };
     if (jpycny) data.jpycny = { price: jpycny.price.toFixed(4) };
     if (gbpcny) data.gbpcny = { price: gbpcny.price.toFixed(4) };
     if (thbcny) data.thbcny = { price: thbcny.price.toFixed(4) };
+    
+    // 如果新浪汇率全部失败，尝试备用源
+    if (!usdcny && !hkdcny && !eurcny) {
+      const fallback = await fetchExchangeRateFallback();
+      if (fallback) {
+        if (fallback.usdcny) data.usdcny = fallback.usdcny;
+        if (fallback.hkdcny) data.hkdcny = fallback.hkdcny;
+        if (fallback.eurcny) data.eurcny = fallback.eurcny;
+        if (fallback.jpycny) data.jpycny = fallback.jpycny;
+        if (fallback.gbpcny) data.gbpcny = fallback.gbpcny;
+        if (fallback.thbcny) data.thbcny = fallback.thbcny;
+      }
+    }
     
     res.status(200).json(data);
   } catch (error) {

@@ -841,8 +841,9 @@
         .spread-zero { stroke: var(--text-tertiary); stroke-width: 1; stroke-dasharray: 4 2; }
         
         /* 美债 Info Icon */
-        .treasury-info-icon { font-size: 10px; color: var(--text-tertiary); opacity: 0.6; margin-left: 4px; transition: opacity 0.2s; }
-        .treasury-item:hover .treasury-info-icon { opacity: 1; color: var(--accent); }
+        .treasury-info-icon, .sentiment-info-icon { font-size: 10px; color: var(--text-tertiary); opacity: 0.6; margin-left: 4px; transition: opacity 0.2s; }
+        .treasury-item:hover .treasury-info-icon, .sentiment-item:hover .sentiment-info-icon { opacity: 1; color: var(--accent); }
+        .sentiment-item[data-info] { cursor: pointer; }
         
         /* 美债弹窗 */
         .treasury-modal-overlay {
@@ -2471,21 +2472,21 @@
                                     <div class="market-card-note" id="sentimentUpdated">加载中...</div>
                                 </div>
                                 <div class="sentiment-grid">
-                                    <div class="sentiment-item" id="vixItem">
-                                        <div class="sentiment-label">VIX 恐慌指数</div>
+                                    <div class="sentiment-item" id="vixItem" data-info="vix">
+                                        <div class="sentiment-label">VIX <i class="fas fa-info-circle sentiment-info-icon"></i></div>
                                         <div class="sentiment-value" id="vixValue">--</div>
                                         <div class="sentiment-change" id="vixChange">--</div>
                                         <div class="sentiment-bar"><div class="sentiment-bar-fill" id="vixBar"></div></div>
                                         <div class="sentiment-level" id="vixLevel">--</div>
                                     </div>
-                                    <div class="sentiment-item" id="fgItem">
-                                        <div class="sentiment-label">恐惧/贪婪</div>
+                                    <div class="sentiment-item" id="fgItem" data-info="fg">
+                                        <div class="sentiment-label">恐惧/贪婪 <i class="fas fa-info-circle sentiment-info-icon"></i></div>
                                         <div class="sentiment-value" id="fgValue">--</div>
                                         <div class="sentiment-gauge"><div class="sentiment-gauge-needle" id="fgNeedle"></div></div>
                                         <div class="sentiment-level" id="fgLevel">--</div>
                                     </div>
-                                    <div class="sentiment-item">
-                                        <div class="sentiment-label">美元 (UUP)</div>
+                                    <div class="sentiment-item" id="dxyItem" data-info="dxy">
+                                        <div class="sentiment-label">美元 <i class="fas fa-info-circle sentiment-info-icon"></i></div>
                                         <div class="sentiment-value" id="dxyValue">--</div>
                                         <div class="sentiment-change" id="dxyChange">--</div>
                                     </div>
@@ -3966,10 +3967,100 @@
             };
         }
         
-        // 绑定点击事件
+        // 绑定点击事件 - 美债
         document.querySelectorAll('.treasury-item[data-info]').forEach(item => {
             item.style.cursor = 'pointer';
             item.onclick = () => showTreasuryInfo(item.dataset.info);
+        });
+        
+        // === 市场情绪 Info 弹窗 ===
+        const sentimentInfoData = {
+            vix: {
+                title: 'VIX 恐慌指数',
+                concept: 'VIX（Volatility Index）是芝加哥期权交易所编制的波动率指数，反映市场对未来30天标普500波动率的预期。被称为"恐慌指数"，因为市场恐慌时波动率飙升。',
+                analysis: function(val) {
+                    const v = parseFloat(val);
+                    if (isNaN(v)) return '数据暂不可用';
+                    if (v > 30) return `当前 VIX ${v} 处于恐慌区间！市场极度不安，波动剧烈。历史上 VIX >30 常伴随市场大跌或重大风险事件。建议降低仓位、增加对冲。`;
+                    if (v > 20) return `当前 VIX ${v} 处于警戒区间，市场不确定性上升。波动加大意味着机会与风险并存，适合降低杠杆、控制仓位。`;
+                    if (v > 15) return `当前 VIX ${v} 处于正常区间，市场情绪相对平稳。适合正常交易，但需关注是否有突发事件催化。`;
+                    return `当前 VIX ${v} 处于低位，市场极度乐观/自满。低波动期往往孕育风险，需警惕"暴风雨前的平静"。`;
+                }
+            },
+            fg: {
+                title: '恐惧与贪婪指数',
+                concept: 'CNN Fear & Greed Index 综合7个市场指标（股价动能、市场宽度、期权、垃圾债需求等）衡量投资者情绪。0-100区间，越低越恐惧，越高越贪婪。常用于逆向投资参考。',
+                analysis: function(val) {
+                    const v = parseFloat(val);
+                    if (isNaN(v)) return '数据暂不可用';
+                    if (v <= 25) return `当前指数 ${v} 处于"极度恐惧"！巴菲特名言"别人恐惧时贪婪"，历史上极度恐惧区间往往是中长期买入机会。但短期仍可能继续下跌。`;
+                    if (v <= 45) return `当前指数 ${v} 处于"恐惧"区间，市场情绪偏悲观。可能是逢低布局的时机，但需结合基本面判断是否为"价值陷阱"。`;
+                    if (v <= 55) return `当前指数 ${v} 处于"中性"区间，市场情绪平衡。没有明显的情绪极端，适合按原计划操作。`;
+                    if (v <= 75) return `当前指数 ${v} 处于"贪婪"区间，市场乐观情绪升温。追涨需谨慎，可考虑部分止盈或降低仓位。`;
+                    return `当前指数 ${v} 处于"极度贪婪"！市场过度乐观往往是风险累积的信号。"别人贪婪时恐惧"，建议逐步获利了结、提高防御。`;
+                }
+            },
+            dxy: {
+                title: '美元指数 (UUP)',
+                concept: 'UUP 是追踪美元指数的 ETF。美元指数衡量美元对一篮子货币（欧元、日元、英镑等）的强弱。美元走强通常压制大宗商品和新兴市场，美元走弱则相反。',
+                analysis: function(val) {
+                    const v = parseFloat(val?.replace('$', ''));
+                    if (isNaN(v)) return '数据暂不可用';
+                    // UUP 价格通常在 24-30 区间
+                    if (v > 29) return `当前 UUP $${v} 处于高位，美元强势。强美元压制大宗商品价格（黄金、原油），新兴市场资产承压，美国出口企业利润受挤压。`;
+                    if (v > 27) return `当前 UUP $${v} 处于中高水平，美元偏强。可能反映美联储鹰派预期或避险需求，需关注非美货币走势。`;
+                    if (v > 25) return `当前 UUP $${v} 处于正常区间，美元表现稳定。关注 Fed 政策走向和全球经济相对强弱。`;
+                    return `当前 UUP $${v} 处于低位，美元偏弱。弱美元利好大宗商品、新兴市场和美国跨国企业。`;
+                }
+            }
+        };
+        
+        function showSentimentInfo(type) {
+            const info = sentimentInfoData[type];
+            if (!info) return;
+            
+            let currentValue = '--';
+            if (type === 'vix') currentValue = document.getElementById('vixValue')?.textContent;
+            else if (type === 'fg') currentValue = document.getElementById('fgValue')?.textContent;
+            else if (type === 'dxy') currentValue = document.getElementById('dxyValue')?.textContent;
+            
+            const modal = document.createElement('div');
+            modal.className = 'treasury-modal-overlay';
+            modal.innerHTML = `
+                <div class="treasury-modal">
+                    <div class="treasury-modal-header">
+                        <div class="treasury-modal-title">${info.title}</div>
+                        <button class="treasury-modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="treasury-modal-body">
+                        <div class="treasury-modal-section">
+                            <div class="treasury-modal-label"><i class="fas fa-book"></i> 基础概念</div>
+                            <div class="treasury-modal-text">${info.concept}</div>
+                        </div>
+                        <div class="treasury-modal-section">
+                            <div class="treasury-modal-label"><i class="fas fa-chart-line"></i> 当前分析</div>
+                            <div class="treasury-modal-text treasury-modal-analysis">${info.analysis(currentValue)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => modal.classList.add('active'), 10);
+            modal.querySelector('.treasury-modal-close').onclick = () => {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 200);
+            };
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.remove(), 200);
+                }
+            };
+        }
+        
+        // 绑定点击事件 - 市场情绪
+        document.querySelectorAll('.sentiment-item[data-info]').forEach(item => {
+            item.onclick = () => showSentimentInfo(item.dataset.info);
         });
     </script>
 </body>

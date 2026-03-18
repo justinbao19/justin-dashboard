@@ -769,6 +769,73 @@
             .forex-price { font-size: 18px; }
         }
 
+        /* 市场情绪板块 */
+        .sentiment-card { padding: 16px 20px; }
+        .sentiment-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .sentiment-item {
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--bg-card);
+            text-align: center;
+        }
+        .sentiment-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sentiment-value { font-size: 28px; font-weight: 800; color: var(--text-primary); margin: 8px 0 4px; }
+        .sentiment-change { font-size: 13px; font-weight: 600; }
+        .sentiment-change.up { color: var(--success); }
+        .sentiment-change.down { color: var(--danger); }
+        .sentiment-level { font-size: 12px; font-weight: 600; margin-top: 6px; padding: 4px 10px; border-radius: 6px; display: inline-block; }
+        .sentiment-level.extreme { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .sentiment-level.elevated { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .sentiment-level.normal { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .sentiment-level.fear { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .sentiment-level.greed { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .sentiment-level.neutral { background: rgba(107,114,128,0.15); color: #6b7280; }
+        
+        .sentiment-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin: 10px 0 6px; overflow: hidden; }
+        .sentiment-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+        .sentiment-bar-fill.normal { background: #22c55e; }
+        .sentiment-bar-fill.elevated { background: #f59e0b; }
+        .sentiment-bar-fill.extreme { background: #ef4444; }
+        
+        .sentiment-gauge { position: relative; width: 100%; height: 8px; background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e); border-radius: 4px; margin: 12px 0 8px; }
+        .sentiment-gauge-needle { position: absolute; top: -4px; width: 4px; height: 16px; background: var(--text-primary); border-radius: 2px; transition: left 0.5s ease; }
+        
+        /* 美债收益率板块 */
+        .treasury-card { padding: 16px 20px; }
+        .treasury-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+        .treasury-item { text-align: center; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+        .treasury-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; text-transform: uppercase; }
+        .treasury-value { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-top: 4px; }
+        .treasury-warning { font-size: 11px; color: #ef4444; font-weight: 600; margin-top: 4px; }
+        #spreadItem.inverted { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.05); }
+        #spreadItem.inverted .treasury-value { color: #ef4444; }
+        
+        .spread-chart { margin-top: 8px; }
+        .spread-chart-svg { width: 100%; height: 50px; }
+        .spread-line { fill: none; stroke: var(--accent); stroke-width: 2; }
+        .spread-area { fill: url(#spreadGrad); opacity: 0.3; }
+        .spread-zero { stroke: var(--text-tertiary); stroke-width: 1; stroke-dasharray: 4 2; }
+        
+        /* 本周事件板块 */
+        .events-card { padding: 16px 20px; }
+        .events-list { display: flex; flex-direction: column; gap: 10px; }
+        .event-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); }
+        .event-date { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 50px; }
+        .event-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text-primary); }
+        .event-country { font-size: 11px; color: var(--text-tertiary); padding: 2px 8px; background: var(--market-section-bg); border-radius: 4px; }
+        .event-item.high-impact { border-left: 3px solid #ef4444; }
+        .events-empty { text-align: center; padding: 20px; color: var(--text-tertiary); font-size: 13px; }
+        
+        @media (max-width: 600px) {
+            .sentiment-grid { grid-template-columns: 1fr; }
+            .treasury-grid { grid-template-columns: 1fr; }
+        }
+
         /* F1 页面样式 */
         .f1-bg {
             position: absolute;
@@ -2331,6 +2398,79 @@
                                 <div class="skeleton skeleton-line w-60"></div>
                             </div>
                         </div>
+                        
+                        <!-- 市场情绪板块 -->
+                        <div class="card sentiment-card" id="sentimentCard">
+                            <div class="market-card-header">
+                                <div class="card-title"><i class="fas fa-heart-pulse"></i> 市场情绪</div>
+                                <div class="market-card-note" id="sentimentUpdated">加载中...</div>
+                            </div>
+                            <div class="sentiment-grid">
+                                <!-- VIX -->
+                                <div class="sentiment-item" id="vixItem">
+                                    <div class="sentiment-label">VIX 恐慌指数</div>
+                                    <div class="sentiment-value" id="vixValue">--</div>
+                                    <div class="sentiment-change" id="vixChange">--</div>
+                                    <div class="sentiment-bar">
+                                        <div class="sentiment-bar-fill" id="vixBar"></div>
+                                    </div>
+                                    <div class="sentiment-level" id="vixLevel">--</div>
+                                </div>
+                                <!-- Fear & Greed -->
+                                <div class="sentiment-item" id="fgItem">
+                                    <div class="sentiment-label">恐惧/贪婪</div>
+                                    <div class="sentiment-value" id="fgValue">--</div>
+                                    <div class="sentiment-gauge">
+                                        <div class="sentiment-gauge-fill" id="fgGauge"></div>
+                                        <div class="sentiment-gauge-needle" id="fgNeedle"></div>
+                                    </div>
+                                    <div class="sentiment-level" id="fgLevel">--</div>
+                                </div>
+                                <!-- DXY -->
+                                <div class="sentiment-item">
+                                    <div class="sentiment-label">美元指数 (UUP)</div>
+                                    <div class="sentiment-value" id="dxyValue">--</div>
+                                    <div class="sentiment-change" id="dxyChange">--</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 美债收益率板块 -->
+                        <div class="card treasury-card" id="treasuryCard">
+                            <div class="market-card-header">
+                                <div class="card-title"><i class="fas fa-landmark"></i> 美债收益率</div>
+                                <div class="market-card-note">FRED 数据</div>
+                            </div>
+                            <div class="treasury-grid">
+                                <div class="treasury-item">
+                                    <div class="treasury-label">10Y</div>
+                                    <div class="treasury-value" id="t10yValue">--</div>
+                                </div>
+                                <div class="treasury-item">
+                                    <div class="treasury-label">2Y</div>
+                                    <div class="treasury-value" id="t2yValue">--</div>
+                                </div>
+                                <div class="treasury-item" id="spreadItem">
+                                    <div class="treasury-label">利差 (10Y-2Y)</div>
+                                    <div class="treasury-value" id="spreadValue">--</div>
+                                    <div class="treasury-warning" id="spreadWarning"></div>
+                                </div>
+                            </div>
+                            <div class="spread-chart">
+                                <svg class="spread-chart-svg" id="spreadChart" viewBox="0 0 280 50"></svg>
+                            </div>
+                        </div>
+                        
+                        <!-- 本周重要事件 -->
+                        <div class="card events-card" id="eventsCard">
+                            <div class="market-card-header">
+                                <div class="card-title"><i class="fas fa-calendar-week"></i> 本周重要事件</div>
+                            </div>
+                            <div class="events-list" id="eventsList">
+                                <div class="skeleton skeleton-line w-80"></div>
+                            </div>
+                        </div>
+                        
                         <div class="market-main-grid">
                             <div class="card market-overview-card">
                                 <div class="market-analysis">
@@ -3562,8 +3702,126 @@
             `).join('');
         }
 
-        loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1();
-        setInterval(() => { loadWeather(); loadMarket(); loadNews(); }, 5 * 60 * 1000);
+        loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
+        setInterval(() => { loadWeather(); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
+        
+        // 市场情绪数据加载
+        async function loadSentiment() {
+            try {
+                const res = await fetch('/api/sentiment?' + Date.now());
+                if (!res.ok) return;
+                const d = await res.json();
+                
+                // VIX
+                if (d.vix) {
+                    document.getElementById('vixValue').textContent = d.vix.value?.toFixed(1) || '--';
+                    const vixChangeEl = document.getElementById('vixChange');
+                    vixChangeEl.textContent = (d.vix.change >= 0 ? '+' : '') + d.vix.change?.toFixed(2) + '%';
+                    vixChangeEl.className = 'sentiment-change ' + (d.vix.change >= 0 ? 'up' : 'down');
+                    
+                    const vixBar = document.getElementById('vixBar');
+                    const vixPct = Math.min(d.vix.value / 50 * 100, 100);
+                    vixBar.style.width = vixPct + '%';
+                    vixBar.className = 'sentiment-bar-fill ' + d.vix.level;
+                    
+                    const vixLevel = document.getElementById('vixLevel');
+                    vixLevel.textContent = d.vix.label;
+                    vixLevel.className = 'sentiment-level ' + d.vix.level;
+                }
+                
+                // Fear & Greed
+                if (d.fear_greed) {
+                    document.getElementById('fgValue').textContent = d.fear_greed.value;
+                    document.getElementById('fgNeedle').style.left = 'calc(' + d.fear_greed.value + '% - 2px)';
+                    
+                    const fgLevel = document.getElementById('fgLevel');
+                    fgLevel.textContent = d.fear_greed.label;
+                    const fgClass = d.fear_greed.value <= 30 ? 'fear' : d.fear_greed.value >= 70 ? 'greed' : 'neutral';
+                    fgLevel.className = 'sentiment-level ' + fgClass;
+                }
+                
+                // DXY
+                if (d.dxy) {
+                    document.getElementById('dxyValue').textContent = '$' + d.dxy.value?.toFixed(2);
+                    const dxyChangeEl = document.getElementById('dxyChange');
+                    dxyChangeEl.textContent = (d.dxy.change >= 0 ? '+' : '') + d.dxy.change?.toFixed(2) + '%';
+                    dxyChangeEl.className = 'sentiment-change ' + (d.dxy.change >= 0 ? 'up' : 'down');
+                }
+                
+                // Treasury
+                if (d.treasury) {
+                    document.getElementById('t10yValue').textContent = d.treasury.y10?.toFixed(2) + '%';
+                    document.getElementById('t2yValue').textContent = d.treasury.y2?.toFixed(2) + '%';
+                    document.getElementById('spreadValue').textContent = (d.treasury.spread >= 0 ? '+' : '') + d.treasury.spread?.toFixed(2) + '%';
+                    
+                    const spreadItem = document.getElementById('spreadItem');
+                    const spreadWarning = document.getElementById('spreadWarning');
+                    if (d.treasury.inverted) {
+                        spreadItem.classList.add('inverted');
+                        spreadWarning.textContent = '⚠️ 收益率曲线倒挂';
+                    } else {
+                        spreadItem.classList.remove('inverted');
+                        spreadWarning.textContent = '';
+                    }
+                    
+                    // 利差走势图
+                    if (d.treasury.spread_history?.length) {
+                        renderSpreadChart(d.treasury.spread_history);
+                    }
+                }
+                
+                // Events
+                if (d.events) {
+                    const eventsList = document.getElementById('eventsList');
+                    if (d.events.length === 0) {
+                        eventsList.innerHTML = '<div class="events-empty">本周暂无重大经济事件</div>';
+                    } else {
+                        eventsList.innerHTML = d.events.map(e => `
+                            <div class="event-item ${e.impact >= 3 ? 'high-impact' : ''}">
+                                <div class="event-date">${e.date?.slice(5) || ''}</div>
+                                <div class="event-name">${e.event}</div>
+                                <div class="event-country">${e.country || 'US'}</div>
+                            </div>
+                        `).join('');
+                    }
+                }
+                
+                document.getElementById('sentimentUpdated').textContent = '刚刚更新';
+            } catch (e) {
+                console.error('Sentiment load error:', e);
+            }
+        }
+        
+        function renderSpreadChart(data) {
+            const svg = document.getElementById('spreadChart');
+            if (!svg || !data.length) return;
+            
+            const w = 280, h = 50, pad = 5;
+            const min = Math.min(...data, -0.5);
+            const max = Math.max(...data, 0.5);
+            const range = max - min || 1;
+            
+            const pts = data.map((v, i) => ({
+                x: pad + (i / (data.length - 1)) * (w - pad * 2),
+                y: h - pad - ((v - min) / range) * (h - pad * 2)
+            }));
+            
+            const zeroY = h - pad - ((0 - min) / range) * (h - pad * 2);
+            const linePath = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x + ',' + p.y).join(' ');
+            const areaPath = linePath + ` L${pts[pts.length-1].x},${h-pad} L${pts[0].x},${h-pad} Z`;
+            
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="spreadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.3"/>
+                        <stop offset="100%" style="stop-color:var(--accent);stop-opacity:0"/>
+                    </linearGradient>
+                </defs>
+                <line class="spread-zero" x1="${pad}" y1="${zeroY}" x2="${w-pad}" y2="${zeroY}"/>
+                <path class="spread-area" d="${areaPath}"/>
+                <path class="spread-line" d="${linePath}"/>
+            `;
+        }
         setInterval(() => { loadMetar(); }, 10 * 60 * 1000); // METAR 每10分钟刷新
     </script>
 </body>

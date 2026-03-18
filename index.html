@@ -840,6 +840,45 @@
         .spread-area { fill: url(#spreadGrad); opacity: 0.3; }
         .spread-zero { stroke: var(--text-tertiary); stroke-width: 1; stroke-dasharray: 4 2; }
         
+        /* 美债 Info Icon */
+        .treasury-info-icon { font-size: 10px; color: var(--text-tertiary); opacity: 0.6; margin-left: 4px; transition: opacity 0.2s; }
+        .treasury-item:hover .treasury-info-icon { opacity: 1; color: var(--accent); }
+        
+        /* 美债弹窗 */
+        .treasury-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 9999;
+            opacity: 0; transition: opacity 0.2s ease;
+        }
+        .treasury-modal-overlay.active { opacity: 1; }
+        .treasury-modal {
+            background: var(--bg-elevated); border-radius: 16px; width: 90%; max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4); transform: scale(0.9); transition: transform 0.2s ease;
+        }
+        .treasury-modal-overlay.active .treasury-modal { transform: scale(1); }
+        .treasury-modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid var(--border);
+        }
+        .treasury-modal-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .treasury-modal-close {
+            background: none; border: none; color: var(--text-tertiary); font-size: 16px;
+            cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s;
+        }
+        .treasury-modal-close:hover { background: var(--border); color: var(--text-primary); }
+        .treasury-modal-body { padding: 20px; }
+        .treasury-modal-section { margin-bottom: 16px; }
+        .treasury-modal-section:last-child { margin-bottom: 0; }
+        .treasury-modal-label {
+            font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+        }
+        .treasury-modal-text { font-size: 14px; line-height: 1.6; color: var(--text-secondary); }
+        .treasury-modal-analysis { 
+            background: var(--market-section-bg); padding: 12px 14px; border-radius: 10px;
+            border-left: 3px solid var(--accent);
+        }
+        
         /* 本周事件板块 */
         .events-card { padding: 14px 16px; }
         .events-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
@@ -2241,13 +2280,13 @@
             }
 
             .market-item {
-                grid-template-columns: minmax(0, 1fr) minmax(100px, 126px) auto;
+                grid-template-columns: minmax(120px, 1fr) minmax(80px, 100px) auto;
                 padding: 14px 16px;
             }
 
             .market-price { font-size: 18px; }
             .market-change { font-size: 13px; }
-            .market-name { font-size: 15px; }
+            .market-name { font-size: 15px; min-width: 100px; }
             .market-flag { font-size: 18px; }
             .market-overview-insights-grid {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2291,7 +2330,7 @@
             }
 
             .market-item {
-                grid-template-columns: minmax(0, 1fr) minmax(120px, 150px) auto;
+                grid-template-columns: minmax(140px, 1fr) minmax(80px, 110px) auto;
                 padding: 16px 18px;
             }
 
@@ -2460,16 +2499,16 @@
                                     <div class="market-card-note">FRED</div>
                                 </div>
                                 <div class="treasury-grid">
-                                    <div class="treasury-item">
-                                        <div class="treasury-label">10Y</div>
+                                    <div class="treasury-item" data-info="t10y">
+                                        <div class="treasury-label">10Y <i class="fas fa-info-circle treasury-info-icon"></i></div>
                                         <div class="treasury-value" id="t10yValue">--</div>
                                     </div>
-                                    <div class="treasury-item">
-                                        <div class="treasury-label">2Y</div>
+                                    <div class="treasury-item" data-info="t2y">
+                                        <div class="treasury-label">2Y <i class="fas fa-info-circle treasury-info-icon"></i></div>
                                         <div class="treasury-value" id="t2yValue">--</div>
                                     </div>
-                                    <div class="treasury-item" id="spreadItem">
-                                        <div class="treasury-label">利差</div>
+                                    <div class="treasury-item" id="spreadItem" data-info="spread">
+                                        <div class="treasury-label">利差 <i class="fas fa-info-circle treasury-info-icon"></i></div>
                                         <div class="treasury-value" id="spreadValue">--</div>
                                         <div class="treasury-warning" id="spreadWarning"></div>
                                     </div>
@@ -3840,6 +3879,98 @@
             `;
         }
         setInterval(() => { loadMetar(); }, 10 * 60 * 1000); // METAR 每10分钟刷新
+        
+        // === 美债收益率 Info 弹窗 ===
+        const treasuryInfoData = {
+            t10y: {
+                title: '10年期美债收益率',
+                concept: '10年期美国国债的年化收益率，是全球金融市场最重要的基准利率之一。反映市场对未来10年经济增长和通胀的预期。',
+                analysis: function(val) {
+                    const v = parseFloat(val);
+                    if (isNaN(v)) return '数据暂不可用';
+                    if (v > 5) return `当前 ${v}% 处于高位，表明市场预期通胀持续或美联储将维持高利率，对股市估值形成压力，房贷利率也会走高。`;
+                    if (v > 4) return `当前 ${v}% 处于中高水平，反映经济韧性但也限制风险资产估值空间。企业融资成本上升。`;
+                    if (v > 3) return `当前 ${v}% 处于正常区间，经济软着陆预期下的合理水平。`;
+                    return `当前 ${v}% 处于低位，可能反映经济衰退担忧或避险情绪升温。`;
+                }
+            },
+            t2y: {
+                title: '2年期美债收益率',
+                concept: '2年期美国国债收益率，对美联储利率政策最敏感。通常被视为市场对未来两年Fed利率路径的预期。',
+                analysis: function(val) {
+                    const v = parseFloat(val);
+                    if (isNaN(v)) return '数据暂不可用';
+                    if (v > 5) return `当前 ${v}% 处于高位，市场预期Fed短期内不会大幅降息，甚至可能加息。`;
+                    if (v > 4) return `当前 ${v}% 表明市场认为Fed将维持较高利率一段时间，"higher for longer"定价。`;
+                    if (v > 3) return `当前 ${v}% 处于中等水平，反映温和的货币政策预期。`;
+                    return `当前 ${v}% 较低，市场可能在定价经济放缓或Fed降息周期。`;
+                }
+            },
+            spread: {
+                title: '收益率利差 (10Y - 2Y)',
+                concept: '10年期与2年期美债收益率之差。正常情况下应为正值（长债收益高于短债）。当利差为负（倒挂）时，历史上是经济衰退的可靠领先指标。',
+                analysis: function(val) {
+                    const v = parseFloat(val?.replace('%', '').replace('+', ''));
+                    if (isNaN(v)) return '数据暂不可用';
+                    if (v < -0.5) return `当前利差 ${v > 0 ? '+' : ''}${v}% 严重倒挂！历史上深度倒挂后6-18个月内常出现衰退。这是重要的预警信号。`;
+                    if (v < 0) return `当前利差 ${v}% 倒挂，市场在定价未来经济放缓。Fed可能被迫降息。需警惕衰退风险。`;
+                    if (v < 0.25) return `当前利差 +${v}% 接近平坦，收益率曲线正在正常化或即将倒挂，经济前景存在不确定性。`;
+                    if (v < 1) return `当前利差 +${v}% 温和正斜率，反映经济预期相对健康，但增长可能放缓。`;
+                    return `当前利差 +${v}% 较陡峭，通常意味着经济扩张预期强劲，是利好风险资产的信号。`;
+                }
+            }
+        };
+        
+        function showTreasuryInfo(type) {
+            const info = treasuryInfoData[type];
+            if (!info) return;
+            
+            let currentValue = '--';
+            if (type === 't10y') currentValue = document.getElementById('t10yValue')?.textContent;
+            else if (type === 't2y') currentValue = document.getElementById('t2yValue')?.textContent;
+            else if (type === 'spread') currentValue = document.getElementById('spreadValue')?.textContent;
+            
+            const modal = document.createElement('div');
+            modal.className = 'treasury-modal-overlay';
+            modal.innerHTML = `
+                <div class="treasury-modal">
+                    <div class="treasury-modal-header">
+                        <div class="treasury-modal-title">${info.title}</div>
+                        <button class="treasury-modal-close"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="treasury-modal-body">
+                        <div class="treasury-modal-section">
+                            <div class="treasury-modal-label"><i class="fas fa-book"></i> 基础概念</div>
+                            <div class="treasury-modal-text">${info.concept}</div>
+                        </div>
+                        <div class="treasury-modal-section">
+                            <div class="treasury-modal-label"><i class="fas fa-chart-line"></i> 当前分析</div>
+                            <div class="treasury-modal-text treasury-modal-analysis">${info.analysis(currentValue)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            setTimeout(() => modal.classList.add('active'), 10);
+            
+            modal.querySelector('.treasury-modal-close').onclick = () => {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 200);
+            };
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                    setTimeout(() => modal.remove(), 200);
+                }
+            };
+        }
+        
+        // 绑定点击事件
+        document.querySelectorAll('.treasury-item[data-info]').forEach(item => {
+            item.style.cursor = 'pointer';
+            item.onclick = () => showTreasuryInfo(item.dataset.info);
+        });
     </script>
 </body>
 </html>

@@ -2733,19 +2733,19 @@
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
         
-        // 2026 积分榜 (澳大利亚站后) - F1 官网数据
+        // 2026 积分榜 (中国站后 R2) - 2026-03-18 更新
         // 车手照片: team_id + driver_code
         const DRIVER_STANDINGS = [
-            { pos: 1, name: 'George Russell', team: 'Mercedes', teamId: 'mercedes', driverCode: 'georus01', color: '27F4D2', points: 25, nat: 'GBR' },
-            { pos: 2, name: 'Kimi Antonelli', team: 'Mercedes', teamId: 'mercedes', driverCode: 'andant01', color: '27F4D2', points: 18, nat: 'ITA' },
-            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', teamId: 'ferrari', driverCode: 'chalec01', color: 'E80020', points: 15, nat: 'MON' },
-            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', teamId: 'ferrari', driverCode: 'lewham01', color: 'E80020', points: 12, nat: 'GBR' },
-            { pos: 5, name: 'Lando Norris', team: 'McLaren', teamId: 'mclaren', driverCode: 'lannor01', color: 'FF8000', points: 10, nat: 'GBR' },
-            { pos: 6, name: 'Max Verstappen', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'maxver01', color: '3671C6', points: 8, nat: 'NED' },
-            { pos: 7, name: 'Oliver Bearman', team: 'Haas F1 Team', teamId: 'haasf1team', driverCode: 'olibea01', color: 'B6BABD', points: 6, nat: 'GBR' },
-            { pos: 8, name: 'Arvid Lindblad', team: 'Racing Bulls', teamId: 'racingbulls', driverCode: 'arvlin01', color: '6692FF', points: 4, nat: 'GBR' },
-            { pos: 9, name: 'Gabriel Bortoleto', team: 'Audi', teamId: 'audi', driverCode: 'gabbor01', color: 'FF0000', points: 2, nat: 'BRA' },
-            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', teamId: 'alpine', driverCode: 'piegas01', color: '0093CC', points: 1, nat: 'FRA' },
+            { pos: 1, name: 'George Russell', team: 'Mercedes', teamId: 'mercedes', driverCode: 'georus01', color: '27F4D2', points: 51, nat: 'GBR' },
+            { pos: 2, name: 'Kimi Antonelli', team: 'Mercedes', teamId: 'mercedes', driverCode: 'andant01', color: '27F4D2', points: 47, nat: 'ITA' },
+            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', teamId: 'ferrari', driverCode: 'chalec01', color: 'E80020', points: 37, nat: 'MON' },
+            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', teamId: 'ferrari', driverCode: 'lewham01', color: 'E80020', points: 30, nat: 'GBR' },
+            { pos: 5, name: 'Oliver Bearman', team: 'Haas F1 Team', teamId: 'haasf1team', driverCode: 'olibea01', color: 'B6BABD', points: 17, nat: 'GBR' },
+            { pos: 6, name: 'Lando Norris', team: 'McLaren', teamId: 'mclaren', driverCode: 'lannor01', color: 'FF8000', points: 15, nat: 'GBR' },
+            { pos: 7, name: 'Max Verstappen', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'maxver01', color: '3671C6', points: 8, nat: 'NED' },
+            { pos: 8, name: 'Liam Lawson', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'lialaw01', color: '3671C6', points: 8, nat: 'NZL' },
+            { pos: 9, name: 'Yuki Tsunoda', team: 'Racing Bulls', teamId: 'racingbulls', driverCode: 'yuktsu01', color: '6692FF', points: 4, nat: 'JPN' },
+            { pos: 10, name: 'Oscar Piastri', team: 'McLaren', teamId: 'mclaren', driverCode: 'oscpia01', color: 'FF8000', points: 3, nat: 'AUS' },
         ];
         
         // F1 2026 官方 CDN URL
@@ -2774,12 +2774,13 @@
             'Williams': 'williams', 'Cadillac': 'cadillac', 'Aston Martin': 'astonmartin'
         };
         
+        // 车队积分榜 (中国站后 R2) - 2026-03-18 更新
         const TEAM_STANDINGS = [
-            { pos: 1, name: 'Mercedes', color: '27F4D2', points: 43 },
-            { pos: 2, name: 'Ferrari', color: 'E80020', points: 27 },
-            { pos: 3, name: 'McLaren', color: 'FF8000', points: 10 },
-            { pos: 4, name: 'Red Bull Racing', color: '3671C6', points: 8 },
-            { pos: 5, name: 'Haas F1 Team', color: 'B6BABD', points: 6 },
+            { pos: 1, name: 'Mercedes', color: '27F4D2', points: 98 },
+            { pos: 2, name: 'Ferrari', color: 'E80020', points: 67 },
+            { pos: 3, name: 'McLaren', color: 'FF8000', points: 18 },
+            { pos: 4, name: 'Haas F1 Team', color: 'B6BABD', points: 17 },
+            { pos: 5, name: 'Red Bull Racing', color: '3671C6', points: 16 },
             { pos: 6, name: 'Racing Bulls', color: '6692FF', points: 4 },
             { pos: 7, name: 'Audi', color: 'FF0000', points: 2 },
             { pos: 8, name: 'Alpine', color: '0093CC', points: 1 },

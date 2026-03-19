@@ -11,18 +11,60 @@
   },
   "history": {
     "equity": [
-      { "date": "2026-03-20", "value": 10000 }
+      {
+        "date": "2026-03-20",
+        "value": 10000
+      },
+      {
+        "date": "2026-03-19",
+        "value": 10000
+      }
     ],
     "trades": [],
-    "decisions": []
+    "decisions": [
+      {
+        "date": "2026-03-19 17:47",
+        "analysis": "综合得分 42/100。技术面 50/100：数据不足。消息面 30/100。无明确交易信号，保持观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-03-19 17:47",
+        "analysis": "综合得分 39/100。技术面 45/100：MA5 < MA20 (短期趋势向下)；价格在 MA20 下方；RSI 28 (超卖区域)。消息面 30/100。无明确交易信号，保持观望。",
+        "action": "hold"
+      }
+    ]
   },
   "config": {
     "allowedAssets": {
-      "US": ["SPY", "QQQ", "AAPL", "TSLA", "NVDA", "META", "GOOGL", "AMZN", "MSFT"],
-      "CN": ["sh000001", "sz399001", "sh600519", "sz000858"],
-      "HK": ["hk00700", "hk09988", "hk03690"],
-      "CRYPTO": ["bitcoin", "ethereum"],
-      "COMMODITY": ["gold"]
+      "US": [
+        "SPY",
+        "QQQ",
+        "AAPL",
+        "TSLA",
+        "NVDA",
+        "META",
+        "GOOGL",
+        "AMZN",
+        "MSFT"
+      ],
+      "CN": [
+        "sh000001",
+        "sz399001",
+        "sh600519",
+        "sz000858"
+      ],
+      "HK": [
+        "hk00700",
+        "hk09988",
+        "hk03690"
+      ],
+      "CRYPTO": [
+        "bitcoin",
+        "ethereum"
+      ],
+      "COMMODITY": [
+        "gold"
+      ]
     },
     "riskLimits": {
       "maxPositionPct": 30,

@@ -1,0 +1,33 @@
+{
+  "meta": {
+    "startDate": "2026-03-20",
+    "initialCapital": 10000,
+    "currency": "USD",
+    "version": "1.0"
+  },
+  "portfolio": {
+    "cash": 10000,
+    "positions": []
+  },
+  "history": {
+    "equity": [
+      { "date": "2026-03-20", "value": 10000 }
+    ],
+    "trades": [],
+    "decisions": []
+  },
+  "config": {
+    "allowedAssets": {
+      "US": ["SPY", "QQQ", "AAPL", "TSLA", "NVDA", "META", "GOOGL", "AMZN", "MSFT"],
+      "CN": ["sh000001", "sz399001", "sh600519", "sz000858"],
+      "HK": ["hk00700", "hk09988", "hk03690"],
+      "CRYPTO": ["bitcoin", "ethereum"],
+      "COMMODITY": ["gold"]
+    },
+    "riskLimits": {
+      "maxPositionPct": 30,
+      "maxDrawdownPct": 20,
+      "stopLossPct": 8
+    }
+  }
+}

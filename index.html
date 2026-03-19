@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --bg-primary: #f5f5f7;
@@ -1851,6 +1852,357 @@
         .skeleton-line.w-60 { width: 60%; }
         .skeleton-line.w-40 { width: 40%; }
 
+        /* ========== TRADING PLAYGROUND ========== */
+        /* Segment Control */
+        .market-segment-control {
+            display: flex;
+            gap: 4px;
+            margin-top: 16px;
+            padding: 4px;
+            background: var(--market-section-bg);
+            border-radius: 12px;
+            width: fit-content;
+        }
+        .segment-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .segment-btn i { font-size: 12px; }
+        .segment-btn:hover { color: var(--text-primary); }
+        .segment-btn.active {
+            background: var(--bg-card);
+            color: var(--accent);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        [data-theme="dark"] .segment-btn.active {
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Trading Playground Container */
+        .trading-playground { display: grid; gap: 20px; }
+
+        /* Metrics Cards */
+        .trading-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .trading-metric-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--market-card-border);
+            position: relative;
+            overflow: hidden;
+        }
+        .trading-metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+        .metric-equity::before { background: var(--accent); }
+        .metric-pnl::before { background: var(--success); }
+        .metric-cash::before { background: #ff9f0a; }
+        .metric-positions::before { background: #bf5af2; }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 8px 0 4px;
+            font-variant-numeric: tabular-nums;
+        }
+        .metric-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .metric-sub.positive { color: var(--success); }
+        .metric-sub.negative { color: var(--danger); }
+
+        /* Chart Card */
+        .trading-chart-card { padding: 20px; }
+        .trading-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .trading-chart-period {
+            display: flex;
+            gap: 4px;
+            background: var(--market-section-bg);
+            padding: 3px;
+            border-radius: 8px;
+        }
+        .period-btn {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-tertiary);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .period-btn:hover { color: var(--text-primary); }
+        .period-btn.active {
+            background: var(--bg-card);
+            color: var(--accent);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] .period-btn.active {
+            background: rgba(255,255,255,0.1);
+        }
+        .trading-chart-wrap {
+            height: 240px;
+            position: relative;
+        }
+        .trading-chart-stats {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .chart-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Positions Card */
+        .trading-positions-card { padding: 20px; }
+        .trading-positions-list { margin-top: 16px; }
+        .trading-empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-tertiary);
+        }
+        .trading-empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.3;
+        }
+        .trading-empty-state p {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .trading-empty-state span { font-size: 13px; }
+
+        .position-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 16px;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .position-item:last-child { border-bottom: none; }
+        .position-symbol {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        .position-symbol span {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+        .position-qty {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+        .position-value {
+            font-size: 15px;
+            font-weight: 600;
+            text-align: right;
+            min-width: 80px;
+        }
+        .position-pnl {
+            font-size: 14px;
+            font-weight: 500;
+            text-align: right;
+            min-width: 70px;
+        }
+        .position-pnl.positive { color: var(--success); }
+        .position-pnl.negative { color: var(--danger); }
+
+        /* Log Card */
+        .trading-log-card { padding: 20px; }
+        .trading-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .trading-log-filter {
+            display: flex;
+            gap: 4px;
+        }
+        .log-filter-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-tertiary);
+            font-size: 11px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .log-filter-btn:hover { color: var(--text-primary); border-color: var(--text-tertiary); }
+        .log-filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .trading-log-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .trading-log-item {
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            background: var(--market-section-bg);
+            border-left: 3px solid var(--border);
+        }
+        .trading-log-item.trading-log-buy { border-left-color: var(--success); }
+        .trading-log-item.trading-log-sell { border-left-color: var(--danger); }
+        .trading-log-item.trading-log-system { border-left-color: var(--accent); }
+        .log-time {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+        .log-action {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .log-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .log-reasoning {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--market-meta-bg);
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .log-reasoning strong {
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Decision Card */
+        .trading-decision-card { padding: 20px; }
+        .trading-decision-content { margin-top: 16px; }
+        .decision-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px;
+            background: var(--market-section-bg);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+        .decision-status i { color: var(--accent); }
+        .decision-factors { display: grid; gap: 12px; }
+        .factor-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 40px;
+            gap: 12px;
+            align-items: center;
+        }
+        .factor-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .factor-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .factor-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .factor-score {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: right;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .trading-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .metric-value { font-size: 22px; }
+            .trading-chart-stats {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+            .chart-stat { flex: 1; min-width: 80px; }
+            .position-item {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .position-qty, .position-value, .position-pnl {
+                text-align: left;
+            }
+        }
+
         /* ========== NEWS ========== */
         .news-article { padding: 24px 0; border-bottom: 1px solid var(--border); }
         .news-article:first-child { padding-top: 0; }
@@ -2405,13 +2757,22 @@
         <div class="page" id="page-market">
             <div class="page-shell">
                 <div class="page-header market-page-header">
-                    <h1><i class="fas fa-chart-line"></i> 市场行情</h1>
+                    <h1><i class="fas fa-chart-line"></i> <span id="marketPageTitle">市场行情</span></h1>
                     <div class="market-header-meta">
                         <span class="subtitle" id="marketDate">2026年3月9日</span>
                         <button class="market-refresh-btn" id="marketRefreshBtn" onclick="refreshMarketPrices()" title="刷新实时行情">
                             <i class="fas fa-rotate-right"></i>
                         </button>
                         <span class="market-refresh-hint" id="marketRefreshHint"></span>
+                    </div>
+                    <!-- Segment Control -->
+                    <div class="market-segment-control">
+                        <button class="segment-btn active" data-segment="market" onclick="switchMarketSegment('market')">
+                            <i class="fas fa-chart-pie"></i> 行情
+                        </button>
+                        <button class="segment-btn" data-segment="trading" onclick="switchMarketSegment('trading')">
+                            <i class="fas fa-robot"></i> AI 交易
+                        </button>
                     </div>
                 </div>
                 <div class="page-content market-page-content">
@@ -2563,6 +2924,126 @@
                             <div id="marketAnalysis">
                                 <div class="skeleton skeleton-line w-60"></div>
                                 <div class="skeleton skeleton-line w-80"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trading Playground -->
+                    <div class="trading-playground" id="tradingPlayground" style="display:none">
+                        <!-- 核心指标卡片 -->
+                        <div class="trading-metrics">
+                            <div class="trading-metric-card metric-equity">
+                                <div class="metric-label">总资产</div>
+                                <div class="metric-value" id="tpEquity">$10,000</div>
+                                <div class="metric-sub" id="tpEquityChange">起始资金</div>
+                            </div>
+                            <div class="trading-metric-card metric-pnl">
+                                <div class="metric-label">累计收益</div>
+                                <div class="metric-value" id="tpPnL">$0.00</div>
+                                <div class="metric-sub" id="tpPnLPct">0.00%</div>
+                            </div>
+                            <div class="trading-metric-card metric-cash">
+                                <div class="metric-label">可用资金</div>
+                                <div class="metric-value" id="tpCash">$10,000</div>
+                                <div class="metric-sub" id="tpCashPct">100%</div>
+                            </div>
+                            <div class="trading-metric-card metric-positions">
+                                <div class="metric-label">持仓数</div>
+                                <div class="metric-value" id="tpPositions">0</div>
+                                <div class="metric-sub" id="tpWinRate">--</div>
+                            </div>
+                        </div>
+
+                        <!-- 盈亏曲线 -->
+                        <div class="card trading-chart-card">
+                            <div class="trading-chart-header">
+                                <div class="card-title"><i class="fas fa-chart-area"></i> 净值曲线</div>
+                                <div class="trading-chart-period">
+                                    <button class="period-btn active" data-period="7d">7D</button>
+                                    <button class="period-btn" data-period="30d">30D</button>
+                                    <button class="period-btn" data-period="all">ALL</button>
+                                </div>
+                            </div>
+                            <div class="trading-chart-wrap">
+                                <canvas id="equityChart"></canvas>
+                            </div>
+                            <div class="trading-chart-stats">
+                                <div class="chart-stat">
+                                    <span class="stat-label">最大回撤</span>
+                                    <span class="stat-value" id="tpMaxDrawdown">0.00%</span>
+                                </div>
+                                <div class="chart-stat">
+                                    <span class="stat-label">夏普比率</span>
+                                    <span class="stat-value" id="tpSharpe">--</span>
+                                </div>
+                                <div class="chart-stat">
+                                    <span class="stat-label">交易次数</span>
+                                    <span class="stat-value" id="tpTradeCount">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 当前持仓 -->
+                        <div class="card trading-positions-card">
+                            <div class="card-title"><i class="fas fa-briefcase"></i> 当前持仓</div>
+                            <div class="trading-positions-list" id="tpPositionsList">
+                                <div class="trading-empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>暂无持仓</p>
+                                    <span>AI 正在分析市场，等待合适时机入场</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 交易日志 -->
+                        <div class="card trading-log-card">
+                            <div class="trading-log-header">
+                                <div class="card-title"><i class="fas fa-scroll"></i> 交易日志</div>
+                                <div class="trading-log-filter">
+                                    <button class="log-filter-btn active" data-filter="all">全部</button>
+                                    <button class="log-filter-btn" data-filter="buy">买入</button>
+                                    <button class="log-filter-btn" data-filter="sell">卖出</button>
+                                </div>
+                            </div>
+                            <div class="trading-log-list" id="tpLogList">
+                                <div class="trading-log-item trading-log-system">
+                                    <div class="log-time">2026-03-20 01:00</div>
+                                    <div class="log-content">
+                                        <div class="log-action">🚀 系统初始化</div>
+                                        <div class="log-detail">Trading Playground 启动，初始资金 $10,000 USD</div>
+                                        <div class="log-reasoning">
+                                            <strong>交易策略：</strong>基于技术面（MA5/MA20/RSI）+ 消息面权重的混合策略。优先选择趋势明确、流动性好的标的。单笔仓位不超过 30%，总回撤控制在 20% 以内。
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI 决策面板 -->
+                        <div class="card trading-decision-card">
+                            <div class="card-title"><i class="fas fa-brain"></i> AI 决策分析</div>
+                            <div class="trading-decision-content" id="tpDecision">
+                                <div class="decision-status">
+                                    <i class="fas fa-clock"></i>
+                                    <span>等待下一个交易日</span>
+                                </div>
+                                <div class="decision-factors">
+                                    <div class="factor-item">
+                                        <div class="factor-label">技术面</div>
+                                        <div class="factor-bar"><div class="factor-fill" style="width:0%"></div></div>
+                                        <div class="factor-score">--</div>
+                                    </div>
+                                    <div class="factor-item">
+                                        <div class="factor-label">消息面</div>
+                                        <div class="factor-bar"><div class="factor-fill" style="width:0%"></div></div>
+                                        <div class="factor-score">--</div>
+                                    </div>
+                                    <div class="factor-item">
+                                        <div class="factor-label">风险控制</div>
+                                        <div class="factor-bar"><div class="factor-fill" style="width:0%"></div></div>
+                                        <div class="factor-score">--</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3761,6 +4242,279 @@
 
         loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
         setInterval(() => { loadWeather(); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
+
+        // ========== TRADING PLAYGROUND ==========
+        let tradingData = null;
+        let equityChart = null;
+
+        function switchMarketSegment(segment) {
+            document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.segment-btn[data-segment="${segment}"]`).classList.add('active');
+            
+            const dashboard = document.querySelector('.market-dashboard');
+            const playground = document.getElementById('tradingPlayground');
+            const title = document.getElementById('marketPageTitle');
+            const refreshBtn = document.getElementById('marketRefreshBtn');
+            
+            if (segment === 'trading') {
+                dashboard.style.display = 'none';
+                playground.style.display = 'grid';
+                title.textContent = 'AI 交易';
+                refreshBtn.style.display = 'none';
+                loadTradingData();
+            } else {
+                dashboard.style.display = 'grid';
+                playground.style.display = 'none';
+                title.textContent = '市场行情';
+                refreshBtn.style.display = '';
+            }
+        }
+
+        async function loadTradingData() {
+            try {
+                const res = await fetch('/data/trading.json?' + Date.now());
+                if (!res.ok) return;
+                tradingData = await res.json();
+                renderTradingDashboard();
+            } catch (e) {
+                console.error('Failed to load trading data:', e);
+            }
+        }
+
+        function renderTradingDashboard() {
+            if (!tradingData) return;
+            
+            const { portfolio, history, meta } = tradingData;
+            const currentEquity = history.equity[history.equity.length - 1]?.value || meta.initialCapital;
+            const pnl = currentEquity - meta.initialCapital;
+            const pnlPct = (pnl / meta.initialCapital * 100);
+            
+            // Update metrics
+            document.getElementById('tpEquity').textContent = formatCurrency(currentEquity);
+            document.getElementById('tpEquityChange').textContent = pnl >= 0 ? `+${formatCurrency(pnl)}` : formatCurrency(pnl);
+            document.getElementById('tpEquityChange').className = 'metric-sub ' + (pnl >= 0 ? 'positive' : 'negative');
+            
+            document.getElementById('tpPnL').textContent = (pnl >= 0 ? '+' : '') + formatCurrency(pnl);
+            document.getElementById('tpPnL').style.color = pnl >= 0 ? 'var(--success)' : 'var(--danger)';
+            document.getElementById('tpPnLPct').textContent = (pnl >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+            document.getElementById('tpPnLPct').className = 'metric-sub ' + (pnl >= 0 ? 'positive' : 'negative');
+            
+            document.getElementById('tpCash').textContent = formatCurrency(portfolio.cash);
+            document.getElementById('tpCashPct').textContent = ((portfolio.cash / currentEquity) * 100).toFixed(0) + '%';
+            
+            document.getElementById('tpPositions').textContent = portfolio.positions.length;
+            
+            // Calculate win rate
+            const closedTrades = history.trades.filter(t => t.type === 'sell');
+            if (closedTrades.length > 0) {
+                const wins = closedTrades.filter(t => t.pnl > 0).length;
+                document.getElementById('tpWinRate').textContent = `胜率 ${(wins / closedTrades.length * 100).toFixed(0)}%`;
+            }
+            
+            // Stats
+            document.getElementById('tpTradeCount').textContent = history.trades.length;
+            document.getElementById('tpMaxDrawdown').textContent = calculateMaxDrawdown(history.equity).toFixed(2) + '%';
+            
+            // Render chart
+            renderEquityChart(history.equity);
+            
+            // Render positions
+            renderPositions(portfolio.positions);
+            
+            // Render trade log
+            renderTradeLog(history.trades, history.decisions);
+        }
+
+        function formatCurrency(val) {
+            return '$' + val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function calculateMaxDrawdown(equity) {
+            let maxDrawdown = 0;
+            let peak = equity[0]?.value || 0;
+            for (const e of equity) {
+                if (e.value > peak) peak = e.value;
+                const dd = (peak - e.value) / peak * 100;
+                if (dd > maxDrawdown) maxDrawdown = dd;
+            }
+            return maxDrawdown;
+        }
+
+        function renderEquityChart(equity) {
+            const ctx = document.getElementById('equityChart');
+            if (!ctx) return;
+            
+            if (equityChart) {
+                equityChart.destroy();
+            }
+            
+            const labels = equity.map(e => e.date);
+            const data = equity.map(e => e.value);
+            
+            equityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        borderColor: theme === 'dark' ? '#0a84ff' : '#0071e3',
+                        backgroundColor: theme === 'dark' ? 'rgba(10,132,255,0.1)' : 'rgba(0,113,227,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: ctx => formatCurrency(ctx.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { display: false },
+                            ticks: { 
+                                color: theme === 'dark' ? '#636366' : '#aeaeb2',
+                                maxTicksLimit: 6,
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            display: true,
+                            grid: { 
+                                color: theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
+                            },
+                            ticks: { 
+                                color: theme === 'dark' ? '#636366' : '#aeaeb2',
+                                callback: v => '$' + v.toLocaleString(),
+                                font: { size: 10 }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        function renderPositions(positions) {
+            const container = document.getElementById('tpPositionsList');
+            if (positions.length === 0) {
+                container.innerHTML = `
+                    <div class="trading-empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>暂无持仓</p>
+                        <span>AI 正在分析市场，等待合适时机入场</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = positions.map(p => `
+                <div class="position-item">
+                    <div class="position-symbol">${p.symbol}<span>${p.market}</span></div>
+                    <div class="position-qty">${p.qty} 股</div>
+                    <div class="position-value">${formatCurrency(p.currentValue || p.qty * p.avgCost)}</div>
+                    <div class="position-pnl ${p.pnl >= 0 ? 'positive' : 'negative'}">
+                        ${p.pnl >= 0 ? '+' : ''}${formatCurrency(p.pnl || 0)}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTradeLog(trades, decisions) {
+            const container = document.getElementById('tpLogList');
+            
+            // Combine trades and decisions, sort by date desc
+            const items = [
+                ...trades.map(t => ({ ...t, itemType: 'trade' })),
+                ...decisions.map(d => ({ ...d, itemType: 'decision' }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (items.length === 0) {
+                // Keep the initial system message
+                return;
+            }
+            
+            const html = items.slice(0, 20).map(item => {
+                if (item.itemType === 'trade') {
+                    const isBuy = item.type === 'buy';
+                    return `
+                        <div class="trading-log-item trading-log-${item.type}">
+                            <div class="log-time">${item.date}</div>
+                            <div class="log-content">
+                                <div class="log-action">${isBuy ? '📈 买入' : '📉 卖出'} ${item.symbol}</div>
+                                <div class="log-detail">${item.qty} 股 @ ${formatCurrency(item.price)}，总额 ${formatCurrency(item.qty * item.price)}</div>
+                                ${item.reasoning ? `<div class="log-reasoning">${item.reasoning}</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="trading-log-item trading-log-system">
+                            <div class="log-time">${item.date}</div>
+                            <div class="log-content">
+                                <div class="log-action">🤖 市场分析</div>
+                                <div class="log-reasoning">${item.analysis}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+            
+            // Prepend system init message
+            container.innerHTML = html + `
+                <div class="trading-log-item trading-log-system">
+                    <div class="log-time">${tradingData?.meta?.startDate || '2026-03-20'} 01:00</div>
+                    <div class="log-content">
+                        <div class="log-action">🚀 系统初始化</div>
+                        <div class="log-detail">Trading Playground 启动，初始资金 $10,000 USD</div>
+                        <div class="log-reasoning">
+                            <strong>交易策略：</strong>基于技术面（MA5/MA20/RSI）+ 消息面权重的混合策略。优先选择趋势明确、流动性好的标的。单笔仓位不超过 30%，总回撤控制在 20% 以内。
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Period buttons
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                // TODO: Filter equity data by period
+            });
+        });
+
+        // Log filter buttons
+        document.querySelectorAll('.log-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.filter;
+                document.querySelectorAll('.trading-log-item').forEach(item => {
+                    if (filter === 'all') {
+                        item.style.display = '';
+                    } else if (filter === 'buy') {
+                        item.style.display = item.classList.contains('trading-log-buy') ? '' : 'none';
+                    } else if (filter === 'sell') {
+                        item.style.display = item.classList.contains('trading-log-sell') ? '' : 'none';
+                    }
+                });
+            });
+        });
         
         // 市场情绪数据加载
         async function loadSentiment() {

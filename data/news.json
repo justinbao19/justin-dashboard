@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-20T08:00:00+08:00",
+  "lastUpdated": "2026-03-20T18:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "特朗普要求以色列停止攻击伊朗能源设施，油气价格剧烈波动",
-      "summary": "美国总统特朗普周四表示，他已告知以色列不得再次袭击伊朗天然气基础设施。此前以色列空袭伊朗南帕尔斯气田、伊朗随即报复性打击海湾国家能源设施，导致全球油气价格剧烈飙升。特朗普警告称，若伊朗继续攻击卡塔尔等盟国设施，美国将「彻底摧毁南帕尔斯气田」。这一表态标志着华盛顿试图为持续三周的能源战降温，同时与以色列单方面升级行动保持距离。国际原油价格曾一度突破每桶120美元。",
-      "image": "",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/world/middle-east/trump-vows-no-more-attacks-by-israel-iran-gas-field-after-it-violently-lashed-2026-03-19/",
-      "timestamp": "2026-03-20T07:00:00+08:00"
+      "title": "美军F-35战斗机被伊朗防空火力击中，紧急迫降中东基地",
+      "summary": "美国中央司令部周四证实，一架F-35隐身战斗机在伊朗上空执行作战任务时被疑似伊朗火力击中，被迫在中东某基地紧急迫降。这是美以对伊战争爆发以来首次有美军先进隐身战机受损的报道。伊朗革命卫队随后发布视频声称「直接命中」，但真实性尚待证实。CNN援引消息人士称飞机被伊朗弹药击中，飞行员安全着陆。此事件引发外界对美军「空中优势神话」的质疑，五角大楼拒绝透露更多细节。F-35造价约1.1亿美元，是美军最先进的第五代战机。",
+      "image": "https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-2185148261.jpg",
+      "source": "CNN / CENTCOM",
+      "url": "https://www.cnn.com/2026/03/19/politics/f-35-damage-iran-war",
+      "timestamp": "2026-03-20T09:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "伊朗袭击重创卡塔尔LNG出口，17%产能或停摆五年",
-      "summary": "卡塔尔能源公司CEO周四透露，伊朗导弹袭击已导致拉斯拉凡工业城遭受「广泛破坏」，全球最大液化天然气出口设施17%的产能被摧毁，预计需要3至5年才能恢复。这意味着每年约200亿美元的出口收入损失，并将严重威胁欧洲和亚洲的能源供应。袭击同时波及沙特炼油厂、阿联酋气田和科威特能源设施。天然气期货价格应声暴涨，欧洲能源危机进一步加剧。此为伊朗战争以来对全球能源供应链最严重的冲击。",
-      "image": "",
-      "source": "Reuters / Bloomberg",
-      "url": "https://www.reuters.com/business/energy/iran-attack-damage-wipes-out-17-qatars-lng-capacity-three-five-years-qatarenergy-2026-03-19/",
-      "timestamp": "2026-03-20T06:30:00+08:00"
+      "title": "特朗普警告以色列停止攻击伊朗能源设施，能源战持续升级",
+      "summary": "美国总统特朗普周四表示，他已告知以色列不得再次袭击伊朗天然气基础设施。此前以色列单独行动空袭伊朗南帕尔斯气田，引发伊朗对海湾国家能源设施的大规模报复性打击，全球油气价格剧烈波动。内塔尼亚胡则在记者会上宣称「伊朗已失去浓缩铀和制造弹道导弹的能力」，强调战争目标基本达成。分析人士认为，美以在战争终点问题上存在明显分歧——华盛顿希望降温，而特拉维夫意图继续打击伊朗残余军事能力。",
+      "image": "https://static.reuters.com/resources/r/?d=20260319&i=RTS9OZAR&r=RTS9OZAR",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/world/middle-east/trump-vows-no-more-attacks-by-israel-iran-gas-field-after-it-violently-lashed-2026-03-19/",
+      "timestamp": "2026-03-20T08:30:00+08:00"
     },
     {
       "id": 3,
-      "title": "三星宣布730亿美元AI芯片投资，创单年投资纪录",
-      "summary": "三星电子周四宣布，2026年将投资超过110万亿韩元（约合732亿美元）用于研发和设施建设，以在人工智能半导体领域夺取领先地位。这一投资额较去年增长22%，创下三星单年投资历史新高。三星联席CEO此前表示，芯片行业正进入「前所未有的超级周期」，AI数据中心需求爆发式增长。此举旨在追赶SK海力士在高带宽存储芯片市场的领先优势——后者目前是英伟达的主要供应商。三星还计划通过战略收购加速AI布局。",
-      "image": "",
-      "source": "Reuters / Bloomberg",
-      "url": "https://www.reuters.com/business/samsung-electronics-plans-over-73-bln-investment-lead-ai-chip-sector-2026-03-19/",
-      "timestamp": "2026-03-20T06:00:00+08:00"
+      "title": "欧盟峰会未能打破僵局，匈牙利继续否决900亿欧元援乌贷款",
+      "summary": "欧盟领导人周四在布鲁塞尔峰会上未能说服匈牙利总理欧尔班解除对900亿欧元（约1030亿美元）乌克兰贷款的否决。德国新任总理默茨在峰会后表示「极度失望」，指责欧尔班「背叛」欧洲团结。欧盟委员会被要求另寻途径绕过匈牙利的阻挠。峰会同时讨论了伊朗战争导致的能源价格飙升问题，各国领导人呼吁中东各方对能源设施实施「暂停攻击」。这笔贷款原计划帮助乌克兰在俄乌战争中维持两年的军事和经济运转。",
+      "image": "https://media.guim.co.uk/6c8a4b8c9a5d4e3f2b1a0987/master/3000.jpg",
+      "source": "The Guardian / Euronews",
+      "url": "https://www.theguardian.com/world/2026/mar/19/hungary-orban-ukraine-loan-veto-eu-summit-europe",
+      "timestamp": "2026-03-20T08:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "伊朗全国断网进入第20天，创历史最长纪录",
-      "summary": "网络监测机构NetBlocks报告称，伊朗全国性断网已持续超过20天（456小时），成为该国历史上最长的一次网络封锁，超越今年1月抗议期间的断网纪录。断网期间伊朗民众无法访问国际互联网，仅能使用受限的国内网络。国际特赦组织谴责这一「全面断网」违反国际人权法，呼吁伊朗当局立即恢复网络接入。分析人士指出，持续断网旨在阻止战争信息外流并压制国内反战声音，但也严重影响了伊朗的经济和民生。",
-      "image": "",
-      "source": "NetBlocks / NYT / Amnesty",
-      "url": "https://www.nytimes.com/2026/03/18/world/middleeast/iran-internet-shutdown.html",
-      "timestamp": "2026-03-20T05:30:00+08:00"
+      "title": "联合国：2万名海员被困波斯湾，呼吁建立安全撤离通道",
+      "summary": "联合国国际海事组织秘书长周四表示，因伊朗战争导致霍尔木兹海峡航运中断，约2万名海员被困在波斯湾无法撤离。IMO成员国已同意着手建立安全海上通道，以保护战区内的商船和船员。此外，至少6艘大型邮轮被迫滞留，1.5万名乘客受困。伊朗革命卫队多次警告将打击任何通过海峡的船只，导致油轮运输量骤降。印度外交部正与伊朗协商撤离本国公民，部分印度船员已在班达阿巴斯港滞留超过两周，目睹附近船只被无人机袭击起火。",
+      "image": "https://static.reuters.com/resources/r/?d=20260319&i=RTS9P02M&r=RTS9P02M",
+      "source": "Reuters / BBC",
+      "url": "https://www.reuters.com/world/middle-east/un-shipping-agency-imo-calls-safe-corridor-evacuate-seafarers-gulf-2026-03-19/",
+      "timestamp": "2026-03-20T07:30:00+08:00"
     },
     {
       "id": 5,
-      "title": "波斯新年诺鲁孜节今日到来，战火中伊朗民众坚持购年货",
-      "summary": "今天（3月20日）是波斯新年诺鲁孜节，标志着春分和波斯历新年的到来。尽管美以对伊朗的军事行动已持续三周、全国断网仍在继续，伊朗民众仍在集市采购传统年货庆祝新年。在美国，伊朗裔美国人社区的诺鲁孜庆祝活动气氛更为复杂，许多人一边点燃跳火仪式的篝火，一边为故土亲人的安危忧心。这一拥有三千年历史的节日跨越国界，从阿塞拜疆到塔吉克斯坦的3亿人共同庆祝，今年被赋予了「和平与希望」的特殊寓意。",
-      "image": "",
-      "source": "Al Jazeera / AP / Newsweek",
-      "url": "https://www.aljazeera.com/video/newsfeed/2026/3/19/iranians-shop-for-persian-new-year-essentials-despite-war",
-      "timestamp": "2026-03-20T05:00:00+08:00"
+      "title": "迪拜机场遭无人机袭击起火后恢复运营，伊朗持续打击海湾设施",
+      "summary": "迪拜国际机场在3月16日遭伊朗无人机袭击引发燃油库起火后，已于周三恢复正常运营。此前机场一度暂停航班数小时。阿联酋内政部表示拦截并摧毁了四枚弹道导弹和六架无人机，但仍有部分突防成功。同日，科威特米纳艾哈迈迪炼油厂也遭无人机袭击起火。沙特、巴林、卡塔尔等海湾国家能源设施本周均遭到伊朗不同程度的攻击。海湾合作委员会外长发表联合声明，谴责伊朗对「民用基础设施和居民区」的袭击，要求伊朗承担国际赔偿责任。",
+      "image": "https://images.indianexpress.com/2026/03/dubai-airport-fire.jpg",
+      "source": "Indian Express / Wikipedia",
+      "url": "https://en.wikipedia.org/wiki/2026_Iranian_strikes_on_the_United_Arab_Emirates",
+      "timestamp": "2026-03-20T07:00:00+08:00"
     }
   ]
 }

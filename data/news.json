@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-21T08:00:00+08:00",
+  "lastUpdated": "2026-03-21T18:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "特朗普表示考虑「逐步结束」伊朗军事行动，但拒绝停火",
-      "summary": "美国总统特朗普周四表示美国正在考虑「逐步结束」对伊朗的军事行动，声称「正在非常接近实现我们的目标」。但他同时明确拒绝与伊朗停火的可能性，并批评北约盟国是「懦夫」，未能协助美国确保霍尔木兹海峡航运安全。伊朗高层消息人士对CNN表示不相信特朗普的说法，认为这只是美国国内政治操作。分析人士指出，美军在中东的行动已持续21天，国际金融市场剧烈动荡，特朗普面临越来越大的国内压力要求结束冲突。",
-      "image": "",
-      "source": "CNBC / Bloomberg / Guardian",
-      "url": "https://www.cnbc.com/2026/03/20/trump-iran-war-ceasefire.html",
-      "timestamp": "2026-03-21T08:00:00+08:00"
+      "title": "特朗普称考虑「逐步结束」伊朗战争，但增派海军陆战队至中东",
+      "summary": "美国总统特朗普周五在Truth Social发文称「我们正非常接近实现对伊朗恐怖政权的军事目标，正在考虑逐步结束我们伟大的军事行动」。但国防部官员透露更多海军陆战队正被部署至中东，两艘两栖攻击舰已进入波斯湾。国家安全顾问沃尔茨表示，美国的目标是让伊朗「无法以核武器、恐怖代理人、弹道导弹和无人机威胁邻国和美国」。特朗普同时暗示欧洲国家应自行承担霍尔木兹海峡的安全责任，引发北约盟国不满。战争已进入第21天，国际油价飙升至2022年7月以来最高。",
+      "image": "https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-2203376285.jpg",
+      "source": "CNN / NPR / Axios",
+      "url": "https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-20-26",
+      "timestamp": "2026-03-21T18:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "瑞士因中立政策暂停对美武器出口，系伊朗战争外交余波",
-      "summary": "瑞士政府周五宣布暂停向美国出口武器，援引其严格的中立政策。瑞士政府声明称「向参与国际武装冲突的国家出口军事物资在冲突期间不得授权」。此前瑞士已以同样理由暂停向以色列和伊朗出口武器。美国是瑞士武器出口的重要市场，主要涉及小型武器及弹药。这一决定凸显伊朗战争正在对全球外交和贸易格局产生深远影响。纽约时报指出，这是瑞士自二战以来首次因美国参战而限制对美武器出口，具有重大象征意义。",
-      "image": "",
+      "title": "瑞士因中立政策暂停对美武器出口，自2月28日战争爆发后未批准新许可",
+      "summary": "瑞士政府周五宣布暂停向美国出口武器，援引其严格的中立原则。瑞士政府声明称「向参与国际武装冲突的国家出口战争物资在冲突期间不得授权」。自2月28日美以对伊朗发动首轮打击以来，瑞士已停止批准任何新的对美武器出口许可。美国是瑞士武器出口的重要市场之一，主要涉及小型武器和弹药。上周末瑞士还以同样理由拒绝了美军两架战机的飞越领空请求。这是继2003年伊拉克战争后，瑞士再次因美国参战而限制对美军事出口，凸显伊朗战争正在重塑全球外交格局。",
+      "image": "https://www.aljazeera.com/wp-content/uploads/2026/03/AFP__20260320__27J94AV__v1__HighRes__SwitzerlandFlagsFactory.jpg",
       "source": "Reuters / Al Jazeera / Bloomberg",
       "url": "https://www.reuters.com/world/europe/switzerland-halts-weapons-exports-us-due-iran-war-citing-neutrality-2026-03-20/",
-      "timestamp": "2026-03-21T07:30:00+08:00"
+      "timestamp": "2026-03-21T17:30:00+08:00"
     },
     {
       "id": 3,
-      "title": "卡塔尔LNG产能因伊朗袭击损失17%，GDP或暴跌13%",
-      "summary": "卡塔尔能源公司CEO周四透露，伊朗对拉斯拉凡工业城的导弹袭击已摧毁该国17%的LNG产能，修复工程预计需要3至5年，年损失高达200亿美元。壳牌运营的珍珠GTL全球最大气转液工厂也严重受损。凯投宏观估计卡塔尔GDP今年可能暴跌13%，成为海湾地区受创最严重的国家。韩国、印度等LNG进口大国已表示供应面临不确定性。特朗普警告伊朗不得再袭击卡塔尔能源设施，否则将「彻底炸毁南帕尔斯气田」。",
-      "image": "",
-      "source": "Reuters / BBC / Guardian",
-      "url": "https://www.reuters.com/business/energy/iran-attack-damage-wipes-out-17-qatars-lng-capacity-three-five-years-qatarenergy-2026-03-19/",
-      "timestamp": "2026-03-21T07:00:00+08:00"
+      "title": "欧盟呼吁中东停止打击能源设施，要求重开霍尔木兹海峡",
+      "summary": "欧盟27国领导人周四在布鲁塞尔峰会上发表联合声明，紧急呼吁各方停止对能源和水利设施的军事打击，要求「降级、最大克制、保护平民和民用基础设施」。以色列对伊朗关键气田的轰炸导致全球能源价格飙升，布伦特原油突破112美元/桶创2022年7月以来新高。欧盟还呼吁尽快重新开放霍尔木兹海峡航运，因20%的全球石油供应须经此通过。欧盟委员会已着手准备紧急能源措施，包括削减电力税、补贴和放宽俄罗斯天然气进口限制。",
+      "image": "https://cloudfront-eu-central-1.images.arcpublishing.com/reuters/N5OJWQBZUJLT7NLNF7OZQXNRWI.jpg",
+      "source": "Reuters / Jerusalem Post / Guardian",
+      "url": "https://www.reuters.com/world/eu-leaders-call-moratorium-strikes-against-energy-water-facilities-middle-east-2026-03-19/",
+      "timestamp": "2026-03-21T17:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "好莱坞动作巨星查克·诺里斯去世，享年86岁",
-      "summary": "美国武术家、动作片演员查克·诺里斯周四在家人陪伴下安详离世，享年86岁。诺里斯曾获六届世界空手道冠军，后转型成为好莱坞动作明星，代表作包括电视剧《德州骑警沃克》和电影《三角洲部队》《龙拳》等。他在1972年与李小龙的对手戏《猛龙过江》成为影史经典。2000年代初，「查克·诺里斯事实」网络梗使他成为流行文化符号。以色列总理内塔尼亚胡发文悼念称诺里斯是「以色列的好朋友」。各路好莱坞明星纷纷发表悼词。",
-      "image": "",
-      "source": "BBC / CNN / NYT / NPR",
-      "url": "https://www.bbc.com/news/articles/c0le8e5jg1xo",
-      "timestamp": "2026-03-21T06:30:00+08:00"
+      "title": "伊拉克宣布外资油田不可抗力，霍尔木兹海峡中断致储油能力告罄",
+      "summary": "伊拉克石油部周五宣布对所有外国公司运营的油田实施「不可抗力」条款，因霍尔木兹海峡军事行动中断了该国绝大部分原油出口。伊拉克大部分原油需经霍尔木兹海峡运往国际市场，目前储油设施已达极限。这是伊朗战争爆发以来对全球能源供应最严重的冲击之一。石油分析师John Kilduff称这是「最糟糕的情景」，油价恢复正常的希望「正在我们眼前消失」。布伦特原油周五收于112.19美元/桶，WTI收于98.32美元/桶，均为2022年7月以来最高结算价。",
+      "image": "https://cloudfront-eu-central-1.images.arcpublishing.com/reuters/WYFNFN3VZJPRPEBG7JVQV7DMGU.jpg",
+      "source": "Reuters / Economic Times",
+      "url": "https://www.reuters.com/business/energy/iraq-declares-force-majeure-foreign-operated-oilfields-over-hormuz-disruption-2026-03-20/",
+      "timestamp": "2026-03-21T16:30:00+08:00"
     },
     {
       "id": 5,
-      "title": "英国大幅削减对非洲援助，国际发展预算降至GNI的0.3%",
-      "summary": "英国政府宣布将大幅削减国际援助开支，其中对非洲的双边援助将从2026年的8.18亿英镑降至2029年的6.77亿英镑，降幅约17%。整体海外发展预算将从GNI的0.5%进一步降至0.3%，成为G7国家中削减幅度最大的一国。政府平等影响评估承认，此举将对非洲女性和女童产生「负面影响」。气候融资也将从56亿英镑/5年大幅缩减至60亿英镑/3年。前首相斯塔默此前曾承诺恢复0.7%的援助水平，如今食言引发国内外批评。",
-      "image": "",
-      "source": "Guardian / Independent / Reuters",
-      "url": "https://www.theguardian.com/global-development/2026/mar/19/poorest-countries-lose-uk-aid-56-per-cent-budget-cut",
-      "timestamp": "2026-03-21T06:00:00+08:00"
+      "title": "好莱坞动作巨星查克·诺里斯去世，享年86岁",
+      "summary": "美国武术家、动作片演员查克·诺里斯周四在夏威夷家中突然离世，享年86岁。诺里斯曾六次获得世界空手道冠军，后转型成为好莱坞动作明星，代表作包括电视剧《德州骑警沃克》和《三角洲部队》《失踪的行动》等电影。他1972年与李小龙在《猛龙过江》中的经典对决成为武术片影史传奇。2000年代初「查克·诺里斯事实」网络梗让他成为流行文化符号。家人声明称「我们想保持具体情况私密，但请知道他在家人陪伴下安详离去」。",
+      "image": "https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-1499595893.jpg",
+      "source": "CNN / NPR / Variety / NYT",
+      "url": "https://www.cnn.com/2026/03/20/entertainment/chuck-norris-death",
+      "timestamp": "2026-03-21T16:00:00+08:00"
     }
   ]
 }

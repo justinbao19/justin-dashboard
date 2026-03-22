@@ -195,13 +195,74 @@ def fetch_news_from_google_rss() -> list:
         return []
 
 
+def fetch_news_from_thepaper() -> list:
+    """从澎湃新闻 RSS 获取新闻（直接链接，无需解析）"""
+    import xml.etree.ElementTree as ET
+    
+    url = "https://feedx.net/rss/thepaper.xml"
+    
+    try:
+        r = requests.get(url, timeout=15)
+        root = ET.fromstring(r.content)
+        
+        items = []
+        for item in root.findall(".//item")[:15]:
+            title_el = item.find("title")
+            link_el = item.find("link")
+            desc_el = item.find("description")
+            pub_date_el = item.find("pubDate")
+            
+            if title_el is None or link_el is None:
+                continue
+            
+            title = title_el.text.strip() if title_el.text else ""
+            link = link_el.text.strip() if link_el.text else ""
+            
+            # 从 description 提取摘要（去掉 HTML 标签）
+            summary = ""
+            if desc_el is not None and desc_el.text:
+                # 提取纯文本前200字
+                text = re.sub(r'<[^>]+>', '', desc_el.text)
+                text = re.sub(r'\s+', ' ', text).strip()
+                summary = text[:300] if len(text) > 300 else text
+            
+            # 从 description 提取第一张图片
+            image = ""
+            if desc_el is not None and desc_el.text:
+                # 澎湃用 data-src 存真实图片，src 是占位符
+                # HTML 实体编码：&quot; = "
+                desc_text = desc_el.text.replace('&quot;', '"').replace('&amp;', '&')
+                img_match = re.search(r'data-src="(https://imgpai\.thepaper\.cn[^"]+)"', desc_text)
+                if img_match:
+                    image = img_match.group(1)
+                else:
+                    # 备选：任何 data-src
+                    img_match = re.search(r'data-src="(https?://[^"]+\.(jpg|jpeg|png))"', desc_text)
+                    if img_match:
+                        image = img_match.group(1)
+            
+            items.append({
+                "title": title,
+                "source": "澎湃新闻",
+                "url": link,
+                "summary": summary,
+                "image": image,
+                "pub_date": pub_date_el.text if pub_date_el is not None else ""
+            })
+        
+        return items
+    except Exception as e:
+        print(f"澎湃新闻 RSS error: {e}")
+        return []
+
+
 def fetch_news_from_newsapi() -> list:
     """从 NewsAPI 获取新闻（需要 API key）"""
     # NewsAPI 免费版限制较多，这里作为备选
     return []
 
 
-def resolve_google_news_url(google_url: str) -> str:
+def resolve_google_news_url(google_url: str, title: str = "") -> str:
     """解析 Google News 跳转链接，获取真实 URL"""
     import base64
     
@@ -217,18 +278,20 @@ def resolve_google_news_url(google_url: str) -> str:
                 decoded_str = decoded.decode("utf-8", errors="ignore")
                 url_match = re.search(r'https?://[^\s\x00-\x1f]+', decoded_str)
                 if url_match:
-                    return url_match.group(0).rstrip('\x00\x01\x02\x03')
+                    result = url_match.group(0).rstrip('\x00\x01\x02\x03')
+                    if "google" not in result:
+                        return result
             except:
                 pass
     except:
         pass
     
-    # 方法2: 用 requests 跟随重定向（有时能用）
+    # 方法2: 用 requests 跟随重定向
     try:
         headers = {
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         }
-        r = requests.head(google_url, headers=headers, timeout=5, allow_redirects=True)
+        r = requests.get(google_url, headers=headers, timeout=8, allow_redirects=True)
         if r.url != google_url and "google" not in r.url:
             return r.url
     except:
@@ -237,8 +300,47 @@ def resolve_google_news_url(google_url: str) -> str:
     return google_url
 
 
-def get_article_summary(url: str) -> str:
+def fetch_via_jina(url: str) -> dict | None:
+    """用 Jina Reader 抓取网页，返回 {title, description, image, content}"""
+    try:
+        jina_url = f"https://r.jina.ai/{url}"
+        headers = {
+            "Accept": "application/json",
+            "X-Return-Format": "json",
+            "User-Agent": "Mozilla/5.0"
+        }
+        r = requests.get(jina_url, headers=headers, timeout=15)
+        if r.status_code == 200:
+            data = r.json()
+            return {
+                "title": data.get("title", ""),
+                "description": data.get("description", ""),
+                "image": data.get("image", ""),
+                "content": data.get("content", "")[:500]  # 截取前500字
+            }
+    except Exception as e:
+        print(f"    Jina error: {e}")
+    return None
+
+
+def get_article_summary(url: str, jina_data: dict | None = None) -> str:
     """从新闻原文提取摘要"""
+    # 优先使用 Jina 数据
+    if jina_data:
+        desc = jina_data.get("description", "")
+        if desc and len(desc) > 20 and "Google News" not in desc:
+            return desc[:300].strip()
+        # 备选：用正文开头
+        content = jina_data.get("content", "")
+        if content and len(content) > 50:
+            # 清理 markdown
+            clean = re.sub(r'\[.*?\]\(.*?\)', '', content)
+            clean = re.sub(r'[#*_`]', '', clean)
+            clean = clean.strip()
+            if len(clean) > 50:
+                return clean[:300].strip()
+    
+    # 回退到直接抓取
     try:
         # 如果是 Google News 链接，先解析
         real_url = resolve_google_news_url(url) if "news.google.com" in url else url
@@ -253,20 +355,20 @@ def get_article_summary(url: str) -> str:
         if match:
             desc = match.group(1) or match.group(2)
             if desc and len(desc) > 20:
-                return desc[:200].strip()
+                return desc[:300].strip()
         
         # 2. 备选：meta description
         match = re.search(r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']', r.text)
         if match:
             desc = match.group(1)
             if desc and len(desc) > 20:
-                return desc[:200].strip()
+                return desc[:300].strip()
         
         # 3. 提取第一段文字
         match = re.search(r'<p[^>]*>([^<]{50,300})</p>', r.text)
         if match:
             text = re.sub(r'<[^>]+>', '', match.group(1))
-            return text[:200].strip()
+            return text[:300].strip()
             
     except Exception as e:
         print(f"    ⚠️ 获取摘要失败: {e}")
@@ -310,19 +412,27 @@ def get_article_image(url: str) -> str | None:
     return None
 
 
-def find_image_for_news(news_item: dict) -> str:
+def find_image_for_news(news_item: dict, jina_data: dict | None = None) -> str:
     """为新闻项找配图"""
     title = news_item["title"]
     url = news_item.get("url", "")
     
-    # 1. 尝试从新闻原文获取图片（跳过 Google News 链接，解析太复杂）
-    if url and "news.google.com" not in url:
-        original_img = get_article_image(url)
+    # 1. 优先使用 Jina 返回的图片
+    if jina_data:
+        img = jina_data.get("image", "")
+        if img and not any(x in img.lower() for x in ["logo", "icon", "avatar", "favicon"]):
+            print(f"  ✓ Jina 图片: {title[:25]}...")
+            return img
+    
+    # 2. 尝试从新闻原文获取图片
+    if url:
+        real_url = resolve_google_news_url(url) if "news.google.com" in url else url
+        original_img = get_article_image(real_url)
         if original_img and not "logo" in original_img.lower():
             print(f"  ✓ 原文图片: {title[:25]}...")
             return original_img
     
-    # 2. 尝试 Unsplash API 搜索（如果配置了 key）
+    # 3. 尝试 Unsplash API 搜索（如果配置了 key）
     keywords = extract_keywords(title)
     if keywords and UNSPLASH_ACCESS_KEY != "your_unsplash_access_key":
         query = " ".join(keywords)
@@ -331,7 +441,7 @@ def find_image_for_news(news_item: dict) -> str:
             print(f"  ✓ Unsplash: {query}")
             return img
     
-    # 3. 使用高质量预设图片（根据内容智能匹配）
+    # 4. 使用高质量预设图片（根据内容智能匹配）
     img = get_fallback_image(title)
     print(f"  → 智能配图: {title[:25]}...")
     return img
@@ -341,8 +451,11 @@ def update_news():
     """更新新闻数据"""
     print("📰 更新新闻数据...")
     
-    # 获取新闻
-    news_items = fetch_news_from_google_rss()
+    # 获取新闻（优先澎湃，直接链接，无需解析）
+    news_items = fetch_news_from_thepaper()
+    if not news_items:
+        print("  澎湃新闻 RSS 失败，尝试 Google News...")
+        news_items = fetch_news_from_google_rss()
     
     if not news_items:
         print("⚠️ 未获取到新闻")
@@ -355,18 +468,64 @@ def update_news():
     for item in news_items[:5]:  # Dashboard 只显示5条
         print(f"  处理: {item['title'][:30]}...")
         
-        # 获取摘要
-        summary = get_article_summary(item["url"])
-        if summary:
-            print(f"    ✓ 摘要: {summary[:30]}...")
+        url = item["url"]
+        
+        # 如果来自澎湃，直接使用 RSS 提供的数据
+        if item.get("summary") or item.get("image"):
+            summary = item.get("summary", "")
+            image = item.get("image", "")
+            
+            # 如果 RSS 没有图片，尝试从原文获取
+            if not image:
+                jina_data = fetch_via_jina(url)
+                if jina_data and jina_data.get("image"):
+                    image = jina_data["image"]
+                    print(f"    ✓ Jina 图片")
+                else:
+                    image = get_fallback_image(item["title"])
+                    print(f"    → 智能配图")
+            else:
+                print(f"    ✓ RSS 图片")
+            
+            if summary:
+                print(f"    ✓ 摘要: {summary[:40]}...")
+            
+            processed.append({
+                "title": item["title"],
+                "source": item["source"],
+                "image": image,
+                "summary": summary,
+                "full_content": "",
+                "url": url
+            })
+            continue
+        
+        # Google News 流程（需要解析）
+        real_url = resolve_google_news_url(url, item["title"]) if "news.google.com" in url else url
+        got_real_url = real_url != url and "google" not in real_url
+        
+        if got_real_url:
+            print(f"    ✓ 真实链接: {real_url[:50]}...")
+        else:
+            print(f"    ⚠️ 无法解析 Google News 链接")
+        
+        jina_data = None
+        if got_real_url:
+            jina_data = fetch_via_jina(real_url)
+        
+        summary = get_article_summary(url, jina_data)
+        if summary and "Google News" not in summary:
+            print(f"    ✓ 摘要: {summary[:40]}...")
+        else:
+            summary = ""
         
         processed.append({
             "title": item["title"],
             "source": item["source"],
-            "image": find_image_for_news(item),
+            "image": find_image_for_news(item, jina_data),
             "summary": summary,
             "full_content": "",
-            "url": item["url"]
+            "url": real_url if got_real_url else url
         })
     
     # 生成 news.json

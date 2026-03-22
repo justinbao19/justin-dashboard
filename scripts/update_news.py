@@ -76,24 +76,31 @@ def search_unsplash(query: str) -> str | None:
     return None
 
 
-def get_fallback_image(title: str) -> str:
-    """根据内容返回合适的 Unsplash 高质量图片"""
+def get_fallback_image(title: str, index: int = 0) -> str:
+    """根据内容返回合适的 Unsplash 高质量图片
+    
+    保障链：关键词匹配 → 通用图片轮换（避免重复）
+    """
     # 预设的高质量图片，按主题分类（都是 1200px 宽度）
     images = {
         # 军事/冲突
         "war": "https://images.unsplash.com/photo-1580130379624-3a069adbffc5?w=1200&q=80",
         "missile": "https://images.unsplash.com/photo-1517976487492-5750f3195933?w=1200&q=80",
         "military": "https://images.unsplash.com/photo-1579912437766-7896df6d3cd3?w=1200&q=80",
+        "terror": "https://images.unsplash.com/photo-1453873531674-2151bcd01707?w=1200&q=80",
         
         # 政治
         "politics_us": "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=1200&q=80",
         "politics_cn": "https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200&q=80",
         "government": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=1200&q=80",
+        "law": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1200&q=80",
         
         # 地区
         "middle_east": "https://images.unsplash.com/photo-1569242840510-9fe6f0112cee?w=1200&q=80",
         "iran": "https://images.unsplash.com/photo-1564668007661-4c2e62e01bab?w=1200&q=80",
         "israel": "https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=1200&q=80",
+        "japan": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&q=80",
+        "australia": "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?w=1200&q=80",
         
         # 经济/金融
         "stock": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80",
@@ -105,36 +112,62 @@ def get_fallback_image(title: str) -> str:
         "tech": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
         "ai": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&q=80",
         "chip": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80",
+        "phone": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80",
         
         # 社会
         "work": "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=1200&q=80",
         "health": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80",
         "education": "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&q=80",
+        "sports": "https://images.unsplash.com/photo-1461896836934- voices-e08b5c?w=1200&q=80",
+        "food": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80",
+        "crime": "https://images.unsplash.com/photo-1589994965851-a8f479c573a9?w=1200&q=80",
+        "panda": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=1200&q=80",
+        "film": "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&q=80",
+        "children": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1200&q=80",
         
-        # 通用
+        # 通用新闻图片池（用于轮换，避免重复）
+        "news_1": "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=1200&q=80",
+        "news_2": "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=1200&q=80",
+        "news_3": "https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=1200&q=80",
+        "news_4": "https://images.unsplash.com/photo-1557992260-ec58e38d363c?w=1200&q=80",
+        "news_5": "https://images.unsplash.com/photo-1478439911751-475f7dc979ea?w=1200&q=80",
         "world": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80",
-        "news": "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=1200&q=80",
     }
     
-    # 关键词匹配规则（按优先级排序）
+    # 关键词匹配规则（按优先级排序，更详细）
     rules = [
+        # 动物
+        (["大熊猫", "熊猫", "国宝"], "panda"),
+        
+        # 恐怖袭击/枪击
+        (["枪击", "恐袭", "恐怖", "袭击", "IS", "伊斯兰国"], "terror"),
+        
+        # 影视娱乐
+        (["导演", "电影", "演员", "影片", "票房", "娱乐"], "film"),
+        
+        # 儿童/未成年
+        (["儿童", "小天才", "手表", "未成年", "孩子"], "children"),
+        
         # 军事/战争
         (["战争", "空袭", "轰炸", "入侵"], "war"),
-        (["导弹", "发射", "核"], "missile"),
-        (["军事", "军队", "部队", "国防"], "military"),
+        (["导弹", "发射", "核武"], "missile"),
+        (["军事", "军队", "部队", "国防", "军方"], "military"),
         
-        # 地区冲突
+        # 地区
         (["伊朗", "德黑兰"], "iran"),
         (["以色列", "特拉维夫", "耶路撒冷"], "israel"),
         (["中东", "黎巴嫩", "叙利亚", "也门"], "middle_east"),
+        (["日本", "东京", "旅日"], "japan"),
+        (["澳大利亚", "悉尼", "墨尔本", "澳洲"], "australia"),
         
         # 政治人物/政府
         (["特朗普", "拜登", "白宫", "美国总统"], "politics_us"),
-        (["习近平", "李强", "两会", "政协", "人大"], "politics_cn"),
-        (["政府", "国会", "议会", "选举"], "government"),
+        (["习近平", "李强", "两会", "政协", "人大", "总书记"], "politics_cn"),
+        (["政府", "国会", "议会", "选举", "官员"], "government"),
+        (["法院", "判决", "定罪", "审判", "司法"], "law"),
         
         # 经济金融
-        (["股市", "A股", "港股", "美股", "纳斯达克"], "stock"),
+        (["股市", "A股", "港股", "美股", "纳斯达克", "证监会"], "stock"),
         (["油价", "原油", "石油", "OPEC"], "oil"),
         (["黄金", "金价"], "gold"),
         (["经济", "GDP", "通胀", "利率", "央行"], "economy"),
@@ -142,20 +175,24 @@ def get_fallback_image(title: str) -> str:
         # 科技
         (["AI", "人工智能", "ChatGPT", "大模型"], "ai"),
         (["芯片", "半导体", "英伟达", "台积电"], "chip"),
+        (["手机", "智能手表", "电子产品"], "phone"),
         (["科技", "互联网", "数字化"], "tech"),
         
         # 社会
-        (["就业", "失业", "裁员", "招聘"], "work"),
-        (["医疗", "健康", "疫情", "病毒"], "health"),
-        (["教育", "学校", "高考", "大学"], "education"),
+        (["就业", "失业", "裁员", "招聘", "体育局", "运动员"], "sports"),
+        (["医疗", "健康", "疫情", "病毒", "体检"], "health"),
+        (["教育", "学校", "高考", "大学", "理论武装"], "education"),
+        (["食品", "陈皮", "造假", "市场"], "food"),
+        (["杀害", "遇害", "凶杀", "犯罪"], "crime"),
     ]
     
     for keywords, category in rules:
         if any(kw in title for kw in keywords):
             return images[category]
     
-    # 默认使用新闻图片
-    return images["news"]
+    # 没有匹配到关键词时，使用通用图片轮换（根据 index 选择不同图片）
+    news_keys = ["news_1", "news_2", "news_3", "news_4", "news_5", "world"]
+    return images[news_keys[index % len(news_keys)]]
 
 
 def fetch_news_from_google_rss() -> list:
@@ -465,67 +502,57 @@ def update_news():
     
     # 处理新闻，添加图片和摘要
     processed = []
-    for item in news_items[:5]:  # Dashboard 只显示5条
-        print(f"  处理: {item['title'][:30]}...")
+    for idx, item in enumerate(news_items[:5]):  # Dashboard 只显示5条
+        print(f"  [{idx+1}] {item['title'][:30]}...")
         
         url = item["url"]
+        title = item["title"]
         
-        # 如果来自澎湃，直接使用 RSS 提供的数据
-        if item.get("summary") or item.get("image"):
-            summary = item.get("summary", "")
-            image = item.get("image", "")
-            
-            # 如果 RSS 没有图片，尝试从原文获取
-            if not image:
-                jina_data = fetch_via_jina(url)
-                if jina_data and jina_data.get("image"):
-                    image = jina_data["image"]
-                    print(f"    ✓ Jina 图片")
-                else:
-                    image = get_fallback_image(item["title"])
-                    print(f"    → 智能配图")
-            else:
-                print(f"    ✓ RSS 图片")
-            
-            if summary:
-                print(f"    ✓ 摘要: {summary[:40]}...")
-            
-            processed.append({
-                "title": item["title"],
-                "source": item["source"],
-                "image": image,
-                "summary": summary,
-                "full_content": "",
-                "url": url
-            })
-            continue
+        # === 图片保障链 ===
+        # 1. RSS 自带图片
+        # 2. Jina Reader 抓取 og:image
+        # 3. 原文页面 og:image
+        # 4. 关键词智能匹配 Unsplash
+        # 5. 通用图片轮换（每条新闻不同）
         
-        # Google News 流程（需要解析）
-        real_url = resolve_google_news_url(url, item["title"]) if "news.google.com" in url else url
-        got_real_url = real_url != url and "google" not in real_url
-        
-        if got_real_url:
-            print(f"    ✓ 真实链接: {real_url[:50]}...")
-        else:
-            print(f"    ⚠️ 无法解析 Google News 链接")
-        
+        image = item.get("image", "")
+        summary = item.get("summary", "")
         jina_data = None
-        if got_real_url:
-            jina_data = fetch_via_jina(real_url)
         
-        summary = get_article_summary(url, jina_data)
-        if summary and "Google News" not in summary:
-            print(f"    ✓ 摘要: {summary[:40]}...")
+        # 层级1: RSS 图片
+        if image:
+            print(f"    ✓ RSS 图片")
         else:
-            summary = ""
+            # 层级2: Jina Reader
+            jina_data = fetch_via_jina(url)
+            if jina_data and jina_data.get("image"):
+                image = jina_data["image"]
+                print(f"    ✓ Jina 图片")
+            else:
+                # 层级3: 直接抓原文 og:image
+                original_img = get_article_image(url)
+                if original_img:
+                    image = original_img
+                    print(f"    ✓ 原文图片")
+                else:
+                    # 层级4+5: 智能配图（关键词匹配 + 轮换）
+                    image = get_fallback_image(title, idx)
+                    print(f"    → 智能配图")
+        
+        # 摘要：优先 RSS，其次 Jina
+        if not summary and jina_data:
+            summary = get_article_summary(url, jina_data)
+        
+        if summary:
+            print(f"    ✓ 摘要: {summary[:40]}...")
         
         processed.append({
-            "title": item["title"],
+            "title": title,
             "source": item["source"],
-            "image": find_image_for_news(item, jina_data),
+            "image": image,
             "summary": summary,
             "full_content": "",
-            "url": real_url if got_real_url else url
+            "url": url
         })
     
     # 生成 news.json

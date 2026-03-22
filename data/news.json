@@ -1,46 +1,50 @@
 {
-  "date": "2026年3月22日",
+  "lastUpdated": "2026-03-22T18:00:00+08:00",
   "items": [
     {
-      "title": "澳枪击事件嫌疑人为父子：曾宣誓效忠“伊斯兰国”，行凶枪支为合法持有",
-      "source": "澎湃新闻",
-      "image": "https://images.unsplash.com/photo-1453873531674-2151bcd01707?w=1200&q=80",
-      "summary": "据新华社12月15日援引澳大利亚广播公司报道，澳大利亚联合反恐小组调查人员表示，悉尼邦迪滩枪击事件两名嫌疑人曾宣誓效忠“伊斯兰国”恐怖组织。报道援引联合反恐小组一名不愿透露姓名的高级官员的话说，警方在邦迪滩两名枪手车内发现一面“伊斯兰国”旗帜。澳大利亚安全情报组织6年前就已在调查邦迪滩枪击案两名枪手之一的纳维德·阿克拉姆，他与“伊斯兰国”在悉尼的恐怖分子有密切联系。澳大利亚警方表示，枪击事件的两名嫌疑人是父子关系，使用合法获得的枪支发动了此次袭击事件。澳大利亚总理阿尔巴尼斯15日表示：“今天下午4点， 我将把更严格的枪支法律列入国家内阁的议程，包括限制个人可持有或许可的枪支数量 。此外，还需对",
-      "full_content": "",
-      "url": "https://www.thepaper.cn/newsDetail_forward_32178049"
+      "id": 1,
+      "title": "伊朗导弹袭击以色列南部城市，超百人受伤",
+      "summary": "伊朗向以色列南部城市阿拉德和迪莫纳发射弹道导弹，造成超过100人受伤，其中10人伤势严重。迪莫纳是以色列核研究中心所在地，此次袭击引发国际社会高度关注。以色列国防军参谋长已批准对「所有战线」发动反击。伊朗使用集束弹药，军方调查显示两枚导弹拦截失败，部分伤者未进入避难所。这是美以对伊战争第22天，双方军事冲突持续升级。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/2GXHDPGDQZM3POWHQISVJ5YAJQ.jpg",
+      "source": "BBC / Times of Israel",
+      "url": "https://www.bbc.com/news/live/ce84073mr06t",
+      "timestamp": "2026-03-22T18:00:00+08:00"
     },
     {
-      "title": "儿童手表“小天才圈”调查：点赞成每日功课，有商家可解除家长管控",
-      "source": "澎湃新闻",
-      "image": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=1200&q=80",
-      "summary": "在校园里，孩子们时常举起戴在手腕上的手表，彼此一碰，便加为好友。这种以“安全”为核心卖点的儿童电话手表，如今已超越通信工具的属性，悄然演变成一个拥有独特规则、社交层级甚至灰色产业链的未成年人数字社交圈——“小天才圈”。在这个属于他们的“江湖”里，“大佬榜”备受关注，“扩列”（增加好友）成为新的社交需求，“点主”（在主页点赞）是每日必做的功课……这些让成年人感到陌生的词汇，正构筑着未成年人的数字社交世界。然而，伴随着这种社交形态的兴起，家长们的担忧也日益加剧：孩子过度沉迷手表社交、不良信息传播、因品牌壁垒导致的“社交绑架”等问题逐渐浮现。《法治日报》记者近日对该现象展开调查，试图揭开这一未成年人",
-      "full_content": "",
-      "url": "https://www.thepaper.cn/newsDetail_forward_32177210"
+      "id": 2,
+      "title": "特朗普威胁：48小时内不开放霍尔木兹海峡将摧毁伊朗电厂",
+      "summary": "美国总统特朗普发出最后通牒，威胁若伊朗不在48小时内重新开放霍尔木兹海峡，将「打击并摧毁」伊朗的电力设施。霍尔木兹海峡承载全球约20%的石油供应，伊朗封锁该航道已导致布伦特原油价格飙升至每桶126美元高点。伊朗官员回应称海峡对「非敌对国家」船只开放，但警告若伊朗设施遭袭将进行报复。超过1000艘货轮滞留海峡外无法通行。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/K6CWKN7GCVNQTJRHVJNFQ7O6MY.jpg",
+      "source": "CNN / CNBC",
+      "url": "https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-21-26",
+      "timestamp": "2026-03-22T17:30:00+08:00"
     },
     {
-      "title": "产地造假、年份速成、无视监管！央视曝光新会陈皮市场乱象",
-      "source": "澎湃新闻",
-      "image": "https://imgpai.thepaper.cn/newpai/image/20251214/b5495a9c-2bb3-45c5-a5be-536bc91cf37d.jpg",
-      "summary": "近日，总台接到群众举报，反映陈皮市场存在年份虚标、产地及工艺造假等问题，千元一斤的“年份陈皮”亦可能名不副实。茶枝柑新果皮冒充陈皮广西浦北出现“速成工艺陈皮”记者发现，直播间里售卖陈皮低价轮番轰炸，年份承诺掷地有声。直播间也有主播爆料，八成市面上所谓广东新会陈皮实为广西陈皮。广西钦州市浦北县是茶枝柑重要种植基地，其果皮是陈皮风味“越陈越香”关键，也是浦北陈皮唯一原料。2024年当地陈皮产业产值破60亿元，采收季大量鲜果加工晾晒成柑皮。果农和收购商称，今年浦北茶枝柑鲜果收购价走低。按20斤鲜果出1斤柑皮比例，叠加人工成本，品相好的新柑皮成本约30元/斤，低端柑皮仅六七元，且当年新柑皮并非真正陈皮",
-      "full_content": "",
-      "url": "https://www.thepaper.cn/newsDetail_forward_32176166"
+      "id": 3,
+      "title": "22国联合声明谴责伊朗封锁霍尔木兹海峡",
+      "summary": "包括英法德意日及阿联酋、巴林在内的22个国家发表联合声明，强烈谴责伊朗对海湾地区民用船只的攻击、对石油天然气设施的打击以及「事实上封锁」霍尔木兹海峡的行为。各国承诺将为确保海峡安全通行贡献力量。此次危机已导致全球能源市场剧烈震荡，卡塔尔GDP预计2026年将下滑13%，约17%的LNG产能已被摧毁。亚洲国家受能源进口中断影响尤为严重。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/IHWCMZFB7RO3HG6FDKNZG4J7GE.jpg",
+      "source": "The Guardian / Channel News Asia",
+      "url": "https://www.theguardian.com/world/live/2026/mar/22/middle-east-crisis-live-iran-war-trump-ultimatum-major-attack-strait-of-hormuz-open-israel-hit-tehran-retaliation",
+      "timestamp": "2026-03-22T16:00:00+08:00"
     },
     {
-      "title": "《怦然心动》导演莱纳与妻子在家中遇害，警方尚未证实是其子所杀",
-      "source": "澎湃新闻",
-      "image": "https://imgpai.thepaper.cn/newpai/image/1765773978161_SByErE_1765775752709.jpg?x-oss-process=image/resize,w_1024",
-      "summary": "当地时间12月14日，曾执导《怦然心动》《当哈利遇到莎莉》《危情十日》等影片的美国导演罗伯·莱纳（Rob Reiner）在他位于洛杉矶的家中遇害身亡。洛杉矶警察已对外证实，现年78岁的莱纳与他现年68岁的妻子米歇尔·辛格·莱纳（Michele Singer Reiner）的遗体一同被发现。2019年，罗伯·莱纳（左一）与《当哈利遇到莎莉》的主演梅格·瑞恩、比利·克里斯托出席TMC经典电影节。据悉，洛杉矶消防局的人员于当地时间12月14日下午3点38分接到医疗救助电话，赶赴位于布伦特伍德区的一处住宅中，随后发现两人已死亡。当天晚间，洛杉矶警察局在其社交媒体官方账号确认死者为导演罗伯·莱纳夫妇，将",
-      "full_content": "",
-      "url": "https://www.thepaper.cn/newsDetail_forward_32178391"
+      "id": 4,
+      "title": "腾讯推出微信与OpenClaw AI助手整合工具",
+      "summary": "腾讯于3月22日正式发布「ClawBot」，将微信与OpenClaw AI助手深度整合，标志着腾讯在中国AI助手竞争中的重要布局。该工具允许用户在微信对话中直接调用AI能力，覆盖文字处理、信息查询、任务自动化等场景。此举是对国内科技巨头AI Agent「军备竞赛」的回应，字节跳动、阿里巴巴等竞争对手也在积极推进类似产品。业界认为这将重塑中国社交应用的交互方式。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/ZBSLQPCQEJOU5GFDGXVPKSAYMM.jpg",
+      "source": "Reuters / Channel News Asia",
+      "url": "https://www.reuters.com/technology/tencent-integrates-wechat-with-openclaw-ai-agent-amid-china-tech-battle-2026-03-22/",
+      "timestamp": "2026-03-22T15:00:00+08:00"
     },
     {
-      "title": "旅日大熊猫“晓晓”“蕾蕾”将于明年1月回国",
-      "source": "澎湃新闻",
-      "image": "https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?w=1200&q=80",
-      "summary": "今日，日本东京都政府发布消息称，旅居日本东京上野动物园的大熊猫“晓晓”“蕾蕾”将于2026年1月下旬送还中国。最终参观日为2026年1月25日。",
-      "full_content": "",
-      "url": "https://www.thepaper.cn/newsDetail_forward_32178397"
+      "id": 5,
+      "title": "前FBI局长穆勒去世，享年81岁",
+      "summary": "曾主持「通俄门」调查的美国前联邦调查局局长罗伯特·穆勒于3月21日去世，享年81岁。穆勒执掌FBI长达12年，于2017-2019年担任特别检察官，负责调查俄罗斯干预2016年大选及特朗普竞选团队与俄方的联系。其调查报告虽记录了俄罗斯干预行为及与特朗普团队的接触，但未对时任总统提起刑事指控。穆勒以其严谨、低调的执法风格著称，被誉为美国执法界的标杆人物。",
+      "image": "https://static01.nyt.com/images/2026/03/22/multimedia/22mueller-obit-promo/22mueller-obit-wgmh-superJumbo.jpg",
+      "source": "New York Times / CNN",
+      "url": "https://www.nytimes.com/2026/03/21/us/politics/robert-s-mueller-dead.html",
+      "timestamp": "2026-03-22T08:00:00+08:00"
     }
-  ],
-  "updated_at": "2026-03-22T13:03:20.804509"
+  ]
 }

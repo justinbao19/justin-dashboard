@@ -19,6 +19,9 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 # Unsplash API (免费 50 请求/小时)
 UNSPLASH_ACCESS_KEY = "your_unsplash_access_key"  # 需要注册获取
 
+# Brave Search API (已配置，用于图片搜索)
+BRAVE_API_KEY = "BSAccshg0ETDm8nWQSXnRyho54sEtrx"
+
 # 新闻关键词 → 图片搜索词映射
 KEYWORD_MAP = {
     # 地缘政治
@@ -74,6 +77,88 @@ def search_unsplash(query: str) -> str | None:
     except Exception as e:
         print(f"Unsplash error: {e}")
     return None
+
+
+def search_brave_images(query: str, count: int = 10) -> str | None:
+    """使用 Brave Search API 搜索图片，返回第一个可访问的 URL
+    
+    特点：
+    - 搜新闻关键词 + 年份，相关度高
+    - 验证图片可访问（避免防盗链 403）
+    - 免费，已有 API key
+    """
+    if not BRAVE_API_KEY:
+        return None
+    
+    url = f"https://api.search.brave.com/res/v1/images/search?q={quote(query)}&count={count}"
+    headers = {"X-Subscription-Token": BRAVE_API_KEY}
+    
+    try:
+        r = requests.get(url, headers=headers, timeout=15)
+        data = r.json()
+        results = data.get("results", [])
+        
+        # 遍历结果，找第一个能访问的
+        for result in results:
+            img_url = result.get("properties", {}).get("url", "")
+            if not img_url:
+                continue
+            
+            # 跳过已知会 403 的域名
+            skip_domains = ["cnbcfm.com", "reuters.com/resizer", "guim.co.uk", "bbc", "cnn.com"]
+            if any(d in img_url for d in skip_domains):
+                continue
+            
+            # 验证可访问
+            try:
+                check = requests.head(img_url, timeout=3, allow_redirects=True)
+                if check.status_code == 200:
+                    return img_url
+            except:
+                continue
+        
+    except Exception as e:
+        print(f"    Brave Images error: {e}")
+    
+    return None
+
+
+def build_search_query(title: str) -> str:
+    """从新闻标题构建搜索关键词
+    
+    策略：提取核心词 + 加年份，提高相关度
+    """
+    from datetime import datetime
+    year = datetime.now().year
+    
+    # 关键词提取规则
+    keywords = []
+    
+    # 人名/组织
+    names = ["特朗普", "拜登", "习近平", "普京", "马斯克", "IEA", "OPEC"]
+    for name in names:
+        if name in title:
+            keywords.append(name)
+    
+    # 地点
+    places = ["伊朗", "以色列", "中东", "霍尔木兹", "波斯湾", "乌克兰", "台湾", "日本", "韩国"]
+    for place in places:
+        if place in title:
+            keywords.append(place)
+    
+    # 事件类型
+    events = ["导弹", "空袭", "战争", "冲突", "股市", "暴跌", "油价", "能源", "危机"]
+    for event in events:
+        if event in title:
+            keywords.append(event)
+    
+    # 如果没提取到，用标题前20字
+    if not keywords:
+        keywords = [title[:20]]
+    
+    # 组合查询词 + 年份
+    query = " ".join(keywords[:3]) + f" {year}"
+    return query
 
 
 def get_fallback_image(title: str, index: int = 0) -> str:
@@ -449,8 +534,16 @@ def get_article_image(url: str) -> str | None:
     return None
 
 
-def find_image_for_news(news_item: dict, jina_data: dict | None = None) -> str:
-    """为新闻项找配图"""
+def find_image_for_news(news_item: dict, jina_data: dict | None = None, index: int = 0) -> str:
+    """为新闻项找配图
+    
+    优先级：
+    1. Jina 返回的图片
+    2. 新闻原文 og:image
+    3. Brave Image Search（推荐，相关度高）
+    4. Unsplash API
+    5. 预设图片兜底
+    """
     title = news_item["title"]
     url = news_item.get("url", "")
     
@@ -458,29 +551,48 @@ def find_image_for_news(news_item: dict, jina_data: dict | None = None) -> str:
     if jina_data:
         img = jina_data.get("image", "")
         if img and not any(x in img.lower() for x in ["logo", "icon", "avatar", "favicon"]):
-            print(f"  ✓ Jina 图片: {title[:25]}...")
-            return img
+            # 验证可访问
+            try:
+                check = requests.head(img, timeout=3, allow_redirects=True)
+                if check.status_code == 200:
+                    print(f"    ✓ Jina 图片")
+                    return img
+            except:
+                pass
     
     # 2. 尝试从新闻原文获取图片
     if url:
         real_url = resolve_google_news_url(url) if "news.google.com" in url else url
         original_img = get_article_image(real_url)
         if original_img and not "logo" in original_img.lower():
-            print(f"  ✓ 原文图片: {title[:25]}...")
-            return original_img
+            # 验证可访问
+            try:
+                check = requests.head(original_img, timeout=3, allow_redirects=True)
+                if check.status_code == 200:
+                    print(f"    ✓ 原文图片")
+                    return original_img
+            except:
+                pass
     
-    # 3. 尝试 Unsplash API 搜索（如果配置了 key）
+    # 3. Brave Image Search（推荐）
+    query = build_search_query(title)
+    brave_img = search_brave_images(query)
+    if brave_img:
+        print(f"    ✓ Brave 搜图: {query[:30]}")
+        return brave_img
+    
+    # 4. 尝试 Unsplash API 搜索（如果配置了 key）
     keywords = extract_keywords(title)
     if keywords and UNSPLASH_ACCESS_KEY != "your_unsplash_access_key":
         query = " ".join(keywords)
         img = search_unsplash(query)
         if img:
-            print(f"  ✓ Unsplash: {query}")
+            print(f"    ✓ Unsplash: {query}")
             return img
     
-    # 4. 使用高质量预设图片（根据内容智能匹配）
-    img = get_fallback_image(title)
-    print(f"  → 智能配图: {title[:25]}...")
+    # 5. 使用高质量预设图片（根据内容智能匹配 + 轮换）
+    img = get_fallback_image(title, index)
+    print(f"    → 预设配图")
     return img
 
 
@@ -509,35 +621,32 @@ def update_news():
         title = item["title"]
         
         # === 图片保障链 ===
-        # 1. RSS 自带图片
+        # 1. RSS 自带图片（验证可访问）
         # 2. Jina Reader 抓取 og:image
         # 3. 原文页面 og:image
-        # 4. 关键词智能匹配 Unsplash
-        # 5. 通用图片轮换（每条新闻不同）
+        # 4. Brave Image Search（推荐，相关度高）
+        # 5. Unsplash API
+        # 6. 预设图片轮换
         
         image = item.get("image", "")
         summary = item.get("summary", "")
         jina_data = None
         
-        # 层级1: RSS 图片
+        # 层级1: RSS 图片（验证可访问）
         if image:
-            print(f"    ✓ RSS 图片")
-        else:
-            # 层级2: Jina Reader
-            jina_data = fetch_via_jina(url)
-            if jina_data and jina_data.get("image"):
-                image = jina_data["image"]
-                print(f"    ✓ Jina 图片")
-            else:
-                # 层级3: 直接抓原文 og:image
-                original_img = get_article_image(url)
-                if original_img:
-                    image = original_img
-                    print(f"    ✓ 原文图片")
+            try:
+                check = requests.head(image, timeout=3, allow_redirects=True)
+                if check.status_code == 200:
+                    print(f"    ✓ RSS 图片")
                 else:
-                    # 层级4+5: 智能配图（关键词匹配 + 轮换）
-                    image = get_fallback_image(title, idx)
-                    print(f"    → 智能配图")
+                    image = ""  # 不可访问，清空
+            except:
+                image = ""
+        
+        if not image:
+            # 使用统一的配图函数（包含 Brave Search）
+            jina_data = fetch_via_jina(url)
+            image = find_image_for_news(item, jina_data, idx)
         
         # 摘要：优先 RSS，其次 Jina
         if not summary and jina_data:

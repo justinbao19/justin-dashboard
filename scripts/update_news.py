@@ -656,6 +656,11 @@ def update_news():
             jina_data = fetch_via_jina(url)
             image = find_image_for_news(item, jina_data, idx)
         
+        # 最终兜底：如果还是没图，用预设图（绝对不能空）
+        if not image:
+            image = get_fallback_image(title, idx)
+            print(f"    ⚠️ 兜底配图")
+        
         # 摘要：优先 RSS，其次 Jina
         if not summary and jina_data:
             summary = get_article_summary(url, jina_data)
@@ -671,6 +676,12 @@ def update_news():
             "full_content": "",
             "url": url
         })
+    
+    # 最终检查：确保每条新闻都有图
+    for idx, item in enumerate(processed):
+        if not item.get("image"):
+            item["image"] = get_fallback_image(item["title"], idx)
+            print(f"  ⚠️ 补充兜底图: {item['title'][:20]}...")
     
     # 生成 news.json
     now = datetime.now()

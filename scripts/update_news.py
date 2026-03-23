@@ -109,11 +109,13 @@ def search_brave_images(query: str, count: int = 10) -> str | None:
             if any(d in img_url for d in skip_domains):
                 continue
             
-            # 验证可访问
+            # 验证可访问（用 GET + stream，兼容性更好）
             try:
-                check = requests.head(img_url, timeout=3, allow_redirects=True)
+                check = requests.get(img_url, timeout=5, allow_redirects=True, stream=True)
                 if check.status_code == 200:
+                    check.close()
                     return img_url
+                check.close()
             except:
                 continue
         
@@ -553,10 +555,12 @@ def find_image_for_news(news_item: dict, jina_data: dict | None = None, index: i
         if img and not any(x in img.lower() for x in ["logo", "icon", "avatar", "favicon"]):
             # 验证可访问
             try:
-                check = requests.head(img, timeout=3, allow_redirects=True)
+                check = requests.get(img, timeout=5, allow_redirects=True, stream=True)
                 if check.status_code == 200:
+                    check.close()
                     print(f"    ✓ Jina 图片")
                     return img
+                check.close()
             except:
                 pass
     
@@ -567,10 +571,12 @@ def find_image_for_news(news_item: dict, jina_data: dict | None = None, index: i
         if original_img and not "logo" in original_img.lower():
             # 验证可访问
             try:
-                check = requests.head(original_img, timeout=3, allow_redirects=True)
+                check = requests.get(original_img, timeout=5, allow_redirects=True, stream=True)
                 if check.status_code == 200:
+                    check.close()
                     print(f"    ✓ 原文图片")
                     return original_img
+                check.close()
             except:
                 pass
     
@@ -635,10 +641,12 @@ def update_news():
         # 层级1: RSS 图片（验证可访问）
         if image:
             try:
-                check = requests.head(image, timeout=3, allow_redirects=True)
+                check = requests.get(image, timeout=5, allow_redirects=True, stream=True)
                 if check.status_code == 200:
+                    check.close()
                     print(f"    ✓ RSS 图片")
                 else:
+                    check.close()
                     image = ""  # 不可访问，清空
             except:
                 image = ""

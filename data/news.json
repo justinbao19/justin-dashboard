@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-22T18:00:00+08:00",
+  "lastUpdated": "2026-03-23T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "伊朗导弹袭击以色列南部城市，超百人受伤",
-      "summary": "伊朗向以色列南部城市阿拉德和迪莫纳发射弹道导弹，造成超过100人受伤，其中10人伤势严重。迪莫纳是以色列核研究中心所在地，此次袭击引发国际社会高度关注。以色列国防军参谋长已批准对「所有战线」发动反击。伊朗使用集束弹药，军方调查显示两枚导弹拦截失败，部分伤者未进入避难所。这是美以对伊战争第22天，双方军事冲突持续升级。",
-      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/2GXHDPGDQZM3POWHQISVJ5YAJQ.jpg",
-      "source": "BBC / Times of Israel",
-      "url": "https://www.bbc.com/news/live/ce84073mr06t",
-      "timestamp": "2026-03-22T18:00:00+08:00"
+      "title": "伊朗导弹命中以色列核设施附近 战争进入第23天",
+      "summary": "美以对伊战争进入第23天，伊朗发射弹道导弹命中以色列迪莫纳核研究中心附近区域。国际原子能机构表示尚未收到核设施受损或辐射异常的报告，但世卫组织已发出警告。以色列国防军证实防空系统未能拦截部分导弹，正在调查原因。以军发言人表示「与真主党的战斗才刚刚开始」，战争或将持续数周。伊朗威胁若美国打击其电厂将「完全封锁」霍尔木兹海峡，中东局势持续恶化。",
+      "image": "https://www.aljazeera.com/wp-content/uploads/2026/03/2026-03-21T204855Z_1020457415_RC239KAKZVED_RTRMADP_3_IRAN-CRISIS-TEHRAN-STRIKE-1774165761.jpg?resize=1920%2C1080",
+      "source": "Al Jazeera / ABC News / Times of Israel",
+      "url": "https://www.aljazeera.com/news/2026/3/22/iran-war-whats-happening-on-day-23-of-us-israel-attacks",
+      "timestamp": "2026-03-23T07:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "特朗普威胁：48小时内不开放霍尔木兹海峡将摧毁伊朗电厂",
-      "summary": "美国总统特朗普发出最后通牒，威胁若伊朗不在48小时内重新开放霍尔木兹海峡，将「打击并摧毁」伊朗的电力设施。霍尔木兹海峡承载全球约20%的石油供应，伊朗封锁该航道已导致布伦特原油价格飙升至每桶126美元高点。伊朗官员回应称海峡对「非敌对国家」船只开放，但警告若伊朗设施遭袭将进行报复。超过1000艘货轮滞留海峡外无法通行。",
-      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/K6CWKN7GCVNQTJRHVJNFQ7O6MY.jpg",
-      "source": "CNN / CNBC",
-      "url": "https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-21-26",
-      "timestamp": "2026-03-22T17:30:00+08:00"
+      "title": "油价飙升至112美元 全球经济面临「巨大风险」",
+      "summary": "霍尔木兹海峡几近关闭导致布伦特原油价格飙升超50%至每桶112美元，《卫报》分析称若油价突破100美元，全球经济增长将下降0.2个百分点至2.8%，通胀将上升0.7个百分点至3.8%。《洛杉矶时报》报道指出，市场油价与消费者实际成本之间的差距正在扩大，加油站价格涨幅远超原油价格。伊朗已有效控制海峡通行，至少22艘民用船只在过去两周遭到攻击，数百艘油轮滞留无法进港。",
+      "image": "https://ca-times.brightspotcdn.com/dims4/default/6d85ecd/2147483647/strip/true/crop/2000x1332+0+0/resize/1200x799!/quality/75/?url=https%3A%2F%2Fcalifornia-times-brightspot.s3.amazonaws.com%2F77%2F25%2Fec71fd689ce108a857df1abb4242%2F1x-1.jpg",
+      "source": "The Guardian / LA Times / Reuters",
+      "url": "https://www.theguardian.com/news/ng-interactive/2026/mar/22/iran-war-global-economy-donald-trump-oil-prices-inflation",
+      "timestamp": "2026-03-23T06:30:00+08:00"
     },
     {
       "id": 3,
-      "title": "22国联合声明谴责伊朗封锁霍尔木兹海峡",
-      "summary": "包括英法德意日及阿联酋、巴林在内的22个国家发表联合声明，强烈谴责伊朗对海湾地区民用船只的攻击、对石油天然气设施的打击以及「事实上封锁」霍尔木兹海峡的行为。各国承诺将为确保海峡安全通行贡献力量。此次危机已导致全球能源市场剧烈震荡，卡塔尔GDP预计2026年将下滑13%，约17%的LNG产能已被摧毁。亚洲国家受能源进口中断影响尤为严重。",
-      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/IHWCMZFB7RO3HG6FDKNZG4J7GE.jpg",
-      "source": "The Guardian / Channel News Asia",
-      "url": "https://www.theguardian.com/world/live/2026/mar/22/middle-east-crisis-live-iran-war-trump-ultimatum-major-attack-strait-of-hormuz-open-israel-hit-tehran-retaliation",
-      "timestamp": "2026-03-22T16:00:00+08:00"
+      "title": "俄乌双方交换袭击 美国斡旋谈判周日继续",
+      "summary": "俄乌战争在美国斡旋下进行新一轮和谈，泽连斯基宣布美国、乌克兰和俄罗斯已就停火监督原则达成一致。然而战场上双方冲突仍在持续——俄罗斯对乌克兰切尔尼戈夫地区发动袭击导致数千人断电，乌方也对俄境内目标实施打击并造成伤亡。分析人士指出，俄罗斯反复拒绝单纯的停火协议，坚持要求达成「全面和平协议」。日内瓦谈判预计于3月底继续，但突破仍面临重重障碍。",
+      "image": "https://static.dw.com/image/76470692_605.jpg",
+      "source": "DW / Reuters",
+      "url": "https://www.dw.com/en/ukraine-russia-trade-strikes-as-us-backed-talks-resume/a-76470828",
+      "timestamp": "2026-03-23T05:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "腾讯推出微信与OpenClaw AI助手整合工具",
-      "summary": "腾讯于3月22日正式发布「ClawBot」，将微信与OpenClaw AI助手深度整合，标志着腾讯在中国AI助手竞争中的重要布局。该工具允许用户在微信对话中直接调用AI能力，覆盖文字处理、信息查询、任务自动化等场景。此举是对国内科技巨头AI Agent「军备竞赛」的回应，字节跳动、阿里巴巴等竞争对手也在积极推进类似产品。业界认为这将重塑中国社交应用的交互方式。",
-      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/ZBSLQPCQEJOU5GFDGXVPKSAYMM.jpg",
-      "source": "Reuters / Channel News Asia",
-      "url": "https://www.reuters.com/technology/tencent-integrates-wechat-with-openclaw-ai-agent-amid-china-tech-battle-2026-03-22/",
-      "timestamp": "2026-03-22T15:00:00+08:00"
+      "title": "AI Agent 热潮席卷中国 智谱、MiniMax股价暴涨",
+      "summary": "OpenClaw AI助手在中国引发全民热潮，从小学生到退休老人都在「养龙虾」（OpenClaw昵称）。智谱旗下AutoClaw已进入社区推广，工作人员帮助居民安装设置。阿里巴巴推出面向企业的AI Agent平台加入竞争，中国政府将AI列为经济增长关键驱动力。英伟达CEO黄仁勋公开点赞后，智谱和MiniMax港股分别暴涨14%和22%。两会期间，中国领导层宣布将加速AI在全经济领域的应用落地。",
+      "image": "https://image.cnbcfm.com/api/v1/image/108279135-17737747902026-03-17t190331z_1569419364_rc2i6kamf29y_rtrmadp_0_nvidia-gtc.jpeg?v=1773774953&w=1920&h=1080",
+      "source": "Reuters / NYT / CNBC",
+      "url": "https://www.reuters.com/technology/openclaw-enthusiasm-grips-china-schoolkids-retirees-alike-raise-lobsters-2026-03-19/",
+      "timestamp": "2026-03-23T04:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "前FBI局长穆勒去世，享年81岁",
-      "summary": "曾主持「通俄门」调查的美国前联邦调查局局长罗伯特·穆勒于3月21日去世，享年81岁。穆勒执掌FBI长达12年，于2017-2019年担任特别检察官，负责调查俄罗斯干预2016年大选及特朗普竞选团队与俄方的联系。其调查报告虽记录了俄罗斯干预行为及与特朗普团队的接触，但未对时任总统提起刑事指控。穆勒以其严谨、低调的执法风格著称，被誉为美国执法界的标杆人物。",
-      "image": "https://static01.nyt.com/images/2026/03/22/multimedia/22mueller-obit-promo/22mueller-obit-wgmh-superJumbo.jpg",
-      "source": "New York Times / CNN",
-      "url": "https://www.nytimes.com/2026/03/21/us/politics/robert-s-mueller-dead.html",
-      "timestamp": "2026-03-22T08:00:00+08:00"
+      "title": "中国动员「一人AI公司」创业潮 政策激励齐发",
+      "summary": "Rest of World 报道，中国正通过政策组合拳鼓励「一人AI公司」创业。两会期间领导层公布AI全面推广计划，各地方政府配套出台激励措施，包括免费算力、租金补贴、创业贷款等。分析认为这是中国应对人口老龄化、提升生产力的战略举措，同时也是与美国AI竞赛的关键一环。北京投入数十亿资金打造AI超级大国，业界预计将涌现大批依托AI工具独立运营的微型企业。",
+      "image": "",
+      "source": "Rest of World / NYT",
+      "url": "https://restofworld.org/2026/china-ai-one-person-companies-incentives/",
+      "timestamp": "2026-03-23T03:00:00+08:00"
     }
   ]
 }

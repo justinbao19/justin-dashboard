@@ -1,5 +1,5 @@
 // 市场情绪与宏观指标 API
-// 数据源: Finnhub, FRED, Alternative.me
+// 数据源: Finnhub, FRED, Alternative.me, ForexFactory
 
 const FINNHUB_KEY = 'd6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg';
 const FRED_KEY = '492b3e5ebbb736ee9b8c1b05cf4031f1';
@@ -44,10 +44,9 @@ export default async function handler(req, res) {
         .then(r => r.json())
         .catch(() => ({})),
       
-      // 7. Economic Calendar (本周)
-      fetch(`https://finnhub.io/api/v1/calendar/economic?from=${getMonday()}&to=${getSunday()}&token=${FINNHUB_KEY}`)
+      // 7. Economic Calendar (ForexFactory 免费 API)
+      fetch('https://nfs.faireconomy.media/ff_calendar_thisweek.json')
         .then(r => r.json())
-        .then(d => d.economicCalendar || [])
         .catch(() => [])
     ]);
 
@@ -63,10 +62,14 @@ export default async function handler(req, res) {
     const spreadValue = parseFloat(spread[0]?.value) || 0;
     const isInverted = spreadValue < 0;
     
-    // 过滤重要事件 (High impact)
+    // 过滤重要事件 (Medium/High impact, 主要关注 USD)
     const importantEvents = events
-      .filter(e => e.impact === 3 || e.impact === 'high' || 
-        ['FOMC', 'CPI', 'NFP', 'GDP', 'Fed', 'PCE', 'Retail Sales'].some(k => e.event?.includes(k)))
+      .filter(e => {
+        const isHighImpact = e.impact === 'High' || e.impact === 'Medium';
+        const isUSD = e.country === 'USD';
+        const isKeyEvent = ['FOMC', 'CPI', 'NFP', 'GDP', 'Fed', 'PCE', 'Retail Sales', 'Unemployment', 'Interest Rate'].some(k => e.title?.includes(k));
+        return (isHighImpact && isUSD) || isKeyEvent;
+      })
       .slice(0, 8);
 
     res.status(200).json({
@@ -101,14 +104,13 @@ export default async function handler(req, res) {
       },
       
       events: importantEvents.map(e => ({
-        date: e.time?.split('T')[0] || e.date,
-        time: e.time?.split('T')[1]?.slice(0, 5) || '',
-        event: e.event,
-        country: e.country,
-        impact: e.impact,
-        actual: e.actual,
-        estimate: e.estimate,
-        previous: e.prev
+        date: e.date?.split('T')[0] || '',
+        time: e.date?.split('T')[1]?.slice(0, 5) || '',
+        event: e.title,
+        country: e.country === 'USD' ? 'US' : e.country,
+        impact: e.impact === 'High' ? 3 : e.impact === 'Medium' ? 2 : 1,
+        forecast: e.forecast,
+        previous: e.previous
       }))
     });
   } catch (error) {
@@ -117,16 +119,4 @@ export default async function handler(req, res) {
   }
 }
 
-function getMonday() {
-  const d = new Date();
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff)).toISOString().split('T')[0];
-}
-
-function getSunday() {
-  const d = new Date();
-  const day = d.getDay();
-  const diff = d.getDate() + (7 - day);
-  return new Date(d.setDate(diff)).toISOString().split('T')[0];
-}
+// getMonday/getSunday no longer needed - ForexFactory returns thisweek automatically

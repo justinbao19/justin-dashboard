@@ -884,7 +884,7 @@
         /* 本周事件板块 */
         .events-card { padding: 14px 16px; }
         .events-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
-        .event-item { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); overflow: hidden; }
+        .event-item { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); }
         .event-item.high-impact { border-left: 3px solid #ef4444; }
         .event-main { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
         .event-date { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 45px; }
@@ -892,9 +892,14 @@
         .event-country { font-size: 10px; color: var(--text-tertiary); padding: 2px 6px; background: var(--market-section-bg); border-radius: 4px; }
         .event-info-btn { background: none; border: none; color: var(--text-tertiary); cursor: pointer; padding: 2px 4px; font-size: 13px; line-height: 1; border-radius: 4px; transition: color 0.15s, background 0.15s; flex-shrink: 0; }
         .event-info-btn:hover { color: var(--accent); background: rgba(99,179,237,0.1); }
-        .event-desc { display: none; font-size: 11px; line-height: 1.6; color: var(--text-secondary); padding: 8px 12px 10px; border-top: 1px solid var(--border); background: var(--market-section-bg); }
-        .event-item.expanded .event-desc { display: block; }
-        .event-item.expanded .event-info-btn { color: var(--accent); }
+        /* 事件详情弹窗 */
+        .event-modal-overlay { display: none; position: fixed; inset: 0; z-index: 9000; background: rgba(0,0,0,0.55); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px; }
+        .event-modal-overlay.open { display: flex; }
+        .event-modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; }
+        .event-modal-title { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; padding-right: 28px; line-height: 1.4; }
+        .event-modal-body { font-size: 12px; line-height: 1.8; color: var(--text-secondary); }
+        .event-modal-close { position: absolute; top: 14px; right: 14px; background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 16px; padding: 4px; border-radius: 6px; transition: color 0.15s; }
+        .event-modal-close:hover { color: var(--text-primary); }
         .events-empty { text-align: center; padding: 16px; color: var(--text-tertiary); font-size: 12px; }
         
         @media (max-width: 1000px) {
@@ -4594,14 +4599,13 @@
                         eventsList.innerHTML = '<div class="events-empty">本周暂无重大经济事件</div>';
                     } else {
                         eventsList.innerHTML = d.events.map((e, idx) => `
-                            <div class="event-item ${e.impact >= 3 ? 'high-impact' : ''}" id="event-${idx}">
+                            <div class="event-item ${e.impact >= 3 ? 'high-impact' : ''}">
                                 <div class="event-main">
                                     <div class="event-date">${e.date?.slice(5) || ''}</div>
                                     <div class="event-name">${e.event_cn || e.event}</div>
                                     <div class="event-country">${e.country || 'US'}</div>
-                                    ${e.description ? `<button class="event-info-btn" onclick="toggleEventDesc('event-${idx}')" title="了解更多"><i class="fas fa-info-circle"></i></button>` : ''}
+                                    ${e.description ? `<button class="event-info-btn" onclick="openEventModal(${JSON.stringify(e.event_cn || e.event)}, ${JSON.stringify(e.description)})" title="了解更多"><i class="fas fa-info-circle"></i></button>` : ''}
                                 </div>
-                                ${e.description ? `<div class="event-desc">${e.description}</div>` : ''}
                             </div>
                         `).join('');
 
@@ -4614,10 +4618,16 @@
             }
         }
         
-        function toggleEventDesc(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.toggle('expanded');
+        function openEventModal(title, desc) {
+            document.getElementById('eventModalTitle').textContent = title;
+            document.getElementById('eventModalBody').textContent = desc;
+            document.getElementById('eventModalOverlay').classList.add('open');
         }
+        function closeEventModal(e) {
+            if (e && e.target !== document.getElementById('eventModalOverlay')) return;
+            document.getElementById('eventModalOverlay').classList.remove('open');
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('eventModalOverlay')?.classList.remove('open'); });
 
         function renderSpreadChart(data) {
             const svg = document.getElementById('spreadChart');
@@ -4833,6 +4843,14 @@
             item.onclick = () => showSentimentInfo(item.dataset.info);
         });
     </script>
+<!-- 事件详情弹窗 -->
+<div class="event-modal-overlay" id="eventModalOverlay" onclick="closeEventModal(event)">
+  <div class="event-modal" id="eventModal">
+    <button class="event-modal-close" onclick="closeEventModal()"><i class="fas fa-times"></i></button>
+    <div class="event-modal-title" id="eventModalTitle"></div>
+    <div class="event-modal-body" id="eventModalBody"></div>
+  </div>
+</div>
 </body>
 </html>
 <!-- Wed Mar 18 10:45:09 CST 2026 -->

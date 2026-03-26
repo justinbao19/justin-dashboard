@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-25T18:00:00+08:00",
+  "lastUpdated": "2026-03-26T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美国向伊朗提出15点和平方案 巴基斯坦担任中间人",
-      "summary": "据《纽约时报》和AP报道，特朗普政府通过巴基斯坦向伊朗递交了一份15点停火方案，内容包括为期一个月的停火安排。这反映出华盛顿急于为这场已引发全球能源危机的冲突寻找「下匝道」。伊朗官员承认收到方案，但公开否认与美方进行任何直接谈判，批评特朗普「自己跟自己谈判」。白宫官员表示，特朗普对谈判持乐观态度，可能在巴基斯坦举行会面。全球股市受停火希望提振普遍上涨，油价应声回落近5%。",
-      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/XHQYHQFFIFPBZAYYXIBLB7JDKU.jpg",
-      "source": "New York Times / AP / Reuters",
-      "url": "https://apnews.com/live/iran-war-israel-trump-03-25-2026",
-      "timestamp": "2026-03-25T17:30:00+08:00"
+      "title": "伊朗拒绝特朗普15点和平方案 战争进入第26天",
+      "summary": "伊朗官方媒体Press TV周三宣布正式拒绝美国通过巴基斯坦递交的15点停火方案。该方案要求伊朗转移所有浓缩铀库存、停止铀浓缩活动、限制弹道导弹计划并切断对地区盟友的资金支持，作为换取制裁减免的条件。伊朗军方发言人佐勒法加里在国家电视台讽刺道「你们的内部分歧已经到了自己跟自己谈判的地步吗」。与此同时，伊朗提出了自己的停火方案，要求将黎巴嫩纳入任何停火安排。战争已持续26天，停火前景依然渺茫。",
+      "image": "https://dims.apnews.com/dims4/default/0c8e8c8/2147483647/strip/true/crop/5472x3648+0+0/resize/1440x960!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Fa8%2F27%2F5e8e8c8d4e5f6a7b8c9d0e1f%2Ftrump-iran-war.jpg",
+      "source": "Time / Washington Post / AP",
+      "url": "https://time.com/article/2026/03/25/trump-peace-proposal-us-iran-war-israel-pakistan/",
+      "timestamp": "2026-03-26T06:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "伊朗宣布霍尔木兹海峡对「非敌对」船只开放",
-      "summary": "伊朗向联合国海事组织和安理会通报，霍尔木兹海峡已向「非敌对」船只开放通航。此举被视为重要的降温信号。自美以军事行动以来，伊朗实际封锁了这条承载全球20%石油运输的关键航道，引发相当于1970年代两次石油危机叠加的能源冲击。土耳其、印度、日本等国船只已陆续获准通行。国际能源署署长比罗尔形容当前危机「史无前例」。航运数据显示，部分油轮选择靠近伊朗海岸的非常规航线以规避风险。",
-      "image": "https://www.reuters.com/resizer/v2/XQBQP67IU5KDZGQK3V5U24NZQY.jpg?auth=8e2d0b3b7c8e8c8d2a3f4e5d6c7b8a9f&width=1200",
-      "source": "Reuters / Al Jazeera / NYT",
-      "url": "https://www.aljazeera.com/economy/2026/3/25/iran-says-non-hostile-ships-can-pass-safely-through-strait-of-hormuz",
-      "timestamp": "2026-03-25T17:00:00+08:00"
+      "title": "联合国秘书长警告：伊朗战争「完全失控」霍尔木兹海峡封锁扼杀全球供应链",
+      "summary": "联合国秘书长古特雷斯周三发表紧急声明，警告中东战争已「完全失控」，全球正「对着更大规模冲突的枪口」。他特别强调霍尔木兹海峡持续封锁正在「扼杀石油、天然气和化肥的运输，恰逢全球播种季节的关键时刻」。全球约20%的石油运输依赖这条海峡，亚洲进口原油的80%以上需经此通道。美国国防工业已因硫磺等关键矿物供应「几乎完全中断」而受到严重影响。古特雷斯呼吁各方通过外交途径解决危机。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/strait-hormuz-tanker-march-2026.jpg",
+      "source": "UN News / Guardian / Middle East Monitor",
+      "url": "https://news.un.org/en/story/2026/03/1167195",
+      "timestamp": "2026-03-26T05:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "油价跌破100美元 全球股市受停火希望提振反弹",
-      "summary": "受中东停火希望推动，国际油价大幅回落。布伦特原油一度跌至97.57美元，跌幅近6%，为两周来首次跌破100美元关口。WTI原油跌至87美元附近。标普500期货亚盘上涨0.7%，欧洲STOXX 600期货涨1.2%，亚太股市普涨近2%。分析师警告，市场对停火前景的乐观情绪可能过于乐观——伊朗仍否认谈判存在，中东冲突远未结束。巴克莱将标普500年终目标上调至7650点，认为盈利预期改善可抵消地缘政治风险。",
-      "image": "https://www.reuters.com/resizer/v2/QHQYH5FFIFPBZAYYXIBLB7JDKU.jpg?auth=7a2d0b3b7c8e8c8d2a3f4e5d6c7b8a9f&width=1200",
-      "source": "Reuters / Guardian / Business Standard",
-      "url": "https://www.reuters.com/business/energy/global-markets-global-markets-2026-03-25/",
-      "timestamp": "2026-03-25T16:30:00+08:00"
+      "title": "「能源封锁」蔓延亚洲：巴基斯坦、孟加拉等国实施类似新冠的限制措施",
+      "summary": "受中东战争引发的全球能源危机影响，亚洲多国正借鉴新冠疫情期间的管控经验实施「能源封锁」。国际能源署（IEA）已发布10项紧急需求削减措施，包括居家办公、降低高速公路限速、推广公共交通和拼车，据称可每日减少270万桶石油消耗。巴基斯坦推行缩短工作周，孟加拉将学校教育转为在线并实施定时停电，斯里兰卡对部分行业实行强制假期，越南鼓励企业远程办公。印度、菲律宾等国加油站出现长队，澳大利亚政府呼吁民众减少非必要出行。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/sydney-oil-tanker-march-2026.jpg",
+      "source": "Reuters / News18 / National Observer",
+      "url": "https://www.reuters.com/business/energy/asia-looks-covid-era-playbook-tackle-fuel-crisis-2026-03-25/",
+      "timestamp": "2026-03-26T04:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "中国禁止Manus联合创始人出境 审查Meta 20亿美元收购案",
-      "summary": "据《金融时报》报道，中国当局已禁止AI初创公司Manus的两名联合创始人出境，同时监管机构正在审查Meta以20亿美元收购该公司是否违反投资法规。Manus是一家开发通用AI智能体的公司，可作为「数字员工」自主执行研究和自动化任务。该公司虽注册于新加坡，但创始团队和核心技术源自中国。此案凸显中美科技脱钩加剧背景下，AI领域跨境交易面临的政治风险。中国商务部此前已表示将对该收购进行评估调查。",
-      "image": "https://cdn.i-scmp.com/sites/default/files/d8/images/methode/2026/03/25/meta-manus-ai.jpg",
-      "source": "Financial Times / Reuters / Bloomberg",
-      "url": "https://www.reuters.com/world/asia-pacific/china-bars-manus-co-founders-leaving-country-it-reviews-sale-meta-ft-reports-2026-03-25/",
-      "timestamp": "2026-03-25T16:00:00+08:00"
+      "title": "黄金突破4550美元创新高 油价因停火传闘回落至100美元以下",
+      "summary": "地缘政治不确定性持续推动避险需求，黄金价格周三飙升5.34%至4579.94美元/盎司，再创历史新高。自2月底战争爆发以来，金价已从约3000美元水平暴涨超过50%。与此同时，受停火谈判消息影响，油价出现回调：布伦特原油跌至102.22美元/桶，WTI跌至约87美元，均较此前高点回落超10%。但分析师警告，若4月份海峡封锁持续，油价仍可能冲向150美元。比特币同期吸引约20亿美元ETF流入，显示部分投资者正从黄金转向加密货币。",
+      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/gold-bars-march-2026.jpg",
+      "source": "USA Today / CNBC / Reuters",
+      "url": "https://eu.usatoday.com/story/money/personalfinance/2026/03/25/gold-price-on-march-25-2026/89312910007/",
+      "timestamp": "2026-03-26T03:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "乌克兰称过去24小时击毙俄军1200余人",
-      "summary": "乌克兰武装部队总参谋部周三发布战报，称过去24小时内俄军损失惨重，超过1200名士兵阵亡。乌克兰世预赛半决赛「主场」因俄罗斯持续空袭无法在基辅举办，被迫移至西班牙瓦伦西亚进行。乌克兰足协工作人员在基辅每天为空袭受害者提供援助。与此同时，欧盟推迟审议原定于4月15日讨论的永久禁止俄罗斯石油进口提案，显示欧洲在能源危机压力下对俄制裁立场出现松动迹象。",
-      "image": "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/ukraine-war-march-2026.jpg",
-      "source": "Reuters / Ukraine Armed Forces / The Athletic",
-      "url": "https://thekenyatimes.com/europe/russian-forces-take-heavy-hits-with-over-1200-soldiers-eliminated-in-24-hours/",
-      "timestamp": "2026-03-25T15:30:00+08:00"
+      "title": "以色列扩大对黎巴嫩空袭 真主党发射超210枚导弹回击",
+      "summary": "以色列国防军宣布扩大对黎巴嫩的「缓冲区」军事行动，持续空袭贝鲁特南郊达希耶地区的真主党据点。黎巴嫩国家媒体报道至少6人在以军空袭中丧生，以军对贝鲁特南郊大部分地区发出撤离警告。联合国驻黎巴嫩临时部队（UNIFIL）监测数据显示，自3月2日以来真主党已向以色列发射超过210枚导弹。伊朗在停火谈判中坚持要求将黎巴嫩纳入任何和平协议，使谈判更加复杂。以军还在贝鲁特击杀了一名哈马斯官员。",
+      "image": "https://dims.apnews.com/dims4/default/8bb5e79a/2147483647/strip/true/crop/6000x4000+0+0/resize/1440x960!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Flebanon-beirut-strike-march-2026.jpg",
+      "source": "NYT / Guardian / Wikipedia",
+      "url": "https://www.nytimes.com/2026/03/25/world/middleeast/israel-lebanon-hezbollah.html",
+      "timestamp": "2026-03-26T02:00:00+08:00"
     }
   ]
 }

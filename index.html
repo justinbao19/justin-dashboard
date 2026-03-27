@@ -3932,14 +3932,27 @@
             
             const updateCountdown = () => {
                 const now = new Date();
-                const upcoming = _f1Data.calendar.filter(r => new Date(r.date_start) > now && !CANCELED_RACES[r.meeting_key]);
+                // 用 date_end 判断比赛是否结束，而不是 date_start
+                const upcoming = _f1Data.calendar.filter(r => new Date(r.date_end) > now && !CANCELED_RACES[r.meeting_key]);
                 if (upcoming.length === 0) return;
                 
                 const next = upcoming[0];
                 const nextStart = new Date(next.date_start);
-                const diff = nextStart - now;
+                const nextEnd = new Date(next.date_end);
                 
-                if (diff > 0) {
+                // 如果比赛已经开始但未结束，显示"进行中"
+                const isOngoing = now >= nextStart && now < nextEnd;
+                const diff = isOngoing ? 0 : nextStart - now;
+                
+                if (isOngoing) {
+                    // 比赛周末进行中
+                    document.getElementById('f1CountdownTitle').textContent = '🔴 Race Weekend Live';
+                    document.getElementById('f1CountDays').textContent = '00';
+                    document.getElementById('f1CountHours').textContent = '00';
+                    document.getElementById('f1CountMins').textContent = '00';
+                    document.getElementById('f1CountSecs').textContent = '00';
+                } else if (diff > 0) {
+                    document.getElementById('f1CountdownTitle').textContent = 'Race Weekend Starts in';
                     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -4598,19 +4611,21 @@
                     if (d.events.length === 0) {
                         eventsList.innerHTML = '<div class="events-empty">本周暂无重大经济事件</div>';
                     } else {
-                        eventsList.innerHTML = d.events.map((e, idx) => {
-                            const eventName = e.event_cn || e.event;
-                            const eventDesc = e.description || `${eventName}：${e.country || 'US'} 经济数据发布。预期值: ${e.forecast || '待公布'}，前值: ${e.previous || '未知'}。该数据可能影响市场对经济前景和货币政策的预期。`;
-                            return `
+                        // 存储事件数据供弹窗使用
+                        window._eventData = d.events.map((e, idx) => ({
+                            name: e.event_cn || e.event,
+                            desc: e.description || `${e.event_cn || e.event}：${e.country || 'US'} 经济数据发布。预期值: ${e.forecast || '待公布'}，前值: ${e.previous || '未知'}。该数据可能影响市场对经济前景和货币政策的预期。`
+                        }));
+                        eventsList.innerHTML = d.events.map((e, idx) => `
                             <div class="event-item ${e.impact >= 3 ? 'high-impact' : ''}">
                                 <div class="event-main">
                                     <div class="event-date">${e.date?.slice(5) || ''}</div>
-                                    <div class="event-name">${eventName}</div>
+                                    <div class="event-name">${e.event_cn || e.event}</div>
                                     <div class="event-country">${e.country || 'US'}</div>
-                                    <button class="event-info-btn" onclick="openEventModal(${JSON.stringify(eventName)}, ${JSON.stringify(eventDesc)})" title="了解更多"><i class="fas fa-info-circle"></i></button>
+                                    <button class="event-info-btn" onclick="openEventModalByIndex(${idx})" title="了解更多"><i class="fas fa-info-circle"></i></button>
                                 </div>
                             </div>
-                        `}).join('');
+                        `).join('');
 
                     }
                 }
@@ -4625,6 +4640,12 @@
             document.getElementById('eventModalTitle').textContent = title;
             document.getElementById('eventModalBody').textContent = desc;
             document.getElementById('eventModalOverlay').classList.add('open');
+        }
+        function openEventModalByIndex(idx) {
+            const data = window._eventData?.[idx];
+            if (data) {
+                openEventModal(data.name, data.desc);
+            }
         }
         function closeEventModal(e) {
             if (e && e.target !== document.getElementById('eventModalOverlay')) return;

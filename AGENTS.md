@@ -52,12 +52,30 @@ with open("data/market.json", "w") as f:
 
 ## 新闻图片规则
 
-1. **不要使用编造的 URL** — 必须验证图片可访问
-2. **优先使用 Brave Image Search** — 搜索后验证 200
-3. **验证命令**：
-   ```bash
-   curl -sI "IMAGE_URL" | head -1  # 应返回 HTTP/2 200
-   ```
+### 自动验证和修复
+
+```bash
+cd ~/Projects/justin-dashboard
+python3 scripts/validate-images.py
+```
+
+脚本会：
+1. 检查每条新闻的图片 URL 是否返回 200
+2. 失败的图片自动用 Brave Image Search 搜索替换
+3. 验证替换的图片确实可用
+4. 自动更新 news.json
+
+### 手动验证
+
+```bash
+curl -sI "IMAGE_URL" | head -1  # 应返回 HTTP/2 200
+```
+
+### 注意事项
+
+- 不要使用编造的 URL
+- 优先使用 Brave Image Search
+- Brave API 有速率限制，脚本已内置 1.5 秒延时
 
 ## 数据文件
 

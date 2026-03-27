@@ -944,6 +944,25 @@
             background: linear-gradient(90deg, #e10600, #ff4444);
         }
         .f1-next-round { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .f1-live-badge { 
+            position: absolute; 
+            top: 14px; 
+            right: 16px; 
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+            color: #fff; 
+            font-size: 11px; 
+            font-weight: 700; 
+            padding: 4px 10px; 
+            border-radius: 4px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            animation: f1-live-pulse 2s ease-in-out infinite;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
+        @keyframes f1-live-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.02); }
+        }
         .f1-next-name { font-size: 32px; font-weight: 800; color: #fff; margin: 10px 0 6px; letter-spacing: -0.5px; }
         .f1-next-location { font-size: 15px; color: #e10600; font-weight: 600; }
         .f1-next-date { 
@@ -3126,6 +3145,7 @@
                     <!-- 下一场比赛倒计时 -->
                     <div class="f1-next-race" id="f1NextRace">
                         <div class="f1-next-round" id="f1NextRound">Round --</div>
+                        <div class="f1-live-badge" id="f1LiveBadge" style="display: none;">🔴 LIVE</div>
                         <div class="f1-next-name" id="f1NextName">Loading...</div>
                         <div class="f1-next-location" id="f1NextLocation">--</div>
                         <div class="f1-next-date" id="f1NextDate">--</div>
@@ -3965,6 +3985,12 @@
                 const meetingStart = new Date(nextMeeting.date_start);
                 const meetingEnd = new Date(nextMeeting.date_end);
                 const isRaceWeekend = now >= meetingStart && now < meetingEnd;
+                
+                // 显示/隐藏 LIVE 徽章
+                const liveBadge = document.getElementById('f1LiveBadge');
+                if (liveBadge) {
+                    liveBadge.style.display = isRaceWeekend ? 'block' : 'none';
+                }
                 
                 // 如果在比赛周末，加载 sessions 数据
                 if (isRaceWeekend && (!_f1Sessions || _f1Sessions[0]?.meeting_key !== nextMeeting.meeting_key)) {

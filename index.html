@@ -3927,46 +3927,101 @@
             document.getElementById('f1RaceList').innerHTML = (listHtml + moreBtn) || '<div class="f1-loading">暂无比赛</div>';
         }
         
+        // Session 名称翻译
+        const SESSION_NAMES = {
+            'Practice 1': 'FP1 练习赛1',
+            'Practice 2': 'FP2 练习赛2', 
+            'Practice 3': 'FP3 练习赛3',
+            'Sprint Qualifying': '冲刺排位赛',
+            'Sprint': '冲刺赛',
+            'Qualifying': '排位赛',
+            'Race': '正赛'
+        };
+        
+        let _f1Sessions = null;
+        
+        async function loadF1Sessions(meetingKey) {
+            try {
+                const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`);
+                if (res.ok) {
+                    _f1Sessions = await res.json();
+                    _f1Sessions.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+                }
+            } catch (e) {
+                console.error('Failed to load F1 sessions:', e);
+            }
+        }
+        
         function startF1Countdown() {
             if (!_f1Data || !_f1Data.calendar) return;
             
-            const updateCountdown = () => {
+            const updateCountdown = async () => {
                 const now = new Date();
-                // 用 date_end 判断比赛是否结束，而不是 date_start
+                // 用 date_end 判断比赛周末是否结束
                 const upcoming = _f1Data.calendar.filter(r => new Date(r.date_end) > now && !CANCELED_RACES[r.meeting_key]);
                 if (upcoming.length === 0) return;
                 
-                const next = upcoming[0];
-                const nextStart = new Date(next.date_start);
-                const nextEnd = new Date(next.date_end);
+                const nextMeeting = upcoming[0];
+                const meetingStart = new Date(nextMeeting.date_start);
+                const meetingEnd = new Date(nextMeeting.date_end);
+                const isRaceWeekend = now >= meetingStart && now < meetingEnd;
                 
-                // 如果比赛已经开始但未结束，显示"进行中"
-                const isOngoing = now >= nextStart && now < nextEnd;
-                const diff = isOngoing ? 0 : nextStart - now;
+                // 如果在比赛周末，加载 sessions 数据
+                if (isRaceWeekend && (!_f1Sessions || _f1Sessions[0]?.meeting_key !== nextMeeting.meeting_key)) {
+                    await loadF1Sessions(nextMeeting.meeting_key);
+                }
                 
-                if (isOngoing) {
-                    // 比赛周末进行中
-                    document.getElementById('f1CountdownTitle').textContent = '🔴 Race Weekend Live';
+                let targetTime, sessionName, isLive = false;
+                
+                if (isRaceWeekend && _f1Sessions) {
+                    // 找下一个未结束的 session
+                    const nextSession = _f1Sessions.find(s => new Date(s.date_end) > now);
+                    
+                    if (nextSession) {
+                        const sessionStart = new Date(nextSession.date_start);
+                        const sessionEnd = new Date(nextSession.date_end);
+                        
+                        if (now >= sessionStart && now < sessionEnd) {
+                            // Session 进行中
+                            isLive = true;
+                            sessionName = SESSION_NAMES[nextSession.session_name] || nextSession.session_name;
+                        } else {
+                            // 倒计时到下一个 session
+                            targetTime = sessionStart;
+                            sessionName = SESSION_NAMES[nextSession.session_name] || nextSession.session_name;
+                        }
+                    }
+                } else {
+                    // 倒计时到比赛周末开始
+                    targetTime = meetingStart;
+                    sessionName = 'Race Weekend';
+                }
+                
+                if (isLive) {
+                    document.getElementById('f1CountdownTitle').textContent = `🔴 ${sessionName} LIVE`;
                     document.getElementById('f1CountDays').textContent = '00';
                     document.getElementById('f1CountHours').textContent = '00';
                     document.getElementById('f1CountMins').textContent = '00';
                     document.getElementById('f1CountSecs').textContent = '00';
-                } else if (diff > 0) {
-                    document.getElementById('f1CountdownTitle').textContent = 'Race Weekend Starts in';
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const secs = Math.floor((diff % (1000 * 60)) / 1000);
-                    
-                    document.getElementById('f1CountDays').textContent = String(days).padStart(2,'0');
-                    document.getElementById('f1CountHours').textContent = String(hours).padStart(2,'0');
-                    document.getElementById('f1CountMins').textContent = String(mins).padStart(2,'0');
-                    document.getElementById('f1CountSecs').textContent = String(secs).padStart(2,'0');
+                } else if (targetTime) {
+                    const diff = targetTime - now;
+                    if (diff > 0) {
+                        document.getElementById('f1CountdownTitle').textContent = `${sessionName} Starts in`;
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                        
+                        document.getElementById('f1CountDays').textContent = String(days).padStart(2,'0');
+                        document.getElementById('f1CountHours').textContent = String(hours).padStart(2,'0');
+                        document.getElementById('f1CountMins').textContent = String(mins).padStart(2,'0');
+                        document.getElementById('f1CountSecs').textContent = String(secs).padStart(2,'0');
+                    }
                 }
             };
             
             updateCountdown();
-            setInterval(updateCountdown, 1000); // 每秒更新
+            setInterval(updateCountdown, 1000);
         }
         
         async function showF1Detail(meetingKey) {

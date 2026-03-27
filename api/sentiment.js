@@ -144,8 +144,11 @@ export default async function handler(req, res) {
         return (isHighImpact && isUSD) || isKeyEvent;
       })
       .filter(e => {
-        // 去重：按标题+日期去重
-        const key = `${e.title}_${e.date?.split('T')[0] || ''}`;
+        // 去重：按核心关键词+日期去重（更宽松）
+        // 提取核心关键词（FOMC, CPI, NFP 等）
+        const coreKeyword = Object.keys(EVENT_I18N).find(k => e.title?.includes(k)) || e.title?.slice(0, 20);
+        const dateKey = e.date?.split('T')[0] || '';
+        const key = `${coreKeyword}_${dateKey}`;
         if (seenEvents.has(key)) return false;
         seenEvents.add(key);
         return true;

@@ -135,12 +135,20 @@ export default async function handler(req, res) {
   }
 
   // 过滤重要事件 (Medium/High impact, 主要关注 USD)
+    const seenEvents = new Set();
     const importantEvents = events
       .filter(e => {
         const isHighImpact = e.impact === 'High' || e.impact === 'Medium';
         const isUSD = e.country === 'USD';
         const isKeyEvent = Object.keys(EVENT_I18N).some(k => e.title?.includes(k));
         return (isHighImpact && isUSD) || isKeyEvent;
+      })
+      .filter(e => {
+        // 去重：按标题+日期去重
+        const key = `${e.title}_${e.date?.split('T')[0] || ''}`;
+        if (seenEvents.has(key)) return false;
+        seenEvents.add(key);
+        return true;
       })
       .slice(0, 8);
 

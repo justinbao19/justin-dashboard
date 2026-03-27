@@ -4598,16 +4598,19 @@
                     if (d.events.length === 0) {
                         eventsList.innerHTML = '<div class="events-empty">本周暂无重大经济事件</div>';
                     } else {
-                        eventsList.innerHTML = d.events.map((e, idx) => `
+                        eventsList.innerHTML = d.events.map((e, idx) => {
+                            const eventName = e.event_cn || e.event;
+                            const eventDesc = e.description || `${eventName}：${e.country || 'US'} 经济数据发布。预期值: ${e.forecast || '待公布'}，前值: ${e.previous || '未知'}。该数据可能影响市场对经济前景和货币政策的预期。`;
+                            return `
                             <div class="event-item ${e.impact >= 3 ? 'high-impact' : ''}">
                                 <div class="event-main">
                                     <div class="event-date">${e.date?.slice(5) || ''}</div>
-                                    <div class="event-name">${e.event_cn || e.event}</div>
+                                    <div class="event-name">${eventName}</div>
                                     <div class="event-country">${e.country || 'US'}</div>
-                                    ${e.description ? `<button class="event-info-btn" onclick="openEventModal(${JSON.stringify(e.event_cn || e.event)}, ${JSON.stringify(e.description)})" title="了解更多"><i class="fas fa-info-circle"></i></button>` : ''}
+                                    <button class="event-info-btn" onclick="openEventModal(${JSON.stringify(eventName)}, ${JSON.stringify(eventDesc)})" title="了解更多"><i class="fas fa-info-circle"></i></button>
                                 </div>
                             </div>
-                        `).join('');
+                        `}).join('');
 
                     }
                 }

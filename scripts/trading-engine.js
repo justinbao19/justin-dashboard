@@ -72,11 +72,34 @@ async function getPrice(symbol, config) {
   }
 }
 
+// Symbol 映射到 Stooq 格式
+const STOOQ_SYMBOLS = {
+  'SPY': 'spy.us',
+  'QQQ': 'qqq.us',
+  'GLD': 'gld.us',
+  'TLT': 'tlt.us',
+  'USO': 'uso.us',
+  'bitcoin': 'btc.v'  // Stooq 用 .v 表示虚拟货币
+};
+
 async function getHistoricalPrices(symbol, days = 60) {
   // 尝试多个数据源
   const sources = [
     async () => {
-      // Yahoo Finance
+      // Stooq.com（免费，无需 API key）
+      const stooqSymbol = STOOQ_SYMBOLS[symbol] || `${symbol.toLowerCase()}.us`;
+      const endDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
+      const url = `https://stooq.com/q/d/l/?s=${stooqSymbol}&d1=${startDate}&d2=${endDate}&i=d`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const lines = text.trim().split('\n').slice(1); // 跳过 header
+      if (lines.length < 10) throw new Error('No data');
+      // CSV: Date,Open,High,Low,Close,Volume
+      return lines.map(line => parseFloat(line.split(',')[4])).filter(p => !isNaN(p));
+    },
+    async () => {
+      // Yahoo Finance（备用）
       const period2 = Math.floor(Date.now() / 1000);
       const period1 = period2 - days * 24 * 60 * 60;
       const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${period1}&period2=${period2}&interval=1d`;
@@ -84,14 +107,6 @@ async function getHistoricalPrices(symbol, days = 60) {
       const closes = d.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
       if (!closes || closes.length < 10) throw new Error('No data');
       return closes.filter(c => c !== null);
-    },
-    async () => {
-      // 备用：Alpha Vantage demo
-      const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&apikey=demo`;
-      const d = await fetchJson(url);
-      const ts = d['Time Series (Daily)'];
-      if (!ts) throw new Error('No data');
-      return Object.values(ts).slice(0, days).map(v => parseFloat(v['4. close'])).reverse();
     }
   ];
   
@@ -139,7 +154,7 @@ function calculateVolatility(prices, period = 20) {
 }
 
 function analyzeTechnicals(symbol, prices) {
-  if (!prices || prices.length < 50) {
+  if (!prices || prices.length < 30) {
     return { score: 50, trend: 'unknown', signals: ['数据不足'] };
   }
   
@@ -499,12 +514,11 @@ async function main() {
   console.log('\n📈 技术分析...');
   const assetAnalysis = {};
   for (const [symbol, config] of Object.entries(ASSETS)) {
-    if (config.type === 'finnhub') {
-      const history = await getHistoricalPrices(symbol, 60);
-      assetAnalysis[symbol] = analyzeTechnicals(symbol, history);
-      console.log(`  ${symbol.padEnd(8)} 得分 ${assetAnalysis[symbol].score}/100 (${assetAnalysis[symbol].trend})`);
-    }
-    await new Promise(r => setTimeout(r, 200));
+    // 所有资产都获取历史数据进行技术分析
+    const history = await getHistoricalPrices(symbol, 60);
+    assetAnalysis[symbol] = analyzeTechnicals(symbol, history);
+    console.log(`  ${symbol.padEnd(8)} 得分 ${assetAnalysis[symbol].score}/100 (${assetAnalysis[symbol].trend})`);
+    await new Promise(r => setTimeout(r, 300)); // 避免请求过快
   }
   
   // 宏观分析

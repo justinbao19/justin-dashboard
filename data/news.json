@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-28T18:00:00+08:00",
+  "lastUpdated": "2026-03-29T18:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美伊战争第28天：美军在沙特基地遇袭受伤，特朗普称仍有3554目标待打击",
-      "summary": "美伊冲突进入第28天，美军士兵在沙特阿拉伯空军基地遭遇袭击受伤。特朗普总统表示战争「尚未结束」，美国仍有3554个伊朗目标待打击，「很快就会完成」。与此同时，美国已将暂停打击伊朗能源设施的期限延长10天，称「谈判正在进行中」。然而伊朗海军司令坦格西里被美军击毙后，美国中央司令部司令库珀表示伊朗海军正走向「不可逆转的衰落」。科威特国际机场因持续的地区安全问题和无人机袭击造成的基础设施损坏，暂停商业航班运营。迪拜机场也受波及，多家航空公司发布出行警告。",
-      "image": "",
-      "source": "CNN / Guardian",
-      "url": "https://www.cnn.com/2026/03/27/world/live-news/iran-war-us-israel-trump",
-      "timestamp": "2026-03-28T16:00:00+08:00"
+      "title": "以色列空袭德黑兰，巴基斯坦主持中东和谈",
+      "summary": "以色列对德黑兰发动新一轮空袭，冲突持续升级。与此同时，巴基斯坦在伊斯兰堡召集地区调解会议，试图推动美以与伊朗停火谈判。巴基斯坦成功说服特朗普政府接受其「和平掮客」角色，但以色列的持续打击和美军在该地区的兵力增援给和谈蒙上阴影。伊朗德黑兰多处遭受猛烈轰炸，浓烟滚滚。欧洲盟国情报显示，俄罗斯对伊朗的军事援助超出美国官方公开承认的程度。阿曼表示其领土也遭到袭击，但尚无任何方承认责任。中东局势正处于一触即发的危险边缘。",
+      "image": "https://media.gettyimages.com/id/2265406584/photo/tehran-iran-plumes-of-smoke-rise-over-the-oil-depot-tanks-hit-by-joint-israel-u-s-over-night.jpg?s=612x612&w=0&k=20&c=AQpwFI-tZ_bMkPnPaawqkGZBwCaoENNvJDjZBjoOr0M=",
+      "source": "NYT / Guardian / WSJ",
+      "url": "https://www.nytimes.com/live/2026/03/29/world/iran-war-trump-israel-oil",
+      "timestamp": "2026-03-29T18:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "G7外长巴黎紧急磋商：欧洲施压美国正视俄罗斯援伊问题",
-      "summary": "G7外长在法国巴黎郊外的沃塞尔内修道院举行会议，聚焦中东局势和伊朗战争。欧洲各国外长向美国国务卿鲁比奥施压，要求华盛顿重视俄罗斯对伊朗的军事援助问题。会议议程包括讨论结束战争的努力、终止伊朗核武及弹道导弹发展计划，以及重新开放海上贸易通道。鲁比奥在会后推动战后霍尔木兹海峡计划，暗示伊朗可能被允许设立通行费制度。然而欧洲盟友对美国的伊朗战略持怀疑态度，G7内部团结面临考验。乌克兰外长西比哈、德国外长瓦德普尔、英国外交大臣库珀等也出席会议。",
-      "image": "",
-      "source": "Reuters / AP / New York Times",
-      "url": "https://apnews.com/article/g7-france-rubio-iran-war-allies-trump-63a8ee21dcca5ecce0c6b1cb900a8c16",
-      "timestamp": "2026-03-28T14:00:00+08:00"
+      "title": "也门胡塞武装向以色列发射弹道导弹，正式加入伊朗战争",
+      "summary": "也门胡塞武装向以色列发射弹道导弹，标志着这支伊朗支持的民兵组织正式加入中东冲突。胡塞武装声称这是对以色列打击伊朗的回应，并警告将继续袭击。美国海军陆战队已抵达该地区增援。分析人士担忧，胡塞武装的介入可能进一步威胁全球航运安全——此前红海商船已多次遭到胡塞袭击，全球供应链面临严峻考验。以色列防空系统成功拦截部分导弹，但地区紧张局势急剧升温。伊朗战争正从双边冲突演变为多方混战。",
+      "image": "https://media.gettyimages.com/id/2268213244/photo/hebron-west-bank-a-view-of-missile-traces-launched-from-yemen-at-israel-sighted-in-the-sky.jpg?s=612x612&w=0&k=20&c=p-fQvcWL-Q8SsYr5QQOiv0rClOjb68VIXB41k-EQgm4=",
+      "source": "Reuters / France24",
+      "url": "https://www.reuters.com/world/asia-pacific/yemens-houthis-enter-iran-war-with-attacks-israel-while-us-marines-arrive-region-2026-03-28/",
+      "timestamp": "2026-03-29T16:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "乌克兰无人机袭击俄罗斯雅罗斯拉夫尔州致一名儿童死亡",
-      "summary": "俄罗斯雅罗斯拉夫尔州州长叶夫拉耶夫在Telegram上宣布，乌克兰无人机袭击导致一名儿童死亡。据报道，这名儿童在袭击发生时身处雅罗斯拉夫尔郊区一栋私人住宅内。俄罗斯防空部队称击落了30多架乌克兰无人机。与此同时，乌克兰城市也遭到俄军空袭，造成三人死亡。俄乌冲突持续超过三年，双方针对对方领土的无人机袭击日益频繁。美国国务卿鲁比奥否认了泽连斯基关于「特朗普要求基辅放弃领土」的说法。冲突升级的背景下，平民伤亡持续增加，和平谈判前景依然渺茫。",
-      "image": "",
-      "source": "Reuters / France24 / Independent",
-      "url": "https://www.reuters.com/world/ukrainian-drone-attack-russias-yaroslavl-region-kills-child-governor-says-2026-03-28/",
-      "timestamp": "2026-03-28T12:00:00+08:00"
+      "title": "俄罗斯向伊朗提供升级版「沙希德」无人机",
+      "summary": "据美联社和欧洲情报机构报道，俄罗斯正在向伊朗提供其在乌克兰战场上测试升级过的「沙希德」无人机。这批无人机经过改良，抗干扰能力和打击精度均有提升。欧洲盟国向美国施压，要求正视俄罗斯对伊朗的军事援助规模。分析人士指出，俄伊军事合作正在加深——俄罗斯提供武器，伊朗则为俄乌战争输送弹药和人员。这种「战争经济」互助模式令西方深感忧虑，也使得中东和东欧两大冲突彼此交织、相互强化。",
+      "image": "https://media.gettyimages.com/id/2201968138/photo/the-iranian-made-unmanned-aerial-vehicle-uav-shahed-136-warhead-used-in-russia-under-the-name.jpg?s=612x612&w=0&k=20&c=ZSYO-RSWxpmjEiK76ib1jhkuzE3Q3Bus0QgKcYMJbmM=",
+      "source": "AP News / CBS News",
+      "url": "https://apnews.com/article/russia-iran-drones-shahed-war-israel-ukraine-840b4f885d99714bdb7813c0d56213cf",
+      "timestamp": "2026-03-29T14:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "Taylor Swift横扫iHeartRadio音乐奖：狂揽7项大奖创纪录",
-      "summary": "Taylor Swift在2026年iHeartRadio音乐颁奖典礼上大放异彩，共斩获7项大奖，包括年度艺人和年度流行专辑（《The Life of a Showgirl》）。颁奖典礼于3月26日在洛杉矶杜比剧院举行。Swift在获奖感言中感谢了未婚夫Travis Kelce的支持，并鼓励粉丝「培养你的爱好」。她的热门单曲《The Fate of Ophelia》还获得了年度歌曲和年度流行歌曲提名，以及TikTok最佳舞蹈和最佳音乐视频等社交媒体投票奖项提名。这是Swift连续多年在iHeartRadio颁奖礼上领跑获奖名单，再次证明她在流行音乐界的统治地位。",
+      "title": "泽连斯基中东行：与阿联酋、卡塔尔签署防空协议",
+      "summary": "乌克兰总统泽连斯基对海湾国家进行旋风式访问，与阿联酋和卡塔尔签署防空合作协议。乌克兰将向海湾盟友提供无人机防御技术，以换取稀缺的「爱国者」导弹系统。这笔交易凸显中东冲突和乌俄战争之间的诡异联动：海湾国家急需防御伊朗导弹袭击，乌克兰则迫切需要防空武器应对俄军空袭。泽连斯基在沙特阿拉伯与沙特王储穆罕默德·本·萨勒曼会面后，继续访问卡塔尔和阿联酋。乌克兰正在利用其无人机战争经验开拓新的外交和商业机会。",
       "image": "",
-      "source": "Billboard / Rolling Stone / People",
-      "url": "https://www.billboard.com/lists/2026-iheartradio-music-awards-winners-list/",
-      "timestamp": "2026-03-28T10:00:00+08:00"
+      "source": "Al Jazeera / NYT / Defense News",
+      "url": "https://www.aljazeera.com/news/2026/3/28/zelenskyy-signs-air-defence-deals-with-uae-qatar-on-gulf-tour",
+      "timestamp": "2026-03-29T12:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "中东局势冲击全球航空：科威特机场关闭、迪拜航班大面积延误",
-      "summary": "受美伊战争和地区安全局势持续紧张影响，科威特国际机场于3月28日暂停所有商业客运航班。机场因遭受多次无人机袭击导致基础设施受损，恢复运营时间尚不确定。迪拜国际机场虽仍开放，但阿联酋航空等多家航空公司航班出现严重延误。印度航空公司IndiGo、Air India和亚航发布了针对印度与西亚间航班的最新出行警告，提醒乘客关注航班动态并做好改签退票准备。这是自战争爆发以来中东航空业遭受的最严重冲击，大量旅客滞留机场，航空公司正紧急调配运力应对危机。",
-      "image": "",
-      "source": "NewsX / IBTimes",
-      "url": "https://www.newsx.com/world/dubai-airport-open-or-closed-today-march-28-2026-emirates-flights-delayed-check-air-india-indigo-flight-status-schedule-rebooking-refund-189900/",
-      "timestamp": "2026-03-28T08:00:00+08:00"
+      "title": "尼泊尔前总理奥利因九月抗议事件被捕",
+      "summary": "尼泊尔警方逮捕了前总理卡德加·普拉萨德·沙尔马·奥利（K.P. Sharma Oli）及前内政部长，指控其在去年九月的大规模反政府抗议活动中下令开枪，导致多名示威者死亡。这次抗议最终导致奥利政府倒台。奥利曾三度出任尼泊尔总理，是该国最具影响力的政治人物之一。此次逮捕被视为对权力滥用的清算，但也引发执政党是否在进行政治报复的争议。奥利的支持者聚集在警察局外抗议，要求释放他们的领袖。尼泊尔政局动荡或将加剧。",
+      "image": "https://media.gettyimages.com/id/2231899788/photo/nepal-prime-minister-kp-sharma-oli-appraises-the-lower-house-the-house-of-representatives-of.jpg?s=612x612&w=0&k=20&c=_RT6zCkvAKDYtSEdafTK6VrW7YLTvtB4uD-x3lxGFYU=",
+      "source": "AP News",
+      "url": "https://apnews.com/article/nepal-former-prime-minister-oli-arrest-protests-0853943a32336ba71f3564e2ee93c246",
+      "timestamp": "2026-03-29T10:00:00+08:00"
     }
   ]
 }

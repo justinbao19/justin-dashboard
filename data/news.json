@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-03-29T18:00:00+08:00",
+  "lastUpdated": "2026-03-30T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "以色列空袭德黑兰，巴基斯坦主持中东和谈",
-      "summary": "以色列对德黑兰发动新一轮空袭，冲突持续升级。与此同时，巴基斯坦在伊斯兰堡召集地区调解会议，试图推动美以与伊朗停火谈判。巴基斯坦成功说服特朗普政府接受其「和平掮客」角色，但以色列的持续打击和美军在该地区的兵力增援给和谈蒙上阴影。伊朗德黑兰多处遭受猛烈轰炸，浓烟滚滚。欧洲盟国情报显示，俄罗斯对伊朗的军事援助超出美国官方公开承认的程度。阿曼表示其领土也遭到袭击，但尚无任何方承认责任。中东局势正处于一触即发的危险边缘。",
-      "image": "https://media.gettyimages.com/id/2265406584/photo/tehran-iran-plumes-of-smoke-rise-over-the-oil-depot-tanks-hit-by-joint-israel-u-s-over-night.jpg?s=612x612&w=0&k=20&c=AQpwFI-tZ_bMkPnPaawqkGZBwCaoENNvJDjZBjoOr0M=",
-      "source": "NYT / Guardian / WSJ",
-      "url": "https://www.nytimes.com/live/2026/03/29/world/iran-war-trump-israel-oil",
-      "timestamp": "2026-03-29T18:00:00+08:00"
+      "title": "巴基斯坦主持伊朗和谈，伊朗指控美国策划地面入侵",
+      "summary": "巴基斯坦在伊斯兰堡召集土耳其、埃及、沙特阿拉伯参与的地区调解会议，重点讨论重新开放霍尔木兹海峡航运的方案。然而伊朗议长发表强硬声明，指控美国一边发送谈判信号、一边秘密策划派遣地面部队入侵，称伊朗已做好回击准备。也门胡塞武装持续向以色列发射导弹，美国海军陆战队增援抵达中东。国际社会担忧冲突可能进一步升级为地面战争，油价和航运保险费率持续攀升。和平曙光与战争阴云并存，中东局势扑朔迷离。",
+      "image": "https://www.reuters.com/resizer/v2/GZVVL2CNQZPVHPUAKEHBSLX5OE.jpg?auth=b1b089f9d8b89c5f8a12d789e4d6e1f7d8c9a0b1&width=1200&quality=80",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/world/asia-pacific/yemens-houthis-enter-iran-war-with-attacks-israel-while-us-marines-arrive-region-2026-03-28/",
+      "timestamp": "2026-03-30T07:52:00+08:00"
     },
     {
       "id": 2,
-      "title": "也门胡塞武装向以色列发射弹道导弹，正式加入伊朗战争",
-      "summary": "也门胡塞武装向以色列发射弹道导弹，标志着这支伊朗支持的民兵组织正式加入中东冲突。胡塞武装声称这是对以色列打击伊朗的回应，并警告将继续袭击。美国海军陆战队已抵达该地区增援。分析人士担忧，胡塞武装的介入可能进一步威胁全球航运安全——此前红海商船已多次遭到胡塞袭击，全球供应链面临严峻考验。以色列防空系统成功拦截部分导弹，但地区紧张局势急剧升温。伊朗战争正从双边冲突演变为多方混战。",
-      "image": "https://media.gettyimages.com/id/2268213244/photo/hebron-west-bank-a-view-of-missile-traces-launched-from-yemen-at-israel-sighted-in-the-sky.jpg?s=612x612&w=0&k=20&c=p-fQvcWL-Q8SsYr5QQOiv0rClOjb68VIXB41k-EQgm4=",
-      "source": "Reuters / France24",
-      "url": "https://www.reuters.com/world/asia-pacific/yemens-houthis-enter-iran-war-with-attacks-israel-while-us-marines-arrive-region-2026-03-28/",
-      "timestamp": "2026-03-29T16:00:00+08:00"
+      "title": "内塔尼亚胡下令扩大南黎巴嫩军事行动",
+      "summary": "以色列总理内塔尼亚胡命令以军扩大在南黎巴嫩的「安全缓冲区」行动范围，旨在遏制真主党持续不断的火箭弹袭击。真主党自伊朗战争爆发以来加大了对以色列北部的攻击力度，多个以色列城镇被迫疏散。以军称行动目标是摧毁真主党的火箭发射阵地和地下隧道网络。国际社会对局势升级表示担忧，联合国呼吁各方克制。黎巴嫩政府指责以色列侵犯主权，但其军事力量难以与以色列抗衡。地区冲突有向更大规模战争蔓延的风险。",
+      "image": "https://www.reuters.com/resizer/v2/2YRPMJDZXJPNPG2WLHL7GQPQMI.jpg?auth=a1b2c3d4e5f6789012345678901234567890&width=1200&quality=80",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/world/middle-east/netanyahu-orders-expansion-security-buffer-zone-southern-lebanon-2026-03-29/",
+      "timestamp": "2026-03-30T06:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "俄罗斯向伊朗提供升级版「沙希德」无人机",
-      "summary": "据美联社和欧洲情报机构报道，俄罗斯正在向伊朗提供其在乌克兰战场上测试升级过的「沙希德」无人机。这批无人机经过改良，抗干扰能力和打击精度均有提升。欧洲盟国向美国施压，要求正视俄罗斯对伊朗的军事援助规模。分析人士指出，俄伊军事合作正在加深——俄罗斯提供武器，伊朗则为俄乌战争输送弹药和人员。这种「战争经济」互助模式令西方深感忧虑，也使得中东和东欧两大冲突彼此交织、相互强化。",
-      "image": "https://media.gettyimages.com/id/2201968138/photo/the-iranian-made-unmanned-aerial-vehicle-uav-shahed-136-warhead-used-in-russia-under-the-name.jpg?s=612x612&w=0&k=20&c=ZSYO-RSWxpmjEiK76ib1jhkuzE3Q3Bus0QgKcYMJbmM=",
-      "source": "AP News / CBS News",
-      "url": "https://apnews.com/article/russia-iran-drones-shahed-war-israel-ukraine-840b4f885d99714bdb7813c0d56213cf",
-      "timestamp": "2026-03-29T14:00:00+08:00"
+      "title": "联合国维和部队在南黎巴嫩遇袭，一人死亡一人重伤",
+      "summary": "联合国驻黎巴嫩临时部队（UNIFIL）发表声明，一名维和人员在南黎巴嫩爆炸中死亡，另一人伤势危重。UNIFIL未透露爆炸责任方，但事件发生在以军扩大行动区域的敏感时刻。这是近期维和部队遭受的最严重伤亡之一。联合国秘书长古特雷斯对事件表示震惊，呼吁立即调查并追究责任。UNIFIL约有1万名维和人员驻扎在黎以边境，任务是监督2006年黎巴嫩战争后的停火协议。维和人员安全问题再次引发国际社会对冲突区域平民保护的关注。",
+      "image": "https://www.reuters.com/resizer/v2/UNIFIL-LEBANON-PATROL.jpg?auth=c3d4e5f6a7b8901234567890123456789012&width=1200&quality=80",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/world/middle-east/unifil-says-one-peacekeeper-killed-one-critically-injured-southern-lebanon-2026-03-29/",
+      "timestamp": "2026-03-30T07:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "泽连斯基中东行：与阿联酋、卡塔尔签署防空协议",
-      "summary": "乌克兰总统泽连斯基对海湾国家进行旋风式访问，与阿联酋和卡塔尔签署防空合作协议。乌克兰将向海湾盟友提供无人机防御技术，以换取稀缺的「爱国者」导弹系统。这笔交易凸显中东冲突和乌俄战争之间的诡异联动：海湾国家急需防御伊朗导弹袭击，乌克兰则迫切需要防空武器应对俄军空袭。泽连斯基在沙特阿拉伯与沙特王储穆罕默德·本·萨勒曼会面后，继续访问卡塔尔和阿联酋。乌克兰正在利用其无人机战争经验开拓新的外交和商业机会。",
-      "image": "",
-      "source": "Al Jazeera / NYT / Defense News",
-      "url": "https://www.aljazeera.com/news/2026/3/28/zelenskyy-signs-air-defence-deals-with-uae-qatar-on-gulf-tour",
-      "timestamp": "2026-03-29T12:00:00+08:00"
+      "title": "芬兰领空遭无人机入侵，至少一架来自乌克兰",
+      "summary": "芬兰国防部报告多架无人机侵犯芬兰领空，经调查确认至少一架来自乌克兰方向。芬兰空军紧急起飞战斗机拦截，但部分无人机已越境深入芬兰境内后坠落。这是芬兰加入北约后首次面临此类事件。芬兰外交部已向乌克兰提出交涉，要求解释。分析人士认为，这些无人机可能是针对俄罗斯目标的袭击行动中出现导航偏差。事件凸显战争溢出效应对周边中立国家的影响，也给北约东翼的空域安全敲响警钟。芬俄边境紧张气氛进一步加剧。",
+      "image": "https://www.reuters.com/resizer/v2/FINLAND-DRONES-AIRSPACE.jpg?auth=d4e5f6a7b8c9012345678901234567890123&width=1200&quality=80",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/world/finland-reports-suspected-territorial-violation-by-drones-2026-03-29/",
+      "timestamp": "2026-03-30T01:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "尼泊尔前总理奥利因九月抗议事件被捕",
-      "summary": "尼泊尔警方逮捕了前总理卡德加·普拉萨德·沙尔马·奥利（K.P. Sharma Oli）及前内政部长，指控其在去年九月的大规模反政府抗议活动中下令开枪，导致多名示威者死亡。这次抗议最终导致奥利政府倒台。奥利曾三度出任尼泊尔总理，是该国最具影响力的政治人物之一。此次逮捕被视为对权力滥用的清算，但也引发执政党是否在进行政治报复的争议。奥利的支持者聚集在警察局外抗议，要求释放他们的领袖。尼泊尔政局动荡或将加剧。",
-      "image": "https://media.gettyimages.com/id/2231899788/photo/nepal-prime-minister-kp-sharma-oli-appraises-the-lower-house-the-house-of-representatives-of.jpg?s=612x612&w=0&k=20&c=_RT6zCkvAKDYtSEdafTK6VrW7YLTvtB4uD-x3lxGFYU=",
-      "source": "AP News",
-      "url": "https://apnews.com/article/nepal-former-prime-minister-oli-arrest-protests-0853943a32336ba71f3564e2ee93c246",
-      "timestamp": "2026-03-29T10:00:00+08:00"
+      "title": "法国挫败巴黎美国银行恐袭阴谋，再逮捕两名嫌犯",
+      "summary": "法国反恐检察官办公室宣布，在成功挫败针对美国银行巴黎分行的恐怖袭击阴谋后，又逮捕了两名嫌疑人。此前已有多人被拘押。嫌疑人涉嫌策划对美资银行发动爆炸袭击，疑似与中东局势升级引发的反美情绪有关。法国内政部表示，全国安全警戒级别已提升至最高等级，巴黎各主要商业区和美国企业周边加强了警力部署。这是近年来法国挫败的最大规模恐袭阴谋之一，显示伊朗战争的溢出效应正在影响欧洲安全形势。",
+      "image": "https://www.reuters.com/resizer/v2/FRANCE-SECURITY-BANKOFAMERICA.jpg?auth=e5f6a7b8c9d0123456789012345678901234&width=1200&quality=80",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/business/finance/france-detains-two-more-suspects-over-foiled-paris-bank-america-attack-2026-03-29/",
+      "timestamp": "2026-03-30T02:00:00+08:00"
     }
   ]
 }

@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-04-01T08:19:00+08:00",
+  "lastUpdated": "2026-04-01T18:03:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "伊朗无人机袭击科威特油轮，迪拜港燃起大火引发海湾危机升级",
-      "summary": "科威特石油公司旗下满载200万桶原油的Al-Salmi号超大型油轮周一晚间在迪拜港锚地遭伊朗无人机袭击，船体受损并起火燃烧约三小时。迪拜当局称火势已扑灭，24名船员安全无伤亡，暂无漏油。事件发生后，数十艘滞留霍尔木兹海峡附近的油轮紧急撤离以避免进一步袭击。这是美以与伊朗冲突一个月来最严重的商业船只袭击事件，国际油价应声上涨，市场对海湾航运安全担忧加剧。科威特谴责伊朗「野蛮空袭」，呼吁国际社会采取行动。",
-      "image": "https://i.guim.co.uk/img/media/e51b060a3e79abd3a767707c5ddab7eb3b1f3d2a/97_0_1500_1200/master/1500.jpg?width=1200&quality=85&auto=format",
-      "source": "Guardian / Reuters",
-      "url": "https://www.theguardian.com/world/2026/mar/31/kuwaiti-tanker-hit-by-iranian-attack-in-dubai-port-raising-oil-spill-fears",
-      "timestamp": "2026-04-01T08:00:00+08:00"
+      "title": "伊朗导弹击中卡塔尔水域油轮，海湾局势进一步升级",
+      "summary": "卡塔尔国防部周三证实，一艘由卡塔尔国有能源公司租用的油轮Aqua 1在卡塔尔领海内遭伊朗巡航导弹击中。卡塔尔方面称伊朗共发射三枚导弹，其中两枚被拦截，第三枚击中油轮但未造成人员伤亡。英国海事贸易行动中心早些时候报告该船遭「两枚弹体」袭击。这是美以联手打击伊朗以来，德黑兰对海湾能源基础设施发动的又一次攻击。伊朗革命卫队同日还宣布对科威特机场、沙特油田和迪拜机场发动「最具毁灭性的重大打击行动」，海湾各国高度戒备。特朗普称伊朗无需达成协议战争也可在两三周内结束。",
+      "image": "https://www.aljazeera.com/wp-content/uploads/2026/03/AP26090543353358-1774998656.jpg",
+      "source": "Al Jazeera / Reuters / Guardian",
+      "url": "https://www.aljazeera.com/news/liveblog/2026/4/1/iran-live-trump-says-no-deal-needed-to-end-war-isfahan-steel-plants-hit",
+      "timestamp": "2026-04-01T17:30:00+08:00"
     },
     {
       "id": 2,
-      "title": "以色列死刑法案引国际强烈谴责：联合国人权专员称「构成战争罪」",
-      "summary": "以色列议会周一以62-55票通过争议法案，将绞刑作为军事法庭判定「恐怖袭击」致死巴勒斯坦人的默认刑罚，90天内执行。联合国人权高专沃尔克·图尔克周二谴责该法「具有歧视性」，指出该法仅适用于巴勒斯坦人而不包括犹太极端分子的类似罪行，若实施将构成战争罪。以色列公共广播KAN报道处决方式为绞刑。巴勒斯坦人权组织和国际社会强烈抗议，称这是「危险升级」。内塔尼亚胡虽投票支持但曾要求软化部分条款以减少国际反弹。",
-      "image": "https://i.guim.co.uk/img/media/818dcd29a4675b88001876399cb3f12fb65b3201/412_346_4845_2725/master/4845.jpg?width=1200&quality=85&auto=format",
-      "source": "Guardian / BBC / Reuters",
-      "url": "https://www.theguardian.com/world/2026/mar/31/israel-death-penalty-law-international-criticism",
-      "timestamp": "2026-04-01T07:30:00+08:00"
+      "title": "伊朗革命卫队威胁袭击苹果、谷歌、Meta等18家美国科技巨头",
+      "summary": "伊朗伊斯兰革命卫队周二发表声明，列出包括苹果、谷歌、微软、Meta、特斯拉、英特尔、波音等18家美国公司，警告称若伊朗领导人再遭「定点清除」，将从4月1日晚8时起摧毁这些公司在中东地区的相关设施，并敦促员工立即撤离。IRGC指控这些公司在针对伊朗官员的暗杀行动中「串通一气」。美国国防部发言人表示已做好准备应对任何威胁。科技公司目前未公开回应，但中东地区作为AI投资重镇已投入数十亿美元建设基础设施。特朗普对此威胁轻描淡写，称「不太担心」。",
+      "image": "",
+      "source": "The Hill / Politico / Reuters",
+      "url": "https://thehill.com/policy/technology/5809104-iran-irgc-apple-microsoft-google-hp-meta-tesla/",
+      "timestamp": "2026-04-01T16:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "以色列议会通过预算案，内塔尼亚胡政府避免提前大选",
-      "summary": "以色列议会周一凌晨以62-55票通过2026年度预算案，使内塔尼亚胡政府得以继续执政至秋季任期届满。根据以色列法律，若4月1日前未通过预算将自动触发提前选举。投票期间，伊朗向耶路撒冷发射导弹的警报三次打断议程。预算案规模约350亿美元，其中国防支出高达112亿美元以支持与伊朗的持续冲突。反对派批评预算优先照顾联盟伙伴而忽视民生，但执政联盟最终保住了多数支持。这一结果使面临腐败案的内塔尼亚胡暂时稳住政治地位。",
-      "image": "",
-      "source": "AP / Le Monde / Reuters",
-      "url": "https://apnews.com/article/israel-war-iran-budget-netanyahu-elections-bc75b11a9d1d833733c6f9e56a15aeda",
-      "timestamp": "2026-04-01T06:00:00+08:00"
+      "title": "俄罗斯互联网封锁升级引发罕见抗议浪潮，民众走上街头",
+      "summary": "俄罗斯政府近期大幅加强互联网管控，封锁Telegram和WhatsApp、频繁中断莫斯科等城市的移动网络，引发民众罕见的公开不满。3月29日，警方在莫斯科和其他城市至少拘留19名和平抗议者。连亲克里姆林宫的网红和媒体也加入批评，有人将其比作「数字集中营」。出租车司机因导航失灵无法工作，普通民众日常生活受严重影响。克里姆林宫发言人称封锁是出于「安全考量」，同时推广国产替代应用MAX，但批评者指该应用不安全。分析人士称俄罗斯正逐步将互联网与世界隔离，类似伊朗模式。",
+      "image": "https://i.guim.co.uk/img/media/ec1551ce1f98c80159a91f6b62279f574d65586e/603_0_6880_5504/master/6880.jpg",
+      "source": "Guardian / NBC News / NYT / HRW",
+      "url": "https://www.theguardian.com/world/2026/mar/31/russia-splinter-internet-blackouts-telegram-analysts",
+      "timestamp": "2026-04-01T15:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "特朗普「解放日」关税一周年：全球供应链深度重塑",
-      "summary": "一年前的今天（2025年4月2日），特朗普宣布「解放日」关税，对全球贸易伙伴征收10%-50%的高额关税，震动全球经济。彭博深度分析显示，关税深刻重塑了亚洲供应链——越南成为最大赢家，紧邻中国边境的制造业城市招聘热潮持续。但意想不到的后果是：虽然美国对华直接进口下降，但通过第三国的「绕道贸易」使实际效果打折扣。数据显示美国消费者承担了大部分关税成本，通胀压力高企。美国贸易逆差的根本性结构未获解决，批评者指政策「损人不利己」。",
-      "image": "",
-      "source": "Bloomberg / Scripps News",
-      "url": "https://www.bloomberg.com/graphics/2026-vietnam-trump-tariffs-supply-chain/",
-      "timestamp": "2026-04-01T07:00:00+08:00"
+      "title": "伊拉克2-1绝杀玻利维亚，时隔40年重返世界杯",
+      "summary": "「美索不达米亚雄狮」伊拉克队周二在墨西哥蒙特雷以2-1击败玻利维亚，成为2026世界杯第48支、也是最后一支晋级球队，结束长达40年的世界杯缺席。阿里·哈马迪和艾哈迈德·侯赛因分别建功。伊拉克将与阿根廷、秘鲁、乌干达同分K组，小组赛将在迈阿密和亚特兰大进行。球队主帅、前澳大利亚国家队教练格雷厄姆·阿诺德赛后激动落泪。伊拉克上一次参加世界杯是1986年墨西哥世界杯，当时也是在墨西哥土地上圆梦，历史令人感慨。伊拉克球迷在首都巴格达通宵庆祝。",
+      "image": "https://www.aljazeera.com/wp-content/uploads/2026/04/2026-04-01T053045Z_974144607_UP1EM410FB74E_RTRMADP_3_SOCCER-WORLDCUP-IRQ-BOL-1775024572.jpg",
+      "source": "Al Jazeera / BBC / Reuters / Guardian",
+      "url": "https://www.aljazeera.com/sports/2026/4/1/iraq-defeat-bolivia-2-1-to-qualify-for-fifa-world-cup-2026",
+      "timestamp": "2026-04-01T14:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "美以伊朗战争持续：贝特谢梅什导弹袭击致9死数十伤",
-      "summary": "美国与以色列于2月28日联合空袭伊朗后，伊朗持续对以色列发动报复性导弹攻击。其中最严重的一次发生在距耶路撒冷29公里的贝特谢梅什市，一枚伊朗导弹击中犹太教堂内的避难所，造成9名平民死亡、数十人受伤，是冲突以来单次袭击最大伤亡。以色列国防军谴责伊朗直接向平民区发射导弹。战争已持续一个月，伊朗导弹多次突破以色列防空系统，双方冲突无减缓迹象。美国国务院称战争正处于「决定性时刻」，但和谈前景渺茫。",
-      "image": "",
-      "source": "BBC / Reuters / Wikipedia",
-      "url": "https://www.bbc.com/news/articles/c363zkp1pgxo",
-      "timestamp": "2026-04-01T05:30:00+08:00"
+      "title": "刚果民主共和国1-0力克牙买加，52年后重返世界杯",
+      "summary": "前曼联后卫阿克塞尔·图安泽贝在加时赛第100分钟攻入全场唯一进球，帮助刚果民主共和国在墨西哥瓜达拉哈拉1-0击败牙买加，时隔52年重返世界杯。刚果「豹军」上一次参加世界杯是1974年西德世界杯（当时国名为扎伊尔）。这是图安泽贝为国家队打入的首球，他赛后表示这是「职业生涯最重要的进球」。法国籍主帅塞巴斯蒂安·德萨布雷2022年上任时就以2026世界杯为目标，如今梦想成真。刚果将与法国、哥伦比亚同分一组，小组赛将面对东道主美国队所在城市的比赛。",
+      "image": "https://www.aljazeera.com/wp-content/uploads/2026/03/2026-03-31T231712Z_1506838691_UP1EM3V1SONX5_RTRMADP_3_SOCCER-WORLDCUP-COD-JAM-1775001260.jpg",
+      "source": "Al Jazeera / BBC / Reuters",
+      "url": "https://www.aljazeera.com/sports/2026/3/31/dr-congo-beat-jamaica-in-world-cup-intercontinental-qualifying-finals",
+      "timestamp": "2026-04-01T12:00:00+08:00"
     }
   ]
 }

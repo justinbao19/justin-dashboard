@@ -7,20 +7,24 @@
 """
 
 import json
+import os
 import re
-import requests
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
 
+import requests
+
 # === 配置 ===
 DATA_DIR = Path(__file__).parent.parent / "data"
+VALIDATE_JSON_SCRIPT = Path(__file__).resolve().parent / "validate-json.py"
 
 # Unsplash API (免费 50 请求/小时)
-UNSPLASH_ACCESS_KEY = "your_unsplash_access_key"  # 需要注册获取
+UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY", "").strip()
 
 # Brave Search API (已配置，用于图片搜索)
-BRAVE_API_KEY = "BSAccshg0ETDm8nWQSXnRyho54sEtrx"
+BRAVE_API_KEY = os.environ.get("BRAVE_API_KEY", "").strip()
 
 # 新闻关键词 → 图片搜索词映射
 KEYWORD_MAP = {
@@ -59,9 +63,16 @@ def extract_keywords(title: str) -> list:
     return keywords[:3]  # 最多3个
 
 
+def validate_json_file(path: Path) -> None:
+    subprocess.run(
+        ["python3", str(VALIDATE_JSON_SCRIPT), str(path)],
+        check=True,
+    )
+
+
 def search_unsplash(query: str) -> str | None:
     """搜索 Unsplash 图片"""
-    if UNSPLASH_ACCESS_KEY == "your_unsplash_access_key":
+    if not UNSPLASH_ACCESS_KEY:
         return None  # 未配置 API key
     
     url = f"https://api.unsplash.com/search/photos?query={quote(query)}&per_page=1&orientation=landscape"
@@ -589,7 +600,7 @@ def find_image_for_news(news_item: dict, jina_data: dict | None = None, index: i
     
     # 4. 尝试 Unsplash API 搜索（如果配置了 key）
     keywords = extract_keywords(title)
-    if keywords and UNSPLASH_ACCESS_KEY != "your_unsplash_access_key":
+    if keywords and UNSPLASH_ACCESS_KEY:
         query = " ".join(keywords)
         img = search_unsplash(query)
         if img:
@@ -694,7 +705,9 @@ def update_news():
     news_file = DATA_DIR / "news.json"
     with open(news_file, "w", encoding="utf-8") as f:
         json.dump(news_data, f, ensure_ascii=False, indent=2)
-    
+
+    validate_json_file(news_file)
+
     print(f"✅ 已更新 {news_file}")
 
 

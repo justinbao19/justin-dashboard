@@ -1,0 +1,123 @@
+name: Dashboard Briefing
+
+on:
+  schedule:
+    # 08:40 Asia/Shanghai
+    - cron: '40 0 * * *'
+    # 18:40 Asia/Shanghai
+    - cron: '40 10 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Briefing mode
+        required: true
+        default: morning
+        type: choice
+        options:
+          - morning
+          - evening
+      send_telegram:
+        description: Send Telegram briefing
+        required: false
+        default: true
+        type: boolean
+      commit_changes:
+        description: Commit updated dashboard data
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-briefing
+  cancel-in-progress: false
+
+jobs:
+  dashboard-briefing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TZ: Asia/Shanghai
+      FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+      BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+      LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+      LLM_MODEL: ${{ secrets.LLM_MODEL }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip requests
+
+      - name: Resolve briefing mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODE="${{ inputs.mode }}"
+          else
+            HOUR=$(TZ=Asia/Shanghai date +%H)
+            if [ "$HOUR" -lt 12 ]; then
+              MODE=morning
+            else
+              MODE=evening
+            fi
+          fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "Using mode: $MODE"
+
+      - name: Update market snapshot
+        run: python3 scripts/update_market.py
+
+      - name: Update news snapshot
+        run: python3 scripts/update_news.py
+
+      - name: Generate market analysis
+        continue-on-error: true
+        run: python3 scripts/generate_market_analysis.py
+
+      - name: Validate JSON files
+        run: python3 scripts/validate-json.py data/market.json data/news.json
+
+      - name: Validate news images
+        run: python3 scripts/validate-images.py
+
+      - name: Re-validate JSON files
+        run: python3 scripts/validate-json.py data/market.json data/news.json
+
+      - name: Show generated briefing
+        run: python3 scripts/send_telegram_briefing.py --mode "${{ steps.mode.outputs.mode }}"
+
+      - name: Commit updated dashboard data
+        id: commit
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_changes != false }}
+        run: |
+          if git diff --quiet -- data/market.json data/news.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No dashboard data changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market.json data/news.json
+          git commit -m "dashboard: refresh market and news briefing"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Send Telegram briefing
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.send_telegram != false }}
+        run: python3 scripts/send_telegram_briefing.py --mode "${{ steps.mode.outputs.mode }}" --send

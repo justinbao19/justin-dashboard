@@ -8,16 +8,30 @@
 """
 
 import json
-import requests
+import os
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
+import requests
+
 # === 配置 ===
-FINNHUB_KEY = "d6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg"
+FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "").strip()
 DATA_DIR = Path(__file__).parent.parent / "data"
+VALIDATE_JSON_SCRIPT = Path(__file__).resolve().parent / "validate-json.py"
+
+
+def validate_json_file(path: Path) -> None:
+    subprocess.run(
+        ["python3", str(VALIDATE_JSON_SCRIPT), str(path)],
+        check=True,
+    )
 
 def get_finnhub_quote(symbol: str) -> dict:
     """获取 Finnhub 实时报价"""
+    if not FINNHUB_KEY:
+        print(f"Finnhub key missing, skip {symbol}")
+        return None
     url = f"https://finnhub.io/api/v1/quote?symbol={symbol}&token={FINNHUB_KEY}"
     try:
         r = requests.get(url, timeout=10)
@@ -150,7 +164,9 @@ def main():
     # 保存
     with open(market_file, "w", encoding="utf-8") as f:
         json.dump(market, f, ensure_ascii=False, indent=2)
-    
+
+    validate_json_file(market_file)
+
     print(f"✅ 已更新 {market_file}")
     print(f"   NDX: {market.get('ndx', {}).get('price')} ({market.get('ndx', {}).get('change')}%)")
     print(f"   SPX: {market.get('spx', {}).get('price')} ({market.get('spx', {}).get('change')}%)")

@@ -1,0 +1,63 @@
+name: Autonomous Trading Cycle
+
+on:
+  schedule:
+    # 13:35 Asia/Shanghai (UTC+8), Monday-Friday
+    - cron: '35 5 * * 1-5'
+    # 05:35 Asia/Shanghai (UTC+8), Monday-Friday
+    - cron: '35 21 * * 0-4'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run without persisting trading.json'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autonomous-trading-cycle
+  cancel-in-progress: false
+
+jobs:
+  trading-cycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Run autonomous trading cycle
+        env:
+          TZ: Asia/Shanghai
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "${DRY_RUN}" = "true" ]; then
+            node scripts/trading-engine.js --dry-run
+          else
+            node scripts/trading-engine.js
+          fi
+
+      - name: Commit updated trading ledger
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          if git diff --quiet -- data/trading.json; then
+            echo "No trading ledger changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/trading.json
+          git commit -m "trading: autonomous cycle"
+          git push

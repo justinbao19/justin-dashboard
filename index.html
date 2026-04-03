@@ -290,10 +290,60 @@
             padding: 70px 20px 40px;
             color: white;
         }
+        .weather-header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+            font-size: 13px;
+            letter-spacing: 0.2px;
+        }
         .weather-header .location { font-size: 34px; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
         .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 10px; }
+        .weather-header-meta {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 12px;
+            margin-top: 22px;
+        }
+        .weather-header-stat {
+            min-width: 118px;
+            padding: 12px 14px;
+            border-radius: 18px;
+            background: rgba(0,0,0,0.18);
+            border: 1px solid rgba(255,255,255,0.12);
+            backdrop-filter: blur(18px);
+            text-align: left;
+        }
+        .weather-header-stat .label {
+            font-size: 12px;
+            opacity: 0.68;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .weather-header-stat .value {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+        .weather-header-note {
+            font-size: 13px;
+            opacity: 0.78;
+            margin-top: 16px;
+            line-height: 1.5;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
         .weather-content { position: relative; z-index: 2; padding: 0 16px 20px; }
 
@@ -307,6 +357,20 @@
             color: white;
         }
         .weather-card .card-title { color: rgba(255,255,255,0.7); }
+        .weather-stack {
+            display: grid;
+            gap: 16px;
+        }
+        .weather-stack > .weather-card {
+            margin-bottom: 0;
+        }
+        .weather-content > .weather-grid,
+        .weather-content > .weather-stack {
+            margin-bottom: 20px;
+        }
+        .weather-content > :last-child {
+            margin-bottom: 0;
+        }
 
         /* Hourly */
         .hourly-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
@@ -345,6 +409,12 @@
         .weather-detail-card .desc { font-size: 15px; opacity: 0.7; margin-top: 6px; }
 
         /* AQI */
+        .weather-card-kicker {
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0.72;
+            margin-bottom: 14px;
+        }
         .aqi-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
         .aqi-value { font-size: 44px; font-weight: 600; }
         .aqi-level { font-size: 20px; opacity: 0.8; }
@@ -360,6 +430,218 @@
         .life-index-item i { font-size: 24px; margin-bottom: 10px; display: block; }
         .life-index-item .name { font-size: 12px; opacity: 0.7; margin-bottom: 6px; }
         .life-index-item .level { font-size: 14px; font-weight: 600; }
+
+        /* Sun / Rain */
+        .weather-sun-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .weather-sun-card::after {
+            content: '';
+            position: absolute;
+            inset: auto -40px -60px auto;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 213, 79, 0.2) 0%, rgba(255, 213, 79, 0) 70%);
+            pointer-events: none;
+        }
+        .sun-times {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .sun-time-item,
+        .sun-rain-summary {
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .sun-time-label,
+        .sun-rain-label {
+            font-size: 13px;
+            opacity: 0.72;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .sun-time-value {
+            font-size: 30px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+        }
+        .sun-time-desc,
+        .sun-rain-desc {
+            font-size: 14px;
+            opacity: 0.72;
+            margin-top: 8px;
+            line-height: 1.45;
+        }
+        .sun-rain-summary {
+            margin-top: 14px;
+        }
+        .sun-phase-meta {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .sun-phase-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .sun-phase-note {
+            font-size: 13px;
+            opacity: 0.72;
+            text-align: right;
+        }
+        .sun-progress {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 16px;
+            padding: 8px 0 4px;
+        }
+        .sun-progress-track {
+            position: relative;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(116, 185, 255, 0.32), rgba(255, 220, 120, 0.7), rgba(255, 170, 72, 0.42));
+            overflow: hidden;
+        }
+        .sun-progress-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.62));
+        }
+        .sun-progress-dot {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffd45f;
+            border: 3px solid rgba(255,255,255,0.92);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+            transform: translate(-50%, -50%);
+        }
+        .sun-progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .sun-rain-value {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .sun-rain-main {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        .sun-rain-sub {
+            font-size: 14px;
+            opacity: 0.78;
+        }
+
+        /* Commute */
+        .weather-commute-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .weather-commute-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(116, 185, 255, 0.08), rgba(255, 255, 255, 0));
+            pointer-events: none;
+        }
+        .commute-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .commute-summary {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 0 2px 16px;
+            margin-bottom: 4px;
+        }
+        .commute-summary-main {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .commute-summary-sub {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+        .commute-summary-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .commute-item {
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.08);
+            min-height: 138px;
+        }
+        .commute-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.14);
+            margin-bottom: 14px;
+            font-size: 18px;
+        }
+        .commute-name {
+            font-size: 13px;
+            opacity: 0.72;
+            margin-bottom: 8px;
+        }
+        .commute-value {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        .commute-desc {
+            font-size: 14px;
+            opacity: 0.72;
+            line-height: 1.45;
+            margin-top: 8px;
+        }
 
         /* General page header — used by news/flight with dark backgrounds */
         .page-header { padding: 52px 20px 28px; color: white; }
@@ -725,15 +1007,28 @@
             text-align: center;
             display: none;
         }
-        .market-values { text-align: right; min-width: 80px; }
+        .market-values {
+            text-align: right;
+            min-width: 0;
+            max-width: 100%;
+        }
         .market-price {
             font-size: 15px;
             font-weight: 600;
             font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
             white-space: nowrap;
             color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .market-change { font-size: 12px; font-weight: 600; margin-top: 3px; }
+        .market-change {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .market-change.up { color: var(--success); }
         .market-change.down { color: var(--danger); }
 
@@ -1886,6 +2181,7 @@
         /* Segment Control */
         .market-segment-control {
             display: flex;
+            flex-wrap: wrap;
             gap: 4px;
             margin-top: 16px;
             padding: 4px;
@@ -2284,6 +2580,451 @@
             border-color: rgba(0, 113, 227, 0.22);
         }
 
+        .market-pulse-board {
+            display: grid;
+            gap: 20px;
+        }
+        .pulse-overview-card,
+        .news-hero-card {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top right, rgba(0, 113, 227, 0.14), transparent 42%),
+                linear-gradient(160deg, rgba(255,255,255,0.98), rgba(245,247,250,0.96));
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        [data-theme="dark"] .pulse-overview-card,
+        [data-theme="dark"] .news-hero-card {
+            background:
+                radial-gradient(circle at top right, rgba(10, 132, 255, 0.18), transparent 42%),
+                linear-gradient(160deg, rgba(28,28,30,0.98), rgba(18,18,20,0.96));
+            border-color: rgba(255,255,255,0.08);
+        }
+        .pulse-overview-card::after,
+        .news-hero-card::after {
+            content: '';
+            position: absolute;
+            inset: auto -32px -64px auto;
+            width: 180px;
+            height: 180px;
+            border-radius: 999px;
+            background: rgba(0, 113, 227, 0.08);
+            filter: blur(8px);
+            pointer-events: none;
+        }
+        .pulse-kicker,
+        .news-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .pulse-headline,
+        .news-hero-title {
+            font-size: clamp(28px, 4vw, 40px);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
+            margin-bottom: 10px;
+        }
+        .pulse-deck,
+        .news-hero-deck {
+            max-width: 700px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+        }
+        .pulse-meta-row,
+        .news-hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 16px;
+            align-items: center;
+            color: var(--text-tertiary);
+            font-size: 13px;
+        }
+        .pulse-source-strip,
+        .news-source-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .pulse-source-chip,
+        .news-source-chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(0, 113, 227, 0.08);
+            border: 1px solid rgba(0, 113, 227, 0.12);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .pulse-layout,
+        .news-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+            gap: 20px;
+            align-items: start;
+        }
+        .pulse-feature-card,
+        .news-feature-card {
+            display: grid;
+            gap: 14px;
+            align-self: start;
+            padding: 24px;
+            border-radius: 24px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--market-card-border);
+        }
+        .pulse-feature-label,
+        .news-feature-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .pulse-rank-chip,
+        .news-rank-chip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 24px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: rgba(0, 113, 227, 0.08);
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        .pulse-feature-title,
+        .news-feature-title {
+            font-size: clamp(24px, 3.5vw, 34px);
+            line-height: 1.18;
+            letter-spacing: -0.04em;
+            margin-bottom: 14px;
+        }
+        .pulse-feature-text,
+        .news-feature-text {
+            font-size: 15px;
+            line-height: 1.78;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+        }
+        .pulse-item-meta,
+        .news-item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+        .pulse-source-badge,
+        .news-source-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .pulse-actions,
+        .news-item-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .pulse-feature-rail,
+        .news-feature-rail {
+            display: grid;
+            gap: 10px;
+            margin-top: 2px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .pulse-feature-rail-title,
+        .news-feature-rail-title {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            font-weight: 700;
+        }
+        .pulse-feature-bullet,
+        .news-feature-bullet {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: start;
+        }
+        .pulse-feature-bullet-rank,
+        .news-feature-bullet-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            background: var(--market-section-bg);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pulse-feature-bullet a,
+        .news-feature-bullet a {
+            display: block;
+            font-size: 14px;
+            line-height: 1.55;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .pulse-feature-bullet-meta,
+        .news-feature-bullet-meta {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        .pulse-link,
+        .news-open-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 38px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .pulse-link.primary,
+        .news-open-link.primary {
+            background: var(--accent);
+            color: white;
+        }
+        .pulse-link.secondary,
+        .news-open-link.secondary {
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .pulse-link:hover,
+        .news-open-link:hover {
+            transform: translateY(-1px);
+        }
+        .pulse-river-card,
+        .news-stack-card {
+            padding: 20px;
+            border-radius: 24px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--market-card-border);
+        }
+        .pulse-card-header,
+        .news-stack-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .pulse-card-title,
+        .news-stack-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+        .pulse-card-note,
+        .news-stack-note {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        .pulse-river,
+        .news-stack {
+            display: grid;
+            gap: 10px;
+        }
+        .pulse-river-item,
+        .news-stack-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .pulse-river-item:last-child,
+        .news-stack-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .pulse-river-item:first-child,
+        .news-stack-item:first-child {
+            padding-top: 6px;
+        }
+        .pulse-river-rank,
+        .news-stack-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--market-section-bg);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pulse-river-title,
+        .news-stack-title-link {
+            display: block;
+            font-size: 15px;
+            line-height: 1.55;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            margin-bottom: 8px;
+        }
+        .pulse-river-submeta,
+        .news-stack-submeta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            align-items: center;
+            color: var(--text-tertiary);
+            font-size: 12px;
+        }
+        .pulse-source-columns,
+        .news-quick-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .pulse-source-column,
+        .news-quick-column {
+            padding: 18px;
+            border-radius: 20px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--market-card-border);
+        }
+        .pulse-column-label,
+        .news-column-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .pulse-column-list,
+        .news-column-list {
+            display: grid;
+            gap: 12px;
+        }
+        .pulse-column-item,
+        .news-column-item {
+            display: grid;
+            gap: 6px;
+        }
+        .pulse-column-item a,
+        .news-column-item a {
+            font-size: 14px;
+            line-height: 1.55;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .pulse-column-meta,
+        .news-column-meta {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        .news-page-content {
+            display: grid;
+            gap: 20px;
+        }
+        .news-tab-control {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 4px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+        }
+        .news-tab-btn {
+            padding: 9px 14px;
+            border: none;
+            border-radius: 9px;
+            background: transparent;
+            color: rgba(255,255,255,0.72);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .news-tab-btn.active {
+            background: rgba(255,255,255,0.16);
+            color: white;
+        }
+        .news-hub {
+            display: grid;
+            gap: 20px;
+        }
+        .news-empty-state,
+        .pulse-empty-state {
+            padding: 28px;
+            border-radius: 20px;
+            background: var(--market-card-bg);
+            border: 1px solid var(--market-card-border);
+            color: var(--text-tertiary);
+            text-align: center;
+        }
+
+        @media (max-width: 980px) {
+            .pulse-layout,
+            .news-layout,
+            .pulse-source-columns,
+            .news-quick-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .pulse-headline,
+            .news-hero-title {
+                font-size: 28px;
+            }
+            .pulse-feature-card,
+            .news-feature-card,
+            .pulse-river-card,
+            .news-stack-card,
+            .pulse-source-column,
+            .news-quick-column {
+                padding: 18px;
+            }
+            .pulse-river-item,
+            .news-stack-item {
+                gap: 10px;
+            }
+        }
+
         /* ========== FLIGHT ========== */
         .flight-tool { background: var(--bg-card); border-radius: 24px; padding: 32px; text-align: center; border: 1px solid var(--border); }
         .flight-tool-icon { width: 90px; height: 90px; margin: 0 auto 22px; background: linear-gradient(135deg, #0071e3, #00c6fb); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; }
@@ -2367,11 +3108,6 @@
                 grid-column: auto;
             }
 
-            .market-main-grid {
-                grid-template-columns: minmax(0, 8fr) minmax(320px, 4.6fr);
-                align-items: start;
-            }
-
             .market-card-note { white-space: nowrap; }
 
             #marketList {
@@ -2416,9 +3152,382 @@
             }
         }
 
+        @media (max-width: 760px) {
+            .weather-header {
+                padding: 56px 20px 28px;
+            }
+
+            .weather-header-badge {
+                padding: 7px 12px;
+                font-size: 12px;
+            }
+
+            .weather-header .location {
+                font-size: 28px;
+            }
+
+            .weather-header .temp-main {
+                font-size: 82px;
+                letter-spacing: -4px;
+            }
+
+            .weather-header .condition {
+                font-size: 20px;
+                line-height: 1.4;
+            }
+
+            .weather-header .temp-range {
+                font-size: 17px;
+                margin-top: 8px;
+            }
+
+            .weather-header-meta {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+                margin-top: 18px;
+            }
+
+            .weather-header-stat {
+                min-width: 0;
+                padding: 11px 12px;
+                border-radius: 16px;
+            }
+
+            .weather-header-stat .label {
+                font-size: 11px;
+                margin-bottom: 5px;
+            }
+
+            .weather-header-stat .value {
+                font-size: 18px;
+            }
+
+            .weather-header-note {
+                font-size: 12px;
+                margin-top: 12px;
+                max-width: 100%;
+            }
+
+            .weather-content {
+                padding: 0 14px 20px;
+            }
+
+            .weather-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .weather-card .card-title {
+                margin-bottom: 14px;
+                font-size: 13px;
+            }
+
+            .weather-card-kicker {
+                font-size: 12px;
+                margin-bottom: 12px;
+            }
+
+            .hourly-scroll {
+                gap: 12px;
+                padding: 8px 0 4px;
+            }
+
+            .hourly-item {
+                min-width: 60px;
+                padding: 12px 10px;
+                border-radius: 24px;
+            }
+
+            .hourly-time {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .hourly-icon {
+                width: 32px;
+                height: 32px;
+                margin-bottom: 8px;
+            }
+
+            .hourly-temp {
+                font-size: 16px;
+            }
+
+            .daily-item {
+                padding: 14px 0;
+            }
+
+            .daily-day,
+            .daily-low,
+            .daily-high {
+                font-size: 15px;
+            }
+
+            .daily-day {
+                width: 52px;
+            }
+
+            .daily-icon {
+                width: 32px;
+                height: 32px;
+                margin-right: 12px;
+            }
+
+            .weather-grid {
+                gap: 12px;
+            }
+
+            .weather-detail-card {
+                padding: 15px;
+                border-radius: 16px;
+            }
+
+            .weather-detail-card .label {
+                font-size: 13px;
+                margin-bottom: 10px;
+            }
+
+            .weather-detail-card .value {
+                font-size: 28px;
+            }
+
+            .weather-detail-card .unit {
+                font-size: 15px;
+            }
+
+            .weather-detail-card .desc {
+                font-size: 13px;
+                margin-top: 5px;
+            }
+
+            .sun-times,
+            .commute-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sun-phase-meta,
+            .commute-summary {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .sun-phase-chip,
+            .commute-summary-badge {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+
+            .sun-phase-note {
+                text-align: left;
+                font-size: 12px;
+            }
+
+            .sun-progress {
+                margin-bottom: 14px;
+                padding-top: 4px;
+            }
+
+            .sun-progress-track {
+                height: 8px;
+            }
+
+            .sun-progress-dot {
+                width: 16px;
+                height: 16px;
+            }
+
+            .sun-progress-labels {
+                font-size: 11px;
+                margin-top: 8px;
+            }
+
+            .sun-time-item,
+            .sun-rain-summary,
+            .commute-item,
+            .aqi-details div,
+            .life-index-item {
+                border-radius: 14px;
+            }
+
+            .sun-time-item,
+            .sun-rain-summary,
+            .commute-item {
+                padding: 14px;
+            }
+
+            .sun-time-value,
+            .sun-rain-main {
+                font-size: 26px;
+            }
+
+            .sun-time-desc,
+            .sun-rain-desc,
+            .commute-desc,
+            .commute-summary-sub {
+                font-size: 13px;
+            }
+
+            .aqi-value {
+                font-size: 36px;
+            }
+
+            .aqi-level {
+                font-size: 17px;
+            }
+
+            .aqi-details {
+                gap: 10px;
+                margin-top: 14px;
+                font-size: 12px;
+            }
+
+            .aqi-details div {
+                padding: 10px 8px;
+            }
+
+            .aqi-details strong {
+                font-size: 16px;
+            }
+
+            .commute-summary {
+                padding-bottom: 14px;
+            }
+
+            .commute-summary-main {
+                font-size: 20px;
+            }
+
+            .commute-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+                font-size: 16px;
+            }
+
+            .commute-name {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+
+            .commute-value {
+                font-size: 19px;
+            }
+
+            .life-index-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                text-align: left;
+            }
+
+            .commute-item {
+                min-height: 0;
+            }
+
+            .life-index-item {
+                padding: 14px 14px 13px;
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .life-index-item i {
+                font-size: 20px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+                width: 22px;
+                text-align: center;
+            }
+
+            .life-index-item .name {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+
+            .life-index-item .level {
+                font-size: 13px;
+                line-height: 1.35;
+            }
+
+            .market-page-header {
+                padding: 36px 20px 18px;
+            }
+
+            .market-page-header h1 {
+                font-size: 26px;
+            }
+
+            .market-header-meta {
+                flex-wrap: wrap;
+                row-gap: 4px;
+            }
+
+            .market-segment-control {
+                width: 100%;
+            }
+
+            .segment-btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .market-summary-item {
+                padding: 14px;
+            }
+
+            .market-summary-value {
+                font-size: 17px;
+            }
+
+            .market-list-card,
+            .market-analysis-card,
+            .market-overview-card,
+            .market-advice-card {
+                padding: 16px;
+            }
+
+            .market-item {
+                grid-template-columns: minmax(0, 1fr) auto;
+                grid-template-areas:
+                    "info values"
+                    "chart chart";
+                gap: 8px 12px;
+                padding: 12px;
+            }
+
+            .market-info {
+                grid-area: info;
+            }
+
+            .market-values {
+                grid-area: values;
+                min-width: 72px;
+            }
+
+            .market-chart {
+                grid-area: chart;
+            }
+
+            .market-sparkline {
+                height: 26px;
+            }
+
+            .market-chart-label {
+                display: block;
+                text-align: left;
+            }
+        }
+
         @media (min-width: 1200px) {
             .pages {
                 padding-bottom: 132px;
+            }
+
+            .market-main-grid {
+                grid-template-columns: minmax(0, 8fr) minmax(340px, 4.2fr);
+                align-items: start;
             }
 
             .theme-toggle {
@@ -2504,7 +3613,8 @@
             }
 
             .weather-card,
-            .weather-grid {
+            .weather-grid,
+            .weather-stack {
                 margin-bottom: 0;
             }
 
@@ -2526,6 +3636,10 @@
                 margin-top: 0 !important;
             }
 
+            .weather-support-stack,
+            .weather-primary-stack,
+            .weather-sun-card,
+            .weather-commute-card,
             .weather-life-card {
                 grid-column: span 6;
             }
@@ -2639,7 +3753,7 @@
 
         @media (min-width: 1440px) {
             #marketList {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
             }
 
             .market-summary-item {
@@ -2651,7 +3765,7 @@
             }
 
             .market-main-grid {
-                grid-template-columns: minmax(0, 8fr) minmax(340px, 4.2fr);
+                grid-template-columns: minmax(0, 8fr) minmax(360px, 4fr);
                 gap: 24px;
             }
 
@@ -2689,17 +3803,63 @@
                 grid-column: span 6;
             }
 
-            .weather-daily-card,
-            .weather-aqi-card {
-                grid-column: span 6;
+            .weather-daily-card { grid-column: span 5; }
+            .weather-details-grid { grid-column: span 7; }
+            .weather-support-stack { grid-column: span 4; align-self: start; }
+            .weather-primary-stack { grid-column: span 8; align-self: start; }
+
+            .weather-support-stack,
+            .weather-primary-stack {
+                gap: 18px;
             }
 
+            .weather-sun-card,
+            .weather-aqi-card,
+            .weather-commute-card,
             .weather-life-card {
-                grid-column: 1 / -1;
+                grid-column: auto;
+            }
+
+            .weather-aqi-card,
+            .weather-life-card {
+                padding: 22px;
+            }
+
+            .aqi-header {
+                gap: 10px;
+                margin-bottom: 4px;
+            }
+
+            .aqi-value {
+                font-size: 40px;
             }
 
             .aqi-details {
-                grid-template-columns: repeat(6, minmax(0, 1fr));
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+                margin-top: 14px;
+            }
+
+            .aqi-details div {
+                padding: 10px 8px;
+            }
+
+            .aqi-details strong {
+                font-size: 16px;
+            }
+
+            .life-index-grid {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .life-index-item {
+                padding: 14px 8px;
+            }
+
+            .life-index-item i {
+                font-size: 20px;
+                margin-bottom: 8px;
             }
 
             #newsList {
@@ -2713,11 +3873,12 @@
             }
 
             .market-item {
-                grid-template-columns: minmax(140px, 1fr) minmax(80px, 110px) auto;
-                padding: 16px 18px;
+                grid-template-columns: minmax(0, 1fr) minmax(64px, 84px) minmax(72px, 88px);
+                gap: 8px 10px;
+                padding: 14px;
             }
 
-            .market-price { font-size: 19px; }
+            .market-price { font-size: 18px; }
         }
     </style>
 </head>
@@ -2745,13 +3906,25 @@
     <div class="pages">
         <!-- Weather -->
         <div class="page active" id="page-weather">
-            <div class="weather-layout">
-                <div class="weather-header">
-                    <div class="location" id="location">上海 · 闵行</div>
-                    <div class="temp-main" id="tempMain">7°</div>
-                    <div class="condition" id="condition">多云</div>
-                    <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
-                </div>
+                <div class="weather-layout">
+                    <div class="weather-header">
+                        <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>实时天气视图</span></div>
+                        <div class="location" id="location">上海 · 闵行</div>
+                        <div class="temp-main" id="tempMain">7°</div>
+                        <div class="condition" id="condition">多云</div>
+                        <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
+                        <div class="weather-header-meta">
+                            <div class="weather-header-stat">
+                                <div class="label"><i class="fas fa-temperature-half"></i> 体感</div>
+                                <div class="value" id="headerFeelsLike">--°</div>
+                            </div>
+                            <div class="weather-header-stat">
+                                <div class="label"><i class="fas fa-droplet"></i> 湿度</div>
+                                <div class="value" id="headerHumidity">--%</div>
+                            </div>
+                        </div>
+                        <div class="weather-header-note" id="weatherHeaderNote">根据当前体感和小时趋势整理</div>
+                    </div>
                 <div class="weather-content">
                     <div class="weather-card weather-hourly-card">
                         <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
@@ -2762,22 +3935,77 @@
                         <div id="dailyForecast"></div>
                     </div>
                     <div class="weather-grid weather-details-grid" id="weatherGrid"></div>
-                    <div class="weather-card weather-aqi-card" style="margin-top:16px">
-                        <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
-                        <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
-                        <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
-                        <div class="aqi-details">
-                            <div>PM2.5<strong id="pm25">12</strong></div>
-                            <div>PM10<strong id="pm10">23</strong></div>
-                            <div>O₃<strong id="o3">76</strong></div>
-                            <div>SO₂<strong id="so2">6</strong></div>
-                            <div>NO₂<strong id="no2">13</strong></div>
-                            <div>CO<strong id="co">0.6</strong></div>
+                    <div class="weather-stack weather-support-stack">
+                        <div class="weather-card weather-sun-card">
+                            <div class="card-title"><i class="fas fa-sun"></i> 日照与降水</div>
+                            <div class="sun-phase-meta">
+                                <div class="sun-phase-chip" id="sunPhaseChip"><i class="fas fa-sun"></i><span id="sunPhaseLabel">白昼进行中</span></div>
+                                <div class="sun-phase-note" id="sunPhaseNote">光照节奏平稳</div>
+                            </div>
+                            <div class="sun-progress">
+                                <div class="sun-progress-track">
+                                    <div class="sun-progress-fill" id="sunProgressFill"></div>
+                                    <div class="sun-progress-dot" id="sunProgressDot"></div>
+                                </div>
+                                <div class="sun-progress-labels">
+                                    <span>日出</span>
+                                    <span>正午</span>
+                                    <span>日落</span>
+                                </div>
+                            </div>
+                            <div class="sun-times">
+                                <div class="sun-time-item">
+                                    <div class="sun-time-label"><i class="fas fa-sunrise"></i> 日出</div>
+                                    <div class="sun-time-value" id="sunriseTime">--:--</div>
+                                    <div class="sun-time-desc" id="sunriseDesc">清晨光线变化</div>
+                                </div>
+                                <div class="sun-time-item">
+                                    <div class="sun-time-label"><i class="fas fa-sunset"></i> 日落</div>
+                                    <div class="sun-time-value" id="sunsetTime">--:--</div>
+                                    <div class="sun-time-desc" id="sunsetDesc">傍晚收光时间</div>
+                                </div>
+                            </div>
+                            <div class="sun-rain-summary">
+                                <div class="sun-rain-label"><i class="fas fa-cloud-rain"></i> 降水窗口</div>
+                                <div class="sun-rain-value">
+                                    <div class="sun-rain-main" id="rainChance">0%</div>
+                                    <div class="sun-rain-sub" id="daylightLength">白昼 0小时0分钟</div>
+                                </div>
+                                <div class="sun-rain-desc" id="rainSummary">未来数小时暂无明显降水信号</div>
+                            </div>
+                        </div>
+                        <div class="weather-card weather-aqi-card">
+                            <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
+                            <div class="weather-card-kicker" id="aqiSummary">空气质量适合日常外出</div>
+                            <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
+                            <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
+                            <div class="aqi-details">
+                                <div>PM2.5<strong id="pm25">12</strong></div>
+                                <div>PM10<strong id="pm10">23</strong></div>
+                                <div>O₃<strong id="o3">76</strong></div>
+                                <div>SO₂<strong id="so2">6</strong></div>
+                                <div>NO₂<strong id="no2">13</strong></div>
+                                <div>CO<strong id="co">0.6</strong></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="weather-card weather-life-card">
-                        <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
-                        <div class="life-index-grid" id="lifeIndex"></div>
+                    <div class="weather-stack weather-primary-stack">
+                        <div class="weather-card weather-commute-card">
+                            <div class="card-title"><i class="fas fa-person-walking"></i> 出行建议</div>
+                            <div class="commute-summary">
+                                <div>
+                                    <div class="commute-summary-main" id="commuteSummaryMain">当前出门节奏平稳</div>
+                                    <div class="commute-summary-sub" id="commuteSummarySub">结合体感、风力和降水做一个轻量判断</div>
+                                </div>
+                                <div class="commute-summary-badge" id="commuteSummaryBadge"><i class="fas fa-route"></i><span>通勤友好</span></div>
+                            </div>
+                            <div class="commute-grid" id="commuteAdvice"></div>
+                        </div>
+                        <div class="weather-card weather-life-card">
+                            <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
+                            <div class="weather-card-kicker" id="lifeSummary">根据今天体感、紫外线和湿度整理的生活建议</div>
+                            <div class="life-index-grid" id="lifeIndex"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2797,10 +4025,13 @@
                     </div>
                     <!-- Segment Control -->
                     <div class="market-segment-control">
-                        <button class="segment-btn active" data-segment="market" onclick="switchMarketSegment('market')">
+                        <button class="segment-btn active" data-segment="market" onclick="switchMarketSegment('market')" aria-pressed="true">
                             <i class="fas fa-chart-pie"></i> 行情
                         </button>
-                        <button class="segment-btn" data-segment="trading" onclick="switchMarketSegment('trading')">
+                        <button class="segment-btn" data-segment="pulse" onclick="switchMarketSegment('pulse')" aria-pressed="false">
+                            <i class="fas fa-satellite-dish"></i> 风向
+                        </button>
+                        <button class="segment-btn" data-segment="trading" onclick="switchMarketSegment('trading')" aria-pressed="false">
                             <i class="fas fa-robot"></i> AI 交易
                         </button>
                     </div>
@@ -2958,6 +4189,40 @@
                         </div>
                     </div>
 
+                    <div class="market-pulse-board" id="marketPulseBoard" style="display:none">
+                        <div class="card pulse-overview-card" id="pulseOverview">
+                            <div class="pulse-kicker"><i class="fas fa-wave-square"></i> Macro Trading Feed</div>
+                            <div class="pulse-headline">市场风向</div>
+                            <div class="pulse-deck">汇集宏观新闻、交易快讯与风险资产线索，适合盘前和日内做一次快速扫描。</div>
+                            <div class="pulse-meta-row">
+                                <span id="pulseUpdatedLabel">正在连接聚合信源...</span>
+                                <span id="pulseCountLabel">--</span>
+                            </div>
+                            <div class="pulse-source-strip" id="pulseSourceStrip"></div>
+                        </div>
+                        <div class="pulse-layout">
+                            <div class="pulse-feature-card" id="pulseFeature">
+                                <div class="skeleton skeleton-line w-80"></div>
+                                <div class="skeleton skeleton-line w-60"></div>
+                            </div>
+                            <div class="pulse-river-card">
+                                <div class="pulse-card-header">
+                                    <div class="pulse-card-title">快讯流</div>
+                                    <div class="pulse-card-note">按源聚合后的可读列表</div>
+                                </div>
+                                <div class="pulse-river" id="pulseRiver">
+                                    <div class="skeleton skeleton-line w-80"></div>
+                                    <div class="skeleton skeleton-line w-60"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pulse-source-columns" id="pulseSourceColumns">
+                            <div class="pulse-source-column">
+                                <div class="skeleton skeleton-line w-60"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Trading Playground -->
                     <div class="trading-playground" id="tradingPlayground" style="display:none">
                         <!-- 核心指标卡片 -->
@@ -3084,9 +4349,49 @@
         <!-- News -->
         <div class="page" id="page-news">
             <div class="page-shell">
-                <div class="page-header"><h1>📰 今日要闻</h1><div class="subtitle" id="newsDate">2026年3月9日</div></div>
+                <div class="page-header">
+                    <h1>📰 新闻雷达</h1>
+                    <div class="subtitle" id="newsDate">2026年3月9日</div>
+                    <div class="news-tab-control">
+                        <button class="news-tab-btn active" data-news-tab="general" onclick="switchNewsTab('general')">综合</button>
+                        <button class="news-tab-btn" data-news-tab="tech" onclick="switchNewsTab('tech')">科技</button>
+                        <button class="news-tab-btn" data-news-tab="social" onclick="switchNewsTab('social')">社交热点</button>
+                    </div>
+                </div>
                 <div class="page-content news-page-content">
-                    <div class="card news-list-card"><div id="newsList"><p style="color:var(--text-tertiary)">加载中...</p></div></div>
+                    <div class="news-hub" id="newsHub">
+                        <div class="card news-hero-card" id="newsHeroCard">
+                            <div class="news-kicker"><i class="fas fa-rss"></i> News Streams</div>
+                            <div class="news-hero-title">按主题切换阅读当天热点</div>
+                            <div class="news-hero-deck">把主流媒体、科技圈和社交热榜拆成三条阅读路径，减少来回跳转的成本。</div>
+                            <div class="news-hero-meta">
+                                <span id="newsHeroUpdated">正在连接聚合信源...</span>
+                                <span id="newsHeroCount">--</span>
+                            </div>
+                            <div class="news-source-strip" id="newsHeroSources"></div>
+                        </div>
+                        <div class="news-layout">
+                            <div class="news-feature-card" id="newsFeature">
+                                <div class="skeleton skeleton-line w-80"></div>
+                                <div class="skeleton skeleton-line w-60"></div>
+                            </div>
+                            <div class="news-stack-card">
+                                <div class="news-stack-header">
+                                    <div class="news-stack-title">主题清单</div>
+                                    <div class="news-stack-note">切换标签可快速扫读</div>
+                                </div>
+                                <div class="news-stack" id="newsStack">
+                                    <div class="skeleton skeleton-line w-80"></div>
+                                    <div class="skeleton skeleton-line w-60"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="news-quick-grid" id="newsQuickGrid">
+                            <div class="news-quick-column">
+                                <div class="skeleton skeleton-line w-60"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3356,6 +4661,10 @@
                 document.getElementById('condition').textContent = d.hourly?.description || '多云';
                 const t0 = d.daily?.temperature?.[0];
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
+                document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
+                document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
+                document.getElementById('weatherHeaderBadge').innerHTML = `<i class="fas fa-location-dot"></i><span>${location.displayName}</span>`;
+                document.getElementById('weatherHeaderNote').textContent = d.forecast_keypoint || d.hourly?.description || '根据当前体感和小时趋势整理';
 
                 // Hourly
                 if (d.hourly?.temperature) {
@@ -3392,22 +4701,219 @@
                 document.getElementById('aqiLevel').textContent = rt.air_quality?.description?.chn || '优';
                 document.getElementById('aqiIndicator').style.left = Math.min(aqi/3,100) + '%';
                 ['pm25','pm10','o3','so2','no2','co'].forEach(k => { const el = document.getElementById(k); if(el) el.textContent = rt.air_quality?.[k] ?? '--'; });
+                document.getElementById('aqiSummary').textContent = aqi <= 50
+                    ? '空气状态比较干净，适合步行和开窗通风'
+                    : (aqi <= 100 ? '整体还能接受，敏感人群外出可以稍微留意' : '污染水平上来了，长时间户外活动建议减少');
+
+                // Sun / Rain
+                const astro = d.daily?.astro?.[0] || {};
+                const sunrise = astro.sunrise?.time || '--:--';
+                const sunset = astro.sunset?.time || '--:--';
+                const sunriseDate = parseClockToDate(sunrise);
+                const sunsetDate = parseClockToDate(sunset);
+                const now = new Date();
+                const daylightMinutes = sunriseDate && sunsetDate ? Math.max(0, Math.round((sunsetDate - sunriseDate) / 60000)) : 0;
+                const sinceSunrise = sunriseDate ? Math.max(0, Math.round((now - sunriseDate) / 60000)) : 0;
+                const untilSunset = sunsetDate ? Math.max(0, Math.round((sunsetDate - now) / 60000)) : 0;
+                const sunProgress = daylightMinutes ? Math.min(100, Math.max(0, (sinceSunrise / daylightMinutes) * 100)) : 0;
+                const rainWindow = (d.hourly?.precipitation || []).slice(0, 12);
+                const maxRain = rainWindow.reduce((best, item) => {
+                    const probability = Number(item?.probability || 0);
+                    const intensity = Number(item?.value || 0);
+                    return probability > best.probability ? { probability, intensity, datetime: item?.datetime } : best;
+                }, { probability: 0, intensity: 0, datetime: '' });
+                const nextRain = rainWindow.find(item => Number(item?.probability || 0) >= 35 || Number(item?.value || 0) > 0.08);
+                const nextRainTime = nextRain?.datetime ? new Date(nextRain.datetime) : null;
+                const isBeforeSunrise = sunriseDate && now < sunriseDate;
+                const isAfterSunset = sunsetDate && now > sunsetDate;
+                const sunPhaseLabel = isBeforeSunrise ? '黎明将近' : (isAfterSunset ? '夜间时段' : '白昼进行中');
+                const sunPhaseNote = isBeforeSunrise
+                    ? `距日出还有 ${formatDurationMinutes(Math.round((sunriseDate - now) / 60000))}`
+                    : (isAfterSunset ? '太阳已经落下，夜间体感会更明显' : `今天的日照已进行 ${Math.round(sunProgress)}%`);
+
+                document.getElementById('sunriseTime').textContent = sunrise;
+                document.getElementById('sunsetTime').textContent = sunset;
+                document.getElementById('sunPhaseLabel').textContent = sunPhaseLabel;
+                document.getElementById('sunPhaseNote').textContent = sunPhaseNote;
+                document.getElementById('sunProgressFill').style.width = `${sunProgress}%`;
+                document.getElementById('sunProgressDot').style.left = `${sunProgress}%`;
+                document.getElementById('sunriseDesc').textContent = sunriseDate
+                    ? (isBeforeSunrise ? `距日出还有 ${formatDurationMinutes(Math.round((sunriseDate - now) / 60000))}` : `日出后已过去 ${formatDurationMinutes(sinceSunrise)}`)
+                    : '清晨光线变化';
+                document.getElementById('sunsetDesc').textContent = sunsetDate
+                    ? (now > sunsetDate ? '今日已日落，夜间体感会更明显' : `距日落还有 ${formatDurationMinutes(untilSunset)}`)
+                    : '傍晚收光时间';
+                document.getElementById('daylightLength').textContent = daylightMinutes ? `白昼 ${formatDurationMinutes(daylightMinutes)}` : '白昼时长待更新';
+                document.getElementById('rainChance').textContent = `${Math.round(maxRain.probability || 0)}%`;
+                document.getElementById('rainSummary').textContent = nextRainTime
+                    ? `未来 12 小时最早可能在 ${String(nextRainTime.getHours()).padStart(2, '0')}:00 左右出现降水，通勤建议预留一点机动`
+                    : (maxRain.probability >= 20 ? '云量偏多但降水信号还不稳定，可以轻装出行' : '未来数小时暂无明显降水信号');
+
+                // Commute
+                const commuteItems = buildCommuteAdvice(rt, d.hourly);
+                const hasRainRisk = commuteItems.some(item => item.name === '备伞建议' && item.value !== '可不带伞');
+                document.getElementById('commuteSummaryMain').textContent = hasRainRisk ? '通勤建议留一点天气余量' : '当前出门节奏比较轻松';
+                document.getElementById('commuteSummarySub').textContent = hasRainRisk
+                    ? '下午到晚间天气可能会有变化，备伞和路径选择更重要'
+                    : '风力、降水和体感都比较平稳，适合按常规节奏出门';
+                document.getElementById('commuteSummaryBadge').innerHTML = hasRainRisk
+                    ? '<i class="fas fa-cloud-rain"></i><span>留意天气变化</span>'
+                    : '<i class="fas fa-route"></i><span>通勤友好</span>';
+                document.getElementById('commuteAdvice').innerHTML = commuteItems.map(item => `
+                    <div class="commute-item">
+                        <div class="commute-icon"><i class="fas ${item.icon}"></i></div>
+                        <div class="commute-name">${item.name}</div>
+                        <div class="commute-value">${item.value}</div>
+                        <div class="commute-desc">${item.desc}</div>
+                    </div>
+                `).join('');
 
                 // Life
                 if (d.daily?.life_index) {
                     const li = d.daily.life_index;
+                    document.getElementById('lifeSummary').textContent = `今天偏${li.dressing?.[0]?.desc || '舒适'}体感，紫外线${li.ultraviolet?.[0]?.desc || '--'}，洗车${li.carWashing?.[0]?.desc || '--'}`;
                     document.getElementById('lifeIndex').innerHTML = [
                         {icon:'fa-sun',name:'紫外线',level:li.ultraviolet?.[0]?.desc||'--'},
                         {icon:'fa-car',name:'洗车',level:li.carWashing?.[0]?.desc||'--'},
                         {icon:'fa-shirt',name:'穿衣',level:li.dressing?.[0]?.desc||'--'},
                         {icon:'fa-face-smile',name:'舒适度',level:li.comfort?.[0]?.desc||'--'},
                         {icon:'fa-virus',name:'感冒',level:li.coldRisk?.[0]?.desc||'--'}
-                    ].map(x => `<div class="life-index-item"><i class="fas ${x.icon}"></i><div class="name">${x.name}</div><div class="level">${x.level}</div></div>`).join('');
+                    ].map(x => `<div class="life-index-item"><i class="fas ${x.icon}"></i><div><div class="name">${x.name}</div><div class="level">${x.level}</div></div></div>`).join('');
                 }
             } catch(e) { console.error('Weather error:', e); }
         }
 
         let _marketStaticCache = {};
+        let marketLiveDateLabel = '';
+        let newsHubData = null;
+        let newsHubDateLabel = '';
+        let activeMarketSegment = 'market';
+        let activeNewsTab = 'general';
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function safeUrl(url) {
+            if (!url) return '#';
+            if (/^https?:\/\//i.test(url)) return url;
+            return '#';
+        }
+
+        function renderLinkButton(label, href, variant = 'secondary', className = 'pulse-link') {
+            const safeHref = safeUrl(href);
+            const rel = safeHref === '#' ? '' : 'target="_blank" rel="noopener noreferrer"';
+            return `<a class="${className} ${variant}" href="${safeHref}" ${rel}>${escapeHtml(label)} <i class="fas fa-arrow-up-right-from-square"></i></a>`;
+        }
+
+        function parseClockToDate(timeText) {
+            if (!timeText || !/^\d{2}:\d{2}$/.test(timeText)) return null;
+            const [hours, minutes] = timeText.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours, minutes, 0, 0);
+            return date;
+        }
+
+        function formatDurationMinutes(totalMinutes) {
+            if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return '0小时0分钟';
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${hours}小时${minutes}分钟`;
+        }
+
+        function describeWind(speed) {
+            if (speed >= 25) return '阵风偏强，通勤注意防风';
+            if (speed >= 15) return '风感明显，体感会更凉';
+            if (speed >= 8) return '微风到和风，出门体感平稳';
+            return '风力较轻，步行体感舒适';
+        }
+
+        function buildCommuteAdvice(rt, hourly) {
+            const rainSeries = hourly?.precipitation || [];
+            const nextSixHours = rainSeries.slice(0, 6);
+            const maxRainProbability = nextSixHours.reduce((max, item) => Math.max(max, Number(item?.probability || 0)), 0);
+            const apparent = Math.round(rt?.apparent_temperature ?? rt?.temperature ?? 0);
+            const temp = Math.round(rt?.temperature ?? 0);
+            const windSpeed = Number(rt?.wind?.speed || 0);
+            const comfortDesc = rt?.life_index?.comfort?.desc || '';
+
+            let outfitValue = '轻薄外套';
+            let outfitDesc = '早晚稍凉，内搭短袖或薄针织更稳妥';
+            if (apparent <= 5) {
+                outfitValue = '厚外套';
+                outfitDesc = '体感偏冷，建议叠穿并注意颈部保暖';
+            } else if (apparent <= 12) {
+                outfitValue = '薄外套';
+                outfitDesc = '适合卫衣、针织或轻夹克，通勤不容易失温';
+            } else if (apparent >= 27) {
+                outfitValue = '清凉穿着';
+                outfitDesc = '以透气速干为主，午后注意补水和遮阳';
+            } else if (apparent >= 20) {
+                outfitValue = '短袖即可';
+                outfitDesc = '白天体感偏暖，可带一件薄衫应对室内空调';
+            }
+
+            let umbrellaValue = '可不带伞';
+            let umbrellaDesc = '未来几小时降水概率低，出门更轻便';
+            if (maxRainProbability >= 70) {
+                umbrellaValue = '建议带伞';
+                umbrellaDesc = '短时降水概率高，最好准备折叠伞或防水外套';
+            } else if (maxRainProbability >= 35) {
+                umbrellaValue = '带伞更稳';
+                umbrellaDesc = '有零散降水可能，通勤路上留个余量会更安心';
+            }
+
+            let comfortValue = comfortDesc || '体感平稳';
+            let comfortAdvice = temp >= 30 ? '午后热感明显，减少暴晒时段外出' : '整体没有太强的不适因素';
+            if ((rt?.humidity || 0) >= 0.8 && temp >= 28) {
+                comfortValue = '闷热';
+                comfortAdvice = '湿度偏高，步行通勤容易出汗，建议轻装出门';
+            } else if (apparent <= 5) {
+                comfortValue = '偏冷';
+                comfortAdvice = '风寒感会更明显，骑行或步行要注意保暖';
+            } else if (comfortDesc) {
+                comfortAdvice = '结合当前体感和风力，出门节奏比较好安排';
+            }
+
+            return [
+                { icon: 'fa-shirt', name: '穿着建议', value: outfitValue, desc: outfitDesc },
+                { icon: 'fa-umbrella', name: '备伞建议', value: umbrellaValue, desc: umbrellaDesc },
+                { icon: 'fa-route', name: '通勤体感', value: comfortValue, desc: `${describeWind(windSpeed)}${comfortAdvice ? '，' + comfortAdvice : ''}` }
+            ];
+        }
+
+        function syncMarketHeader() {
+            const title = document.getElementById('marketPageTitle');
+            const subtitle = document.getElementById('marketDate');
+            const refreshBtn = document.getElementById('marketRefreshBtn');
+            const refreshHint = document.getElementById('marketRefreshHint');
+
+            if (activeMarketSegment === 'trading') {
+                title.textContent = 'AI 交易';
+                subtitle.textContent = tradingData?.meta?.startDate ? `${tradingData.meta.startDate} 策略演练` : '策略演练';
+                refreshBtn.style.display = 'none';
+                refreshHint.classList.remove('visible');
+                return;
+            }
+
+            if (activeMarketSegment === 'pulse') {
+                const macro = newsHubData?.categories?.macro;
+                title.textContent = '市场风向';
+                subtitle.textContent = macro?.updatedLabel || '正在汇总宏观新闻...';
+                refreshBtn.style.display = 'none';
+                refreshHint.classList.remove('visible');
+                return;
+            }
+
+            title.textContent = '市场行情';
+            subtitle.textContent = marketLiveDateLabel || '正在同步市场数据...';
+            refreshBtn.style.display = '';
+        }
 
         async function refreshMarketPrices() {
             const btn = document.getElementById('marketRefreshBtn');
@@ -3431,7 +4937,8 @@
         }
 
         function applyMarketPrices(d) {
-            document.getElementById('marketDate').textContent = d.date || '';
+            marketLiveDateLabel = d.date || '';
+            syncMarketHeader();
             const ms = [{k:'spx',f:'🇺🇸',n:'标普500',i:'S&P 500'},{k:'ndx',f:'🇺🇸',n:'纳斯达克100',i:'NDX'},{k:'dji',f:'🇺🇸',n:'道琼斯',i:'Dow Jones'},{k:'hsi',f:'🇭🇰',n:'恒生指数',i:'Hang Seng'},{k:'hstec',f:'🇭🇰',n:'恒生科技',i:'HS Tech'},{k:'sse',f:'🇨🇳',n:'上证指数',i:'SSE'},{k:'gold',f:'🥇',n:'黄金',i:'COMEX'},{k:'btc',f:'₿',n:'比特币',i:'BTC/USD'}];
             const trackedMarkets = ms.filter(m=>d[m.k]);
             const risingCount = trackedMarkets.filter(m => d[m.k].change > 0).length;
@@ -3634,21 +5141,220 @@
             return `<div class="market-sparkline" aria-hidden="true"><svg class="market-sparkline-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polygon class="market-sparkline-area ${trend}" points="${areaString}"></polygon><polyline class="market-sparkline-line ${trend}" points="${pointString}"></polyline></svg></div>`;
         }
 
-        async function loadNews() {
-            try {
-                const r = await fetch('data/news.json?' + Date.now());
-                if (!r.ok) { document.getElementById('newsList').innerHTML = '<p style="color:var(--text-tertiary)">加载失败</p>'; return; }
-                const d = await r.json();
-                document.getElementById('newsDate').textContent = d.date || '';
-                if (!d.items || d.items.length === 0) { document.getElementById('newsList').innerHTML = '<p style="color:var(--text-tertiary)">暂无新闻</p>'; return; }
-                document.getElementById('newsList').innerHTML = d.items.map((x,i) => `<article class="news-article">${x.image?`<img class="news-image" src="${x.image}" alt="" loading="lazy">`:''}<div class="news-source">${x.source}</div><h2 class="news-title">${x.title}</h2><p class="news-summary">${x.summary}</p><div class="news-full" id="nf-${i}">${x.full_content||''}</div><div class="news-actions">${x.full_content?`<button class="news-expand" onclick="toggleNews(${i})">展开全文</button>`:''}<a href="${x.url||'#'}" target="_blank" class="news-link">查看原文 →</a></div></article>`).join('');
-            } catch(e) { console.error('News error:', e); document.getElementById('newsList').innerHTML = '<p style="color:var(--text-tertiary)">加载出错</p>'; }
+        function getNewsCategory(key) {
+            return newsHubData?.categories?.[key] || null;
         }
 
-        function toggleNews(i) {
-            const f = document.getElementById(`nf-${i}`), b = f.parentElement.querySelector('.news-expand');
-            if (f.classList.contains('expanded')) { f.classList.remove('expanded'); b.textContent = '展开全文'; }
-            else { f.classList.add('expanded'); b.textContent = '收起'; }
+        function renderEmptyPulse(message) {
+            document.getElementById('pulseFeature').innerHTML = `<div class="pulse-empty-state">${escapeHtml(message)}</div>`;
+            document.getElementById('pulseRiver').innerHTML = '';
+            document.getElementById('pulseSourceColumns').innerHTML = '';
+        }
+
+        function renderMarketPulse() {
+            const category = getNewsCategory('macro');
+            if (!category || !category.featured) {
+                document.getElementById('pulseUpdatedLabel').textContent = '聚合信源暂不可用';
+                document.getElementById('pulseCountLabel').textContent = '';
+                document.getElementById('pulseSourceStrip').innerHTML = '';
+                renderEmptyPulse('暂时没有拿到宏观新闻流，请稍后再试。');
+                syncMarketHeader();
+                return;
+            }
+
+            const totalCount = category.items.length + 1;
+            document.getElementById('pulseUpdatedLabel').textContent = category.updatedLabel || '刚刚更新';
+            document.getElementById('pulseCountLabel').textContent = `${totalCount} 条聚合线索`;
+            document.getElementById('pulseSourceStrip').innerHTML = category.sources
+                .slice(0, 6)
+                .map(source => `<span class="pulse-source-chip">${escapeHtml(source)}</span>`)
+                .join('');
+
+            const featured = category.featured;
+            const followUps = category.items.slice(0, 3);
+            document.getElementById('pulseFeature').innerHTML = `
+                <div class="pulse-feature-label">
+                    <span class="pulse-rank-chip">TOP ${featured.rank}</span>
+                    <span>${escapeHtml(featured.sourceLabel)}</span>
+                </div>
+                <h2 class="pulse-feature-title">${escapeHtml(featured.title)}</h2>
+                <div class="pulse-feature-text">${escapeHtml(featured.info || '来自聚合源的高优先级市场新闻，适合先扫标题，再决定是否点进原文。')}</div>
+                <div class="pulse-item-meta">
+                    <span class="pulse-source-badge">${escapeHtml(featured.sourceLabel)}</span>
+                    ${featured.stamp ? `<span>${escapeHtml(featured.stamp)}</span>` : ''}
+                    <span>排名 ${featured.rank}</span>
+                </div>
+                <div class="pulse-actions">
+                    ${renderLinkButton('查看原文', featured.url, 'primary')}
+                    ${featured.desktopUrl && featured.desktopUrl !== featured.url ? renderLinkButton('网页地址', featured.desktopUrl, 'secondary') : ''}
+                </div>
+                ${followUps.length ? `
+                    <div class="pulse-feature-rail">
+                        <div class="pulse-feature-rail-title">接着看</div>
+                        ${followUps.map(item => `
+                            <div class="pulse-feature-bullet">
+                                <div class="pulse-feature-bullet-rank">${item.rank}</div>
+                                <div>
+                                    <a href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                                    <div class="pulse-feature-bullet-meta">${escapeHtml(item.sourceLabel)}${item.stamp ? ` · ${escapeHtml(item.stamp)}` : ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('pulseRiver').innerHTML = category.items
+                .slice(0, 8)
+                .map(item => `
+                    <div class="pulse-river-item">
+                        <div class="pulse-river-rank">${item.rank}</div>
+                        <div>
+                            <a class="pulse-river-title" href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                            <div class="pulse-river-submeta">
+                                <span class="pulse-source-badge">${escapeHtml(item.sourceLabel)}</span>
+                                ${item.stamp ? `<span>${escapeHtml(item.stamp)}</span>` : ''}
+                                ${item.info ? `<span>${escapeHtml(item.info)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            document.getElementById('pulseSourceColumns').innerHTML = category.sourceGroups
+                .slice(0, 3)
+                .map(group => `
+                    <div class="pulse-source-column">
+                        <div class="pulse-column-label">${escapeHtml(group.label)}</div>
+                        <div class="pulse-column-list">
+                            ${group.items.map(item => `
+                                <div class="pulse-column-item">
+                                    <a href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                                    <div class="pulse-column-meta">第 ${item.rank} 位${item.stamp ? ` · ${escapeHtml(item.stamp)}` : ''}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+            syncMarketHeader();
+        }
+
+        function renderEmptyNews(message) {
+            document.getElementById('newsHeroUpdated').textContent = message;
+            document.getElementById('newsHeroCount').textContent = '';
+            document.getElementById('newsHeroSources').innerHTML = '';
+            document.getElementById('newsFeature').innerHTML = `<div class="news-empty-state">${escapeHtml(message)}</div>`;
+            document.getElementById('newsStack').innerHTML = '';
+            document.getElementById('newsQuickGrid').innerHTML = '';
+        }
+
+        function renderNewsCategory(key) {
+            const category = getNewsCategory(key);
+            if (!category || !category.featured) {
+                renderEmptyNews('暂时没有拿到这一类新闻，请稍后刷新。');
+                return;
+            }
+
+            const totalCount = category.items.length + 1;
+            document.getElementById('newsDate').textContent = newsHubDateLabel || category.updatedLabel || '';
+            document.getElementById('newsHeroUpdated').textContent = category.updatedLabel || '刚刚更新';
+            document.getElementById('newsHeroCount').textContent = `${totalCount} 条线索`;
+            document.getElementById('newsHeroCard').querySelector('.news-hero-title').textContent = category.title;
+            document.getElementById('newsHeroCard').querySelector('.news-hero-deck').textContent = category.deck;
+            document.getElementById('newsHeroSources').innerHTML = category.sources
+                .slice(0, 6)
+                .map(source => `<span class="news-source-chip">${escapeHtml(source)}</span>`)
+                .join('');
+
+            const featured = category.featured;
+            const followUps = category.items.slice(0, 3);
+            document.getElementById('newsFeature').innerHTML = `
+                <div class="news-feature-label">
+                    <span class="news-rank-chip">TOP ${featured.rank}</span>
+                    <span>${escapeHtml(featured.sourceLabel)}</span>
+                </div>
+                <h2 class="news-feature-title">${escapeHtml(featured.title)}</h2>
+                <div class="news-feature-text">${escapeHtml(featured.info || '保留原始热榜标题，不做 AI 改写，适合快速判断是否值得点开。')}</div>
+                <div class="news-item-meta">
+                    <span class="news-source-badge">${escapeHtml(featured.sourceLabel)}</span>
+                    ${featured.stamp ? `<span>${escapeHtml(featured.stamp)}</span>` : ''}
+                    <span>排名 ${featured.rank}</span>
+                </div>
+                <div class="news-item-actions">
+                    ${renderLinkButton('查看原文', featured.url, 'primary', 'news-open-link')}
+                    ${featured.desktopUrl && featured.desktopUrl !== featured.url ? renderLinkButton('网页地址', featured.desktopUrl, 'secondary', 'news-open-link') : ''}
+                </div>
+                ${followUps.length ? `
+                    <div class="news-feature-rail">
+                        <div class="news-feature-rail-title">继续浏览</div>
+                        ${followUps.map(item => `
+                            <div class="news-feature-bullet">
+                                <div class="news-feature-bullet-rank">${item.rank}</div>
+                                <div>
+                                    <a href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                                    <div class="news-feature-bullet-meta">${escapeHtml(item.sourceLabel)}${item.stamp ? ` · ${escapeHtml(item.stamp)}` : ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('newsStack').innerHTML = category.items
+                .slice(0, 8)
+                .map(item => `
+                    <div class="news-stack-item">
+                        <div class="news-stack-rank">${item.rank}</div>
+                        <div>
+                            <a class="news-stack-title-link" href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                            <div class="news-stack-submeta">
+                                <span class="news-source-badge">${escapeHtml(item.sourceLabel)}</span>
+                                ${item.stamp ? `<span>${escapeHtml(item.stamp)}</span>` : ''}
+                                ${item.info ? `<span>${escapeHtml(item.info)}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+            document.getElementById('newsQuickGrid').innerHTML = category.sourceGroups
+                .slice(0, 3)
+                .map(group => `
+                    <div class="news-quick-column">
+                        <div class="news-column-label">${escapeHtml(group.label)}</div>
+                        <div class="news-column-list">
+                            ${group.items.map(item => `
+                                <div class="news-column-item">
+                                    <a href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                                    <div class="news-column-meta">第 ${item.rank} 位${item.stamp ? ` · ${escapeHtml(item.stamp)}` : ''}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function switchNewsTab(tab) {
+            activeNewsTab = tab;
+            document.querySelectorAll('.news-tab-btn').forEach(button => {
+                button.classList.toggle('active', button.dataset.newsTab === tab);
+            });
+            renderNewsCategory(tab);
+        }
+
+        async function loadNews() {
+            try {
+                const r = await fetch('/api/news?' + Date.now());
+                if (!r.ok) throw new Error('Failed to fetch news hub');
+                const d = await r.json();
+                newsHubData = d;
+                newsHubDateLabel = d.date || '';
+                renderMarketPulse();
+                renderNewsCategory(activeNewsTab);
+            } catch (e) {
+                console.error('News error:', e);
+                renderEmptyPulse('新闻聚合接口暂时不可用。');
+                renderEmptyNews('新闻聚合接口暂时不可用。');
+            }
         }
 
         // METAR 机场天气
@@ -4368,26 +6074,36 @@
         let equityChart = null;
 
         function switchMarketSegment(segment) {
-            document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.segment-btn[data-segment="${segment}"]`).classList.add('active');
+            const activeBtn = document.querySelector(`.segment-btn.active`);
+            if (activeBtn && activeBtn.dataset.segment === segment) return;
+
+            activeMarketSegment = segment;
+            document.querySelectorAll('.segment-btn').forEach(b => {
+                const isActive = b.dataset.segment === segment;
+                b.classList.toggle('active', isActive);
+                b.setAttribute('aria-pressed', String(isActive));
+            });
             
             const dashboard = document.querySelector('.market-dashboard');
+            const pulseBoard = document.getElementById('marketPulseBoard');
             const playground = document.getElementById('tradingPlayground');
-            const title = document.getElementById('marketPageTitle');
-            const refreshBtn = document.getElementById('marketRefreshBtn');
             
             if (segment === 'trading') {
                 dashboard.style.display = 'none';
+                pulseBoard.style.display = 'none';
                 playground.style.display = 'grid';
-                title.textContent = 'AI 交易';
-                refreshBtn.style.display = 'none';
                 loadTradingData();
+            } else if (segment === 'pulse') {
+                dashboard.style.display = 'none';
+                pulseBoard.style.display = 'grid';
+                playground.style.display = 'none';
+                renderMarketPulse();
             } else {
                 dashboard.style.display = 'grid';
+                pulseBoard.style.display = 'none';
                 playground.style.display = 'none';
-                title.textContent = '市场行情';
-                refreshBtn.style.display = '';
             }
+            syncMarketHeader();
         }
 
         async function loadTradingData() {
@@ -4396,6 +6112,7 @@
                 if (!res.ok) return;
                 tradingData = await res.json();
                 renderTradingDashboard();
+                syncMarketHeader();
             } catch (e) {
                 console.error('Failed to load trading data:', e);
             }
@@ -4443,6 +6160,9 @@
             
             // Render trade log
             renderTradeLog(history.trades, history.decisions);
+
+            // Render AI decision panel
+            renderDecisionPanel(history.decisions, history.trades);
         }
 
         function formatCurrency(val) {
@@ -4552,6 +6272,124 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        function renderDecisionPanel(decisions, trades) {
+            const container = document.getElementById('tpDecision');
+            if (!container) return;
+
+            const latestDecision = [...(decisions || [])]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            const latestTrade = [...(trades || [])]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+            if (!latestDecision) {
+                container.innerHTML = `
+                    <div class="decision-status">
+                        <i class="fas fa-clock"></i>
+                        <span>暂无最新决策数据</span>
+                    </div>
+                    <div class="decision-factors">
+                        <div class="factor-item">
+                            <div class="factor-label">技术面</div>
+                            <div class="factor-bar"><div class="factor-fill" style="width:0%"></div></div>
+                            <div class="factor-score">--</div>
+                        </div>
+                        <div class="factor-item">
+                            <div class="factor-label">消息面</div>
+                            <div class="factor-bar"><div class="factor-fill" style="width:0%"></div></div>
+                            <div class="factor-score">--</div>
+                        </div>
+                        <div class="factor-item">
+                            <div class="factor-label">风险控制</div>
+                            <div class="factor-bar"><div class="factor-fill" style="width:0%"></div></div>
+                            <div class="factor-score">--</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const analysisText = latestDecision.analysis || '暂无分析内容';
+            const totalMatch = analysisText.match(/综合得分\s*(\d+)/);
+            const techMatch = analysisText.match(/技术面\s*(\d+)\/100/);
+            const newsMatch = analysisText.match(/消息面\s*(\d+)\/100/);
+
+            const totalScore = totalMatch ? Number(totalMatch[1]) : null;
+            const techScore = techMatch ? Number(techMatch[1]) : inferTechScore(latestDecision, latestTrade);
+            const newsScore = newsMatch ? Number(newsMatch[1]) : inferNewsScore(latestDecision);
+            const riskScore = inferRiskScore(latestDecision, latestTrade, totalScore);
+
+            const action = latestDecision.action || 'hold';
+            const statusMap = {
+                buy: { icon: 'fa-arrow-trend-up', text: 'AI 倾向买入，等待执行窗口' },
+                sell: { icon: 'fa-arrow-trend-down', text: 'AI 倾向减仓，优先控制回撤' },
+                hold: { icon: 'fa-pause', text: 'AI 当前建议观望，等待更清晰信号' }
+            };
+            const status = statusMap[action] || statusMap.hold;
+            const actionLabel = action === 'buy' ? '买入倾向' : action === 'sell' ? '卖出倾向' : '观望';
+            const updatedLabel = latestDecision.date ? `最近更新 ${latestDecision.date}` : '最近一次决策';
+
+            container.innerHTML = `
+                <div class="decision-status">
+                    <i class="fas ${status.icon}"></i>
+                    <span>${status.text}</span>
+                </div>
+                <div class="decision-factors">
+                    <div class="factor-item">
+                        <div class="factor-label">技术面</div>
+                        <div class="factor-bar"><div class="factor-fill" style="width:${clampScore(techScore)}%"></div></div>
+                        <div class="factor-score">${formatScore(techScore)}</div>
+                    </div>
+                    <div class="factor-item">
+                        <div class="factor-label">消息面</div>
+                        <div class="factor-bar"><div class="factor-fill" style="width:${clampScore(newsScore)}%"></div></div>
+                        <div class="factor-score">${formatScore(newsScore)}</div>
+                    </div>
+                    <div class="factor-item">
+                        <div class="factor-label">风险控制</div>
+                        <div class="factor-bar"><div class="factor-fill" style="width:${clampScore(riskScore)}%"></div></div>
+                        <div class="factor-score">${formatScore(riskScore)}</div>
+                    </div>
+                </div>
+                <div class="log-reasoning" style="margin-top:16px;">
+                    <strong>${actionLabel}${totalScore !== null ? ` · 综合 ${totalScore}/100` : ''}</strong>
+                    ${analysisText}
+                </div>
+                <div class="market-card-note" style="margin-top:10px;">${updatedLabel}</div>
+            `;
+        }
+
+        function clampScore(value) {
+            const score = Number(value);
+            if (!Number.isFinite(score)) return 0;
+            return Math.max(0, Math.min(100, Math.round(score)));
+        }
+
+        function formatScore(value) {
+            return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}` : '--';
+        }
+
+        function inferTechScore(decision, latestTrade) {
+            if (decision?.action === 'buy') return 72;
+            if (decision?.action === 'sell') return 34;
+            if (latestTrade?.type === 'buy') return 65;
+            return 48;
+        }
+
+        function inferNewsScore(decision) {
+            const text = decision?.analysis || '';
+            if (/风险偏好回升|走强|修复/.test(text)) return 62;
+            if (/避险|走弱|大跌|风险/.test(text)) return 38;
+            return 50;
+        }
+
+        function inferRiskScore(decision, latestTrade, totalScore) {
+            if (Number.isFinite(totalScore)) return 100 - Math.max(20, totalScore - 10);
+            if (decision?.action === 'buy') return 58;
+            if (decision?.action === 'sell') return 82;
+            if (latestTrade?.type === 'buy') return 64;
+            return 70;
         }
 
         function renderTradeLog(trades, decisions) {

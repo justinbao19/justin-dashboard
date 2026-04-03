@@ -2224,6 +2224,44 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
         }
+        .trading-run-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .trading-run-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+            min-width: 0;
+        }
+        .trading-run-pill i {
+            color: var(--accent);
+            font-size: 13px;
+            width: 14px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .trading-run-pill-content { min-width: 0; }
+        .trading-run-pill-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .trading-run-pill-value {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .trading-metric-card {
             padding: 20px;
             border-radius: 16px;
@@ -2513,6 +2551,9 @@
         @media (max-width: 768px) {
             .trading-metrics {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .trading-run-meta {
+                grid-template-columns: 1fr;
             }
             .metric-value { font-size: 22px; }
             .trading-chart-stats {
@@ -4246,6 +4287,30 @@
                                 <div class="metric-label">持仓数</div>
                                 <div class="metric-value" id="tpPositions">0</div>
                                 <div class="metric-sub" id="tpWinRate">--</div>
+                            </div>
+                        </div>
+
+                        <div class="trading-run-meta" id="tpRunMeta">
+                            <div class="trading-run-pill">
+                                <i class="fas fa-clock-rotate-left"></i>
+                                <div class="trading-run-pill-content">
+                                    <div class="trading-run-pill-label">最近运行</div>
+                                    <div class="trading-run-pill-value" id="tpLastRunAt">等待首次自主运行</div>
+                                </div>
+                            </div>
+                            <div class="trading-run-pill">
+                                <i class="fas fa-bolt"></i>
+                                <div class="trading-run-pill-content">
+                                    <div class="trading-run-pill-label">触发来源</div>
+                                    <div class="trading-run-pill-value" id="tpLastTrigger">尚未记录</div>
+                                </div>
+                            </div>
+                            <div class="trading-run-pill">
+                                <i class="fas fa-compass"></i>
+                                <div class="trading-run-pill-content">
+                                    <div class="trading-run-pill-label">最后动作</div>
+                                    <div class="trading-run-pill-value" id="tpLastAction">等待决策</div>
+                                </div>
                             </div>
                         </div>
 
@@ -6140,6 +6205,7 @@
             document.getElementById('tpCashPct').textContent = ((portfolio.cash / currentEquity) * 100).toFixed(0) + '%';
             
             document.getElementById('tpPositions').textContent = portfolio.positions.length;
+            renderTradingRunMeta(meta);
             
             // Calculate win rate
             const closedTrades = history.trades.filter(t => t.type === 'sell');
@@ -6163,6 +6229,44 @@
 
             // Render AI decision panel
             renderDecisionPanel(history.decisions, history.trades);
+        }
+
+        function renderTradingRunMeta(meta = {}) {
+            const lastRunAtEl = document.getElementById('tpLastRunAt');
+            const lastTriggerEl = document.getElementById('tpLastTrigger');
+            const lastActionEl = document.getElementById('tpLastAction');
+            if (!lastRunAtEl || !lastTriggerEl || !lastActionEl) return;
+
+            const triggerLabels = {
+                cli: '手动命令',
+                'cli-dry-run': '手动演练',
+                api: '远程 API',
+                'api-dry-run': 'API 演练',
+                manual: '手动触发'
+            };
+            const actionLabels = {
+                buy: '买入',
+                sell: '卖出',
+                hold: '观望'
+            };
+
+            lastRunAtEl.textContent = formatTradingTimestamp(meta.lastRunAt) || '等待首次自主运行';
+            lastTriggerEl.textContent = triggerLabels[meta.lastTrigger] || meta.lastTrigger || '尚未记录';
+            lastActionEl.textContent = actionLabels[meta.lastAction] || meta.lastAction || '等待决策';
+        }
+
+        function formatTradingTimestamp(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+            return date.toLocaleString('zh-CN', {
+                timeZone: 'Asia/Shanghai',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
         }
 
         function formatCurrency(val) {

@@ -27,6 +27,20 @@ def validate_json_file(path: Path) -> None:
         check=True,
     )
 
+
+def load_existing_market(path: Path) -> dict:
+    if not path.exists():
+        return {}
+
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        print("发现损坏的 market.json，先尝试自动修复...")
+        validate_json_file(path)
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+
 def get_finnhub_quote(symbol: str) -> dict:
     """获取 Finnhub 实时报价"""
     if not FINNHUB_KEY:
@@ -129,11 +143,7 @@ def main():
     
     # 读取现有数据（保留 analysis 等字段）
     market_file = DATA_DIR / "market.json"
-    if market_file.exists():
-        with open(market_file, "r", encoding="utf-8") as f:
-            market = json.load(f)
-    else:
-        market = {}
+    market = load_existing_market(market_file)
     
     # 更新价格数据
     now = datetime.now()

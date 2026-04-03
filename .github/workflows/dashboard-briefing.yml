@@ -79,6 +79,9 @@ jobs:
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
           echo "Using mode: $MODE"
 
+      - name: Normalize existing JSON files
+        run: python3 scripts/validate-json.py data/market.json data/news.json
+
       - name: Update market snapshot
         run: python3 scripts/update_market.py
 

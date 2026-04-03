@@ -19,10 +19,9 @@ from pathlib import Path
 
 def fix_chinese_quotes(content: str) -> str:
     """替换中文引号为不干扰 JSON 的字符"""
-    # 替换中文双引号
-    content = content.replace('"', '「').replace('"', '」')
-    # 替换中文单引号
-    content = content.replace(''', '『').replace(''', '』')
+    # 仅替换中文/智能引号，避免破坏 JSON 结构本身的 ASCII 双引号
+    content = content.replace("“", "「").replace("”", "」")
+    content = content.replace("‘", "『").replace("’", "』")
     return content
 
 

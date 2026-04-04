@@ -1,50 +1,51 @@
 {
-  "lastUpdated": "2026-04-02T08:00:00+08:00",
+  "lastUpdated": "2026-04-04T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "NASA Artemis II成功发射，人类时隔53年再赴月球",
-      "summary": "美东时间4月1日下午6时24分，NASA的Artemis II任务从肯尼迪航天中心39B发射台成功升空，搭载四名宇航员飞往月球。这是自1972年阿波罗17号以来人类首次执行载人绕月任务。机组包括NASA指令长Reid Wiseman、飞行员Victor Glover、任务专家Christina Koch以及加拿大航天局宇航员Jeremy Hansen。整个任务历时10天，宇航员将环绕月球飞行但不着陆，为后续Artemis III登月任务做准备。全球数亿观众通过直播见证这一历史时刻。",
-      "image": "https://www.nasa.gov/wp-content/uploads/2024/02/artemis-ii-crew-nasa-gov-banner-image.jpg",
-      "source": "NASA / Reuters / NYT",
-      "url": "https://www.nasa.gov/blogs/missions/2026/04/01/live-artemis-ii-launch-day-updates/",
-      "timestamp": "2026-04-02T06:24:00+08:00"
+      "title": "伊朗-美以战争第5周：导弹袭击科威特炼油厂与海水淡化厂",
+      "summary": "伊朗在第5周战事中连续向以色列、沙特、阿联酋、科威特发射导弹和无人机，重创科威特最大炼油厂并引发火灾，同时攻击多国海水淡化设施。特朗普威胁将打击伊朗桥梁与电力基础设施，随后两架美军飞机被击落。分析人士警告，此次攻击威胁全球液化天然气供应链与亚洲的航运路线，局势有进一步升级风险。",
+      "image": "",
+      "source": "NPR / Reuters",
+      "url": "https://www.npr.org/2026/04/03/g-s1-116314/iran-hits-gulf-refineries-as-trump-warns-u-s-will-attack-iranian-bridges-power-plants",
+      "timestamp": "2026-04-04T08:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "特朗普黄金时段发表伊朗战争讲话，称美军「即将撤离」",
-      "summary": "美国总统特朗普于4月1日晚9时（北京时间4月2日早9时）向全国发表电视讲话，宣称针对伊朗的军事行动目标已基本达成，美军将在「两到三周内」撤离。他表示霍尔木兹海峡必须重新开放才能结束冲突，但「无需达成协议」。伊朗方面否认曾请求停火，斥美方说法为「虚假且毫无根据」。随着战事进入第五周，国际油价飙升、美国国内汽油价格高企，民调显示多数美国人对战争走向表示担忧。英国等盟国已明确表态不参与军事行动。",
-      "image": "https://ichef.bbci.co.uk/news/1024/cpsprodpb/1d44/live/a8f71180-0f8e-11f0-acf5-ed1f03fb03dd.jpg",
-      "source": "BBC / Reuters / Politico / NPR",
-      "url": "https://www.bbc.com/news/articles/c74vqd8k3g1o",
-      "timestamp": "2026-04-02T09:00:00+08:00"
+      "title": "霍尔木兹海峡危机：联合国安理会表决巴林决议，中俄意见分歧",
+      "summary": "4月4日，联合国安理会将就巴林提出的保障霍尔木兹海峡商业航运决议进行表决。尽管多数国家支持维持海峡通行自由，俄罗斯与中国担心决议措辞可能为军事行动开绿灯而存有保留。伊朗已威胁将「点燃」试图强行通过海峡的船只。霍尔木兹海峡是全球最重要的石油运输通道，封锁将直接冲击亚洲能源安全与全球航运秩序。",
+      "image": "",
+      "source": "Reuters / Wikipedia",
+      "url": "https://www.reuters.com/world/asia-pacific/hopes-dim-swift-end-iran-war-after-trump-speech-oil-prices-surge-anew-2026-04-02/",
+      "timestamp": "2026-04-04T08:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "SpaceX秘密提交IPO申请，估值或达1.75万亿美元创纪录",
-      "summary": "据彭博社和路透社报道，马斯克旗下SpaceX已向美国证券交易委员会秘密提交首次公开募股（IPO）申请，有望成为美国历史上规模最大的IPO。此前报道显示公司估值约为1.75万亿美元，这一数字令其跻身全球最具价值公司之列。SpaceX今年早些时候已与xAI合并，进一步整合马斯克的商业帝国。公司CFO自去年12月起便与私人投资者接触，探讨2026年中上市的可能性。分析师认为，Starlink卫星互联网业务的巨大成功是推动上市的关键因素。IPO预计将筹集超过250亿美元。",
-      "image": "https://s.yimg.com/ny/api/res/1.2/p4e4oEd6lJmB5kU8NYMqaQ--/YXBwaWQ9aGlnaGxhbmRlcjt3PTk2MDtoPTY0MA--/https://media.zenfs.com/en/reuters-finance.com/a0c8a0e8e4c8e8d8e4c8e8d8e4c8e8d8",
-      "source": "Reuters / CNBC / Guardian / Bloomberg",
-      "url": "https://www.reuters.com/business/aerospace-defense/spacex-registers-take-rocket-maker-public-blockbuster-ipo-bloomberg-news-reports-2026-04-01/",
-      "timestamp": "2026-04-02T01:00:00+08:00"
+      "title": "赫格塞斯在伊朗战争期间解雇美国陆军参谋长等三名将领",
+      "summary": "美国防长赫格塞斯在美国深陷中东战争之际，强制要求陆军参谋长兰迪·乔治上将退休，同时解雇陆军牧师长及陆军转型训练司令部司令，共三名高级将领遭撤换。这是赫格塞斯自上任以来解雇的第十余名高级军官。分析人士批评此举是在关键战时行动期间人为削弱军事指挥体系，将引发盟友与国会的广泛质疑。",
+      "image": "",
+      "source": "Reuters / BBC / NYT",
+      "url": "https://www.reuters.com/world/us/hegseth-has-asked-us-army-chief-staff-step-down-cbs-news-reports-2026-04-02/",
+      "timestamp": "2026-04-04T08:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "匈牙利大选在即，极右翼政党或成「造王者」",
-      "summary": "距匈牙利4月12日议会选举还有不到两周，最新民调显示极右翼政党「我们的祖国」可能成为关键的「造王者」力量。该党是除欧尔班执政的Fidesz和反对派Tisza之外唯一有望跨越5%门槛进入议会的小党。民调显示反对党Tisza目前领先Fidesz，但选情仍存变数。若无任何一方获得绝对多数，「我们的祖国」的取向将决定最终政府组成。该党持比Fidesz更激进的反移民、反欧盟立场，分析人士担忧其崛起可能使匈牙利政治进一步右倾。",
-      "image": "https://www.reuters.com/resizer/v2/NKFXAJHQKJNMXJ3KGXLQXQSXRU.jpg?auth=5f8e4d8e5f8e4d8e5f8e4d8e5f8e4d8e",
-      "source": "Reuters / Independent / Straits Times",
-      "url": "https://www.reuters.com/world/hungarys-far-right-party-seen-potential-kingmaker-april-12-election-2026-04-01/",
-      "timestamp": "2026-04-02T03:00:00+08:00"
+      "title": "「解放日」一周年：特朗普10%全球关税持续生效，贸易战影响持续",
+      "summary": "去年「解放日」一周年之际，美国最高法院2月裁定IEEPA不授权总统征收关税后，特朗普改援引《贸易法》第122条实施全球10%关税，有效期至7月24日。经济学人分析指，各国普遍选择开放市场、与美洽谈双边协议而非报复，关税税率低于预期，但贸易格局已深度重塑。目前美英、美日均已达成部分协议，对华政策方向仍不明朗。",
+      "image": "",
+      "source": "The Economist / Tax Foundation / CNBC",
+      "url": "https://www.economist.com/finance-and-economics/2026/04/01/liberation-day-has-reshaped-trade-but-not-as-donald-trump-hoped",
+      "timestamp": "2026-04-04T08:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "2026普利兹克建筑奖揭晓，智利建筑师Smiljan Radić获殊荣",
-      "summary": "被誉为「建筑界诺贝尔奖」的普利兹克建筑奖宣布将2026年度大奖授予智利建筑师Smiljan Radić Clarke。他以将巨石等自然元素融入建筑设计闻名，作品常在材料探索和空间感知之间创造独特张力。代表作包括位于智利Papudo的Casa Pite悬崖住宅和圣地亚哥的Nave表演艺术中心。评委会称赞他「以激进的原创性回应每一个项目，让不显眼的变得显而易见」。值得一提的是，此次奖项公布因普利兹克家族主席与爱泼斯坦案件相关的争议而推迟。Radić是继1980年获奖的Luis Barragán之后第二位拉美建筑师获此殊荣。",
-      "image": "https://images.adsttc.com/media/images/67b1/b81b/314f/6601/8902/c743/large_jpg/smiljan-radic-clarke-receives-the-2026-pritzker-prize-the-artist-of-unspoken-architecture_34.jpg",
-      "source": "ArchDaily / Dezeen / Guardian",
-      "url": "https://www.archdaily.com/1039553/smiljan-radic-clarke-receives-the-2026-pritzker-prize-the-artist-of-unspoken-architecture",
-      "timestamp": "2026-04-01T20:00:00+08:00"
+      "title": "乐施会报告：全球最富0.1%藏匿逾3.55万亿美元离岸资产",
+      "summary": "乐施会在「巴拿马文件」发布十周年之际发布报告，揭示全球最富裕0.1%的人口将逾3.55万亿美元财富隐藏于离岸避税天堂，超过全球最贫困40亿人口（占总人口一半）的全部财富总和。其中超富裕的0.01%群体独占约1.77万亿美元。乐施会呼吁各国政府对超级富豪征收财富税，并加强跨境税务信息透明度与国际合作。",
+      "image": "",
+      "source": "Oxfam International",
+      "url": "https://www.oxfam.org/en/press-releases/untaxed-wealth-hidden-offshore-richest-01-surpasses-entire-wealth-poorest-half",
+      "timestamp": "2026-04-04T08:00:00+08:00"
     }
-  ]
+  ],
+  "date": "2026年4月4日"
 }

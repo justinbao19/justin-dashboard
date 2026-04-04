@@ -2224,6 +2224,44 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
         }
+        .trading-run-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+        .trading-run-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--market-section-bg);
+            border: 1px solid var(--border);
+            min-width: 0;
+        }
+        .trading-run-pill i {
+            color: var(--accent);
+            font-size: 13px;
+            width: 14px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .trading-run-pill-content { min-width: 0; }
+        .trading-run-pill-label {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+        .trading-run-pill-value {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .trading-metric-card {
             padding: 20px;
             border-radius: 16px;
@@ -2513,6 +2551,9 @@
         @media (max-width: 768px) {
             .trading-metrics {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .trading-run-meta {
+                grid-template-columns: 1fr;
             }
             .metric-value { font-size: 22px; }
             .trading-chart-stats {
@@ -4249,6 +4290,30 @@
                             </div>
                         </div>
 
+                        <div class="trading-run-meta" id="tpRunMeta">
+                            <div class="trading-run-pill">
+                                <i class="fas fa-clock-rotate-left"></i>
+                                <div class="trading-run-pill-content">
+                                    <div class="trading-run-pill-label">最近运行</div>
+                                    <div class="trading-run-pill-value" id="tpLastRunAt">等待首次自主运行</div>
+                                </div>
+                            </div>
+                            <div class="trading-run-pill">
+                                <i class="fas fa-bolt"></i>
+                                <div class="trading-run-pill-content">
+                                    <div class="trading-run-pill-label">触发来源</div>
+                                    <div class="trading-run-pill-value" id="tpLastTrigger">尚未记录</div>
+                                </div>
+                            </div>
+                            <div class="trading-run-pill">
+                                <i class="fas fa-compass"></i>
+                                <div class="trading-run-pill-content">
+                                    <div class="trading-run-pill-label">最后动作</div>
+                                    <div class="trading-run-pill-value" id="tpLastAction">等待决策</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- 盈亏曲线 -->
                         <div class="card trading-chart-card">
                             <div class="trading-chart-header">
@@ -4594,6 +4659,8 @@
         const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','FOG':'fog','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
         const DEFAULT_WEATHER_LOCATION = { lon: '121.405', lat: '31.123', displayName: '上海 · 闵行' };
         const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
+        const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
+        const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
         let weatherLocationPromise = null;
 
         let theme = localStorage.getItem('theme') || (new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'dark' : 'light');
@@ -4601,15 +4668,47 @@
         const toggleTheme = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', theme); applyTheme(); };
         applyTheme();
 
+        function normalizePage(page) {
+            return VALID_PAGES.has(page) ? page : 'weather';
+        }
+
+        function getPageFromPathname(pathname = window.location.pathname) {
+            const cleaned = pathname.replace(/\/+$/, '') || '/';
+            const match = Object.entries(PAGE_PATHS).find(([, path]) => path === cleaned);
+            return match ? match[0] : 'weather';
+        }
+
+        function setActivePage(page, { updateHistory = false, replaceHistory = false } = {}) {
+            const normalizedPage = normalizePage(page);
+            document.querySelectorAll('.tab-item').forEach(button => {
+                button.classList.toggle('active', button.dataset.page === normalizedPage);
+            });
+            document.querySelectorAll('.page').forEach(panel => {
+                panel.classList.toggle('active', panel.id === `page-${normalizedPage}`);
+            });
+            document.getElementById('weatherScene').style.opacity = normalizedPage === 'weather' ? 1 : 0;
+            ['market','news','flight'].forEach(name => {
+                const element = document.getElementById(`bg-${name}`);
+                if (element) element.style.opacity = name === normalizedPage ? 1 : 0;
+            });
+
+            const targetPath = PAGE_PATHS[normalizedPage];
+            if (updateHistory && window.location.pathname !== targetPath) {
+                window.history.pushState({ page: normalizedPage }, '', targetPath);
+            } else if (replaceHistory && window.location.pathname !== targetPath) {
+                window.history.replaceState({ page: normalizedPage }, '', targetPath);
+            }
+        }
+
         document.querySelectorAll('.tab-item').forEach(t => t.addEventListener('click', () => {
-            const p = t.dataset.page;
-            document.querySelectorAll('.tab-item').forEach(x => x.classList.remove('active'));
-            t.classList.add('active');
-            document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-            document.getElementById(`page-${p}`).classList.add('active');
-            document.getElementById('weatherScene').style.opacity = p === 'weather' ? 1 : 0;
-            ['market','news','flight'].forEach(n => { const e = document.getElementById(`bg-${n}`); if(e) e.style.opacity = n === p ? 1 : 0; });
+            setActivePage(t.dataset.page, { updateHistory: true });
         }));
+
+        window.addEventListener('popstate', () => {
+            setActivePage(getPageFromPathname(), { replaceHistory: false });
+        });
+
+        setActivePage(getPageFromPathname(), { replaceHistory: true });
 
         function updateScene(skycon) {
             const s = document.getElementById('weatherScene');
@@ -6140,6 +6239,7 @@
             document.getElementById('tpCashPct').textContent = ((portfolio.cash / currentEquity) * 100).toFixed(0) + '%';
             
             document.getElementById('tpPositions').textContent = portfolio.positions.length;
+            renderTradingRunMeta(meta);
             
             // Calculate win rate
             const closedTrades = history.trades.filter(t => t.type === 'sell');
@@ -6163,6 +6263,44 @@
 
             // Render AI decision panel
             renderDecisionPanel(history.decisions, history.trades);
+        }
+
+        function renderTradingRunMeta(meta = {}) {
+            const lastRunAtEl = document.getElementById('tpLastRunAt');
+            const lastTriggerEl = document.getElementById('tpLastTrigger');
+            const lastActionEl = document.getElementById('tpLastAction');
+            if (!lastRunAtEl || !lastTriggerEl || !lastActionEl) return;
+
+            const triggerLabels = {
+                cli: '手动命令',
+                'cli-dry-run': '手动演练',
+                api: '远程 API',
+                'api-dry-run': 'API 演练',
+                manual: '手动触发'
+            };
+            const actionLabels = {
+                buy: '买入',
+                sell: '卖出',
+                hold: '观望'
+            };
+
+            lastRunAtEl.textContent = formatTradingTimestamp(meta.lastRunAt) || '等待首次自主运行';
+            lastTriggerEl.textContent = triggerLabels[meta.lastTrigger] || meta.lastTrigger || '尚未记录';
+            lastActionEl.textContent = actionLabels[meta.lastAction] || meta.lastAction || '等待决策';
+        }
+
+        function formatTradingTimestamp(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+            return date.toLocaleString('zh-CN', {
+                timeZone: 'Asia/Shanghai',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
         }
 
         function formatCurrency(val) {

@@ -11,14 +11,15 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 
 from briefing_content import build_brief
 
 WEIXIN_CHANNEL = "openclaw-weixin"
-WEIXIN_ACCOUNT = "7718db65dcf1-im-bot"
-WEIXIN_TARGET = "o9cq8097CyKn-7P-8ofBnaMlDlJw@im.wechat"
+WEIXIN_ACCOUNT = os.environ.get("WEIXIN_ACCOUNT_ID", "7718db65dcf1-im-bot")
+WEIXIN_TARGET = os.environ.get("WEIXIN_TARGET_ID", "o9cq8097CyKn-7P-8ofBnaMlDlJw@im.wechat")
 
 
 def send_message(text: str) -> None:

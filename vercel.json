@@ -12,6 +12,7 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/tracks/(.*)", "dest": "/tracks/$1" },
+    { "src": "/(weather|market|news|f1)", "dest": "/" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }

@@ -15,11 +15,14 @@ import os
 import subprocess
 import sys
 
+import requests
+
 from briefing_content import build_brief
 
 WEIXIN_CHANNEL = "openclaw-weixin"
 WEIXIN_ACCOUNT = os.environ.get("WEIXIN_ACCOUNT_ID", "7718db65dcf1-im-bot")
 WEIXIN_TARGET = os.environ.get("WEIXIN_TARGET_ID", "o9cq8097CyKn-7P-8ofBnaMlDlJw@im.wechat")
+DASHBOARD_URL = "https://justin-dashboard-xi.vercel.app"
 
 
 def send_message(text: str) -> None:
@@ -39,14 +42,30 @@ def send_message(text: str) -> None:
     subprocess.run(cmd, check=True)
 
 
+def load_generated_brief(mode: str) -> str:
+    response = requests.get(
+        f"{DASHBOARD_URL}/data/briefings/{mode}.txt",
+        timeout=20,
+    )
+    response.raise_for_status()
+    return response.text.strip()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["morning", "evening"], required=True)
-    parser.add_argument("--source", choices=["local", "remote", "auto"], default="remote")
+    parser.add_argument(
+        "--source",
+        choices=["generated", "local", "remote", "auto"],
+        default="generated",
+    )
     parser.add_argument("--send", action="store_true")
     args = parser.parse_args()
 
-    text = build_brief(args.mode, source=args.source)
+    if args.source == "generated":
+        text = load_generated_brief(args.mode)
+    else:
+        text = build_brief(args.mode, source=args.source)
     print(text)
 
     if args.send:

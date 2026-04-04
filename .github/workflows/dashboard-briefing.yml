@@ -2,10 +2,10 @@ name: Dashboard Briefing
 
 on:
   schedule:
-    # 08:40 Asia/Shanghai
-    - cron: '40 0 * * *'
-    # 18:40 Asia/Shanghai
-    - cron: '40 10 * * *'
+    # 08:20 Asia/Shanghai
+    - cron: '20 0 * * *'
+    # 22:50 Asia/Shanghai
+    - cron: '50 14 * * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -16,11 +16,6 @@ on:
         options:
           - morning
           - evening
-      send_telegram:
-        description: Send Telegram briefing
-        required: false
-        default: true
-        type: boolean
       commit_changes:
         description: Commit updated dashboard data
         required: false
@@ -45,9 +40,6 @@ jobs:
       LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
       LLM_MODEL: ${{ secrets.LLM_MODEL }}
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      TELEGRAM_THREAD_ID: ${{ secrets.TELEGRAM_THREAD_ID }}
 
     steps:
       - name: Checkout repository
@@ -102,13 +94,15 @@ jobs:
         run: python3 scripts/validate-json.py data/market.json data/news.json
 
       - name: Show generated briefing
-        run: python3 scripts/send_telegram_briefing.py --mode "${{ steps.mode.outputs.mode }}"
+        run: |
+          mkdir -p data/briefings
+          python3 scripts/send_wechat_briefing.py --mode "${{ steps.mode.outputs.mode }}" --source local | tee "data/briefings/${{ steps.mode.outputs.mode }}.txt"
 
       - name: Commit updated dashboard data
         id: commit
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_changes != false }}
         run: |
-          if git diff --quiet -- data/market.json data/news.json; then
+          if git diff --quiet -- data/market.json data/news.json data/briefings/${{ steps.mode.outputs.mode }}.txt; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No dashboard data changes to commit."
             exit 0
@@ -116,11 +110,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/market.json data/news.json
+          git add data/market.json data/news.json "data/briefings/${{ steps.mode.outputs.mode }}.txt"
           git commit -m "dashboard: refresh market and news briefing"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
-
-      - name: Send Telegram briefing
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.send_telegram != false }}
-        run: python3 scripts/send_telegram_briefing.py --mode "${{ steps.mode.outputs.mode }}" --send

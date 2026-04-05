@@ -24,7 +24,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: cloud-digests-${{ github.event.inputs.digest || github.run_id }}
+  group: repo-write-main
   cancel-in-progress: false
 
 jobs:

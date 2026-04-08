@@ -1,7 +1,21 @@
 const { FINNHUB_KEY, STOOQ_SYMBOLS } = require('./config');
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return res;
+  } catch (err) {
+    clearTimeout(timer);
+    if (err.name === 'AbortError') throw new Error(`Request timeout after ${timeoutMs}ms: ${url}`);
+    throw err;
+  }
+}
+
 async function fetchJson(url, headers = {}) {
-  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0', ...headers } });
+  const res = await fetchWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0', ...headers } });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -29,7 +43,7 @@ async function getHistoricalPrices(symbol, days = 60) {
       const endDate = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10).replace(/-/g, '');
       const url = `https://stooq.com/q/d/l/?s=${stooqSymbol}&d1=${startDate}&d2=${endDate}&i=d`;
-      const res = await fetch(url);
+      const res = await fetchWithTimeout(url, {}, 10000);
       const text = await res.text();
       const lines = text.trim().split('\n').slice(1);
       if (lines.length < 10) throw new Error('No data');

@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-04-09T13:30:27.466Z",
+    "lastRunAt": "2026-04-09T22:10:07.814Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-04-09 13:30",
+    "lastDecisionAt": "2026-04-09 22:10",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -18,8 +18,8 @@
         "qty": 2,
         "avgCost": 414.49,
         "entryDate": "2026-03-27 18:32",
-        "currentValue": 869.1,
-        "pnl": 40.120000000000005
+        "currentValue": 875.82,
+        "pnl": 46.84000000000003
       }
     ]
   },
@@ -83,7 +83,7 @@
       },
       {
         "date": "2026-04-09",
-        "value": 10040.12
+        "value": 10046.84
       }
     ],
     "trades": [
@@ -206,6 +206,11 @@
       {
         "date": "2026-04-09 13:30",
         "analysis": "宏观：股市走强，风险偏好回升；原油大跌（需求担忧/通缩信号）。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-04-09 22:10",
+        "analysis": "宏观：市场整体平稳，无明显信号。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }
     ]

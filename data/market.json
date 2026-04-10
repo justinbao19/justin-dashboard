@@ -1,24 +1,24 @@
 {
-  "date": "2026年4月10日 晚间",
+  "date": "2026年4月10日 实时",
   "ndx": {
-    "price": "25,256",
-    "change": 0.02
+    "price": "25,097",
+    "change": 0.3163
   },
   "spx": {
-    "price": "6,862",
-    "change": -0.02
+    "price": "6,807",
+    "change": 0.1191
   },
   "dji": {
-    "price": "48,158",
-    "change": 0.0
+    "price": "48,024",
+    "change": -0.3445
   },
   "hsi": {
     "price": "25,894",
     "change": 0.55
   },
   "hstec": {
-    "price": "4,822",
-    "change": 0.0
+    "price": "4,860",
+    "change": 0.8
   },
   "sse": {
     "price": "3,986",
@@ -33,20 +33,20 @@
     "change": 3.78
   },
   "gold": {
-    "price": "$4,774",
-    "change": -0.91
+    "price": "$2,563",
+    "change": 0.0594
   },
   "oil": {
-    "price": "$98.54",
-    "change": 0.69
+    "price": "$78.78",
+    "change": 0.0788
   },
   "btc": {
-    "price": "$71,784",
-    "change": 0.38
+    "price": "$72,735",
+    "change": 1.12
   },
   "eth": {
-    "price": "$2,196",
-    "change": 0.14
+    "price": "$2,236",
+    "change": 1.2
   },
   "macro_summary": "A股强势反弹，创业板+3.78%领涨，科技算力板块接力；港股跟涨收红；美股期货平静，周五观望情绪浓厚；黄金随risk-on回落，原油小升。",
   "logic_chain": [
@@ -141,7 +141,7 @@
       "金融股季报暴雷引发美股回调"
     ]
   },
-  "updated_at": "2026-04-10T18:03:00+08:00",
+  "updated_at": "2026-04-10T23:36:58.972545",
   "us_market_preview": {
     "title": "📊 美股今晚开盘预判",
     "summary": "期货近乎平开，周五成交量偏低，季报空窗末期，等待下周金融股季报（JPM/WFC/MS/GS）定下基调。Delta季报今日出炉，指引可能偏保守。",

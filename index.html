@@ -304,7 +304,52 @@
             cursor: pointer;
             user-select: none;
         }
-        .weather-header .location { font-size: 34px; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .weather-header .location {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px 12px;
+            margin-top: 10px;
+        }
+        .weather-location-name {
+            font-size: 34px;
+            font-weight: 600;
+            line-height: 1.12;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .weather-location-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.18);
+            border: 1px solid rgba(255,255,255,0.14);
+            backdrop-filter: blur(18px);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.14);
+        }
+        .weather-location-source.device {
+            background: rgba(96, 214, 162, 0.18);
+            border-color: rgba(182,255,221,0.28);
+        }
+        .weather-location-source.ip {
+            background: rgba(116, 185, 255, 0.18);
+            border-color: rgba(183,221,255,0.28);
+        }
+        .weather-location-source.default {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.16);
+        }
+        .weather-location-detail {
+            width: 100%;
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.8;
+        }
         .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
         .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 10px; }
@@ -3206,7 +3251,21 @@
             }
 
             .weather-header .location {
+                margin-top: 8px;
+                gap: 8px 10px;
+            }
+
+            .weather-location-name {
                 font-size: 28px;
+            }
+
+            .weather-location-source {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+
+            .weather-location-detail {
+                font-size: 12px;
             }
 
             .weather-header .temp-main {
@@ -3631,6 +3690,10 @@
             }
 
             .weather-header .location {
+                justify-content: flex-start;
+            }
+
+            .weather-location-name {
                 font-size: 42px;
             }
 
@@ -3951,8 +4014,11 @@
         <div class="page active" id="page-weather">
                 <div class="weather-layout">
                     <div class="weather-header">
-                        <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>实时天气视图</span></div>
-                        <div class="location" id="location">上海 · 闵行</div>
+                        <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
+                        <div class="location" id="location">
+                            <span class="weather-location-name">上海 · 闵行</span>
+                            <span class="weather-location-source default"><i class="fas fa-map-pin"></i><span>默认位置</span></span>
+                        </div>
                         <div class="temp-main" id="tempMain">7°</div>
                         <div class="condition" id="condition">多云</div>
                         <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
@@ -4744,6 +4810,39 @@
             weatherLocationCache = null;
         }
 
+        function escapeHtml(value = '') {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function getLocationSourceMeta(location = {}) {
+            if (location.source === 'device') {
+                return { label: '设备定位', className: 'device', icon: 'fa-location-crosshairs' };
+            }
+            if (location.source === 'ip') {
+                return { label: 'IP定位', className: 'ip', icon: 'fa-globe' };
+            }
+            return { label: '默认位置', className: 'default', icon: 'fa-map-pin' };
+        }
+
+        function renderWeatherLocation(location, { detail = '' } = {}) {
+            const locationEl = document.getElementById('location');
+            if (!locationEl) return;
+            const sourceMeta = getLocationSourceMeta(location);
+            const detailLine = detail
+                ? `<span class="weather-location-detail">${escapeHtml(detail)}</span>`
+                : '';
+            locationEl.innerHTML = `
+                <span class="weather-location-name">${escapeHtml(location.displayName || DEFAULT_WEATHER_LOCATION.displayName)}</span>
+                <span class="weather-location-source ${sourceMeta.className}"><i class="fas ${sourceMeta.icon}"></i><span>${sourceMeta.label}</span></span>
+                ${detailLine}
+            `;
+        }
+
         async function getLocationFromApi() {
             const response = await fetch('/api/location');
             if (!response.ok) throw new Error('Failed to resolve location from /api/location');
@@ -4888,7 +4987,9 @@
 
         async function loadWeather({ forceRelocate = false } = {}) {
             try {
-                document.getElementById('location').textContent = '正在定位...';
+                renderWeatherLocation({ displayName: '正在定位', source: 'default' }, {
+                    detail: forceRelocate ? '正在刷新当前位置天气' : '正在读取当前天气位置'
+                });
                 if (forceRelocate) updateRelocateBadge(true);
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
                 const location = await getWeatherLocation({
@@ -4896,7 +4997,12 @@
                     preferDevice: forceRelocate || permissionState === 'granted',
                     allowCachedDevice: !forceRelocate
                 });
-                document.getElementById('location').textContent = location.displayName;
+                const locationDetail = location.source === 'device'
+                    ? '已同步当前设备位置'
+                    : (location.source === 'ip'
+                        ? `已根据网络位置匹配天气${location.deviceError ? ` · ${location.deviceError}` : ''}`
+                        : '当前位置不可用，已切换默认天气视图');
+                renderWeatherLocation(location, { detail: locationDetail });
 
                 // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
                 const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
@@ -4909,13 +5015,9 @@
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
                 document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
-                const sourceLabel = location.source === 'device' ? '设备定位' : location.source === 'ip' ? 'IP定位' : '默认位置';
-                document.getElementById('weatherHeaderBadge').innerHTML = `<i class="fas fa-location-dot"></i><span>${location.displayName}</span>`;
-                document.getElementById('weatherHeaderNote').textContent = location.source === 'device'
-                    ? `定位来源：${sourceLabel}`
-                    : (location.source === 'ip'
-                        ? `设备定位不可用，已切换 ${sourceLabel}${location.deviceError ? ` · ${location.deviceError}` : ''}`
-                        : `定位来源：${sourceLabel}`);
+                document.getElementById('weatherHeaderNote').textContent = d.hourly?.description
+                    ? `根据当前体感和小时趋势整理 · ${d.hourly.description}`
+                    : '根据当前体感和小时趋势整理';
 
                 // Hourly
                 if (d.hourly?.temperature) {
@@ -5034,6 +5136,7 @@
                 updateRelocateBadge(false);
             } catch(e) {
                 console.error('Weather error:', e);
+                renderWeatherLocation(DEFAULT_WEATHER_LOCATION, { detail: '天气加载失败，已保留默认天气视图' });
                 updateRelocateBadge(false);
             }
         }

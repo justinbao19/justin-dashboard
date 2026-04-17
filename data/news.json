@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-04-17T01:05:00+08:00",
+  "lastUpdated": "2026-04-17T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美伊谈判现进展，华盛顿继续施压",
-      "summary": "美方表示对与伊朗达成协议持乐观态度，但同时强调若德黑兰继续强硬，将加大经济施压。报道显示，双方围绕停火与地区安全问题仍在拉扯，谈判有窗口期但远未落地，市场也在紧盯后续制裁与油市反应。",
+      "title": "以色列与黎巴嫩停火生效，地区紧张暂时降温",
+      "summary": "在美国斡旋下，以色列和黎巴嫩达成短暂停火安排，边境战事先行按下暂停键。报道显示，现场仍可见炮火与烟尘，但外交渠道已为后续谈判打开窗口。市场关注停火能否转化为更持久的安全机制。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/world/asia-pacific/us-shuts-down-irans-maritime-trade-despite-optimism-more-talks-2026-04-15/",
-      "timestamp": "2026-04-17T01:05:00+08:00"
+      "url": "https://www.reuters.com/world/iran-war-live-updates-trump-says-israel-lebanon-have-agreed-10-day-ceasefire-2026-04-16/",
+      "timestamp": "2026-04-17T08:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "IMF下调全球增长预期，警告经济正滑向更差情景",
-      "summary": "国际货币基金组织将2026年全球增长预期下调至3.1%，称中东冲突推高能源和商品成本，并可能把世界经济推向更不利的轨道。机构同时指出，尽管部分经济体靠刺激政策和关税回落获得缓冲，但整体不确定性依然高企。",
+      "title": "欧盟与北约寻求强化关系，欧洲安全协调升温",
+      "summary": "冯德莱恩表示，欧盟与北约将在未来数周加强合作，重点放在防务协调、共同威慑与欧洲安全框架的衔接。此举反映出地缘风险抬头后，欧洲正加速补强集体防御体系，以减少对外部安全环境波动的脆弱性。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/world/imf-world-bank-meetings-global-growth-downgrade-expected-iran-war-hits-prices-2026-04-14/",
-      "timestamp": "2026-04-17T01:05:00+08:00"
+      "url": "https://www.reuters.com/world/eu-nato-work-strengthen-relationship-von-der-leyen-says-2026-04-16/",
+      "timestamp": "2026-04-17T08:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "受制裁油轮仍进入海湾，霍尔木兹海峡航运受关注",
-      "summary": "一艘受美方制裁的油轮在美国封锁伊朗港口往来之际，仍通过霍尔木兹海峡进入海湾，引发外界对制裁执行力与航运安全的关注。报道显示，相关航线的通行并未明显受阻，但地缘风险和能源市场波动仍在持续发酵。",
+      "title": "中国经济出现回暖迹象，全球供应链再受关注",
+      "summary": "路透称中国经济在2026年初重新加速，出口增长一度带动整体动能回升，但中东战争推高能源成本后，外需和企业利润又面临新压力。报道显示，全球制造与供应链正在重新评估中国复苏节奏及其外溢影响。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/world/middle-east/us-sanctioned-supertankers-enter-gulf-despite-blockade-2026-04-16/",
-      "timestamp": "2026-04-17T01:05:00+08:00"
+      "url": "https://www.reuters.com/world/china/china-is-coming-back-timing-couldnt-be-better-2026-04-16/",
+      "timestamp": "2026-04-17T08:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "以色列讨论黎以停火，局势出现阶段性缓和信号",
-      "summary": "以色列安全内阁讨论与黎巴嫩的停火安排，显示持续多日的冲突开始出现外交缓冲窗口。与此同时，战事造成的烟尘、平民撤离和边境紧张仍未完全消退，说明停火前景虽有希望，但落地后仍需面对安全和政治分歧。",
+      "title": "美军称已准备重启对伊朗打击选项，油价与风险偏好承压",
+      "summary": "美国防长称，如伊朗不接受协议，美军已准备恢复战斗并打击其能源设施。相关表态强化了市场对冲突升级的担忧，也让油价、航运和风险资产情绪继续承压。后续谈判走向将直接影响中东局势是否失控。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/world/middle-east/hezbollah-says-lebanons-talks-with-israel-widen-national-rift-2026-04-15/",
-      "timestamp": "2026-04-17T01:05:00+08:00"
+      "url": "https://www.reuters.com/world/middle-east/us-forces-ready-restart-combat-if-iran-doesnt-agree-deal-says-hegseth-2026-04-16/",
+      "timestamp": "2026-04-17T08:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "土耳其校园枪击再酿伤亡，社会安全问题受审视",
-      "summary": "土耳其接连发生校园枪击事件，至少造成多人死亡和受伤，引发对校园安保、青少年暴力和枪支管控的重新讨论。报道称，嫌疑人与动机仍在调查中，而学校周边秩序、应急响应和公共安全治理已成为舆论焦点。",
+      "title": "伊美谈判转向临时协议方案，双方分歧仍在",
+      "summary": "多名伊朗消息人士称，伊朗与美国正把目标从全面协议收缩为临时备忘录，以避免冲突回到战场。报道表明，双方在核活动、制裁安排和安全保证上仍有明显分歧，但务实降级的谈判方向已开始成形。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/world/least-one-killed-turkey-school-shooting-ntv-reports-2026-04-15/",
-      "timestamp": "2026-04-17T01:05:00+08:00"
+      "url": "https://www.reuters.com/world/asia-pacific/iran-us-narrow-differences-after-pakistani-mediation-splits-remain-senior-2026-04-16/",
+      "timestamp": "2026-04-17T08:00:00+08:00"
     }
   ]
 }

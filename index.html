@@ -4723,22 +4723,53 @@
             if (isRain) { for(let i=0;i<100;i++) { const d=document.createElement('div'); d.className='raindrop'; d.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*0.7}s;animation-duration:${0.5+Math.random()*0.3}s`; document.getElementById('rain').appendChild(d); } }
         }
 
+        function getDeviceLocation({ enableHighAccuracy = true, timeout = 10000 } = {}) {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation not supported'));
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        resolve({
+                            lon: String(position.coords.longitude),
+                            lat: String(position.coords.latitude),
+                            displayName: '当前位置',
+                            source: 'device'
+                        });
+                    },
+                    error => reject(error),
+                    {
+                        enableHighAccuracy,
+                        timeout,
+                        maximumAge: 5 * 60 * 1000
+                    }
+                );
+            });
+        }
+
         async function getWeatherLocation() {
             if (!weatherLocationPromise) {
                 weatherLocationPromise = (async () => {
                     try {
-                        const response = await fetch('/api/location');
-                        if (!response.ok) throw new Error('Failed to resolve location');
-                        const data = await response.json();
-                        if (!data?.lon || !data?.lat) return DEFAULT_WEATHER_LOCATION;
-                        return {
-                            lon: data.lon,
-                            lat: data.lat,
-                            displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName
-                        };
-                    } catch (error) {
-                        console.error('Location error:', error);
-                        return DEFAULT_WEATHER_LOCATION;
+                        return await getDeviceLocation({ enableHighAccuracy: true, timeout: 10000 });
+                    } catch (deviceError) {
+                        console.warn('Device location unavailable, fallback to IP location:', deviceError);
+                        try {
+                            const response = await fetch('/api/location');
+                            if (!response.ok) throw new Error('Failed to resolve location');
+                            const data = await response.json();
+                            if (!data?.lon || !data?.lat) return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
+                            return {
+                                lon: String(data.lon),
+                                lat: String(data.lat),
+                                displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
+                                source: 'ip'
+                            };
+                        } catch (error) {
+                            console.error('Location error:', error);
+                            return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
+                        }
                     }
                 })();
             }
@@ -4747,11 +4778,15 @@
 
         async function loadWeather() {
             try {
-                document.getElementById('location').textContent = '正在定位...';
+                document.getElementById('location').textContent = '正在获取设备定位...';
+                document.getElementById('weatherHeaderBadge').innerHTML = '<i class="fas fa-location-dot"></i><span>正在获取设备定位...</span>';
+                document.getElementById('weatherHeaderNote').textContent = '定位来源：设备定位（高精度）';
                 const location = await getWeatherLocation();
                 document.getElementById('location').textContent = location.displayName;
+                if (location.source !== 'device') {
+                    document.getElementById('weatherHeaderNote').textContent = '设备定位不可用，已切换 IP 定位';
+                }
 
-                // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
                 const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
                 if (!r.ok) return;
                 const d = (await r.json()).result;
@@ -4762,8 +4797,15 @@
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
                 document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
-                document.getElementById('weatherHeaderBadge').innerHTML = `<i class="fas fa-location-dot"></i><span>${location.displayName}</span>`;
-                document.getElementById('weatherHeaderNote').textContent = d.forecast_keypoint || d.hourly?.description || '根据当前体感和小时趋势整理';
+                const sourceLabel = location.source === 'device' ? '设备定位' : 'IP定位';
+                document.getElementById('weatherHeaderBadge').innerHTML = `<i class="fas fa-location-dot"></i><span>${location.displayName} · ${sourceLabel}</span>`;
+                if (location.source === 'device') {
+                    document.getElementById('weatherHeaderNote').textContent = '定位来源：设备定位（高精度）';
+                } else if (location.source === 'ip') {
+                    document.getElementById('weatherHeaderNote').textContent = '设备定位不可用，已切换 IP 定位';
+                } else {
+                    document.getElementById('weatherHeaderNote').textContent = '定位来源：默认位置（IP定位失败）';
+                }
 
                 // Hourly
                 if (d.hourly?.temperature) {

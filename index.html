@@ -4664,6 +4664,9 @@
         const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
         const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
         const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
+        const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
+        const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
+        const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
         let geolocationPermissionState = 'unknown';
@@ -4754,28 +4757,72 @@
             };
         }
 
-        async function getLocationFromDevice() {
-            if (!navigator.geolocation) throw new Error('Geolocation unavailable');
-            return await new Promise((resolve, reject) => {
+        function describeGeolocationError(error) {
+            const code = Number(error?.code);
+            if (code === 1) return '用户拒绝了定位授权';
+            if (code === 2) return '设备暂时无法确定位置';
+            if (code === 3) return '设备定位超时';
+            return error?.message || '设备定位失败';
+        }
+
+        function requestDevicePosition(options) {
+            return new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(
-                    position => resolve({
-                        lon: position.coords.longitude.toFixed(6),
-                        lat: position.coords.latitude.toFixed(6),
-                        displayName: '设备定位',
-                        source: 'device'
-                    }),
-                    reject,
-                    { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+                    resolve,
+                    error => reject(new Error(describeGeolocationError(error))),
+                    options
                 );
             });
         }
 
-        async function resolveWeatherLocation({ preferDevice = false } = {}) {
+        async function getLocationFromDevice({ allowCached = true } = {}) {
+            if (!navigator.geolocation) throw new Error('Geolocation unavailable');
+
+            const attempts = [
+                {
+                    enableHighAccuracy: false,
+                    timeout: WEATHER_DEVICE_LOCATION_FAST_TIMEOUT,
+                    maximumAge: allowCached ? WEATHER_DEVICE_LOCATION_STALE_MS : 0
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT,
+                    maximumAge: 0
+                }
+            ];
+
+            let lastError = null;
+            for (const options of attempts) {
+                try {
+                    const position = await requestDevicePosition(options);
+                    return {
+                        lon: position.coords.longitude.toFixed(6),
+                        lat: position.coords.latitude.toFixed(6),
+                        displayName: '设备定位',
+                        source: 'device'
+                    };
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+
+            throw lastError || new Error('设备定位失败');
+        }
+
+        async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true } = {}) {
             if (preferDevice) {
                 try {
-                    return await getLocationFromDevice();
+                    return await getLocationFromDevice({ allowCached: allowCachedDevice });
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
+                    const fallback = await getLocationFromApi().catch(apiError => {
+                        console.error('Location fallback error:', apiError);
+                        return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
+                    });
+                    return {
+                        ...fallback,
+                        deviceError: error?.message || '设备定位失败'
+                    };
                 }
             }
 
@@ -4787,14 +4834,14 @@
             }
         }
 
-        async function getWeatherLocation({ forceRefresh = false, preferDevice = false } = {}) {
+        async function getWeatherLocation({ forceRefresh = false, preferDevice = false, allowCachedDevice = true } = {}) {
             if (forceRefresh) clearWeatherLocationCache();
             const now = Date.now();
             const cacheValid = weatherLocationCache && (now - weatherLocationCache.updatedAt < WEATHER_LOCATION_CACHE_TTL);
             if (cacheValid) return weatherLocationCache.location;
 
             if (!weatherLocationPromise) {
-                weatherLocationPromise = resolveWeatherLocation({ preferDevice })
+                weatherLocationPromise = resolveWeatherLocation({ preferDevice, allowCachedDevice })
                     .then(location => {
                         weatherLocationCache = { location, updatedAt: Date.now() };
                         return location;
@@ -4846,7 +4893,8 @@
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
                 const location = await getWeatherLocation({
                     forceRefresh: forceRelocate,
-                    preferDevice: forceRelocate || permissionState === 'granted'
+                    preferDevice: forceRelocate || permissionState === 'granted',
+                    allowCachedDevice: !forceRelocate
                 });
                 document.getElementById('location').textContent = location.displayName;
 
@@ -4866,7 +4914,7 @@
                 document.getElementById('weatherHeaderNote').textContent = location.source === 'device'
                     ? `定位来源：${sourceLabel}`
                     : (location.source === 'ip'
-                        ? `设备定位不可用，已切换 ${sourceLabel}`
+                        ? `设备定位不可用，已切换 ${sourceLabel}${location.deviceError ? ` · ${location.deviceError}` : ''}`
                         : `定位来源：${sourceLabel}`);
 
                 // Hourly

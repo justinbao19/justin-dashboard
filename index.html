@@ -4666,7 +4666,8 @@
         const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
-        let geolocationPermissionState = 'prompt';
+        let geolocationPermissionState = 'unknown';
+        let geolocationPermissionPromise = null;
 
         let theme = localStorage.getItem('theme') || (new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'dark' : 'light');
         const applyTheme = () => { document.documentElement.setAttribute('data-theme', theme); document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; };
@@ -4748,7 +4749,8 @@
             return {
                 lon: data.lon,
                 lat: data.lat,
-                displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName
+                displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
+                source: 'ip'
             };
         }
 
@@ -4759,7 +4761,8 @@
                     position => resolve({
                         lon: position.coords.longitude.toFixed(6),
                         lat: position.coords.latitude.toFixed(6),
-                        displayName: '设备定位'
+                        displayName: '设备定位',
+                        source: 'device'
                     }),
                     reject,
                     { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
@@ -4780,7 +4783,7 @@
                 return await getLocationFromApi();
             } catch (error) {
                 console.error('Location fallback error:', error);
-                return DEFAULT_WEATHER_LOCATION;
+                return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
             }
         }
 
@@ -4802,29 +4805,48 @@
             return weatherLocationPromise;
         }
 
-        async function watchGeolocationPermission() {
-            if (!navigator.permissions?.query) return;
-            try {
-                const status = await navigator.permissions.query({ name: 'geolocation' });
-                geolocationPermissionState = status.state;
-                status.onchange = () => {
-                    geolocationPermissionState = status.state;
-                    if (geolocationPermissionState === 'granted') {
-                        clearWeatherLocationCache();
-                    }
-                };
-            } catch (error) {
-                console.warn('Permission query unsupported:', error);
+        async function ensureGeolocationPermissionState({ refresh = false } = {}) {
+            if (!navigator.permissions?.query) {
+                geolocationPermissionState = 'unsupported';
+                return geolocationPermissionState;
             }
+
+            if (refresh) geolocationPermissionPromise = null;
+            if (geolocationPermissionState !== 'unknown' && !refresh) return geolocationPermissionState;
+
+            if (!geolocationPermissionPromise) {
+                geolocationPermissionPromise = navigator.permissions.query({ name: 'geolocation' })
+                    .then(status => {
+                        geolocationPermissionState = status.state;
+                        status.onchange = () => {
+                            geolocationPermissionState = status.state;
+                            if (geolocationPermissionState === 'granted') {
+                                clearWeatherLocationCache();
+                            }
+                        };
+                        return geolocationPermissionState;
+                    })
+                    .catch(error => {
+                        console.warn('Permission query unsupported:', error);
+                        geolocationPermissionState = 'unsupported';
+                        return geolocationPermissionState;
+                    })
+                    .finally(() => {
+                        geolocationPermissionPromise = null;
+                    });
+            }
+
+            return geolocationPermissionPromise;
         }
 
         async function loadWeather({ forceRelocate = false } = {}) {
             try {
                 document.getElementById('location').textContent = '正在定位...';
                 if (forceRelocate) updateRelocateBadge(true);
+                const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
                 const location = await getWeatherLocation({
                     forceRefresh: forceRelocate,
-                    preferDevice: forceRelocate || geolocationPermissionState === 'granted'
+                    preferDevice: forceRelocate || permissionState === 'granted'
                 });
                 document.getElementById('location').textContent = location.displayName;
 
@@ -4839,8 +4861,13 @@
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
                 document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
+                const sourceLabel = location.source === 'device' ? '设备定位' : location.source === 'ip' ? 'IP定位' : '默认位置';
                 document.getElementById('weatherHeaderBadge').innerHTML = `<i class="fas fa-location-dot"></i><span>${location.displayName}</span>`;
-                document.getElementById('weatherHeaderNote').textContent = d.forecast_keypoint || d.hourly?.description || '根据当前体感和小时趋势整理';
+                document.getElementById('weatherHeaderNote').textContent = location.source === 'device'
+                    ? `定位来源：${sourceLabel}`
+                    : (location.source === 'ip'
+                        ? `设备定位不可用，已切换 ${sourceLabel}`
+                        : `定位来源：${sourceLabel}`);
 
                 // Hourly
                 if (d.hourly?.temperature) {
@@ -4967,7 +4994,7 @@
             loadWeather({ forceRelocate: true });
         });
 
-        watchGeolocationPermission();
+        ensureGeolocationPermissionState();
 
         let _marketStaticCache = {};
         let marketLiveDateLabel = '';

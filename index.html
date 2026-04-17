@@ -301,6 +301,8 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.14);
             font-size: 13px;
             letter-spacing: 0.2px;
+            cursor: pointer;
+            user-select: none;
         }
         .weather-header .location { font-size: 34px; font-weight: 600; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
         .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
@@ -4661,7 +4663,11 @@
         const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
         const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
         const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
+        const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
         let weatherLocationPromise = null;
+        let weatherLocationCache = null;
+        let geolocationPermissionState = 'unknown';
+        let geolocationPermissionPromise = null;
 
         let theme = localStorage.getItem('theme') || (new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'dark' : 'light');
         const applyTheme = () => { document.documentElement.setAttribute('data-theme', theme); document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; };
@@ -4723,32 +4729,125 @@
             if (isRain) { for(let i=0;i<100;i++) { const d=document.createElement('div'); d.className='raindrop'; d.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*0.7}s;animation-duration:${0.5+Math.random()*0.3}s`; document.getElementById('rain').appendChild(d); } }
         }
 
-        async function getWeatherLocation() {
-            if (!weatherLocationPromise) {
-                weatherLocationPromise = (async () => {
-                    try {
-                        const response = await fetch('/api/location');
-                        if (!response.ok) throw new Error('Failed to resolve location');
-                        const data = await response.json();
-                        if (!data?.lon || !data?.lat) return DEFAULT_WEATHER_LOCATION;
-                        return {
-                            lon: data.lon,
-                            lat: data.lat,
-                            displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName
-                        };
-                    } catch (error) {
-                        console.error('Location error:', error);
-                        return DEFAULT_WEATHER_LOCATION;
-                    }
-                })();
+        function updateRelocateBadge(isLocating = false) {
+            const badge = document.getElementById('weatherHeaderBadge');
+            if (!badge) return;
+            badge.innerHTML = `<i class="fas ${isLocating ? 'fa-spinner fa-spin' : 'fa-location-dot'}"></i><span>${isLocating ? '重新定位中...' : '点击重新定位'}</span>`;
+            badge.setAttribute('title', '点击后将清除定位缓存并重新尝试定位');
+        }
+
+        function clearWeatherLocationCache() {
+            weatherLocationPromise = null;
+            weatherLocationCache = null;
+        }
+
+        async function getLocationFromApi() {
+            const response = await fetch('/api/location');
+            if (!response.ok) throw new Error('Failed to resolve location from /api/location');
+            const data = await response.json();
+            if (!data?.lon || !data?.lat) throw new Error('Invalid location response');
+            return {
+                lon: data.lon,
+                lat: data.lat,
+                displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
+                source: 'ip'
+            };
+        }
+
+        async function getLocationFromDevice() {
+            if (!navigator.geolocation) throw new Error('Geolocation unavailable');
+            return await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve({
+                        lon: position.coords.longitude.toFixed(6),
+                        lat: position.coords.latitude.toFixed(6),
+                        displayName: '设备定位',
+                        source: 'device'
+                    }),
+                    reject,
+                    { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
+                );
+            });
+        }
+
+        async function resolveWeatherLocation({ preferDevice = false } = {}) {
+            if (preferDevice) {
+                try {
+                    return await getLocationFromDevice();
+                } catch (error) {
+                    console.warn('Device geolocation failed, fallback to /api/location:', error);
+                }
             }
+
+            try {
+                return await getLocationFromApi();
+            } catch (error) {
+                console.error('Location fallback error:', error);
+                return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
+            }
+        }
+
+        async function getWeatherLocation({ forceRefresh = false, preferDevice = false } = {}) {
+            if (forceRefresh) clearWeatherLocationCache();
+            const now = Date.now();
+            const cacheValid = weatherLocationCache && (now - weatherLocationCache.updatedAt < WEATHER_LOCATION_CACHE_TTL);
+            if (cacheValid) return weatherLocationCache.location;
+
+            if (!weatherLocationPromise) {
+                weatherLocationPromise = resolveWeatherLocation({ preferDevice })
+                    .then(location => {
+                        weatherLocationCache = { location, updatedAt: Date.now() };
+                        return location;
+                    })
+                    .finally(() => { weatherLocationPromise = null; });
+            }
+
             return weatherLocationPromise;
         }
 
-        async function loadWeather() {
+        async function ensureGeolocationPermissionState({ refresh = false } = {}) {
+            if (!navigator.permissions?.query) {
+                geolocationPermissionState = 'unsupported';
+                return geolocationPermissionState;
+            }
+
+            if (refresh) geolocationPermissionPromise = null;
+            if (geolocationPermissionState !== 'unknown' && !refresh) return geolocationPermissionState;
+
+            if (!geolocationPermissionPromise) {
+                geolocationPermissionPromise = navigator.permissions.query({ name: 'geolocation' })
+                    .then(status => {
+                        geolocationPermissionState = status.state;
+                        status.onchange = () => {
+                            geolocationPermissionState = status.state;
+                            if (geolocationPermissionState === 'granted') {
+                                clearWeatherLocationCache();
+                            }
+                        };
+                        return geolocationPermissionState;
+                    })
+                    .catch(error => {
+                        console.warn('Permission query unsupported:', error);
+                        geolocationPermissionState = 'unsupported';
+                        return geolocationPermissionState;
+                    })
+                    .finally(() => {
+                        geolocationPermissionPromise = null;
+                    });
+            }
+
+            return geolocationPermissionPromise;
+        }
+
+        async function loadWeather({ forceRelocate = false } = {}) {
             try {
                 document.getElementById('location').textContent = '正在定位...';
-                const location = await getWeatherLocation();
+                if (forceRelocate) updateRelocateBadge(true);
+                const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
+                const location = await getWeatherLocation({
+                    forceRefresh: forceRelocate,
+                    preferDevice: forceRelocate || permissionState === 'granted'
+                });
                 document.getElementById('location').textContent = location.displayName;
 
                 // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
@@ -4762,8 +4861,13 @@
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
                 document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
+                const sourceLabel = location.source === 'device' ? '设备定位' : location.source === 'ip' ? 'IP定位' : '默认位置';
                 document.getElementById('weatherHeaderBadge').innerHTML = `<i class="fas fa-location-dot"></i><span>${location.displayName}</span>`;
-                document.getElementById('weatherHeaderNote').textContent = d.forecast_keypoint || d.hourly?.description || '根据当前体感和小时趋势整理';
+                document.getElementById('weatherHeaderNote').textContent = location.source === 'device'
+                    ? `定位来源：${sourceLabel}`
+                    : (location.source === 'ip'
+                        ? `设备定位不可用，已切换 ${sourceLabel}`
+                        : `定位来源：${sourceLabel}`);
 
                 // Hourly
                 if (d.hourly?.temperature) {
@@ -4879,8 +4983,18 @@
                         {icon:'fa-virus',name:'感冒',level:li.coldRisk?.[0]?.desc||'--'}
                     ].map(x => `<div class="life-index-item"><i class="fas ${x.icon}"></i><div><div class="name">${x.name}</div><div class="level">${x.level}</div></div></div>`).join('');
                 }
-            } catch(e) { console.error('Weather error:', e); }
+                updateRelocateBadge(false);
+            } catch(e) {
+                console.error('Weather error:', e);
+                updateRelocateBadge(false);
+            }
         }
+
+        document.getElementById('weatherHeaderBadge').addEventListener('click', () => {
+            loadWeather({ forceRelocate: true });
+        });
+
+        ensureGeolocationPermissionState();
 
         let _marketStaticCache = {};
         let marketLiveDateLabel = '';

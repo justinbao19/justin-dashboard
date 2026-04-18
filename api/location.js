@@ -8,6 +8,21 @@ const DEFAULT_LOCATION = {
   source: 'default'
 };
 
+function readHeader(req, name) {
+  const value = req.headers[name];
+  if (!value) return '';
+  return Array.isArray(value) ? String(value[0] || '').trim() : String(value).trim();
+}
+
+function decodeHeaderValue(value) {
+  if (!value) return '';
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 function getClientIp(req) {
   const candidates = [
     req.headers['x-forwarded-for'],
@@ -65,44 +80,46 @@ function formatDisplayName(location) {
   return uniquePieces.join(' · ') || location.country || DEFAULT_LOCATION.displayName;
 }
 
+function getLocationFromVercelHeaders(req, ip) {
+  const lat = readHeader(req, 'x-vercel-ip-latitude');
+  const lon = readHeader(req, 'x-vercel-ip-longitude');
+  if (!lat || !lon) return null;
+
+  const city = decodeHeaderValue(readHeader(req, 'x-vercel-ip-city'));
+  const region = decodeHeaderValue(readHeader(req, 'x-vercel-ip-country-region'));
+  const country = decodeHeaderValue(readHeader(req, 'x-vercel-ip-country'));
+
+  const location = {
+    lon,
+    lat,
+    city,
+    region,
+    country,
+    displayName: '',
+    source: 'ip',
+    ip: ip || null
+  };
+
+  location.displayName = formatDisplayName(location);
+  return location;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Cache-Control', 'no-store');
 
   const ip = getClientIp(req);
+  const headerLocation = getLocationFromVercelHeaders(req, ip);
 
-  if (isPrivateIp(ip)) {
-    res.status(200).json({ ...DEFAULT_LOCATION, ip: ip || null });
+  if (headerLocation) {
+    res.status(200).json(headerLocation);
     return;
   }
 
-  try {
-    const response = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`);
-    if (!response.ok) {
-      throw new Error(`Geo lookup failed with status ${response.status}`);
-    }
+  const error = isPrivateIp(ip)
+    ? 'Local request has no public geo headers'
+    : 'Geo headers unavailable on this request';
 
-    const data = await response.json();
-    if (!data.success || typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
-      throw new Error('Geo lookup returned incomplete data');
-    }
-
-    const location = {
-      lon: String(data.longitude),
-      lat: String(data.latitude),
-      city: data.city || '',
-      region: data.region || '',
-      country: data.country || '',
-      displayName: '',
-      source: 'ip',
-      ip
-    };
-
-    location.displayName = formatDisplayName(location);
-
-    res.status(200).json(location);
-  } catch (error) {
-    res.status(200).json({ ...DEFAULT_LOCATION, ip, error: 'Failed to locate IP' });
-  }
+  res.status(200).json({ ...DEFAULT_LOCATION, ip: ip || null, error });
 }

@@ -305,50 +305,22 @@
             user-select: none;
         }
         .weather-header .location {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 10px 12px;
+            display: grid;
+            justify-items: center;
+            gap: 8px;
             margin-top: 10px;
         }
-        .weather-location-name {
+        .weather-location-primary {
             font-size: 34px;
             font-weight: 600;
             line-height: 1.12;
             text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .weather-location-source {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(0,0,0,0.18);
-            border: 1px solid rgba(255,255,255,0.14);
-            backdrop-filter: blur(18px);
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.14);
-        }
-        .weather-location-source.device {
-            background: rgba(96, 214, 162, 0.18);
-            border-color: rgba(182,255,221,0.28);
-        }
-        .weather-location-source.ip {
-            background: rgba(116, 185, 255, 0.18);
-            border-color: rgba(183,221,255,0.28);
-        }
-        .weather-location-source.default {
-            background: rgba(255,255,255,0.14);
-            border-color: rgba(255,255,255,0.16);
-        }
-        .weather-location-detail {
-            width: 100%;
+        .weather-location-secondary {
             font-size: 13px;
             line-height: 1.5;
             opacity: 0.8;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.24);
         }
         .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
@@ -3252,19 +3224,14 @@
 
             .weather-header .location {
                 margin-top: 8px;
-                gap: 8px 10px;
+                gap: 6px;
             }
 
-            .weather-location-name {
+            .weather-location-primary {
                 font-size: 28px;
             }
 
-            .weather-location-source {
-                padding: 7px 10px;
-                font-size: 12px;
-            }
-
-            .weather-location-detail {
+            .weather-location-secondary {
                 font-size: 12px;
             }
 
@@ -3691,9 +3658,10 @@
 
             .weather-header .location {
                 justify-content: flex-start;
+                justify-items: start;
             }
 
-            .weather-location-name {
+            .weather-location-primary {
                 font-size: 42px;
             }
 
@@ -4016,8 +3984,8 @@
                     <div class="weather-header">
                         <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
                         <div class="location" id="location">
-                            <span class="weather-location-name">上海 · 闵行</span>
-                            <span class="weather-location-source default"><i class="fas fa-map-pin"></i><span>默认位置</span></span>
+                            <span class="weather-location-primary">上海 · 闵行 / 默认位置</span>
+                            <span class="weather-location-secondary">正在准备当前天气视图</span>
                         </div>
                         <div class="temp-main" id="tempMain">7°</div>
                         <div class="condition" id="condition">多云</div>
@@ -4819,26 +4787,20 @@
                 .replaceAll("'", '&#39;');
         }
 
-        function getLocationSourceMeta(location = {}) {
-            if (location.source === 'device') {
-                return { label: '设备定位', className: 'device', icon: 'fa-location-crosshairs' };
-            }
-            if (location.source === 'ip') {
-                return { label: 'IP定位', className: 'ip', icon: 'fa-globe' };
-            }
-            return { label: '默认位置', className: 'default', icon: 'fa-map-pin' };
+        function getLocationSourceLabel(location = {}) {
+            if (location.source === 'device') return '设备定位';
+            if (location.source === 'ip') return 'IP定位';
+            return '默认位置';
         }
 
         function renderWeatherLocation(location, { detail = '' } = {}) {
             const locationEl = document.getElementById('location');
             if (!locationEl) return;
-            const sourceMeta = getLocationSourceMeta(location);
-            const detailLine = detail
-                ? `<span class="weather-location-detail">${escapeHtml(detail)}</span>`
-                : '';
+            const sourceLabel = getLocationSourceLabel(location);
+            const primaryLine = `${location.displayName || DEFAULT_WEATHER_LOCATION.displayName} / ${sourceLabel}`;
+            const detailLine = detail ? `<span class="weather-location-secondary">${escapeHtml(detail)}</span>` : '';
             locationEl.innerHTML = `
-                <span class="weather-location-name">${escapeHtml(location.displayName || DEFAULT_WEATHER_LOCATION.displayName)}</span>
-                <span class="weather-location-source ${sourceMeta.className}"><i class="fas ${sourceMeta.icon}"></i><span>${sourceMeta.label}</span></span>
+                <span class="weather-location-primary">${escapeHtml(primaryLine)}</span>
                 ${detailLine}
             `;
         }
@@ -4852,7 +4814,8 @@
                 lon: data.lon,
                 lat: data.lat,
                 displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
-                source: 'ip'
+                source: data.source || 'default',
+                error: data.error || ''
             };
         }
 
@@ -4897,7 +4860,7 @@
                     return {
                         lon: position.coords.longitude.toFixed(6),
                         lat: position.coords.latitude.toFixed(6),
-                        displayName: '设备定位',
+                        displayName: '当前位置',
                         source: 'device'
                     };
                 } catch (error) {
@@ -4911,12 +4874,17 @@
         async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true } = {}) {
             if (preferDevice) {
                 try {
-                    return await getLocationFromDevice({ allowCached: allowCachedDevice });
+                    const deviceLocation = await getLocationFromDevice({ allowCached: allowCachedDevice });
+                    const labelLocation = await getLocationFromApi().catch(() => null);
+                    if (labelLocation?.displayName && labelLocation.source === 'ip') {
+                        deviceLocation.displayName = labelLocation.displayName;
+                    }
+                    return deviceLocation;
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
                     const fallback = await getLocationFromApi().catch(apiError => {
                         console.error('Location fallback error:', apiError);
-                        return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
+                        return { ...DEFAULT_WEATHER_LOCATION, source: 'default', error: 'IP定位不可用' };
                     });
                     return {
                         ...fallback,
@@ -4929,7 +4897,7 @@
                 return await getLocationFromApi();
             } catch (error) {
                 console.error('Location fallback error:', error);
-                return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
+                return { ...DEFAULT_WEATHER_LOCATION, source: 'default', error: 'IP定位不可用' };
             }
         }
 
@@ -5000,8 +4968,8 @@
                 const locationDetail = location.source === 'device'
                     ? '已同步当前设备位置'
                     : (location.source === 'ip'
-                        ? `已根据网络位置匹配天气${location.deviceError ? ` · ${location.deviceError}` : ''}`
-                        : '当前位置不可用，已切换默认天气视图');
+                        ? '已根据网络位置匹配天气'
+                        : (location.error || '当前位置不可用，已切换默认天气视图'));
                 renderWeatherLocation(location, { detail: locationDetail });
 
                 // 先按访问 IP 解析经纬度，再获取对应城市的实时天气

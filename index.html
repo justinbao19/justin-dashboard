@@ -4735,6 +4735,7 @@
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
+        let weatherDeviceLocationAttempted = false;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
 
@@ -4810,6 +4811,15 @@
             weatherLocationCache = null;
         }
 
+        function formatCoordinateLabel(latitude, longitude) {
+            const lat = Number(latitude);
+            const lon = Number(longitude);
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return '';
+            const latLabel = `${lat >= 0 ? '北纬' : '南纬'} ${Math.abs(lat).toFixed(3)}`;
+            const lonLabel = `${lon >= 0 ? '东经' : '西经'} ${Math.abs(lon).toFixed(3)}`;
+            return `${latLabel} · ${lonLabel}`;
+        }
+
         function escapeHtml(value = '') {
             return String(value)
                 .replaceAll('&', '&amp;')
@@ -4874,6 +4884,15 @@
             });
         }
 
+        function shouldPreferDeviceLocation(permissionState, { forceRelocate = false } = {}) {
+            if (forceRelocate) return true;
+            if (permissionState === 'granted') return true;
+            if ((permissionState === 'prompt' || permissionState === 'unsupported' || permissionState === 'unknown') && !weatherDeviceLocationAttempted) {
+                return true;
+            }
+            return false;
+        }
+
         async function getLocationFromDevice({ allowCached = true } = {}) {
             if (!navigator.geolocation) throw new Error('Geolocation unavailable');
 
@@ -4897,7 +4916,8 @@
                     return {
                         lon: position.coords.longitude.toFixed(6),
                         lat: position.coords.latitude.toFixed(6),
-                        displayName: '设备定位',
+                        displayName: '当前位置',
+                        coordinateLabel: formatCoordinateLabel(position.coords.latitude, position.coords.longitude),
                         source: 'device'
                     };
                 } catch (error) {
@@ -4967,6 +4987,7 @@
                         status.onchange = () => {
                             geolocationPermissionState = status.state;
                             if (geolocationPermissionState === 'granted') {
+                                weatherDeviceLocationAttempted = false;
                                 clearWeatherLocationCache();
                             }
                         };
@@ -4992,13 +5013,15 @@
                 });
                 if (forceRelocate) updateRelocateBadge(true);
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
+                const preferDevice = shouldPreferDeviceLocation(permissionState, { forceRelocate });
+                if (preferDevice) weatherDeviceLocationAttempted = true;
                 const location = await getWeatherLocation({
                     forceRefresh: forceRelocate,
-                    preferDevice: forceRelocate || permissionState === 'granted',
+                    preferDevice,
                     allowCachedDevice: !forceRelocate
                 });
                 const locationDetail = location.source === 'device'
-                    ? '已同步当前设备位置'
+                    ? `已同步当前设备位置${location.coordinateLabel ? ` · ${location.coordinateLabel}` : ''}`
                     : (location.source === 'ip'
                         ? `已根据网络位置匹配天气${location.deviceError ? ` · ${location.deviceError}` : ''}`
                         : '当前位置不可用，已切换默认天气视图');

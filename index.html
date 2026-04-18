@@ -4874,12 +4874,7 @@
         async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true } = {}) {
             if (preferDevice) {
                 try {
-                    const deviceLocation = await getLocationFromDevice({ allowCached: allowCachedDevice });
-                    const labelLocation = await getLocationFromApi().catch(() => null);
-                    if (labelLocation?.displayName && labelLocation.source === 'ip') {
-                        deviceLocation.displayName = labelLocation.displayName;
-                    }
-                    return deviceLocation;
+                    return await getLocationFromDevice({ allowCached: allowCachedDevice });
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
                     const fallback = await getLocationFromApi().catch(apiError => {

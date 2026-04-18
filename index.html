@@ -631,8 +631,8 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            gap: 10px 12px;
-            margin-top: 10px;
+            gap: 8px 12px;
+            margin-top: 16px;
         }
         .weather-location-name {
             font-size: 34px;
@@ -640,45 +640,15 @@
             line-height: 1.12;
             text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .weather-location-source {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(0,0,0,0.18);
-            border: 1px solid rgba(255,255,255,0.14);
-            backdrop-filter: blur(18px);
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.14);
-        }
-        .weather-location-source.device {
-            background: rgba(96, 214, 162, 0.18);
-            border-color: rgba(182,255,221,0.28);
-        }
-        .weather-location-source.saved {
-            background: rgba(255,255,255,0.12);
-            border-color: rgba(255,255,255,0.18);
-        }
-        .weather-location-source.ip {
-            background: rgba(116, 185, 255, 0.18);
-            border-color: rgba(183,221,255,0.28);
-        }
-        .weather-location-source.default {
-            background: rgba(255,255,255,0.14);
-            border-color: rgba(255,255,255,0.16);
-        }
         .weather-location-detail {
             width: 100%;
             font-size: 13px;
             line-height: 1.5;
-            opacity: 0.8;
+            opacity: 0.74;
         }
         .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-        .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 10px; }
+        .weather-header .condition { font-size: 24px; margin-top: 18px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 12px; }
         .weather-header-meta {
             display: flex;
             justify-content: center;
@@ -711,7 +681,7 @@
         .weather-header-note {
             font-size: 13px;
             opacity: 0.78;
-            margin-top: 16px;
+            margin-top: 20px;
             line-height: 1.5;
             max-width: 320px;
             margin-left: auto;
@@ -3629,11 +3599,6 @@
                 font-size: 28px;
             }
 
-            .weather-location-source {
-                padding: 7px 10px;
-                font-size: 12px;
-            }
-
             .weather-location-detail {
                 font-size: 12px;
             }
@@ -4056,8 +4021,8 @@
 
             .weather-layout {
                 display: grid;
-                grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
-                gap: 40px;
+                grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+                gap: 44px;
                 align-items: start;
                 min-height: 100vh;
                 padding: 32px 24px 140px;
@@ -4068,28 +4033,52 @@
                 top: 24px;
                 text-align: left;
                 padding: 34px 8px 0;
-                max-width: 380px;
+                max-width: 400px;
             }
 
             .weather-header .location {
                 justify-content: flex-start;
+                margin-top: 20px;
+                gap: 6px 10px;
             }
 
             .weather-location-name {
-                font-size: 42px;
+                font-size: clamp(40px, 4vw, 52px);
+                max-width: 7ch;
             }
 
             .weather-header .temp-main {
-                font-size: clamp(132px, 11vw, 176px);
+                font-size: clamp(132px, 10vw, 176px);
                 letter-spacing: -10px;
             }
 
             .weather-header .condition {
-                font-size: 28px;
+                font-size: 24px;
+                margin-top: 18px;
+                max-width: 12ch;
+                line-height: 1.28;
             }
 
             .weather-header .temp-range {
-                font-size: 22px;
+                font-size: 20px;
+                margin-top: 12px;
+            }
+
+            .weather-header-meta {
+                display: none;
+            }
+
+            .weather-location-detail {
+                max-width: 28ch;
+            }
+
+            .weather-header-note {
+                margin-top: 26px;
+                margin-left: 0;
+                margin-right: 0;
+                max-width: 28ch;
+                padding-top: 16px;
+                border-top: 1px solid rgba(255,255,255,0.12);
             }
 
             .weather-content {
@@ -4400,7 +4389,7 @@
                         <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-crosshairs"></i><span>刷新当前位置</span></div>
                         <div class="location" id="location">
                             <span class="weather-location-name">上海 · 闵行</span>
-                            <span class="weather-location-source default"><i class="fas fa-map-pin"></i><span>默认位置</span></span>
+                            <span class="weather-location-detail">默认天气位置</span>
                         </div>
                         <div class="temp-main" id="tempMain">7°</div>
                         <div class="condition" id="condition">多云</div>
@@ -5301,29 +5290,14 @@
                 .replaceAll("'", '&#39;');
         }
 
-        function getLocationSourceMeta(location = {}) {
-            if (location.source === 'saved') {
-                return { label: '已保存', className: 'saved', icon: 'fa-bookmark' };
-            }
-            if (location.source === 'device') {
-                return { label: '设备定位', className: 'device', icon: 'fa-location-crosshairs' };
-            }
-            if (location.source === 'ip') {
-                return { label: 'IP定位', className: 'ip', icon: 'fa-globe' };
-            }
-            return { label: '默认位置', className: 'default', icon: 'fa-map-pin' };
-        }
-
         function renderWeatherLocation(location, { detail = '' } = {}) {
             const locationEl = document.getElementById('location');
             if (!locationEl) return;
-            const sourceMeta = getLocationSourceMeta(location);
             const detailLine = detail
                 ? `<span class="weather-location-detail">${escapeHtml(detail)}</span>`
                 : '';
             locationEl.innerHTML = `
                 <span class="weather-location-name">${escapeHtml(location.displayName || DEFAULT_WEATHER_LOCATION.displayName)}</span>
-                <span class="weather-location-source ${sourceMeta.className}"><i class="fas ${sourceMeta.icon}"></i><span>${sourceMeta.label}</span></span>
                 ${detailLine}
             `;
         }
@@ -5836,8 +5810,12 @@
             return {
                 lon: data.lon,
                 lat: data.lat,
+                city: data.city || '',
+                region: data.region || '',
+                country: data.country || '',
                 displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
-                source: 'ip'
+                source: data.source || 'ip',
+                error: data.error || ''
             };
         }
 
@@ -5854,6 +5832,9 @@
                 return {
                     lon: position.coords.longitude.toFixed(6),
                     lat: position.coords.latitude.toFixed(6),
+                    city: data?.city || '',
+                    region: data?.region || '',
+                    country: data?.country || '',
                     displayName: data?.displayName || DEFAULT_WEATHER_LOCATION.displayName,
                     coordinateLabel: formatCoordinateLabel(position.coords.latitude, position.coords.longitude),
                     source: 'device'
@@ -6049,7 +6030,7 @@
                 return location.metaLabel ? `${location.metaLabel} · 已保存城市天气` : '已保存城市天气';
             }
             if (location.source === 'device') {
-                return `已同步当前设备位置${location.coordinateLabel ? ` · ${location.coordinateLabel}` : ''}`;
+                return '已同步当前位置天气';
             }
             if (location.source === 'ip') {
                 return `已根据网络位置匹配天气${location.deviceError ? ` · ${location.deviceError}` : ''}`;

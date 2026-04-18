@@ -3984,7 +3984,7 @@
                     <div class="weather-header">
                         <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
                         <div class="location" id="location">
-                            <span class="weather-location-primary">上海 · 闵行 / 默认位置</span>
+                            <span class="weather-location-primary">上海 · 闵行</span>
                             <span class="weather-location-secondary">正在准备当前天气视图</span>
                         </div>
                         <div class="temp-main" id="tempMain">7°</div>
@@ -4788,21 +4788,13 @@
                 .replaceAll("'", '&#39;');
         }
 
-        function getLocationSourceLabel(location = {}) {
-            if (location.source === 'device') return '设备定位';
-            if (location.source === 'ip') return 'IP定位';
-            return '默认位置';
-        }
-
         function renderWeatherLocation(location, { detail = '' } = {}) {
             const locationEl = document.getElementById('location');
             if (!locationEl) return;
-            const sourceLabel = getLocationSourceLabel(location);
             const displayName = location.displayName || DEFAULT_WEATHER_LOCATION.displayName;
-            const primaryLine = location.source === 'default' ? displayName : `${displayName} / ${sourceLabel}`;
             const detailLine = detail ? `<span class="weather-location-secondary">${escapeHtml(detail)}</span>` : '';
             locationEl.innerHTML = `
-                <span class="weather-location-primary">${escapeHtml(primaryLine)}</span>
+                <span class="weather-location-primary">${escapeHtml(displayName)}</span>
                 ${detailLine}
             `;
         }

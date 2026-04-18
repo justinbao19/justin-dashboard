@@ -1,0 +1,15 @@
+{
+  "activeCityId": "shanghai-minhang-121405-311230",
+  "manualCities": [
+    {
+      "id": "shanghai-minhang-121405-311230",
+      "name": "上海",
+      "country": "中国",
+      "region": "闵行",
+      "lat": "31.1230",
+      "lon": "121.4050",
+      "timezone": "Asia/Shanghai"
+    }
+  ],
+  "updatedAt": "2026-04-19T00:00:00.000Z"
+}

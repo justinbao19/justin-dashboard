@@ -290,6 +290,11 @@
             padding: 70px 20px 40px;
             color: white;
         }
+        .weather-header-top {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+        }
         .weather-header-badge {
             display: inline-flex;
             align-items: center;
@@ -322,9 +327,21 @@
             opacity: 0.8;
             text-shadow: 0 1px 4px rgba(0,0,0,0.24);
         }
-        .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-        .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 10px; }
+        .weather-hero-main {
+            display: grid;
+            justify-items: center;
+            gap: 14px;
+            margin-top: 28px;
+        }
+        .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 0.92; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .weather-hero-copy {
+            display: grid;
+            gap: 8px;
+            justify-items: center;
+            max-width: 520px;
+        }
+        .weather-header .condition { font-size: 24px; line-height: 1.22; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .weather-header .temp-range { font-size: 20px; opacity: 0.9; }
         .weather-header-meta {
             display: flex;
             justify-content: center;
@@ -3235,9 +3252,19 @@
                 font-size: 12px;
             }
 
+            .weather-hero-main {
+                gap: 10px;
+                margin-top: 22px;
+            }
+
             .weather-header .temp-main {
                 font-size: 82px;
                 letter-spacing: -4px;
+            }
+
+            .weather-hero-copy {
+                gap: 6px;
+                max-width: 100%;
             }
 
             .weather-header .condition {
@@ -3247,7 +3274,6 @@
 
             .weather-header .temp-range {
                 font-size: 17px;
-                margin-top: 8px;
             }
 
             .weather-header-meta {
@@ -3653,7 +3679,11 @@
                 top: 24px;
                 text-align: left;
                 padding: 34px 8px 0;
-                max-width: 380px;
+                max-width: 420px;
+            }
+
+            .weather-header-top {
+                justify-items: start;
             }
 
             .weather-header .location {
@@ -3662,20 +3692,55 @@
             }
 
             .weather-location-primary {
-                font-size: 42px;
+                font-size: 48px;
+                max-width: 100%;
+            }
+
+            .weather-hero-main {
+                grid-template-columns: auto minmax(0, 1fr);
+                align-items: end;
+                justify-items: stretch;
+                gap: 18px;
+                margin-top: 26px;
             }
 
             .weather-header .temp-main {
-                font-size: clamp(132px, 11vw, 176px);
-                letter-spacing: -10px;
+                font-size: clamp(132px, 10vw, 168px);
+                letter-spacing: -9px;
+            }
+
+            .weather-hero-copy {
+                justify-items: start;
+                align-self: center;
+                max-width: 260px;
+                padding-bottom: 18px;
             }
 
             .weather-header .condition {
-                font-size: 28px;
+                font-size: 30px;
+                max-width: 100%;
             }
 
             .weather-header .temp-range {
-                font-size: 22px;
+                font-size: 18px;
+                opacity: 0.82;
+            }
+
+            .weather-header-meta {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                margin-top: 24px;
+            }
+
+            .weather-header-stat {
+                min-width: 0;
+                padding: 14px 16px;
+            }
+
+            .weather-header-note {
+                margin-top: 18px;
+                max-width: 100%;
             }
 
             .weather-content {
@@ -3982,14 +4047,20 @@
         <div class="page active" id="page-weather">
                 <div class="weather-layout">
                     <div class="weather-header">
-                        <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
-                        <div class="location" id="location">
-                            <span class="weather-location-primary">上海 · 闵行</span>
-                            <span class="weather-location-secondary">正在准备当前天气视图</span>
+                        <div class="weather-header-top">
+                            <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
+                            <div class="location" id="location">
+                                <span class="weather-location-primary">上海 · 闵行</span>
+                                <span class="weather-location-secondary">正在准备当前天气视图</span>
+                            </div>
                         </div>
-                        <div class="temp-main" id="tempMain">7°</div>
-                        <div class="condition" id="condition">多云</div>
-                        <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
+                        <div class="weather-hero-main">
+                            <div class="temp-main" id="tempMain">7°</div>
+                            <div class="weather-hero-copy">
+                                <div class="condition" id="condition">多云</div>
+                                <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
+                            </div>
+                        </div>
                         <div class="weather-header-meta">
                             <div class="weather-header-stat">
                                 <div class="label"><i class="fas fa-temperature-half"></i> 体感</div>

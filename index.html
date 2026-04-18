@@ -289,6 +289,8 @@
             text-align: center;
             padding: 70px 20px 40px;
             color: white;
+            display: grid;
+            align-content: start;
         }
         .weather-header-badge {
             display: inline-flex;
@@ -304,13 +306,15 @@
             cursor: pointer;
             user-select: none;
         }
+        .weather-header-top {
+            display: grid;
+            justify-items: center;
+            gap: 14px;
+        }
         .weather-header .location {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 10px 12px;
-            margin-top: 10px;
+            display: grid;
+            justify-items: center;
+            gap: 10px;
         }
         .weather-location-name {
             font-size: 34px;
@@ -318,47 +322,33 @@
             line-height: 1.12;
             text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
-        .weather-location-source {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(0,0,0,0.18);
-            border: 1px solid rgba(255,255,255,0.14);
-            backdrop-filter: blur(18px);
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.14);
-        }
-        .weather-location-source.device {
-            background: rgba(96, 214, 162, 0.18);
-            border-color: rgba(182,255,221,0.28);
-        }
-        .weather-location-source.ip {
-            background: rgba(116, 185, 255, 0.18);
-            border-color: rgba(183,221,255,0.28);
-        }
-        .weather-location-source.default {
-            background: rgba(255,255,255,0.14);
-            border-color: rgba(255,255,255,0.16);
-        }
         .weather-location-detail {
-            width: 100%;
-            font-size: 13px;
-            line-height: 1.5;
-            opacity: 0.8;
+            font-size: 14px;
+            line-height: 1.55;
+            opacity: 0.84;
+            max-width: 340px;
         }
-        .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 1; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .weather-header .condition { font-size: 24px; margin-top: 6px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-        .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 10px; }
+        .weather-hero-main {
+            display: grid;
+            justify-items: center;
+            gap: 16px;
+            margin-top: 28px;
+        }
+        .weather-hero-copy {
+            display: grid;
+            gap: 10px;
+            justify-items: center;
+            max-width: 520px;
+        }
+        .weather-header .temp-main { font-size: 100px; font-weight: 200; line-height: 0.92; letter-spacing: -6px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .weather-header .condition { font-size: 24px; margin-top: 0; line-height: 1.28; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .weather-header .temp-range { font-size: 20px; opacity: 0.9; margin-top: 0; }
         .weather-header-meta {
             display: flex;
             justify-content: center;
             align-items: stretch;
             gap: 12px;
-            margin-top: 22px;
+            margin-top: 26px;
         }
         .weather-header-stat {
             min-width: 118px;
@@ -385,9 +375,9 @@
         .weather-header-note {
             font-size: 13px;
             opacity: 0.78;
-            margin-top: 16px;
+            margin-top: 18px;
             line-height: 1.5;
-            max-width: 320px;
+            max-width: 520px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -3250,22 +3240,31 @@
                 font-size: 12px;
             }
 
+            .weather-header-top {
+                gap: 10px;
+            }
+
             .weather-header .location {
-                margin-top: 8px;
-                gap: 8px 10px;
+                gap: 8px;
             }
 
             .weather-location-name {
                 font-size: 28px;
             }
 
-            .weather-location-source {
-                padding: 7px 10px;
-                font-size: 12px;
-            }
-
             .weather-location-detail {
                 font-size: 12px;
+                max-width: 100%;
+            }
+
+            .weather-hero-main {
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .weather-hero-copy {
+                gap: 8px;
+                max-width: 100%;
             }
 
             .weather-header .temp-main {
@@ -3280,7 +3279,6 @@
 
             .weather-header .temp-range {
                 font-size: 17px;
-                margin-top: 8px;
             }
 
             .weather-header-meta {
@@ -3674,8 +3672,8 @@
 
             .weather-layout {
                 display: grid;
-                grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
-                gap: 40px;
+                grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+                gap: 44px;
                 align-items: start;
                 min-height: 100vh;
                 padding: 32px 24px 140px;
@@ -3685,29 +3683,104 @@
                 position: sticky;
                 top: 24px;
                 text-align: left;
-                padding: 34px 8px 0;
-                max-width: 380px;
+                padding: 36px 8px 0;
+                max-width: 392px;
+                justify-items: start;
+            }
+
+            .weather-header-top {
+                justify-items: start;
+                gap: 16px;
+                width: 100%;
+                max-width: 344px;
+            }
+
+            .weather-header-badge {
+                padding: 10px 16px;
+                font-size: 14px;
+                box-shadow: 0 12px 32px rgba(0,0,0,0.14);
             }
 
             .weather-header .location {
-                justify-content: flex-start;
+                justify-items: start;
+                gap: 10px;
+                width: 100%;
             }
 
             .weather-location-name {
-                font-size: 42px;
+                font-size: clamp(48px, 3.4vw, 54px);
+                max-width: 100%;
+                line-height: 1.04;
+            }
+
+            .weather-location-detail {
+                max-width: 304px;
+                font-size: 14px;
+                opacity: 0.68;
+            }
+
+            .weather-hero-main {
+                grid-template-columns: minmax(0, 1fr);
+                justify-items: start;
+                gap: 14px;
+                margin-top: 26px;
+                width: 100%;
+                max-width: 344px;
             }
 
             .weather-header .temp-main {
-                font-size: clamp(132px, 11vw, 176px);
-                letter-spacing: -10px;
+                font-size: clamp(132px, 10vw, 168px);
+                letter-spacing: -8px;
+                line-height: 0.84;
+                margin-left: -6px;
+            }
+
+            .weather-hero-copy {
+                justify-items: start;
+                gap: 8px;
+                max-width: 320px;
+                padding-bottom: 0;
             }
 
             .weather-header .condition {
-                font-size: 28px;
+                font-size: 24px;
+                max-width: 100%;
+                line-height: 1.34;
             }
 
             .weather-header .temp-range {
-                font-size: 22px;
+                font-size: 17px;
+                opacity: 0.76;
+            }
+
+            .weather-header-meta {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 14px;
+                margin-top: 30px;
+                width: 100%;
+                max-width: 344px;
+            }
+
+            .weather-header-stat {
+                min-width: 0;
+                min-height: 118px;
+                padding: 16px 18px;
+                border-radius: 22px;
+                background: rgba(12, 20, 35, 0.22);
+            }
+
+            .weather-header-note {
+                margin-top: 22px;
+                max-width: 344px;
+                width: 100%;
+                margin-left: 0;
+                margin-right: 0;
+                font-size: 14px;
+                line-height: 1.65;
+                opacity: 0.7;
+                padding-top: 16px;
+                border-top: 1px solid rgba(255,255,255,0.09);
             }
 
             .weather-content {
@@ -4012,16 +4085,22 @@
     <div class="pages">
         <!-- Weather -->
         <div class="page active" id="page-weather">
-                <div class="weather-layout">
+            <div class="weather-layout">
                     <div class="weather-header">
-                        <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
-                        <div class="location" id="location">
-                            <span class="weather-location-name">上海 · 闵行</span>
-                            <span class="weather-location-source default"><i class="fas fa-map-pin"></i><span>默认位置</span></span>
+                        <div class="weather-header-top">
+                            <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
+                            <div class="location" id="location">
+                                <span class="weather-location-name">上海 · 闵行</span>
+                                <span class="weather-location-detail">根据当前定位同步天气信息</span>
+                            </div>
                         </div>
-                        <div class="temp-main" id="tempMain">7°</div>
-                        <div class="condition" id="condition">多云</div>
-                        <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
+                        <div class="weather-hero-main">
+                            <div class="temp-main" id="tempMain">7°</div>
+                            <div class="weather-hero-copy">
+                                <div class="condition" id="condition">多云</div>
+                                <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
+                            </div>
+                        </div>
                         <div class="weather-header-meta">
                             <div class="weather-header-stat">
                                 <div class="label"><i class="fas fa-temperature-half"></i> 体感</div>
@@ -4034,8 +4113,8 @@
                         </div>
                         <div class="weather-header-note" id="weatherHeaderNote">根据当前体感和小时趋势整理</div>
                     </div>
-                <div class="weather-content">
-                    <div class="weather-card weather-hourly-card">
+                    <div class="weather-content">
+                        <div class="weather-card weather-hourly-card">
                         <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
                         <div class="hourly-scroll" id="hourlyScroll"></div>
                     </div>
@@ -4819,26 +4898,14 @@
                 .replaceAll("'", '&#39;');
         }
 
-        function getLocationSourceMeta(location = {}) {
-            if (location.source === 'device') {
-                return { label: '设备定位', className: 'device', icon: 'fa-location-crosshairs' };
-            }
-            if (location.source === 'ip') {
-                return { label: 'IP定位', className: 'ip', icon: 'fa-globe' };
-            }
-            return { label: '默认位置', className: 'default', icon: 'fa-map-pin' };
-        }
-
         function renderWeatherLocation(location, { detail = '' } = {}) {
             const locationEl = document.getElementById('location');
             if (!locationEl) return;
-            const sourceMeta = getLocationSourceMeta(location);
             const detailLine = detail
                 ? `<span class="weather-location-detail">${escapeHtml(detail)}</span>`
                 : '';
             locationEl.innerHTML = `
                 <span class="weather-location-name">${escapeHtml(location.displayName || DEFAULT_WEATHER_LOCATION.displayName)}</span>
-                <span class="weather-location-source ${sourceMeta.className}"><i class="fas ${sourceMeta.icon}"></i><span>${sourceMeta.label}</span></span>
                 ${detailLine}
             `;
         }

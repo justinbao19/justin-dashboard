@@ -4703,6 +4703,7 @@
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
+        let lastResolvedWeatherLocation = null;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
 
@@ -4797,7 +4798,8 @@
             const locationEl = document.getElementById('location');
             if (!locationEl) return;
             const sourceLabel = getLocationSourceLabel(location);
-            const primaryLine = `${location.displayName || DEFAULT_WEATHER_LOCATION.displayName} / ${sourceLabel}`;
+            const displayName = location.displayName || DEFAULT_WEATHER_LOCATION.displayName;
+            const primaryLine = location.source === 'default' ? displayName : `${displayName} / ${sourceLabel}`;
             const detailLine = detail ? `<span class="weather-location-secondary">${escapeHtml(detail)}</span>` : '';
             locationEl.innerHTML = `
                 <span class="weather-location-primary">${escapeHtml(primaryLine)}</span>
@@ -4961,6 +4963,7 @@
         }
 
         async function loadWeather({ forceRelocate = false } = {}) {
+            let resolvedLocation = null;
             try {
                 renderWeatherLocation({ displayName: '正在定位', source: 'default' }, {
                     detail: forceRelocate ? '正在刷新当前位置天气' : '正在读取当前天气位置'
@@ -4972,6 +4975,8 @@
                     preferDevice: forceRelocate || permissionState === 'granted',
                     allowCachedDevice: !forceRelocate
                 });
+                resolvedLocation = location;
+                lastResolvedWeatherLocation = location;
                 const locationDetail = location.source === 'device'
                     ? '已同步当前设备位置'
                     : (location.source === 'ip'
@@ -4983,13 +4988,14 @@
                 const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
                 if (!r.ok) return;
                 const d = (await r.json()).result;
-                updateScene(d.realtime.skycon);
-                document.getElementById('tempMain').textContent = Math.round(d.realtime.temperature) + '°';
+                const rt = d?.realtime || {};
+                updateScene(rt.skycon || 'CLEAR_DAY');
+                document.getElementById('tempMain').textContent = Math.round(rt.temperature ?? 0) + '°';
                 document.getElementById('condition').textContent = d.hourly?.description || '多云';
                 const t0 = d.daily?.temperature?.[0];
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
-                document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
-                document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
+                document.getElementById('headerFeelsLike').textContent = `${Math.round(rt.apparent_temperature ?? rt.temperature ?? 0)}°`;
+                document.getElementById('headerHumidity').textContent = `${Math.round((rt.humidity || 0) * 100)}%`;
                 document.getElementById('weatherHeaderNote').textContent = d.hourly?.description
                     ? `根据当前体感和小时趋势整理 · ${d.hourly.description}`
                     : '根据当前体感和小时趋势整理';
@@ -5012,14 +5018,13 @@
                 }
 
                 // Details
-                const rt = d.realtime;
                 const getDir = deg => ['北','东北','东','东南','南','西南','西','西北'][Math.round(deg/45)%8] + '风';
                 document.getElementById('weatherGrid').innerHTML = [
-                    {icon:'fa-temperature-half',label:'体感温度',val:Math.round(rt.apparent_temperature),unit:'°',desc:rt.life_index?.comfort?.desc||''},
-                    {icon:'fa-droplet',label:'湿度',val:Math.round(rt.humidity*100),unit:'%'},
-                    {icon:'fa-wind',label:'风速',val:rt.wind.speed.toFixed(1),unit:' km/h',desc:getDir(rt.wind.direction)},
-                    {icon:'fa-eye',label:'能见度',val:rt.visibility.toFixed(1),unit:' km'},
-                    {icon:'fa-gauge',label:'气压',val:Math.round(rt.pressure/100),unit:' hPa'},
+                    {icon:'fa-temperature-half',label:'体感温度',val:Math.round(rt.apparent_temperature ?? rt.temperature ?? 0),unit:'°',desc:rt.life_index?.comfort?.desc||''},
+                    {icon:'fa-droplet',label:'湿度',val:Math.round((rt.humidity || 0)*100),unit:'%'},
+                    {icon:'fa-wind',label:'风速',val:Number(rt.wind?.speed || 0).toFixed(1),unit:' km/h',desc:getDir(Number(rt.wind?.direction || 0))},
+                    {icon:'fa-eye',label:'能见度',val:Number(rt.visibility || 0).toFixed(1),unit:' km'},
+                    {icon:'fa-gauge',label:'气压',val:Math.round((rt.pressure || 0)/100),unit:' hPa'},
                     {icon:'fa-sun',label:'紫外线',val:rt.life_index?.ultraviolet?.index||0,unit:'',desc:rt.life_index?.ultraviolet?.desc||'无'}
                 ].map(x => `<div class="weather-detail-card"><div class="label"><i class="fas ${x.icon}"></i> ${x.label}</div><div class="value">${x.val}<span class="unit">${x.unit}</span></div>${x.desc?`<div class="desc">${x.desc}</div>`:''}</div>`).join('');
 
@@ -5111,7 +5116,11 @@
                 updateRelocateBadge(false);
             } catch(e) {
                 console.error('Weather error:', e);
-                renderWeatherLocation(DEFAULT_WEATHER_LOCATION, { detail: '天气加载失败，已保留默认天气视图' });
+                const preservedLocation = resolvedLocation || lastResolvedWeatherLocation || DEFAULT_WEATHER_LOCATION;
+                const errorDetail = preservedLocation.source === 'default'
+                    ? '天气加载失败，已保留当前天气视图'
+                    : '天气加载失败，但已保留当前位置';
+                renderWeatherLocation(preservedLocation, { detail: errorDetail });
                 updateRelocateBadge(false);
             }
         }

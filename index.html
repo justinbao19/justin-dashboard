@@ -4819,6 +4819,13 @@
             };
         }
 
+        async function getDisplayNameFromCoords({ lat, lon }) {
+            const response = await fetch(`/api/reverse-geocode?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+            if (!response.ok) throw new Error('Failed to reverse geocode coordinates');
+            const data = await response.json();
+            return data?.displayName || '当前位置';
+        }
+
         function describeGeolocationError(error) {
             const code = Number(error?.code);
             if (code === 1) return '用户拒绝了定位授权';
@@ -4874,7 +4881,12 @@
         async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true } = {}) {
             if (preferDevice) {
                 try {
-                    return await getLocationFromDevice({ allowCached: allowCachedDevice });
+                    const deviceLocation = await getLocationFromDevice({ allowCached: allowCachedDevice });
+                    const displayName = await getDisplayNameFromCoords(deviceLocation).catch(() => '当前位置');
+                    return {
+                        ...deviceLocation,
+                        displayName
+                    };
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
                     const fallback = await getLocationFromApi().catch(apiError => {

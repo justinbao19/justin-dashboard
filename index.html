@@ -3482,6 +3482,56 @@
                 padding-left: 28px;
                 padding-right: 28px;
             }
+
+            .weather-header {
+                text-align: left;
+                max-width: 720px;
+                margin: 0 auto;
+                padding: 72px 28px 28px;
+            }
+
+            .weather-header .location {
+                justify-content: flex-start;
+                margin-top: 18px;
+            }
+
+            .weather-location-name {
+                font-size: clamp(44px, 6vw, 60px);
+                max-width: 9ch;
+            }
+
+            .weather-location-detail {
+                max-width: 32ch;
+            }
+
+            .weather-header .temp-main {
+                font-size: clamp(116px, 15vw, 168px);
+                letter-spacing: -8px;
+            }
+
+            .weather-header .condition {
+                font-size: 30px;
+                margin-top: 18px;
+                line-height: 1.2;
+            }
+
+            .weather-header .temp-range {
+                font-size: 22px;
+                margin-top: 10px;
+            }
+
+            .weather-header-meta {
+                display: none;
+            }
+
+            .weather-header-note {
+                margin-left: 0;
+                margin-right: 0;
+                margin-top: 22px;
+                max-width: 26ch;
+                padding-top: 14px;
+                border-top: 1px solid rgba(255,255,255,0.12);
+            }
         }
 
         @media (min-width: 1024px) {
@@ -5260,6 +5310,20 @@
             if (isRain) { for(let i=0;i<100;i++) { const d=document.createElement('div'); d.className='raindrop'; d.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*0.7}s;animation-duration:${0.5+Math.random()*0.3}s`; document.getElementById('rain').appendChild(d); } }
         }
 
+        function getPrimaryConditionLabel(skycon = '', fallback = '多云') {
+            const normalized = String(skycon || '').toUpperCase();
+            if (!normalized) return fallback;
+            if (normalized.includes('CLEAR')) return '晴';
+            if (normalized.includes('PARTLY_CLOUDY')) return '晴间多云';
+            if (normalized.includes('CLOUDY')) return '多云';
+            if (normalized.includes('LIGHT_HAZE') || normalized.includes('MODERATE_HAZE') || normalized.includes('HEAVY_HAZE')) return '轻雾霾';
+            if (normalized.includes('FOG')) return '有雾';
+            if (normalized.includes('RAIN')) return '有雨';
+            if (normalized.includes('SNOW') || normalized.includes('SLEET')) return '有雪';
+            if (normalized.includes('WIND')) return '有风';
+            return fallback;
+        }
+
         function updateRelocateBadge(isLocating = false) {
             const badge = document.getElementById('weatherHeaderBadge');
             if (!badge) return;
@@ -5988,7 +6052,7 @@
         function storeWeatherSummary(location, data) {
             const summary = {
                 temperatureText: `${Math.round(data?.realtime?.temperature ?? 0)}°`,
-                condition: data?.hourly?.description || '多云',
+                condition: getPrimaryConditionLabel(data?.realtime?.skycon, data?.hourly?.description || '多云'),
                 range: data?.daily?.temperature?.[0]
                     ? `最高 ${Math.round(data.daily.temperature[0].max)}° 最低 ${Math.round(data.daily.temperature[0].min)}°`
                     : '最高 --° 最低 --°'
@@ -6077,14 +6141,14 @@
             renderWeatherLocation(location, { detail: getWeatherLocationDetail(location) });
             updateScene(d.realtime.skycon);
             document.getElementById('tempMain').textContent = Math.round(d.realtime.temperature) + '°';
-            document.getElementById('condition').textContent = d.hourly?.description || '多云';
+            document.getElementById('condition').textContent = getPrimaryConditionLabel(d.realtime?.skycon, d.hourly?.description || '多云');
             const t0 = d.daily?.temperature?.[0];
             if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
             document.getElementById('headerFeelsLike').textContent = `${Math.round(d.realtime.apparent_temperature ?? d.realtime.temperature)}°`;
             document.getElementById('headerHumidity').textContent = `${Math.round((d.realtime.humidity || 0) * 100)}%`;
             document.getElementById('weatherHeaderNote').textContent = d.hourly?.description
-                ? `根据当前体感和小时趋势整理 · ${d.hourly.description}`
-                : '根据当前体感和小时趋势整理';
+                ? d.hourly.description
+                : '根据小时趋势整理当前天气变化';
 
             if (d.hourly?.temperature) {
                 document.getElementById('hourlyScroll').innerHTML = d.hourly.temperature.slice(0,24).map((h,i) => {

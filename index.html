@@ -6199,7 +6199,7 @@
                 const location = await getWeatherLocation({
                     forceRefresh: forceRelocate,
                     preferDevice,
-                    allowCachedDevice: !forceRelocate,
+                    allowCachedDevice: true,
                     allowIpFallback: !existingSuccessfulLocation || !preserveCurrentOnFailure
                 });
 

@@ -4094,12 +4094,13 @@
 
             .weather-location-name {
                 font-size: clamp(40px, 4vw, 52px);
-                max-width: 7ch;
+                max-width: none;
+                white-space: nowrap;
             }
 
             .weather-header .temp-main {
-                font-size: clamp(132px, 10vw, 176px);
-                letter-spacing: -10px;
+                font-size: clamp(116px, 8.5vw, 152px);
+                letter-spacing: -8px;
             }
 
             .weather-header .condition {
@@ -6455,12 +6456,10 @@
         }
 
         document.getElementById('weatherHeaderBadge').addEventListener('click', async () => {
-            if (weatherActiveView.type === 'current' || !weatherActiveView.cityId) {
-                refreshCurrentLocationWeather({ renderToPage: true });
-                return;
-            }
+            weatherActiveView = { type: 'current' };
+            renderWeatherCityList();
             try {
-                await refreshCurrentLocationWeather({ renderToPage: false });
+                await refreshCurrentLocationWeather({ renderToPage: true });
                 setWeatherSaveState('success', '当前位置天气已刷新');
             } catch (error) {
                 console.error('Failed to refresh current location:', error);

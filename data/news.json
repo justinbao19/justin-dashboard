@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-04-18T08:00:00+08:00",
+  "lastUpdated": "2026-04-19T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "突尼斯喜剧演员阿卜代利被缺席判刑",
-      "summary": "突尼斯演员兼喜剧人洛特菲·阿卜代利称，当地法院因其多年以前演出的戏剧，缺席判处他18个月监禁。他认为判决带有明显政治色彩，核心争议已从单一案件延伸到言论自由与司法独立，预计会继续引发突尼斯国内外舆论关注。",
+      "title": "伊朗宣布霍尔木兹海峡重新开放",
+      "summary": "路透报道，伊朗外长称霍尔木兹海峡对商船通行已恢复开放，市场随即认为中东局势最坏阶段暂时缓解。消息带动油价回落，也让外界重新评估航运风险、能源供给稳定性与后续谈判空间，但地缘摩擦并未真正消失。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/business/media-telecom/tunisian-comedian-abdelli-sentenced-absentia-says-ruling-targets-free-speech-2026-04-17/",
-      "timestamp": "2026-04-18T08:00:00+08:00"
+      "url": "https://www.reuters.com/world/middle-east/irans-foreign-minister-says-passage-vessels-via-hormuz-strait-is-open-during-2026-04-17/",
+      "timestamp": "2026-04-19T08:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "美国最高法院将裁定特朗普关税合法性",
-      "summary": "路透报道显示，美国最高法院预计将在未来数月裁定特朗普政府依据《国际紧急经济权力法》加征关税是否合宪。若裁决推翻现行做法，企业退税、贸易谈判和供应链定价都可能重估，市场也会重新评估美国对外贸易政策的法律边界。",
+      "title": "中国愿推动升级中瑞自贸协定谈判",
+      "summary": "路透称，中国表示愿意推进中瑞自贸协定升级谈判，释放出继续扩大贸易与投资合作的信号。此举有助于稳定双边经贸预期，也反映北京在全球供应链调整背景下，仍希望通过更高标准协议争取技术、市场与制度层面的互利空间。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/business/tariffs/",
-      "timestamp": "2026-04-18T08:00:00+08:00"
+      "url": "https://www.reuters.com/world/china/",
+      "timestamp": "2026-04-19T08:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "匈牙利碳税被欧盟法院认定违规",
-      "summary": "路透环境新闻显示，欧盟最高司法机构裁定匈牙利的碳税违反欧盟规则，这对成员国在气候政策上的税制设计形成约束。案件凸显欧洲在减排目标与产业成本之间的拉扯，也可能影响其他国家对碳税、补贴和合规框架的后续调整。",
+      "title": "澳大利亚与日本签署70亿美元军舰合同",
+      "summary": "路透报道，澳大利亚和日本已签署首批合同，推进总额约70亿美元的军舰项目。这不仅是两国防务工业合作的重要一步，也说明印太安全环境持续紧张，各国正把军备现代化、供应链可靠性和联盟协同放在更优先的位置。",
       "image": "",
       "source": "Reuters",
-      "url": "https://www.reuters.com/business/environment/",
-      "timestamp": "2026-04-18T08:00:00+08:00"
+      "url": "https://www.reuters.com/world/china/australia-japan-sign-contracts-start-7-billion-warship-deal-2026-04-18/",
+      "timestamp": "2026-04-19T08:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "俄军对乌克兰发动今年最大规模之一无人机袭击",
-      "summary": "CNN援引路透称，俄罗斯对乌克兰发动了今年规模最大的无人机袭击之一，造成18人死亡。袭击进一步证明前线之外的空袭战仍在升级，也会推高乌克兰防空压力、平民伤亡和对外军援需求，和平谈判前景因此更加不确定。",
-      "image": "https://media.cnn.com/api/v1/images/stellar/prod/220413094331-01-daniel-kinahan-state-dept-reward-boxing-spt-intl.jpg?c=16x9&q=h_876,w_1560,c_fill/f_webp",
-      "source": "CNN / Reuters",
-      "url": "https://edition.cnn.com/world",
-      "timestamp": "2026-04-18T08:00:00+08:00"
+      "title": "西班牙与中国强调加强关系",
+      "summary": "路透称，西班牙首相与中国领导人会面时强调要在动荡国际环境下深化合作。报道显示，欧洲部分国家仍倾向维持对华经贸接触，以平衡美国压力与自身产业利益，这类外交动作也会影响欧中经贸和技术合作的节奏。",
+      "image": "",
+      "source": "Reuters",
+      "url": "https://www.reuters.com/world/china/spanish-premier-chinas-xi-pledge-closer-ties-amid-crumbling-international-order-2026-04-14/",
+      "timestamp": "2026-04-19T08:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "Meta计划5月20日启动首轮裁员",
-      "summary": "路透称，Meta计划在5月20日启动第一轮裁员，随后还会在2026年进行更多削减。消息表明大型科技公司仍在压缩成本、重排组织结构，AI投入与盈利压力同时存在，行业内部的用工和资本开支节奏可能继续趋紧。",
+      "title": "BBC称国际足联反击新泽西州长批评",
+      "summary": "BBC报道，国际足联回击了美国新泽西州长对2026世界杯铁路票价的批评，称过高票价会带来负面观感。争议反映大型赛事在商业化和公共可达性之间的老问题，也可能影响球迷体验、城市形象与主办方的舆论压力。",
       "image": "",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/technology/artificial-intelligence/",
-      "timestamp": "2026-04-18T08:00:00+08:00"
+      "source": "BBC",
+      "url": "https://www.bbc.com/news",
+      "timestamp": "2026-04-19T08:00:00+08:00"
     }
   ]
 }

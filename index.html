@@ -5199,11 +5199,11 @@
         const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
+        const WEATHER_DEVICE_LOCATION_OVERALL_TIMEOUT = 10000;
         const WEATHER_CITY_SUMMARY_CACHE_TTL = 5 * 60 * 1000;
         const WEATHER_WRITE_SECRET_STORAGE_KEY = 'weatherConfigWriteSecret';
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
-        let weatherDeviceLocationAttempted = false;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
         let weatherCitiesConfig = cloneWeatherCitiesConfig(DEFAULT_WEATHER_CITIES_CONFIG);
@@ -5933,13 +5933,19 @@
             });
         }
 
+        function withTimeout(promise, timeoutMs, message) {
+            let timeoutId = null;
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+            });
+            return Promise.race([promise, timeoutPromise]).finally(() => {
+                if (timeoutId !== null) window.clearTimeout(timeoutId);
+            });
+        }
+
         function shouldPreferDeviceLocation(permissionState, { forceRelocate = false } = {}) {
             if (forceRelocate) return true;
-            if (permissionState === 'granted') return true;
-            if ((permissionState === 'prompt' || permissionState === 'unsupported' || permissionState === 'unknown') && !weatherDeviceLocationAttempted) {
-                return true;
-            }
-            return false;
+            return permissionState === 'granted';
         }
 
         async function getLocationFromDevice({ allowCached = true } = {}) {
@@ -5974,7 +5980,11 @@
         async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true } = {}) {
             if (preferDevice) {
                 try {
-                    return await getLocationFromDevice({ allowCached: allowCachedDevice });
+                    return await withTimeout(
+                        getLocationFromDevice({ allowCached: allowCachedDevice }),
+                        WEATHER_DEVICE_LOCATION_OVERALL_TIMEOUT,
+                        '设备定位超时'
+                    );
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
                     const fallback = await getLocationFromApi().catch(apiError => {
@@ -6030,7 +6040,6 @@
                         status.onchange = () => {
                             geolocationPermissionState = status.state;
                             if (geolocationPermissionState === 'granted') {
-                                weatherDeviceLocationAttempted = false;
                                 clearWeatherLocationCache();
                             }
                         };
@@ -6108,16 +6117,17 @@
             }
 
             weatherCurrentLocationPromise = (async () => {
-                if (!silent) {
-                    renderWeatherLocation({ displayName: '正在定位', source: 'default' }, {
-                        detail: forceRelocate ? '正在刷新当前位置天气' : '正在读取当前位置天气'
-                    });
-                }
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
                 const preferDevice = silent
                     ? (forceRelocate || permissionState === 'granted')
                     : shouldPreferDeviceLocation(permissionState, { forceRelocate });
-                if (preferDevice) weatherDeviceLocationAttempted = true;
+                if (!silent) {
+                    renderWeatherLocation({ displayName: preferDevice ? '正在定位' : '正在匹配位置', source: 'default' }, {
+                        detail: forceRelocate
+                            ? (preferDevice ? '正在刷新当前位置天气' : '正在重新匹配当前位置天气')
+                            : (preferDevice ? '正在读取当前位置天气' : '正在匹配当前位置天气')
+                    });
+                }
                 const location = await getWeatherLocation({
                     forceRefresh: forceRelocate,
                     preferDevice,

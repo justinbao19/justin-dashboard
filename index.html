@@ -5199,7 +5199,7 @@
         const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
-        const WEATHER_DEVICE_LOCATION_OVERALL_TIMEOUT = 10000;
+        const WEATHER_DEVICE_LOCATION_OVERALL_TIMEOUT = 4500;
         const WEATHER_CITY_SUMMARY_CACHE_TTL = 5 * 60 * 1000;
         const WEATHER_WRITE_SECRET_STORAGE_KEY = 'weatherConfigWriteSecret';
         let weatherLocationPromise = null;
@@ -6122,16 +6122,19 @@
                     ? (forceRelocate || permissionState === 'granted')
                     : shouldPreferDeviceLocation(permissionState, { forceRelocate });
                 if (!silent) {
-                    renderWeatherLocation({ displayName: preferDevice ? '正在定位' : '正在匹配位置', source: 'default' }, {
+                    const loadingLocation = forceRelocate && weatherCurrentLocation
+                        ? weatherCurrentLocation
+                        : { displayName: preferDevice ? '正在定位' : '正在匹配位置', source: 'default' };
+                    renderWeatherLocation(loadingLocation, {
                         detail: forceRelocate
                             ? (preferDevice ? '正在刷新当前位置天气' : '正在重新匹配当前位置天气')
                             : (preferDevice ? '正在读取当前位置天气' : '正在匹配当前位置天气')
                     });
                 }
                 const location = await getWeatherLocation({
-                    forceRefresh: forceRelocate,
+                    forceRefresh: forceRelocate && !weatherCurrentLocation,
                     preferDevice,
-                    allowCachedDevice: !forceRelocate
+                    allowCachedDevice: true
                 });
                 weatherCurrentLocation = location;
                 if (currentLocationWeather) {

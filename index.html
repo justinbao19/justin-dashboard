@@ -5199,7 +5199,6 @@
         const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
-        const WEATHER_DEVICE_LOCATION_OVERALL_TIMEOUT = 4500;
         const WEATHER_CITY_SUMMARY_CACHE_TTL = 5 * 60 * 1000;
         const WEATHER_WRITE_SECRET_STORAGE_KEY = 'weatherConfigWriteSecret';
         let weatherLocationPromise = null;
@@ -5974,16 +5973,6 @@
             });
         }
 
-        function withTimeout(promise, timeoutMs, message) {
-            let timeoutId = null;
-            const timeoutPromise = new Promise((_, reject) => {
-                timeoutId = window.setTimeout(() => reject(new Error(message)), timeoutMs);
-            });
-            return Promise.race([promise, timeoutPromise]).finally(() => {
-                if (timeoutId !== null) window.clearTimeout(timeoutId);
-            });
-        }
-
         function shouldPreferDeviceLocation(permissionState, { forceRelocate = false } = {}) {
             if (forceRelocate) return true;
             return permissionState === 'granted';
@@ -6021,11 +6010,7 @@
         async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true, allowIpFallback = true, forceApiRefresh = false } = {}) {
             if (preferDevice) {
                 try {
-                    return await withTimeout(
-                        getLocationFromDevice({ allowCached: allowCachedDevice }),
-                        WEATHER_DEVICE_LOCATION_OVERALL_TIMEOUT,
-                        '设备定位超时'
-                    );
+                    return await getLocationFromDevice({ allowCached: allowCachedDevice });
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
                     if (!allowIpFallback) {

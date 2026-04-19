@@ -5220,6 +5220,8 @@
         let weatherSummaryCache = new Map();
         let weatherSummaryPromises = new Map();
         let weatherCurrentLocation = null;
+        let lastSuccessfulDeviceLocation = null;
+        let lastSuccessfulIpLocation = null;
         let weatherCurrentLocationPromise = null;
         let currentLocationWeather = null;
         let activeCityWeather = null;
@@ -5334,6 +5336,43 @@
         function clearWeatherLocationCache() {
             weatherLocationPromise = null;
             weatherLocationCache = null;
+        }
+
+        function cloneWeatherLocation(location) {
+            return location ? { ...location } : null;
+        }
+
+        function hasSuccessfulCurrentLocation() {
+            return Boolean(lastSuccessfulDeviceLocation || lastSuccessfulIpLocation);
+        }
+
+        function getBestSuccessfulCurrentLocation() {
+            return cloneWeatherLocation(
+                lastSuccessfulDeviceLocation
+                || lastSuccessfulIpLocation
+                || ((weatherCurrentLocation?.source === 'device' || weatherCurrentLocation?.source === 'ip') ? weatherCurrentLocation : null)
+                || ((currentLocationWeather?.location?.source === 'device' || currentLocationWeather?.location?.source === 'ip') ? currentLocationWeather.location : null)
+                || null
+            );
+        }
+
+        function rememberCurrentLocation(location, { allowDefaultOverwrite = false } = {}) {
+            if (!location) return null;
+            const nextLocation = cloneWeatherLocation(location);
+
+            if (nextLocation.source === 'device') {
+                lastSuccessfulDeviceLocation = cloneWeatherLocation(nextLocation);
+            } else if (nextLocation.source === 'ip') {
+                lastSuccessfulIpLocation = cloneWeatherLocation(nextLocation);
+            } else if (!allowDefaultOverwrite && hasSuccessfulCurrentLocation()) {
+                return getBestSuccessfulCurrentLocation();
+            }
+
+            weatherCurrentLocation = cloneWeatherLocation(nextLocation);
+            if (currentLocationWeather) {
+                currentLocationWeather.location = cloneWeatherLocation(nextLocation);
+            }
+            return nextLocation;
         }
 
         function formatCoordinateLabel(latitude, longitude) {
@@ -5866,8 +5905,9 @@
             await Promise.allSettled(tasks);
         }
 
-        async function getLocationFromApi() {
-            const response = await fetch('/api/location');
+        async function getLocationFromApi({ forceRefresh = false } = {}) {
+            const endpoint = forceRefresh ? `/api/location?ts=${Date.now()}` : '/api/location';
+            const response = await fetch(endpoint, { cache: 'no-store' });
             if (!response.ok) throw new Error('Failed to resolve location from /api/location');
             const data = await response.json();
             if (!data?.lon || !data?.lat) throw new Error('Invalid location response');
@@ -5879,7 +5919,8 @@
                 country: data.country || '',
                 displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
                 source: data.source || 'ip',
-                error: data.error || ''
+                error: data.error || '',
+                ip: data.ip || ''
             };
         }
 
@@ -5977,7 +6018,7 @@
             throw lastError || new Error('设备定位失败');
         }
 
-        async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true } = {}) {
+        async function resolveWeatherLocation({ preferDevice = false, allowCachedDevice = true, allowIpFallback = true, forceApiRefresh = false } = {}) {
             if (preferDevice) {
                 try {
                     return await withTimeout(
@@ -5987,7 +6028,10 @@
                     );
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
-                    const fallback = await getLocationFromApi().catch(apiError => {
+                    if (!allowIpFallback) {
+                        throw error;
+                    }
+                    const fallback = await getLocationFromApi({ forceRefresh: forceApiRefresh }).catch(apiError => {
                         console.error('Location fallback error:', apiError);
                         return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
                     });
@@ -5999,26 +6043,35 @@
             }
 
             try {
-                return await getLocationFromApi();
+                return await getLocationFromApi({ forceRefresh: forceApiRefresh });
             } catch (error) {
                 console.error('Location fallback error:', error);
                 return { ...DEFAULT_WEATHER_LOCATION, source: 'default' };
             }
         }
 
-        async function getWeatherLocation({ forceRefresh = false, preferDevice = false, allowCachedDevice = true } = {}) {
-            if (forceRefresh) clearWeatherLocationCache();
+        async function getWeatherLocation({ forceRefresh = false, preferDevice = false, allowCachedDevice = true, allowIpFallback = true } = {}) {
+            if (forceRefresh) {
+                weatherLocationPromise = null;
+            }
             const now = Date.now();
             const cacheValid = weatherLocationCache && (now - weatherLocationCache.updatedAt < WEATHER_LOCATION_CACHE_TTL);
-            if (cacheValid) return weatherLocationCache.location;
+            if (cacheValid && !forceRefresh) return weatherLocationCache.location;
 
-            if (!weatherLocationPromise) {
-                weatherLocationPromise = resolveWeatherLocation({ preferDevice, allowCachedDevice })
-                    .then(location => {
-                        weatherLocationCache = { location, updatedAt: Date.now() };
+            if (!weatherLocationPromise || forceRefresh) {
+                const locationPromise = resolveWeatherLocation({
+                    preferDevice,
+                    allowCachedDevice,
+                    allowIpFallback,
+                    forceApiRefresh: forceRefresh
+                }).then(location => {
+                        if (location?.source === 'device' || location?.source === 'ip') {
+                            weatherLocationCache = { location: cloneWeatherLocation(location), updatedAt: Date.now() };
+                        }
                         return location;
                     })
                     .finally(() => { weatherLocationPromise = null; });
+                weatherLocationPromise = locationPromise;
             }
 
             return weatherLocationPromise;
@@ -6111,19 +6164,46 @@
             return '当前位置不可用，已切换默认天气视图';
         }
 
-        async function ensureCurrentLocationReady({ forceRelocate = false, silent = false } = {}) {
+        function isSameWeatherLocation(a, b) {
+            if (!a || !b) return false;
+            return String(a.lat) === String(b.lat) && String(a.lon) === String(b.lon) && String(a.source || '') === String(b.source || '');
+        }
+
+        async function updateCurrentLocationWeather(location, { renderToPage = false, renderToken = weatherCurrentRenderToken, detailOverride = '' } = {}) {
+            const data = await fetchWeatherResult(location);
+            if (renderToPage && renderToken !== weatherCurrentRenderToken) return null;
+            const summary = storeWeatherSummary(location, data);
+            currentLocationWeather = { location: cloneWeatherLocation(location), data, summary, updatedAt: Date.now() };
+            rememberCurrentLocation(location, { allowDefaultOverwrite: !hasSuccessfulCurrentLocation() });
+            if (renderToPage) {
+                renderWeatherResultToPage(location, data);
+                if (detailOverride) {
+                    renderWeatherLocation(location, { detail: detailOverride });
+                }
+            }
+            renderWeatherCityList();
+            return { data, summary };
+        }
+
+        async function ensureCurrentLocationReady({ forceRelocate = false, silent = false, preserveCurrentOnFailure = true } = {}) {
             if (weatherCurrentLocationPromise && !forceRelocate) {
                 return weatherCurrentLocationPromise;
             }
 
             weatherCurrentLocationPromise = (async () => {
+                const existingSuccessfulLocation = getBestSuccessfulCurrentLocation();
+                if (!forceRelocate && existingSuccessfulLocation) {
+                    return rememberCurrentLocation(existingSuccessfulLocation);
+                }
+
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
                 const preferDevice = silent
                     ? (forceRelocate || permissionState === 'granted')
                     : shouldPreferDeviceLocation(permissionState, { forceRelocate });
+
                 if (!silent) {
-                    const loadingLocation = forceRelocate && weatherCurrentLocation
-                        ? weatherCurrentLocation
+                    const loadingLocation = forceRelocate && existingSuccessfulLocation
+                        ? existingSuccessfulLocation
                         : { displayName: preferDevice ? '正在定位' : '正在匹配位置', source: 'default' };
                     renderWeatherLocation(loadingLocation, {
                         detail: forceRelocate
@@ -6132,21 +6212,81 @@
                     });
                 }
                 const location = await getWeatherLocation({
-                    forceRefresh: forceRelocate && !weatherCurrentLocation,
+                    forceRefresh: forceRelocate,
                     preferDevice,
-                    allowCachedDevice: true
+                    allowCachedDevice: !forceRelocate,
+                    allowIpFallback: !existingSuccessfulLocation || !preserveCurrentOnFailure
                 });
-                weatherCurrentLocation = location;
-                if (currentLocationWeather) {
-                    currentLocationWeather.location = location;
+
+                if ((location?.source === 'default' || !location?.displayName) && existingSuccessfulLocation && preserveCurrentOnFailure) {
+                    return rememberCurrentLocation(existingSuccessfulLocation);
                 }
-                return location;
+
+                return rememberCurrentLocation(location, { allowDefaultOverwrite: !existingSuccessfulLocation });
             })();
 
             try {
                 return await weatherCurrentLocationPromise;
+            } catch (error) {
+                const preservedLocation = preserveCurrentOnFailure ? getBestSuccessfulCurrentLocation() : null;
+                if (preservedLocation) {
+                    return rememberCurrentLocation(preservedLocation);
+                }
+                throw error;
             } finally {
                 weatherCurrentLocationPromise = null;
+            }
+        }
+
+        async function refreshCurrentLocationWeather({ renderToPage = false } = {}) {
+            const renderToken = ++weatherCurrentRenderToken;
+            const existingSuccessfulLocation = getBestSuccessfulCurrentLocation();
+            updateRelocateBadge(true);
+
+            try {
+                if (existingSuccessfulLocation) {
+                    rememberCurrentLocation(existingSuccessfulLocation);
+                    if (renderToPage) {
+                        renderWeatherLocation(existingSuccessfulLocation, { detail: '正在刷新当前位置天气' });
+                    }
+
+                    try {
+                        await updateCurrentLocationWeather(existingSuccessfulLocation, {
+                            renderToPage,
+                            renderToken,
+                            detailOverride: '正在刷新当前位置天气'
+                        });
+                    } catch (error) {
+                        console.warn('Fast refresh using existing location failed:', error);
+                        if (renderToPage) {
+                            renderWeatherLocation(existingSuccessfulLocation, { detail: '天气刷新失败，但已保留当前位置天气' });
+                        }
+                    }
+                }
+
+                const refreshedLocation = await ensureCurrentLocationReady({
+                    forceRelocate: true,
+                    silent: !renderToPage,
+                    preserveCurrentOnFailure: true
+                });
+
+                if (!refreshedLocation) return;
+
+                const shouldRefreshWeather = !existingSuccessfulLocation || !isSameWeatherLocation(existingSuccessfulLocation, refreshedLocation);
+                if (shouldRefreshWeather || !currentLocationWeather) {
+                    await updateCurrentLocationWeather(refreshedLocation, {
+                        renderToPage,
+                        renderToken
+                    });
+                } else {
+                    renderWeatherCityList();
+                }
+
+                if (renderToPage && renderToken === weatherCurrentRenderToken) {
+                    renderWeatherLocation(refreshedLocation, { detail: getWeatherLocationDetail(refreshedLocation) });
+                }
+            } finally {
+                updateRelocateBadge(false);
             }
         }
 
@@ -6274,11 +6414,10 @@
 
         async function loadWeather({ forceRelocate = false, fallbackToFirstSavedOnCurrentFailure = false } = {}) {
             const renderToken = ++weatherCurrentRenderToken;
+            let location = null;
             try {
                 await ensureWeatherCitiesConfigLoaded();
-                if (forceRelocate) updateRelocateBadge(true);
 
-                let location = null;
                 let activeCity = null;
                 if (weatherActiveView.type === 'saved') {
                     activeCity = getManualCityById(weatherActiveView.cityId, weatherCitiesDraft) || getManualCityById(weatherCitiesConfig.activeCityId, weatherCitiesConfig);
@@ -6288,7 +6427,11 @@
                     location = createSavedCityLocation(activeCity);
                 } else {
                     weatherActiveView = { type: 'current' };
-                    location = await ensureCurrentLocationReady({ forceRelocate });
+                    if (forceRelocate) {
+                        await refreshCurrentLocationWeather({ renderToPage: true });
+                        return;
+                    }
+                    location = getBestSuccessfulCurrentLocation() || await ensureCurrentLocationReady({ forceRelocate: false });
                 }
 
                 if (weatherActiveView.type === 'current' && fallbackToFirstSavedOnCurrentFailure && location.source === 'default') {
@@ -6305,35 +6448,37 @@
 
                 const summary = storeWeatherSummary(location, data);
                 if (weatherActiveView.type === 'current') {
-                    currentLocationWeather = { location, data, summary, updatedAt: Date.now() };
+                    currentLocationWeather = { location: cloneWeatherLocation(location), data, summary, updatedAt: Date.now() };
+                    rememberCurrentLocation(location, { allowDefaultOverwrite: !hasSuccessfulCurrentLocation() });
                 } else {
                     activeCityWeather = { location, data, summary, updatedAt: Date.now() };
                 }
                 renderWeatherResultToPage(location, data);
                 renderWeatherCityList();
-                updateRelocateBadge(false);
             } catch (e) {
                 console.error('Weather error:', e);
-                renderWeatherLocation(DEFAULT_WEATHER_LOCATION, { detail: '天气加载失败，已保留默认天气视图' });
-                updateRelocateBadge(false);
+                const preservedLocation = weatherActiveView.type === 'current'
+                    ? getBestSuccessfulCurrentLocation() || location
+                    : null;
+                if (preservedLocation) {
+                    renderWeatherLocation(preservedLocation, { detail: '天气加载失败，但已保留当前位置天气' });
+                    renderWeatherCityList();
+                } else {
+                    renderWeatherLocation(DEFAULT_WEATHER_LOCATION, { detail: '天气加载失败，已保留默认天气视图' });
+                }
             }
         }
 
         document.getElementById('weatherHeaderBadge').addEventListener('click', async () => {
             if (weatherActiveView.type === 'current' || !weatherActiveView.cityId) {
-                loadWeather({ forceRelocate: true });
+                refreshCurrentLocationWeather({ renderToPage: true });
                 return;
             }
-            updateRelocateBadge(true);
             try {
-                await ensureCurrentLocationReady({ forceRelocate: true });
-                await getWeatherSummary(weatherCurrentLocation, { force: true });
-                renderWeatherCityList();
-                updateRelocateBadge(false);
+                await refreshCurrentLocationWeather({ renderToPage: false });
                 setWeatherSaveState('success', '当前位置天气已刷新');
             } catch (error) {
                 console.error('Failed to refresh current location:', error);
-                updateRelocateBadge(false);
                 setWeatherSaveState('error', '当前位置刷新失败');
             }
         });

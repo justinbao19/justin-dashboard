@@ -11,6 +11,12 @@ const DEFAULT_LOCATION = {
 const REVERSE_GEOCODE_ENDPOINT = 'https://nominatim.openstreetmap.org/reverse';
 const REVERSE_GEOCODE_USER_AGENT = 'justin-dashboard/1.0 (weather location reverse geocoding)';
 
+function getHeaderValue(req, name) {
+  const value = req.headers?.[name];
+  if (Array.isArray(value)) return String(value[0] || '').trim();
+  return String(value || '').trim();
+}
+
 function getClientIp(req) {
   const candidates = [
     req.headers['x-forwarded-for'],
@@ -266,38 +272,40 @@ export default async function handler(req, res) {
   }
 
   const ip = getClientIp(req);
+  const vercelCity = getHeaderValue(req, 'x-vercel-ip-city');
+  const vercelRegion = getHeaderValue(req, 'x-vercel-ip-country-region');
+  const vercelCountry = getHeaderValue(req, 'x-vercel-ip-country');
+  const vercelLatitude = getHeaderValue(req, 'x-vercel-ip-latitude');
+  const vercelLongitude = getHeaderValue(req, 'x-vercel-ip-longitude');
 
   if (isPrivateIp(ip)) {
     res.status(200).json({ ...DEFAULT_LOCATION, ip: ip || null });
     return;
   }
 
-  try {
-    const response = await fetch(`https://ipwho.is/${encodeURIComponent(ip)}`);
-    if (!response.ok) {
-      throw new Error(`Geo lookup failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (!data.success || typeof data.latitude !== 'number' || typeof data.longitude !== 'number') {
-      throw new Error('Geo lookup returned incomplete data');
-    }
-
+  if (vercelLatitude && vercelLongitude) {
     const location = {
-      lon: String(data.longitude),
-      lat: String(data.latitude),
-      city: data.city || '',
-      region: data.region || '',
-      country: data.country || '',
+      lon: vercelLongitude,
+      lat: vercelLatitude,
+      city: normalizeMunicipalityName(vercelCity),
+      region: normalizeMunicipalityName(vercelRegion),
+      country: vercelCountry || '',
       displayName: '',
       source: 'ip',
       ip
     };
 
-    location.displayName = formatDisplayName(location);
-
+    const fallbackDisplayName = [vercelCity, vercelRegion, vercelCountry]
+      .filter(Boolean)
+      .join(' · ') || DEFAULT_LOCATION.displayName;
+    location.displayName = formatDisplayName(location, fallbackDisplayName);
     res.status(200).json(location);
-  } catch (error) {
-    res.status(200).json({ ...DEFAULT_LOCATION, ip, error: 'Failed to locate IP' });
+    return;
   }
+
+  res.status(200).json({
+    ...DEFAULT_LOCATION,
+    ip,
+    error: 'Platform did not provide geo headers'
+  });
 }

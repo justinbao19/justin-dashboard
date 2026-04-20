@@ -1,50 +1,50 @@
 {
-  "lastUpdated": "2026-04-19T18:00:00+08:00",
+  "lastUpdated": "2026-04-20T08:00:00+08:00",
   "items": [
     {
       "id": 1,
-      "title": "美国批准向德国出售价值119亿美元综合作战系统",
-      "summary": "美国政府批准向德国出售价值119亿美元的综合作战系统，显示美德在欧洲安全与防务协作上继续加深。此类军售通常涵盖指挥、通信、传感与武器整合能力，不只是单一装备交易，也会影响北约盟友的联合作战与采购节奏。",
-      "image": "",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/world/europe/",
-      "timestamp": "2026-04-19T18:00:00+08:00"
+      "title": "外交渠道加紧斡旋美伊再谈判",
+      "summary": "美伊对峙持续升级之际，多国外交官正通过非正式渠道推动双方恢复谈判。报道显示，围绕霍尔木兹海峡、地区停火与航运安全的压力并未消散，联合国也呼吁尽快重启对话。市场与地缘政治两条线同时承压，后续关键看美伊是否愿意让步。",
+      "image": "https://dims.apnews.com/dims4/default/6082bd3/2147483647/strip/true/crop/1280x720+0+0/resize/980x551!/format/webp/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Fa2%2Fac%2F2d2c145713c4fd24483c0e177196%2Firan-aftermath-reax-20260414cr-1920x1080.jpg",
+      "source": "AP",
+      "url": "https://apnews.com/article/us-iran-war-lebanon-israel-talks-hormuz-14-april-2026-24655d40b2d968c39949e5ec2e01535b",
+      "timestamp": "2026-04-20T08:00:00+08:00"
     },
     {
       "id": 2,
-      "title": "伦敦疑似纵火案引发英国反恐调查",
-      "summary": "英国反恐警察正在调查伦敦一宗纵火案，案件牵涉伊朗国际电视台办公地点附近的安全风险。若调查确认与政治或跨境因素有关，这将进一步放大英国国内对外国势力影响、媒体安全与公共秩序的警惕，也可能带来更严格的安保措施。",
-      "image": "",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/world/uk/british-counter-terrorism-police-investigating-london-arson-attack-2026-04-18/",
-      "timestamp": "2026-04-19T18:00:00+08:00"
+      "title": "以色列与黎巴嫩停火协议生效",
+      "summary": "一项由美国促成、以色列和黎巴嫩同意的十天停火已经开始执行，令持续数周的中东冲突暂时降温。虽然协议给前线争取到喘息空间，但双方互信依然脆弱，未来能否延续停火、交换条件是否落实，仍是外界最关注的风险点。",
+      "image": "https://dims.apnews.com/dims4/default/6d114c6/2147483647/strip/true/crop/1920x1080+0+0/resize/980x551!/format/webp/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F8d%2Fb7%2Ff6e3953e44836778fc42b2a33046%2Fus-dc-israel-ambassador-lebanon-talks-20260414cr-1920x1080.jpg",
+      "source": "AP",
+      "url": "https://apnews.com/article/us-iran-war-lebanon-israel-talks-pakistan-hormuz-16-april-2026-297a8d2bb94add26e503a4ef3a5d1151",
+      "timestamp": "2026-04-20T08:00:00+08:00"
     },
     {
       "id": 3,
-      "title": "今年以来已有17名移民在美国ICE羁押中死亡",
-      "summary": "路透报道显示，自2026年1月以来，美国移民与海关执法局羁押期间已有至少17名移民死亡，引发人权与监管层面的强烈关注。该数据会加剧外界对拘押条件、医疗照护、审查程序及执法透明度的质疑，预计将成为移民政策争论焦点。",
-      "image": "",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/world/",
-      "timestamp": "2026-04-19T18:00:00+08:00"
+      "title": "美国称将封锁伊朗港口施压谈判",
+      "summary": "在停火谈判未能达成一致后，美国宣布将立即对进出霍尔木兹海峡的船只实施封锁，进一步抬高地区紧张局势。此举直接触及全球能源运输要道，也意味着军事施压与外交斡旋正在同步推进，原油、航运和保险市场都可能继续出现剧烈反应。",
+      "image": "https://dims.apnews.com/dims4/default/911e118/2147483647/strip/true/crop/1920x1080+0+0/resize/980x551!/format/webp/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Ff9%2F01%2F71c2c98b77a5402f83ca7ab073c0%2Fun-guterres-middle-east-20260414cr-1920x1080.jpg",
+      "source": "AP",
+      "url": "https://apnews.com/article/iran-us-israel-trump-lebanon-april-12-2026-a8a0d22918fc3fb30bc3abf1cd5c5a13",
+      "timestamp": "2026-04-20T08:00:00+08:00"
     },
     {
       "id": 4,
-      "title": "伊朗宣布霍尔木兹海峡开放后油价回落9%",
-      "summary": "在伊朗宣布霍尔木兹海峡开放后，国际油价大幅回落约9%，市场迅速降低对供应中断的担忧。霍尔木兹海峡是全球能源运输关键通道，任何关于通行安全的变化都会立即反映到原油、航运与风险资产定价上，短线波动仍可能很剧烈。",
-      "image": "",
-      "source": "Reuters",
-      "url": "https://www.reuters.com/business/",
-      "timestamp": "2026-04-19T18:00:00+08:00"
+      "title": "特朗普要求伊朗48小时内开放霍尔木兹海峡",
+      "summary": "美国总统特朗普再次向德黑兰发出最后通牒，要求尽快恢复霍尔木兹海峡通航，否则地区局势可能进一步失控。伊朗方面则以更强硬措辞回应，双方都在试探对方底线。围绕海峡通行权的角力，已经成为当前中东局势最敏感的火药桶。",
+      "image": "https://dims.apnews.com/dims4/default/0e82ea2/2147483647/strip/true/crop/1280x720+0+0/resize/980x551!/format/webp/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F52%2Fe7%2Fdaf81e99d40c180cfd948b3835a7%2Fira-tehran-us-reactions-20260402cr-1920x1080.jpg",
+      "source": "AP",
+      "url": "https://apnews.com/article/iran-us-israel-trump-lebanon-april-4-2026-b1f73e5c2a88ddcf71d93f49f9494e1b",
+      "timestamp": "2026-04-20T08:00:00+08:00"
     },
     {
       "id": 5,
-      "title": "国际足联回应新泽西州长对世界杯票价的批评",
-      "summary": "国际足联回击了美国新泽西州长对2026年世界杯高额火车票价的批评，称过高票价可能对球迷出行产生明显抑制效应。围绕赛事交通与定价的争议，已经从体育话题扩散到公共服务、公平性与大型赛事经济效应的讨论。",
-      "image": "",
-      "source": "BBC",
-      "url": "https://www.bbc.com/news",
-      "timestamp": "2026-04-19T18:00:00+08:00"
+      "title": "两架美军飞机在伊朗方向接连被击落",
+      "summary": "两架美军飞机在不同事件中被击落后，地区紧张局势进一步恶化，一名机组人员仍然失踪。报道显示，冲突已从外交施压升级到更直接的军事对抗，若搜救和后续调查无法稳定局面，相关国家之间的误判风险还会继续上升。",
+      "image": "https://dims.apnews.com/dims4/default/0e82ea2/2147483647/strip/true/crop/1280x720+0+0/resize/980x551!/format/webp/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F52%2Fe7%2Fdaf81e99d40c180cfd948b3835a7%2Fira-tehran-us-reactions-20260402cr-1920x1080.jpg",
+      "source": "AP",
+      "url": "https://apnews.com/article/iran-us-israel-trump-lebanon-april-3-2026-a6365c6123cc8a696474f576d4ce7668",
+      "timestamp": "2026-04-20T08:00:00+08:00"
     }
   ]
 }

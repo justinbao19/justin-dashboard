@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-05-11T22:34:20.017Z",
+    "lastRunAt": "2026-05-12T08:11:35.071Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-05-11 22:34",
+    "lastDecisionAt": "2026-05-12 08:11",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -183,6 +183,10 @@
       },
       {
         "date": "2026-05-11",
+        "value": 10040.32
+      },
+      {
+        "date": "2026-05-12",
         "value": 10040.32
       }
     ],
@@ -540,6 +544,11 @@
       },
       {
         "date": "2026-05-11 22:34",
+        "analysis": "宏观：原油大涨（通胀压力/地缘风险）。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-05-12 08:11",
         "analysis": "宏观：原油大涨（通胀压力/地缘风险）。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }

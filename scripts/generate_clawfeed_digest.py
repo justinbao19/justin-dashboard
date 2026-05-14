@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from datetime import datetime
 from typing import Any
 
@@ -40,13 +41,22 @@ def pick_items(section: dict[str, Any], limit: int) -> list[dict[str, Any]]:
     return items[:limit]
 
 
-def build_prompt(edition: str, payload: dict[str, Any]) -> str:
+def select_news(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     categories = payload.get("categories", {}) if isinstance(payload, dict) else {}
-    selected = {
+    return {
         "macro": pick_items(categories.get("macro", {}) if isinstance(categories, dict) else {}, 4),
         "tech": pick_items(categories.get("tech", {}) if isinstance(categories, dict) else {}, 6),
         "general": pick_items(categories.get("general", {}) if isinstance(categories, dict) else {}, 4),
     }
+
+
+def clip_text(value: Any, limit: int = 80) -> str:
+    text = " ".join(str(value or "").split())
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def build_prompt(edition: str, payload: dict[str, Any]) -> str:
+    selected = select_news(payload)
 
     if edition == "morning":
         structure = {
@@ -88,35 +98,83 @@ def build_prompt(edition: str, payload: dict[str, Any]) -> str:
     )
 
 
+def build_fallback_digest(edition: str, payload: dict[str, Any]) -> str:
+    selected = select_news(payload)
+    today = datetime.now().strftime("%Y年%-m月%-d日")
+    title = "🤖 ClawFeed AI 科技早报" if edition == "morning" else "🤖 ClawFeed AI 科技午报"
+
+    def lines(items: list[dict[str, Any]], limit: int) -> list[str]:
+        out: list[str] = []
+        for item in items[:limit]:
+            item_title = clip_text(item.get("title", ""), 70)
+            source = clip_text(item.get("sourceLabel") or item.get("source") or "", 18)
+            stamp = clip_text(item.get("stamp") or item.get("publishedAt") or "", 20)
+            meta = " · ".join(part for part in [source, stamp] if part)
+            out.append(f"- {item_title}" + (f"（{meta}）" if meta else ""))
+        return out
+
+    sections: list[tuple[str, list[str]]] = []
+    macro_lines = lines(selected["macro"], 3 if edition == "morning" else 2)
+    tech_lines = lines(selected["tech"], 4 if edition == "morning" else 3)
+    general_lines = lines(selected["general"], 3 if edition == "morning" else 2)
+
+    if macro_lines:
+        sections.append(("🔥 今日热点" if edition == "morning" else "🔥 上午热点", macro_lines))
+    if tech_lines:
+        sections.append(("💡 技术动态", tech_lines))
+    if general_lines:
+        sections.append(("💬 值得关注", general_lines))
+
+    parts = [f"{title} | {today}"]
+    for heading, body in sections:
+        parts.append(f"\n{heading}\n" + "\n".join(body))
+    if len(parts) == 1:
+        parts.append("\n💬 值得关注\n- 暂无足够的 AI/科技动态可供整理。")
+    return "\n".join(parts).strip()
+
+
 def call_llm(prompt: str) -> str:
     api_key = require_env("LLM_API_KEY")
     base_url = require_env("LLM_BASE_URL").rstrip("/")
     model = require_env("LLM_MODEL")
-    response = requests.post(
-        f"{base_url}/chat/completions",
-        json={
-            "model": model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": (
-                        "You write concise Chinese AI/tech digests. "
-                        "Return plain text only."
-                    ),
-                },
-                {"role": "user", "content": prompt},
-            ],
-            "temperature": 0.5,
-            "max_tokens": 1800,
-        },
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        timeout=90,
-    )
-    response.raise_for_status()
-    payload = response.json()
+    body = {
+        "model": model,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "You write concise Chinese AI/tech digests. "
+                    "Return plain text only."
+                ),
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "temperature": 0.5,
+        "max_tokens": 1800,
+    }
+
+    try:
+        response = requests.post(
+            f"{base_url}/chat/completions",
+            json=body,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            timeout=90,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except requests.HTTPError as exc:
+        detail = ""
+        if exc.response is not None:
+            detail = exc.response.text[:2000]
+        raise SystemExit(
+            f"LLM request failed: HTTP {exc.response.status_code if exc.response else 'unknown'}: {detail}"
+        ) from exc
+    except requests.RequestException as exc:
+        raise SystemExit(f"LLM request failed: {exc}") from exc
+
     try:
         content = payload["choices"][0]["message"]["content"]
     except Exception as exc:
@@ -132,7 +190,12 @@ def main() -> int:
     args = parser.parse_args()
 
     payload = load_news_stream()
-    text = call_llm(build_prompt(args.edition, payload))
+    prompt = build_prompt(args.edition, payload)
+    try:
+        text = call_llm(prompt)
+    except SystemExit as exc:
+        print(f"[warn] {exc}. Falling back to deterministic digest.", file=sys.stderr)
+        text = build_fallback_digest(args.edition, payload)
 
     today = datetime.now().strftime("%Y年%-m月%-d日")
     if args.edition == "morning" and "ClawFeed AI 科技早报" not in text:

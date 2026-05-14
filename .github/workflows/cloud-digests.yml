@@ -57,14 +57,15 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             DIGEST="${{ inputs.digest }}"
           else
-            HOUR=$(TZ=Asia/Shanghai date +%H)
-            if [ "$HOUR" = "07" ]; then
-              DIGEST=weather
-            elif [ "$HOUR" = "08" ]; then
-              DIGEST=clawfeed-morning
-            else
-              DIGEST=clawfeed-noon
-            fi
+            case "${{ github.event.schedule }}" in
+              '45 23 * * *') DIGEST=weather ;;
+              '0 0 * * *') DIGEST=clawfeed-morning ;;
+              '0 4 * * *') DIGEST=clawfeed-noon ;;
+              *)
+                echo "Unknown schedule: ${{ github.event.schedule }}" >&2
+                exit 1
+                ;;
+            esac
           fi
           echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
           echo "Using digest: $DIGEST"

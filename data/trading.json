@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-06-02T09:50:14.055Z",
+    "lastRunAt": "2026-06-02T23:17:59.878Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-06-02 09:50",
+    "lastDecisionAt": "2026-06-02 23:17",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -18,8 +18,8 @@
         "qty": 2,
         "avgCost": 414.49,
         "entryDate": "2026-03-27 18:32",
-        "currentValue": 822.52,
-        "pnl": -6.460000000000036
+        "currentValue": 823.9,
+        "pnl": -5.080000000000041
       }
     ]
   },
@@ -259,7 +259,7 @@
       },
       {
         "date": "2026-06-02",
-        "value": 9993.54
+        "value": 9994.92
       }
     ],
     "trades": [
@@ -772,6 +772,11 @@
       {
         "date": "2026-06-02 09:50",
         "analysis": "宏观：原油大涨（通胀压力/地缘风险）。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-06-02 23:17",
+        "analysis": "宏观：BTC 大跌（风险偏好弱）。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }
     ]

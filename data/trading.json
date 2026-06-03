@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-06-02T23:17:59.878Z",
+    "lastRunAt": "2026-06-03T10:23:55.275Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-06-02 23:17",
+    "lastDecisionAt": "2026-06-03 10:23",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -259,6 +259,10 @@
       },
       {
         "date": "2026-06-02",
+        "value": 9994.92
+      },
+      {
+        "date": "2026-06-03",
         "value": 9994.92
       }
     ],
@@ -777,6 +781,11 @@
       {
         "date": "2026-06-02 23:17",
         "analysis": "宏观：BTC 大跌（风险偏好弱）。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-06-03 10:23",
+        "analysis": "宏观：市场整体平稳，无明显信号。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }
     ]

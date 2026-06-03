@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-06-03T10:23:55.275Z",
+    "lastRunAt": "2026-06-03T23:19:19.507Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-06-03 10:23",
+    "lastDecisionAt": "2026-06-03 23:19",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -18,8 +18,8 @@
         "qty": 2,
         "avgCost": 414.49,
         "entryDate": "2026-03-27 18:32",
-        "currentValue": 823.9,
-        "pnl": -5.080000000000041
+        "currentValue": 815.74,
+        "pnl": -13.240000000000009
       }
     ]
   },
@@ -263,7 +263,7 @@
       },
       {
         "date": "2026-06-03",
-        "value": 9994.92
+        "value": 9986.76
       }
     ],
     "trades": [
@@ -785,6 +785,11 @@
       },
       {
         "date": "2026-06-03 10:23",
+        "analysis": "宏观：市场整体平稳，无明显信号。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-06-03 23:19",
         "analysis": "宏观：市场整体平稳，无明显信号。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }

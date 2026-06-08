@@ -5853,66 +5853,187 @@
             1283: '中东冲突'   // Saudi Arabian GP
         };
         
-        // 2026 赛季分站成绩数据
+        // 2026 分站成绩 (截至摩纳哥站 R8) - 2026-06-08 更新
         const RACE_RESULTS_2026 = {
+            'andant01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 2, sprint: null, result: 2, points: 18 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 1, sprint: 5, result: 1, points: 29 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 1, sprint: null, result: 1, points: 25 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 1, sprint: 6, result: 1, points: 28 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 2, sprint: 3, result: 1, points: 31 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 1, sprint: null, result: 1, points: 25 }
+            ],
+            'lewham01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 7, sprint: null, result: 4, points: 12 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 3, sprint: 3, result: 3, points: 21 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 6, sprint: null, result: 6, points: 8 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 6, sprint: 7, result: 6, points: 10 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 5, sprint: 6, result: 2, points: 21 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 3, sprint: null, result: 2, points: 18 }
+            ],
             'georus01': [
                 { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 1, sprint: null, result: 1, points: 25 },
                 { round: 2, race: '中国', flag: '🇨🇳', qual: 2, sprint: 1, result: 2, points: 26 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 2, sprint: null, result: 4, points: 12 }
-            ],
-            'andant01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 2, sprint: null, result: 2, points: 18 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 1, sprint: 4, result: 1, points: 29 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 1, sprint: null, result: 1, points: 25 }
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 2, sprint: null, result: 4, points: 12 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 5, sprint: 4, result: 4, points: 17 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 1, sprint: 1, result: 'DNF', points: 8 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 6, sprint: null, result: 12, points: 0 }
             ],
             'chalec01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 3, sprint: null, result: 3, points: 15 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 3, sprint: 2, result: 4, points: 22 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 4, sprint: null, result: 3, points: 15 }
-            ],
-            'lewham01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 4, sprint: null, result: 4, points: 12 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 4, sprint: 3, result: 3, points: 21 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 6, sprint: null, result: 6, points: 8 }
-            ],
-            'olibea01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 7, sprint: null, result: 7, points: 6 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 6, sprint: 6, result: 5, points: 11 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 18, sprint: null, result: 22, points: 0 }
-            ],
-            'lannor01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 5, sprint: null, result: 5, points: 10 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 8, sprint: null, result: 'DNF', points: 5 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 5, sprint: null, result: 5, points: 10 }
-            ],
-            'maxver01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 6, sprint: null, result: 6, points: 8 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 10, sprint: 8, result: 'DNF', points: 0 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 11, sprint: null, result: 8, points: 4 }
-            ],
-            'lialaw01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 9, sprint: null, result: 10, points: 1 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 7, sprint: 5, result: 6, points: 7 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 14, sprint: null, result: 9, points: 2 }
-            ],
-            'yuktsu01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 8, sprint: null, result: 8, points: 4 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 12, sprint: 7, result: 11, points: 0 }
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 4, sprint: null, result: 3, points: 15 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 4, sprint: 2, result: 4, points: 19 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 4, sprint: null, result: 3, points: 15 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 3, sprint: 3, result: 8, points: 10 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 8, sprint: 5, result: 4, points: 16 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 4, sprint: null, result: 'DNF', points: 0 }
             ],
             'oscpia01': [
-                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 10, sprint: null, result: 9, points: 2 },
-                { round: 2, race: '中国', flag: '🇨🇳', qual: 9, sprint: null, result: 'DNF', points: 1 },
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 3, sprint: null, result: 2, points: 18 }
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 5, sprint: null, result: 'DNF', points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 5, sprint: 6, result: 'DNF', points: 3 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 3, sprint: null, result: 2, points: 18 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 7, sprint: 2, result: 3, points: 22 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 4, sprint: 4, result: 11, points: 5 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 7, sprint: null, result: 4, points: 12 }
+            ],
+            'lannor01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 6, sprint: null, result: 5, points: 10 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 6, sprint: 4, result: 'DNF', points: 5 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 5, sprint: null, result: 5, points: 10 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 4, sprint: 1, result: 2, points: 26 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 3, sprint: 2, result: 'DNF', points: 7 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 8, sprint: null, result: 'DNF', points: 0 }
+            ],
+            'maxver01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: null, sprint: null, result: 6, points: 8 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 8, sprint: 9, result: 'DNF', points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 11, sprint: null, result: 8, points: 4 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 2, sprint: 5, result: 5, points: 14 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 6, sprint: 7, result: 3, points: 17 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 2, sprint: null, result: 'DNF', points: 0 }
+            ],
+            'isahad01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 3, sprint: null, result: 'DNF', points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 9, sprint: 15, result: 8, points: 4 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 8, sprint: null, result: 12, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: null, sprint: 9, result: 'DNF', points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 7, sprint: 21, result: 5, points: 10 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 5, sprint: null, result: 3, points: 15 }
             ],
             'piegas01': [
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 7, sprint: null, result: 7, points: 6 }
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 14, sprint: null, result: 10, points: 1 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 7, sprint: 11, result: 6, points: 8 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 7, sprint: null, result: 7, points: 6 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 9, sprint: 8, result: 'DNF', points: 1 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 14, sprint: 20, result: 8, points: 4 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 9, sprint: null, result: 7, points: 6 }
+            ],
+            'lialaw01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 8, sprint: null, result: 13, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 14, sprint: 7, result: 7, points: 8 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 14, sprint: null, result: 9, points: 2 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 11, sprint: 14, result: 'DNF', points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 12, sprint: 11, result: 7, points: 6 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 10, sprint: null, result: 5, points: 10 }
+            ],
+            'olibea01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 12, sprint: null, result: 7, points: 6 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 10, sprint: 8, result: 5, points: 11 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 18, sprint: null, result: 'DNF', points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 12, sprint: 12, result: 11, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 16, sprint: 18, result: 10, points: 1 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 19, sprint: null, result: 'DNF', points: 0 }
+            ],
+            'fracol01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 16, sprint: null, result: 14, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 12, sprint: 14, result: 10, points: 1 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 15, sprint: null, result: 16, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 8, sprint: 10, result: 7, points: 6 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 10, sprint: 9, result: 6, points: 8 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 14, sprint: null, result: 14, points: 0 }
+            ],
+            'arvlin01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 9, sprint: null, result: 8, points: 4 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 15, sprint: 'DNF', result: 12, points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 10, sprint: null, result: 14, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 16, sprint: 'DNF', result: 14, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 9, sprint: 8, result: 'DNF', points: 1 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 15, sprint: null, result: 6, points: 8 }
+            ],
+            'carsai01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: null, sprint: null, result: 15, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 17, sprint: 12, result: 9, points: 2 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 16, sprint: null, result: 15, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 13, sprint: 13, result: 9, points: 2 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 15, sprint: 10, result: 9, points: 2 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 12, sprint: null, result: 'DNF', points: 0 }
+            ],
+            'alealb01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 15, sprint: null, result: 12, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 18, sprint: 16, result: 'DNF', points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 17, sprint: null, result: 20, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 15, sprint: 18, result: 10, points: 1 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 18, sprint: 19, result: 'DNF', points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 11, sprint: null, result: 8, points: 4 }
             ],
             'estoco01': [
-                { round: 3, race: '日本', flag: '🇯🇵', qual: 12, sprint: null, result: 10, points: 1 }
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 13, sprint: null, result: 11, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 13, sprint: 10, result: 14, points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 12, sprint: null, result: 10, points: 1 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 14, sprint: 11, result: 13, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 17, sprint: 13, result: 14, points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 17, sprint: null, result: 9, points: 2 }
+            ],
+            'gabbor01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 10, sprint: null, result: 9, points: 2 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 16, sprint: 13, result: 'DNF', points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 9, sprint: null, result: 13, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 21, sprint: 'DNF', result: 12, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 13, sprint: 12, result: 13, points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 16, sprint: null, result: 11, points: 0 }
+            ],
+            'feralo01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 17, sprint: null, result: 'DNF', points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 19, sprint: 17, result: 'DNF', points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 21, sprint: null, result: 18, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 17, sprint: 15, result: 15, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 19, sprint: 'DNF', result: 'DNF', points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 21, sprint: null, result: 10, points: 1 }
+            ],
+            'serper01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 18, sprint: null, result: 16, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 22, sprint: 19, result: 15, points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 19, sprint: null, result: 17, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 20, sprint: 16, result: 16, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 20, sprint: 14, result: 'DNF', points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 18, sprint: null, result: 15, points: 0 }
+            ],
+            'valbot01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 19, sprint: null, result: 'DNF', points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 20, sprint: 'DNF', result: 13, points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 20, sprint: null, result: 19, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 19, sprint: 19, result: 18, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 22, sprint: 17, result: 16, points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 20, sprint: null, result: 'DNF', points: 0 }
+            ],
+            'lanstr01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: null, sprint: null, result: null, points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 21, sprint: 18, result: 'DNF', points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 22, sprint: null, result: 'DNF', points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 18, sprint: 17, result: 17, points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 21, sprint: 16, result: 15, points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 22, sprint: null, result: 'DNF', points: 0 }
+            ],
+            'nichul01': [
+                { round: 1, race: '澳大利亚', flag: '🇦🇺', qual: 11, sprint: null, result: 'DNF', points: 0 },
+                { round: 2, race: '中国', flag: '🇨🇳', qual: 11, sprint: 'DNF', result: 11, points: 0 },
+                { round: 3, race: '日本', flag: '🇯🇵', qual: 13, sprint: null, result: 11, points: 0 },
+                { round: 6, race: '迈阿密', flag: '🇺🇸', qual: 10, sprint: 'DNF', result: 'DNF', points: 0 },
+                { round: 7, race: '加拿大', flag: '🇨🇦', qual: 11, sprint: 15, result: 12, points: 0 },
+                { round: 8, race: '摩纳哥', flag: '🇲🇨', qual: 13, sprint: null, result: 13, points: 0 }
             ]
         };
         
-        // 车手生涯数据 (截至2026中国站后)
+        // 车手生涯数据 (截至2026摩纳哥站后)
         // 数据来源: F1官网、Wikipedia
         const DRIVER_CAREER = {
             'georus01': { number: 63, debut: 2019, wins: 5, podiums: 21, poles: 6, fastestLaps: 9, championships: 0, races: 144 },
@@ -5924,22 +6045,46 @@
             'maxver01': { number: 1, debut: 2015, wins: 64, podiums: 115, poles: 46, fastestLaps: 36, championships: 4, races: 232 },
             'lialaw01': { number: 30, debut: 2023, wins: 0, podiums: 1, poles: 0, fastestLaps: 2, championships: 0, races: 40 }, // 2023替补5场, 2024替补6场, 2025全职RB
             'yuktsu01': { number: 22, debut: 2021, wins: 0, podiums: 2, poles: 0, fastestLaps: 2, championships: 0, races: 120 },
-            'oscpia01': { number: 81, debut: 2023, wins: 3, podiums: 16, poles: 3, fastestLaps: 4, championships: 0, races: 68 }
+            'oscpia01': { number: 81, debut: 2023, wins: 3, podiums: 16, poles: 3, fastestLaps: 4, championships: 0, races: 68 },
+            'isahad01': { number: 6, debut: 2025, wins: 0, podiums: 1, poles: 0, fastestLaps: 0, championships: 0, races: 32 }, // 2025新秀, 2026升红牛
+            'arvlin01': { number: 41, debut: 2026, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, championships: 0, races: 8 }, // 2026新秀, Racing Bulls
+            'fracol01': { number: 43, debut: 2024, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, championships: 0, races: 18 }, // 2024威廉姆斯替补, 2026全职Alpine
+            'carsai01': { number: 55, debut: 2015, wins: 4, podiums: 27, poles: 6, fastestLaps: 4, championships: 0, races: 230 },
+            'alealb01': { number: 23, debut: 2019, wins: 0, podiums: 2, poles: 0, fastestLaps: 0, championships: 0, races: 120 },
+            'estoco01': { number: 31, debut: 2016, wins: 1, podiums: 4, poles: 0, fastestLaps: 0, championships: 0, races: 170 },
+            'gabbor01': { number: 5, debut: 2025, wins: 0, podiums: 0, poles: 0, fastestLaps: 0, championships: 0, races: 32 }, // 2025新秀, Audi/Sauber
+            'feralo01': { number: 14, debut: 2001, wins: 32, podiums: 106, poles: 22, fastestLaps: 26, championships: 2, races: 416 },
+            'serper01': { number: 11, debut: 2011, wins: 6, podiums: 39, poles: 3, fastestLaps: 11, championships: 0, races: 290 }, // 2026复出Cadillac
+            'valbot01': { number: 77, debut: 2013, wins: 10, podiums: 67, poles: 20, fastestLaps: 19, championships: 0, races: 250 }, // 2026复出Cadillac
+            'lanstr01': { number: 18, debut: 2017, wins: 0, podiums: 3, poles: 1, fastestLaps: 0, championships: 0, races: 188 },
+            'nichul01': { number: 27, debut: 2010, wins: 0, podiums: 1, poles: 1, fastestLaps: 2, championships: 0, races: 240 }
         };
         
-        // 2026 积分榜 (日本站后 R3) - 2026-03-30 更新
+        // 2026 积分榜 (摩纳哥站后 R8) - 2026-06-08 更新
         // 车手照片: team_id + driver_code
         const DRIVER_STANDINGS = [
-            { pos: 1, name: 'Kimi Antonelli', team: 'Mercedes', teamId: 'mercedes', driverCode: 'andant01', color: '27F4D2', points: 72, nat: 'ITA' },
-            { pos: 2, name: 'George Russell', team: 'Mercedes', teamId: 'mercedes', driverCode: 'georus01', color: '27F4D2', points: 63, nat: 'GBR' },
-            { pos: 3, name: 'Charles Leclerc', team: 'Ferrari', teamId: 'ferrari', driverCode: 'chalec01', color: 'E80020', points: 52, nat: 'MON' },
-            { pos: 4, name: 'Lewis Hamilton', team: 'Ferrari', teamId: 'ferrari', driverCode: 'lewham01', color: 'E80020', points: 38, nat: 'GBR' },
-            { pos: 5, name: 'Lando Norris', team: 'McLaren', teamId: 'mclaren', driverCode: 'lannor01', color: 'FF8000', points: 25, nat: 'GBR' },
-            { pos: 6, name: 'Oscar Piastri', team: 'McLaren', teamId: 'mclaren', driverCode: 'oscpia01', color: 'FF8000', points: 21, nat: 'AUS' },
-            { pos: 7, name: 'Oliver Bearman', team: 'Haas F1 Team', teamId: 'haasf1team', driverCode: 'olibea01', color: 'B6BABD', points: 17, nat: 'GBR' },
-            { pos: 8, name: 'Max Verstappen', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'maxver01', color: '3671C6', points: 12, nat: 'NED' },
-            { pos: 9, name: 'Liam Lawson', team: 'Racing Bulls', teamId: 'racingbulls', driverCode: 'lialaw01', color: '6692FF', points: 10, nat: 'NZL' },
-            { pos: 10, name: 'Pierre Gasly', team: 'Alpine', teamId: 'alpine', driverCode: 'piegas01', color: '0093CC', points: 6, nat: 'FRA' },
+            { pos: 1, name: 'Kimi Antonelli', team: 'Mercedes', teamId: 'mercedes', driverCode: 'andant01', color: '27F4D2', points: 156, nat: 'ITA' },
+            { pos: 2, name: 'Lewis Hamilton', team: 'Ferrari', teamId: 'ferrari', driverCode: 'lewham01', color: 'E80020', points: 90, nat: 'GBR' },
+            { pos: 3, name: 'George Russell', team: 'Mercedes', teamId: 'mercedes', driverCode: 'georus01', color: '27F4D2', points: 88, nat: 'GBR' },
+            { pos: 4, name: 'Charles Leclerc', team: 'Ferrari', teamId: 'ferrari', driverCode: 'chalec01', color: 'E80020', points: 75, nat: 'MON' },
+            { pos: 5, name: 'Oscar Piastri', team: 'McLaren', teamId: 'mclaren', driverCode: 'oscpia01', color: 'FF8000', points: 60, nat: 'AUS' },
+            { pos: 6, name: 'Lando Norris', team: 'McLaren', teamId: 'mclaren', driverCode: 'lannor01', color: 'FF8000', points: 58, nat: 'GBR' },
+            { pos: 7, name: 'Max Verstappen', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'maxver01', color: '3671C6', points: 43, nat: 'NED' },
+            { pos: 8, name: 'Isack Hadjar', team: 'Red Bull Racing', teamId: 'redbullracing', driverCode: 'isahad01', color: '3671C6', points: 29, nat: 'FRA' },
+            { pos: 9, name: 'Pierre Gasly', team: 'Alpine', teamId: 'alpine', driverCode: 'piegas01', color: '0093CC', points: 26, nat: 'FRA' },
+            { pos: 10, name: 'Liam Lawson', team: 'Racing Bulls', teamId: 'racingbulls', driverCode: 'lialaw01', color: '6692FF', points: 26, nat: 'NZL' },
+            { pos: 11, name: 'Oliver Bearman', team: 'Haas F1 Team', teamId: 'haasf1team', driverCode: 'olibea01', color: 'B6BABD', points: 18, nat: 'GBR' },
+            { pos: 12, name: 'Franco Colapinto', team: 'Alpine', teamId: 'alpine', driverCode: 'fracol01', color: '0093CC', points: 15, nat: 'ARG' },
+            { pos: 13, name: 'Arvid Lindblad', team: 'Racing Bulls', teamId: 'racingbulls', driverCode: 'arvlin01', color: '6692FF', points: 13, nat: 'GBR' },
+            { pos: 14, name: 'Carlos Sainz', team: 'Williams', teamId: 'williams', driverCode: 'carsai01', color: '64C4FF', points: 6, nat: 'ESP' },
+            { pos: 15, name: 'Alexander Albon', team: 'Williams', teamId: 'williams', driverCode: 'alealb01', color: '64C4FF', points: 5, nat: 'THA' },
+            { pos: 16, name: 'Esteban Ocon', team: 'Haas F1 Team', teamId: 'haasf1team', driverCode: 'estoco01', color: 'B6BABD', points: 3, nat: 'FRA' },
+            { pos: 17, name: 'Gabriel Bortoleto', team: 'Audi', teamId: 'audi', driverCode: 'gabbor01', color: 'FF0000', points: 2, nat: 'BRA' },
+            { pos: 18, name: 'Fernando Alonso', team: 'Aston Martin', teamId: 'astonmartin', driverCode: 'feralo01', color: '229971', points: 1, nat: 'ESP' },
+            { pos: 19, name: 'Sergio Perez', team: 'Cadillac', teamId: 'cadillac', driverCode: 'serper01', color: 'C4A35A', points: 0, nat: 'MEX' },
+            { pos: 20, name: 'Valtteri Bottas', team: 'Cadillac', teamId: 'cadillac', driverCode: 'valbot01', color: 'C4A35A', points: 0, nat: 'FIN' },
+            { pos: 21, name: 'Lance Stroll', team: 'Aston Martin', teamId: 'astonmartin', driverCode: 'lanstr01', color: '229971', points: 0, nat: 'CAN' },
+            { pos: 22, name: 'Nico Hulkenberg', team: 'Audi', teamId: 'audi', driverCode: 'nichul01', color: 'FF0000', points: 0, nat: 'GER' },
         ];
         
         // F1 2026 官方 CDN URL
@@ -5968,19 +6113,19 @@
             'Williams': 'williams', 'Cadillac': 'cadillac', 'Aston Martin': 'astonmartin'
         };
         
-        // 车队积分榜 (日本站后 R3) - 2026-03-30 更新
+        // 车队积分榜 (摩纳哥站后 R8) - 2026-06-08 更新
         const TEAM_STANDINGS = [
-            { pos: 1, name: 'Mercedes', color: '27F4D2', points: 135 },
-            { pos: 2, name: 'Ferrari', color: 'E80020', points: 90 },
-            { pos: 3, name: 'McLaren', color: 'FF8000', points: 46 },
-            { pos: 4, name: 'Haas F1 Team', color: 'B6BABD', points: 18 },
-            { pos: 5, name: 'Red Bull Racing', color: '3671C6', points: 16 },
-            { pos: 6, name: 'Alpine', color: '0093CC', points: 7 },
-            { pos: 7, name: 'Racing Bulls', color: '6692FF', points: 6 },
-            { pos: 8, name: 'Audi', color: 'FF0000', points: 2 },
-            { pos: 9, name: 'Williams', color: '64C4FF', points: 0 },
-            { pos: 10, name: 'Cadillac', color: 'C4A35A', points: 0 },
-            { pos: 11, name: 'Aston Martin', color: '229971', points: 0 },
+            { pos: 1, name: 'Mercedes', color: '27F4D2', points: 244 },
+            { pos: 2, name: 'Ferrari', color: 'E80020', points: 165 },
+            { pos: 3, name: 'McLaren', color: 'FF8000', points: 118 },
+            { pos: 4, name: 'Red Bull Racing', color: '3671C6', points: 72 },
+            { pos: 5, name: 'Alpine', color: '0093CC', points: 41 },
+            { pos: 6, name: 'Racing Bulls', color: '6692FF', points: 39 },
+            { pos: 7, name: 'Haas F1 Team', color: 'B6BABD', points: 21 },
+            { pos: 8, name: 'Williams', color: '64C4FF', points: 11 },
+            { pos: 9, name: 'Audi', color: 'FF0000', points: 2 },
+            { pos: 10, name: 'Aston Martin', color: '229971', points: 1 },
+            { pos: 11, name: 'Cadillac', color: 'C4A35A', points: 0 },
         ];
         
         // 赛道 SVG 文件映射 (本地 /tracks/*.svg)

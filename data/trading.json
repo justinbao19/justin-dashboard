@@ -4,24 +4,14 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-06-10T09:05:45.072Z",
+    "lastRunAt": "2026-06-10T23:15:31.421Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-06-10 09:05",
-    "lastAction": "hold"
+    "lastDecisionAt": "2026-06-10 23:15",
+    "lastAction": "sell"
   },
   "portfolio": {
-    "cash": 9171.02,
-    "positions": [
-      {
-        "symbol": "GLD",
-        "market": "COMMODITY",
-        "qty": 2,
-        "avgCost": 414.49,
-        "entryDate": "2026-03-27 18:32",
-        "currentValue": 781.56,
-        "pnl": -47.42000000000007
-      }
-    ]
+    "cash": 9920.18,
+    "positions": []
   },
   "history": {
     "equity": [
@@ -287,7 +277,7 @@
       },
       {
         "date": "2026-06-10",
-        "value": 9952.58
+        "value": 9920.18
       }
     ],
     "trades": [
@@ -299,6 +289,16 @@
         "date": "2026-03-27 18:32",
         "reasoning": "📈 买入信号（综合得分 73/100）\n技术面：价格在 MA50 上方（长期趋势向上）；MA20 > MA50（中期趋势健康）；RSI 16（超卖，可能是买入机会）；波动率 32.6%（高，风险较大）；近20日跌 -17.2%（回调可能是机会）\n宏观：股市走弱，避险情绪升温；黄金涨+股市跌 → Risk-Off 模式；原油大涨（通胀压力/地缘风险）\n仓位：12%，约 $1150",
         "trigger": "value-buy"
+      },
+      {
+        "type": "sell",
+        "symbol": "GLD",
+        "qty": 2,
+        "price": 374.58,
+        "date": "2026-06-10 23:15",
+        "pnl": -79.82000000000005,
+        "reasoning": "🛑 止损触发：亏损 -9.6% 超过止损线 -8%。纪律执行，控制损失。",
+        "trigger": "stop-loss"
       }
     ],
     "decisions": [

@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-06-21T22:45:31.904Z",
+    "lastRunAt": "2026-06-22T11:17:52.929Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-06-21 22:45",
+    "lastDecisionAt": "2026-06-22 11:17",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -313,6 +313,10 @@
       },
       {
         "date": "2026-06-21",
+        "value": 9920.18
+      },
+      {
+        "date": "2026-06-22",
         "value": 9920.18
       }
     ],
@@ -965,6 +969,11 @@
       },
       {
         "date": "2026-06-21 22:45",
+        "analysis": "宏观：股市走强，风险偏好回升。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-06-22 11:17",
         "analysis": "宏观：股市走强，风险偏好回升。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }

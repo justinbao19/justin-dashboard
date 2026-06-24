@@ -4,9 +4,9 @@
     "initialCapital": 10000,
     "currency": "USD",
     "version": "1.0",
-    "lastRunAt": "2026-06-23T22:49:33.502Z",
+    "lastRunAt": "2026-06-24T08:39:56.458Z",
     "lastTrigger": "cli",
-    "lastDecisionAt": "2026-06-23 22:49",
+    "lastDecisionAt": "2026-06-24 08:39",
     "lastAction": "hold"
   },
   "portfolio": {
@@ -321,6 +321,10 @@
       },
       {
         "date": "2026-06-23",
+        "value": 9920.18
+      },
+      {
+        "date": "2026-06-24",
         "value": 9920.18
       }
     ],
@@ -993,6 +997,11 @@
       },
       {
         "date": "2026-06-23 22:49",
+        "analysis": "宏观：股市走弱，避险情绪升温。技术面未达买入阈值或在冷却期内。继续观望。",
+        "action": "hold"
+      },
+      {
+        "date": "2026-06-24 08:39",
         "analysis": "宏观：股市走弱，避险情绪升温。技术面未达买入阈值或在冷却期内。继续观望。",
         "action": "hold"
       }

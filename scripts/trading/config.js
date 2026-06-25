@@ -1,7 +1,7 @@
 const path = require('path');
 
 const TRADING_FILE = path.join(__dirname, '../../data/trading.json');
-const FINNHUB_KEY = 'd6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg';
+const FINNHUB_KEY = process.env.FINNHUB_KEY || '';
 
 const ASSETS = {
   SPY: { name: 'S&P 500 ETF', market: 'US', category: 'index', type: 'finnhub' },

@@ -1,5 +1,5 @@
 // Vercel Serverless Function - 彩云天气代理
-const CAIYUN_KEY = 'Du0t79IRJh5j9mUe';
+const CAIYUN_KEY = process.env.CAIYUN_API_TOKEN || process.env.CAIYUN_KEY || '';
 const DEFAULT_LON = '121.405';
 const DEFAULT_LAT = '31.123';
 

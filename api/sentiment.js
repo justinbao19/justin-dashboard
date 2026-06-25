@@ -1,8 +1,8 @@
 // 市场情绪与宏观指标 API
 // 数据源: Finnhub, FRED, Alternative.me, ForexFactory
 
-const FINNHUB_KEY = 'd6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg';
-const FRED_KEY = '492b3e5ebbb736ee9b8c1b05cf4031f1';
+const FINNHUB_KEY = process.env.FINNHUB_KEY || '';
+const FRED_KEY = process.env.FRED_KEY || '';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');

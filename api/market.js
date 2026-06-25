@@ -1,5 +1,5 @@
 // Vercel Serverless Function - 市场数据代理
-const FINNHUB_KEY = 'd6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg';
+const FINNHUB_KEY = process.env.FINNHUB_KEY || '';
 const TWELVE_DATA_KEY = process.env.TWELVE_DATA_KEY || '';
 const SPARKLINE_POINTS = 12;
 const SPARKLINE_TTL_MS = 6 * 60 * 60 * 1000; // 趋势线缓存 6 小时

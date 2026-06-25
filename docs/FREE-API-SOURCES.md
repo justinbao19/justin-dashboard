@@ -151,6 +151,6 @@ curl "https://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Money
 ## API Keys 汇总
 
 ```
-Finnhub: d6n1ec1r01qir35irdl0d6n1ec1r01qir35irdlg (已有)
+Finnhub: 已配置到环境变量 FINNHUB_KEY（不要在仓库中明文保存）
 FRED: (待申请)
 ```

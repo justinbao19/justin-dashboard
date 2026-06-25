@@ -98,6 +98,12 @@ jobs:
           mkdir -p data/briefings
           python3 scripts/send_wechat_briefing.py --mode "${{ steps.mode.outputs.mode }}" --source local | tee "data/briefings/${{ steps.mode.outputs.mode }}.txt"
 
+      - name: Guard deploy config
+        run: node scripts/guard-deploy.js
+
+      - name: Verify Vercel build
+        run: npx vercel build
+
       - name: Commit updated dashboard data
         id: commit
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.commit_changes != false }}

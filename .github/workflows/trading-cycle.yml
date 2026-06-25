@@ -48,6 +48,12 @@ jobs:
             node scripts/trading-engine.js
           fi
 
+      - name: Guard deploy config
+        run: node scripts/guard-deploy.js
+
+      - name: Verify Vercel build
+        run: npx vercel build
+
       - name: Commit updated trading ledger
         if: ${{ inputs.dry_run != true }}
         run: |

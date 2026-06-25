@@ -89,6 +89,12 @@ jobs:
               ;;
           esac
 
+      - name: Guard deploy config
+        run: node scripts/guard-deploy.js
+
+      - name: Verify Vercel build
+        run: npx vercel build
+
       - name: Commit generated digest
         run: |
           if [ -z "$(git status --porcelain -- data/briefings)" ]; then

@@ -1,0 +1,31 @@
+name: Deploy Guard
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  verify-deploy-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
+      FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+      FRED_KEY: ${{ secrets.FRED_KEY }}
+      CAIYUN_API_TOKEN: ${{ secrets.CAIYUN_API_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Guard deploy config
+        run: node scripts/guard-deploy.js
+
+      - name: Verify Vercel build
+        run: npx vercel build

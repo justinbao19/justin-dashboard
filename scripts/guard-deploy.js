@@ -22,10 +22,11 @@ if (Object.prototype.hasOwnProperty.call(vercel, 'public')) {
   fail('vercel.json must not contain deprecated `public` field');
 }
 
-const trackedForbidden = ['.vercel/README.txt', '.vercel/project.json'];
 const tracked = execSync('git ls-files', { encoding: 'utf8' }).split('\n').filter(Boolean);
-for (const item of trackedForbidden) {
-  if (tracked.includes(item)) fail(`forbidden tracked file: ${item}`);
+for (const item of tracked) {
+  if (item === '.vercel' || item.startsWith('.vercel/')) {
+    fail(`forbidden tracked Vercel local state: ${item}`);
+  }
 }
 
 const docsPath = path.join(root, 'docs', 'FREE-API-SOURCES.md');

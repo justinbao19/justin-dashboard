@@ -52,7 +52,9 @@ jobs:
         run: node scripts/guard-deploy.js
 
       - name: Verify Vercel build
-        run: npx vercel build
+        run: |
+          node scripts/prepare-vercel-build.js
+          npx vercel build
 
       - name: Commit updated trading ledger
         if: ${{ inputs.dry_run != true }}

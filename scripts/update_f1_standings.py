@@ -91,7 +91,9 @@ def flatten_text(node: Any) -> str:
     if node is None:
         return ''
     if isinstance(node, str):
-        return node
+        if node in ('$undefined',):
+            return ''
+        return node.replace('Â', ' ')
     if isinstance(node, (int, float)):
         return str(node)
     if isinstance(node, list):
@@ -99,7 +101,8 @@ def flatten_text(node: Any) -> str:
             if len(node) >= 4 and isinstance(node[3], dict):
                 return flatten_text(node[3].get('children'))
             return ''
-        return ''.join(flatten_text(x) for x in node)
+        parts = [flatten_text(x) for x in node]
+        return ''.join(parts)
     if isinstance(node, dict):
         return flatten_text(node.get('children'))
     return ''
@@ -115,7 +118,16 @@ def parse_driver_standings() -> list[dict[str, Any]]:
         if isinstance(driver_node, list) and len(driver_node) >= 4 and isinstance(driver_node[3], dict):
             href = driver_node[3].get('href', '')
         code = href.split('/drivers/')[-1].split('/')[0].lower()
-        name = ' '.join(flatten_text(driver_node).replace('\xa0', ' ').split())
+        children = driver_node[3].get('children', []) if isinstance(driver_node, list) and len(driver_node) >= 4 and isinstance(driver_node[3], dict) else []
+        visible_parts = []
+        if isinstance(children, list) and len(children) >= 2:
+            text_node = children[1]
+            nested = text_node[3].get('children', []) if isinstance(text_node, list) and len(text_node) >= 4 and isinstance(text_node[3], dict) else []
+            for part in nested:
+                text_part = flatten_text(part).strip()
+                if text_part and text_part not in {'ANT', 'RUS', 'HAM', 'PIA', 'NOR', 'LEC', 'VER', 'HAD', 'GAS', 'LAW', 'BEA', 'COL', 'LIN', 'SAI', 'ALB', 'OCO', 'BOR', 'ALO', 'PER', 'BOT', 'STR', 'HUL'}:
+                    visible_parts.append(text_part)
+        name = ' '.join(' '.join(visible_parts).replace('\xa0', ' ').split())
         nat = flatten_text(content_value(row[2])).strip()
         team = ' '.join(flatten_text(content_value(row[3])).split())
         points = int(flatten_text(content_value(row[4])).strip())

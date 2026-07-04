@@ -1,0 +1,26 @@
+{
+  "name": "justin-dashboard",
+  "version": "1.0.0",
+  "description": "个人信息仪表盘，集成天气、市场行情、新闻资讯等模块。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justinbao19/justin-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/justinbao19/justin-dashboard/issues"
+  },
+  "homepage": "https://github.com/justinbao19/justin-dashboard#readme",
+  "dependencies": {
+    "stock-sdk": "^2.2.2"
+  }
+}

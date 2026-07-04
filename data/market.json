@@ -1,28 +1,34 @@
 {
   "date": "2026年7月4日 实时",
   "ndx": {
-    "price": "29,217",
-    "change": -1.7334
+    "price": "29,329",
+    "change": -1.61,
+    "source": "stock-sdk"
   },
   "spx": {
-    "price": "7,448",
-    "change": -0.1314
+    "price": "7,483",
+    "change": 0,
+    "source": "stock-sdk"
   },
   "dji": {
-    "price": "52,788",
-    "change": 1.049
+    "price": "52,900",
+    "change": 1.14,
+    "source": "stock-sdk"
   },
   "hsi": {
     "price": "23,350",
-    "change": 1.28
+    "change": 1.28,
+    "source": "stock-sdk"
   },
   "hstec": {
     "price": "4,499",
-    "change": 1.0
+    "change": 1,
+    "source": "stock-sdk"
   },
   "sse": {
     "price": "4,044",
-    "change": 0.37
+    "change": 0.37,
+    "source": "stock-sdk"
   },
   "szse": {
     "price": "14,898",
@@ -39,19 +45,23 @@
   },
   "gold": {
     "price": "$2,212",
-    "change": 2.0318
+    "change": 2.03,
+    "source": "stock-sdk"
   },
   "oil": {
     "price": "$64.47",
-    "change": 0.6875
+    "change": 0.69,
+    "source": "stock-sdk"
   },
   "btc": {
-    "price": "$62,584",
-    "change": 1.99
+    "price": "$62,861",
+    "change": 1.73,
+    "source": "coingecko"
   },
   "eth": {
-    "price": "$1,753",
-    "change": 2.76
+    "price": "$1,789",
+    "change": 3.35,
+    "source": "coingecko"
   },
   "macro_summary": "全球风险资产温和反弹，美股三大指数齐涨，恒指与科指强势共振，A股独跌且商品与加密币回落，显示资金仍偏好高弹性成长而非内需旧经济。",
   "logic_chain": [
@@ -164,7 +174,7 @@
       "监管突收紧港股平台经济"
     ]
   },
-  "updated_at": "2026-07-04T12:03:10.545021",
+  "updated_at": "2026-07-04T15:47:06.402Z",
   "us_market_preview": {
     "title": "📊 美股短线预判",
     "summary": "若PCE不超预期且英伟达财报前瞻乐观，纳指有望挑战3万点；反之核心通胀>2.8%将触发科技获利回吐，道指相对抗跌。",
@@ -187,5 +197,30 @@
         "probability": "30%"
       }
     ]
+  },
+  "data_source": "stock-sdk primary (Tencent/Eastmoney) + CoinGecko crypto + open.er-api FX",
+  "usdcny": {
+    "price": "6.7907",
+    "source": "open-er-api"
+  },
+  "hkdcny": {
+    "price": "0.8658",
+    "source": "open-er-api"
+  },
+  "eurcny": {
+    "price": "7.7612",
+    "source": "open-er-api"
+  },
+  "jpycny": {
+    "price": "0.0421",
+    "source": "open-er-api"
+  },
+  "gbpcny": {
+    "price": "9.0582",
+    "source": "open-er-api"
+  },
+  "thbcny": {
+    "price": "0.2047",
+    "source": "open-er-api"
   }
 }

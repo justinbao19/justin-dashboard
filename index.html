@@ -45,12 +45,19 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html {
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
         }
 
         /* ========== 天气背景场景 ========== */
@@ -58,6 +65,7 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             z-index: 0;
         }
@@ -250,8 +258,22 @@
         }
 
         /* Pages */
-        .pages { position: relative; z-index: 1; padding-bottom: 100px; }
-        .page { display: none; min-height: 100vh; }
+        .pages {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .page {
+            display: none;
+            height: 100vh;
+            height: 100dvh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: calc(92px + env(safe-area-inset-bottom));
+        }
         .page.active { display: block; }
         .page-shell,
         .weather-layout {

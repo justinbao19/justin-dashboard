@@ -26,6 +26,20 @@ const CRYPTO = [
   { key: 'eth', coinId: 'ethereum', prefix: '$', decimals: 0 },
 ];
 
+const SPARKLINE_POINTS = 12;
+const SPARKLINE_SOURCES = [
+  { key: 'spx', symbol: '^GSPC' },
+  { key: 'ndx', symbol: '^NDX' },
+  { key: 'dji', symbol: '^DJI' },
+  { key: 'hsi', symbol: '^HSI' },
+  // Yahoo does not expose HSTECH reliably. 3033.HK is Hang Seng TECH ETF;
+  // sparkline only needs shape, while displayed price still comes from stock-sdk.
+  { key: 'hstec', symbol: '3033.HK' },
+  { key: 'sse', symbol: '000001.SS' },
+  { key: 'gold', symbol: 'GLD', multiplier: 5.85, decimals: 2 },
+  { key: 'oil', symbol: 'USO', multiplier: 0.62, decimals: 2 },
+];
+
 const FOREX_KEYS = {
   USD: 'usdcny',
   HKD: 'hkdcny',
@@ -55,6 +69,31 @@ async function settleMap(tasks) {
     }
   }));
   return Object.fromEntries(entries);
+}
+
+async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, { ...options, signal: controller.signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function normalizeSparkline(values, multiplier = 1, decimals = 2) {
+  if (!Array.isArray(values)) return null;
+  const clean = values.map(Number).filter(Number.isFinite);
+  if (clean.length < 2) return null;
+  const sampled = clean.length <= SPARKLINE_POINTS
+    ? clean
+    : Array.from({ length: SPARKLINE_POINTS }, (_, i) => {
+        const idx = Math.round((i * (clean.length - 1)) / (SPARKLINE_POINTS - 1));
+        return clean[idx];
+      });
+  return sampled.map(v => Number((v * multiplier).toFixed(decimals)));
 }
 
 function toQuoteItem(quote, spec) {
@@ -119,6 +158,37 @@ async function fetchCryptoQuotes() {
   return data;
 }
 
+async function fetchYahooSparkline({ symbol, multiplier = 1, decimals = 2 }) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=14d&interval=1d`;
+  const json = await fetchJsonWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const closes = json.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
+  return normalizeSparkline(closes, multiplier, decimals);
+}
+
+async function fetchCoinGeckoSparkline(coinId) {
+  const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7&interval=daily`;
+  const json = await fetchJsonWithTimeout(url);
+  return normalizeSparkline(json.prices?.map(p => p?.[1]), 1, 2);
+}
+
+async function fetchSparklines() {
+  const tasks = [
+    ...SPARKLINE_SOURCES.map(async spec => [spec.key, await fetchYahooSparkline(spec)]),
+    ...CRYPTO.map(async spec => [spec.key, await fetchCoinGeckoSparkline(spec.coinId)]),
+  ];
+
+  const entries = await Promise.all(tasks.map(async task => {
+    try {
+      return await task;
+    } catch (error) {
+      console.warn(`[market] sparkline failed: ${error?.message || error}`);
+      return null;
+    }
+  }));
+
+  return Object.fromEntries(entries.filter(entry => Array.isArray(entry) && Array.isArray(entry[1])));
+}
+
 async function fetchForexQuotes() {
   const r = await fetch('https://open.er-api.com/v6/latest/CNY');
   if (!r.ok) throw new Error(`FX HTTP ${r.status}`);
@@ -161,17 +231,24 @@ export async function buildMarketSnapshot({ existing = {}, preserveStatic = fals
     stock: fetchStockQuotes,
     crypto: fetchCryptoQuotes,
     forex: fetchForexQuotes,
+    sparklines: fetchSparklines,
   });
 
   const now = new Date();
   const live = {
     date: formatDate(now),
     updated_at: now.toISOString(),
-    data_source: 'stock-sdk primary (Tencent/Eastmoney) + CoinGecko crypto + open.er-api FX',
+    data_source: 'stock-sdk primary (Tencent/Eastmoney) + Yahoo Finance 7D sparklines + CoinGecko crypto + open.er-api FX',
     ...(results.stock || {}),
     ...(results.crypto || {}),
     ...(results.forex || {}),
   };
+
+  for (const [key, sparkline] of Object.entries(results.sparklines || {})) {
+    if (live[key] && sparkline?.length > 1) {
+      live[key].sparkline = sparkline;
+    }
+  }
 
   preserveNestedFields(live, existing);
   return preserveStatic ? { ...existing, ...live } : live;

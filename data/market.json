@@ -1,34 +1,118 @@
 {
-  "date": "2026年7月5日 实时",
+  "date": "2026年7月6日 实时",
   "ndx": {
     "price": "29,329",
     "change": -1.61,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      29635.95,
+      30543.92,
+      29968.13,
+      30406.19,
+      30347.08,
+      29347.27,
+      29220.06,
+      29440.32,
+      29118.24,
+      30276.35,
+      29809.13,
+      29329.21
+    ]
   },
   "spx": {
     "price": "7,483",
     "change": 0,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      7431.46,
+      7554.29,
+      7511.35,
+      7500.58,
+      7472.79,
+      7365.46,
+      7358.22,
+      7357.49,
+      7354.02,
+      7499.36,
+      7483.23,
+      7483.24
+    ]
   },
   "dji": {
     "price": "52,900",
     "change": 1.14,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      51202.26,
+      51671.03,
+      51999.67,
+      51564.7,
+      51712.71,
+      51666.84,
+      51848.9,
+      51920.62,
+      51876.11,
+      52319.2,
+      52305.24,
+      52900.07
+    ]
   },
   "hsi": {
     "price": "23,350",
     "change": 1.28,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      24718.1,
+      24842.67,
+      24493.95,
+      23924.81,
+      23768.52,
+      23336.28,
+      23412.18,
+      23076.91,
+      22671.86,
+      22881.02,
+      23055.03,
+      23350.03
+    ]
   },
   "hstec": {
     "price": "4,499",
     "change": 1,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      4.61,
+      4.67,
+      4.56,
+      4.51,
+      4.46,
+      4.31,
+      4.4,
+      4.33,
+      4.18,
+      4.39,
+      4.36,
+      4.42
+    ]
   },
   "sse": {
     "price": "4,044",
     "change": 0.37,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      4096.47,
+      4091.89,
+      4108.08,
+      4163.1,
+      4106.25,
+      4110.81,
+      4120.28,
+      4027.26,
+      4073.9,
+      4112.44,
+      4028.9,
+      4043.64
+    ]
   },
   "szse": {
     "price": "14,898",
@@ -46,22 +130,70 @@
   "gold": {
     "price": "$2,212",
     "change": 2.03,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      2261.26,
+      2319.82,
+      2326.14,
+      2264.65,
+      2249.85,
+      2207.32,
+      2140.63,
+      2161.34,
+      2185.74,
+      2155.02,
+      2168.01,
+      2212.06
+    ]
   },
   "oil": {
     "price": "$64.47",
     "change": 0.69,
-    "source": "stock-sdk"
+    "source": "stock-sdk",
+    "sparkline": [
+      77.77,
+      75.15,
+      71.59,
+      71.22,
+      69.87,
+      68.98,
+      65.9,
+      67.77,
+      65.4,
+      65.99,
+      64.03,
+      64.47
+    ]
   },
   "btc": {
-    "price": "$62,678",
-    "change": -0.32,
-    "source": "coingecko"
+    "price": "$62,636",
+    "change": -0.27,
+    "source": "coingecko",
+    "sparkline": [
+      59612.29,
+      60159.63,
+      58550.75,
+      59979.9,
+      61487.3,
+      62537.44,
+      63094.24,
+      62635.22
+    ]
   },
   "eth": {
     "price": "$1,772",
-    "change": -1.05,
-    "source": "coingecko"
+    "change": -0.8,
+    "source": "coingecko",
+    "sparkline": [
+      1571.79,
+      1609.67,
+      1569.94,
+      1608.43,
+      1698.4,
+      1756.08,
+      1778.96,
+      1771.7
+    ]
   },
   "macro_summary": "全球风险资产温和反弹，美股三大指数齐涨，恒指与科指强势共振，A股独跌且商品与加密币回落，显示资金仍偏好高弹性成长而非内需旧经济。",
   "logic_chain": [
@@ -174,7 +306,7 @@
       "监管突收紧港股平台经济"
     ]
   },
-  "updated_at": "2026-07-05T15:52:49.866Z",
+  "updated_at": "2026-07-05T16:24:22.368Z",
   "us_market_preview": {
     "title": "📊 美股短线预判",
     "summary": "若PCE不超预期且英伟达财报前瞻乐观，纳指有望挑战3万点；反之核心通胀>2.8%将触发科技获利回吐，道指相对抗跌。",
@@ -198,7 +330,7 @@
       }
     ]
   },
-  "data_source": "stock-sdk primary (Tencent/Eastmoney) + CoinGecko crypto + open.er-api FX",
+  "data_source": "stock-sdk primary (Tencent/Eastmoney) + Yahoo Finance 7D sparklines + CoinGecko crypto + open.er-api FX",
   "usdcny": {
     "price": "6.7953",
     "source": "open-er-api"

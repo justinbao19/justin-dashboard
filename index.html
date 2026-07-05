@@ -6185,28 +6185,31 @@
                 document.getElementById('f1NextDate').textContent = `${startDate.getDate()} - ${endDate.getDate()} ${MONTHS[startDate.getMonth()]}`;
             }
             
-            // 赛程列表 - 默认显示5场
-            const displayRaces = _f1ShowAllRaces ? upcoming : upcoming.slice(0, 5);
+            // 赛程列表：默认看接下来 5 场；展开后显示完整赛季，避免已完赛数据看起来“丢失”
+            const fullCalendar = _f1Data.calendar || [];
+            const displayRaces = _f1ShowAllRaces ? fullCalendar : upcoming.slice(0, 5);
             const listHtml = displayRaces.map(r => {
                 const d = new Date(r.date_start);
                 const isCanceled = CANCELED_RACES[r.meeting_key];
-                const canceledClass = isCanceled ? ' canceled' : '';
+                const isPast = new Date(r.date_end) <= now;
+                const stateClass = `${isPast ? ' past' : ''}${isCanceled ? ' canceled' : ''}`;
                 const canceledBadge = isCanceled ? '<span class="f1-canceled-badge">CANCELED</span>' : '';
+                const doneBadge = isPast && !isCanceled ? '<span class="f1-sprint-badge">DONE</span>' : '';
                 const canceledReason = isCanceled ? `<div class="f1-canceled-reason">⚠️ ${CANCELED_RACES[r.meeting_key]}</div>` : '';
-                const sprintBadge = !isCanceled && r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
+                const sprintBadge = !isCanceled && !isPast && r.has_sprint ? '<span class="f1-sprint-badge">SPRINT</span>' : '';
                 const circuitLower = (r.circuit || '').toLowerCase();
                 const trackKey = Object.keys(CIRCUIT_TRACKS).find(k => circuitLower.includes(k)) || '';
                 const trackId = CIRCUIT_TRACKS[trackKey] || '';
                 const trackImg = trackId && !isCanceled ? `<div class="f1-race-track"><img src="/tracks/${trackId}.svg" alt=""></div>` : '';
                 const clickHandler = isCanceled ? '' : `onclick="showF1Detail(${r.meeting_key})"`;
-                return `<div class="f1-race-item${canceledClass}" ${clickHandler}>
+                return `<div class="f1-race-item${stateClass}" ${clickHandler}>
                     <div class="f1-race-flag">${r.country_flag || '🏁'}</div>
                     <div class="f1-race-date">
                         <div class="f1-race-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                         <div class="f1-race-date-month">${MONTHS[d.getMonth()]}</div>
                     </div>
                     <div class="f1-race-info">
-                        <div class="f1-race-name">${r.gp_name} ${sprintBadge}${canceledBadge}</div>
+                        <div class="f1-race-name">${r.gp_name} ${doneBadge}${sprintBadge}${canceledBadge}</div>
                         <div class="f1-race-meta">R${String(r.round).padStart(2,'0')} <span>• ${r.circuit}</span></div>
                         ${canceledReason}
                     </div>
@@ -6216,9 +6219,9 @@
             }).join('');
             
             // 展开/收起按钮
-            const moreBtn = upcoming.length > 5 ? `
+            const moreBtn = fullCalendar.length > 5 ? `
                 <button class="f1-race-more" onclick="toggleF1Races()">
-                    ${_f1ShowAllRaces ? '收起' : `查看全部 ${upcoming.length} 场比赛`}
+                    ${_f1ShowAllRaces ? '收起' : `查看完整赛季 ${fullCalendar.length} 场比赛`}
                 </button>` : '';
             
             document.getElementById('f1RaceList').innerHTML = (listHtml + moreBtn) || '<div class="f1-loading">暂无比赛</div>';

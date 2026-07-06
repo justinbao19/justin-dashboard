@@ -77,7 +77,7 @@ justin-dashboard/
 ### F1 Standings Refresh
 
 - 文件: `.github/workflows/f1-standings.yml`
-- 定时: 每天北京时间 `09:15`
+- 定时: 比赛窗口自动跑；周六/周日赛后多次同步，周一北京时间 `00:20`、`03:20`、`06:20`、`08:20`、`09:20` 兜底
 - 手动: 支持 `workflow_dispatch`
 - 流程:
   1. 从 formula1.com 自动发现 2026 最新已完赛分站

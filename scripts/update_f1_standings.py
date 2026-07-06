@@ -13,10 +13,35 @@ import requests
 
 BASE = 'https://www.formula1.com/en/results/2026'
 HEADERS = {'User-Agent': 'Mozilla/5.0 (compatible; F1StandingsBot/1.0)'}
-INDEX_PATH = Path('/Users/justin/Projects/justin-dashboard/index.html')
-REPO_DIR = INDEX_PATH.parent
+REPO_DIR = Path(__file__).resolve().parents[1]
+INDEX_PATH = REPO_DIR / 'index.html'
 ROUND_PATTERN = re.compile(r'R(\d+)')
 DATE_PATTERN = re.compile(r'20\d\d-\d\d-\d\d')
+
+SLUG_RACE_NAME_MAP = {
+    'australia': 'Australia',
+    'china': 'China',
+    'japan': 'Japan',
+    'miami': 'Miami',
+    'canada': 'Canada',
+    'monaco': 'Monaco',
+    'barcelona-catalunya': 'Spain',
+    'austria': 'Austria',
+    'great-britain': 'Great Britain',
+    'belgium': 'Belgium',
+    'hungary': 'Hungary',
+    'netherlands': 'Netherlands',
+    'italy': 'Italy',
+    'spain': 'Spain',
+    'azerbaijan': 'Azerbaijan',
+    'singapore': 'Singapore',
+    'united-states': 'United States',
+    'mexico': 'Mexico',
+    'brazil': 'Brazil',
+    'las-vegas': 'Las Vegas',
+    'qatar': 'Qatar',
+    'abu-dhabi': 'Abu Dhabi',
+}
 
 TEAM_INFO = {
     'Mercedes': {'teamId': 'mercedes', 'color': '27F4D2'},
@@ -45,7 +70,7 @@ FLAG_MAP = {
     'Australia': '🇦🇺', 'China': '🇨🇳', 'Japan': '🇯🇵', 'Austria': '🇦🇹', 'Great Britain': '🇬🇧',
     'Belgium': '🇧🇪', 'Hungary': '🇭🇺', 'Canada': '🇨🇦', 'Monaco': '🇲🇨', 'Miami': '🇺🇸',
     'Emilia-Romagna': '🇮🇹', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱',
-    'Singapore': '🇸🇬', 'Mexico': '🇲🇽', 'Brazil': '🇧🇷', 'Qatar': '🇶🇦', 'Abu Dhabi': '🇦🇪',
+    'Singapore': '🇸🇬', 'Mexico': '🇲🇽', 'Brazil': '🇧🇷', 'Qatar': '🇶🇦', 'Abu Dhabi': '🇦🇪', 'Azerbaijan': '🇦🇿',
     'United States': '🇺🇸', 'Las Vegas': '🇺🇸'
 }
 
@@ -53,9 +78,18 @@ RACE_NAME_MAP = {
     'Australia': '澳大利亚', 'China': '中国', 'Japan': '日本', 'Austria': '奥地利', 'Great Britain': '英国',
     'Belgium': '比利时', 'Hungary': '匈牙利', 'Canada': '加拿大', 'Monaco': '摩纳哥', 'Miami': '迈阿密',
     'Emilia-Romagna': '艾米利亚-罗马涅', 'Italy': '意大利', 'Spain': '西班牙', 'Netherlands': '荷兰',
-    'Singapore': '新加坡', 'Mexico': '墨西哥', 'Brazil': '巴西', 'Qatar': '卡塔尔', 'Abu Dhabi': '阿布扎比',
+    'Singapore': '新加坡', 'Mexico': '墨西哥', 'Brazil': '巴西', 'Qatar': '卡塔尔', 'Abu Dhabi': '阿布扎比', 'Azerbaijan': '阿塞拜疆',
     'United States': '美国', 'Las Vegas': '拉斯维加斯'
 }
+
+
+@dataclass(frozen=True)
+class RaceTarget:
+    round: int
+    meeting: int
+    slug: str
+    race_name_en: str
+    sprint: bool
 
 
 def fetch(url: str) -> str:
@@ -63,6 +97,49 @@ def fetch(url: str) -> str:
     r.raise_for_status()
     return r.text
 
+
+
+def race_has_results(meeting: int, slug: str) -> bool:
+    try:
+        rows = extract_rows(fetch(f'{BASE}/races/{meeting}/{slug}/race-result'))
+    except Exception:
+        return False
+    if not rows:
+        return False
+    try:
+        return bool(flatten_text(content_value(rows[0][-1])).strip())
+    except Exception:
+        return True
+
+
+def race_has_sprint_results(meeting: int, slug: str) -> bool:
+    try:
+        rows = extract_rows(fetch(f'{BASE}/races/{meeting}/{slug}/sprint-results'))
+    except Exception:
+        return False
+    return bool(rows)
+
+
+def discover_latest_completed_race() -> RaceTarget:
+    races_text = fetch(f'{BASE}/races')
+    races: dict[int, str] = {}
+    for meeting_raw, slug in re.findall(r'/en/results/2026/races/(\d+)/([^/]+)/race-result', races_text):
+        meeting = int(meeting_raw)
+        races.setdefault(meeting, slug)
+    completed: list[tuple[int, str]] = []
+    for meeting, slug in sorted(races.items()):
+        if race_has_results(meeting, slug):
+            completed.append((meeting, slug))
+    if not completed:
+        raise ValueError('no completed 2026 races found on formula1.com')
+    meeting, slug = completed[-1]
+    return RaceTarget(
+        round=len(completed),
+        meeting=meeting,
+        slug=slug,
+        race_name_en=SLUG_RACE_NAME_MAP.get(slug, slug.replace('-', ' ').title()),
+        sprint=race_has_sprint_results(meeting, slug),
+    )
 
 def extract_rows(text: str) -> list[list[dict[str, Any]]]:
     patterns = [
@@ -173,8 +250,8 @@ def parse_round_from_index(text: str) -> int:
     return int(m.group(1))
 
 
-def parse_session_map(round_number: int, meeting_slug: str, sprint_expected: bool) -> tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]:
-    base = f'{BASE}/races/1288/{meeting_slug}'
+def parse_session_map(round_number: int, meeting: int, meeting_slug: str, sprint_expected: bool) -> tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]:
+    base = f'{BASE}/races/{meeting}/{meeting_slug}'
     race_url = base + '/race-result'
     qual_url = base + '/qualifying'
     sprint_url = base + '/sprint-results'
@@ -350,9 +427,9 @@ def parse_existing_race_results(existing_text: str) -> dict[str, list[dict[str, 
     return result
 
 
-def build_updated_race_results(existing_text: str, round_num: int, meeting_slug: str, race_name_en: str, sprint_expected: bool) -> dict[str, list[dict[str, Any]]]:
+def build_updated_race_results(existing_text: str, round_num: int, meeting: int, meeting_slug: str, race_name_en: str, sprint_expected: bool) -> dict[str, list[dict[str, Any]]]:
     existing = parse_existing_race_results(existing_text)
-    race_map, qual_map, sprint_map = parse_session_map(round_num, meeting_slug, sprint_expected)
+    race_map, qual_map, sprint_map = parse_session_map(round_num, meeting, meeting_slug, sprint_expected)
     race_name_cn = RACE_NAME_MAP.get(race_name_en, race_name_en)
     flag = FLAG_MAP.get(race_name_en, '🏁')
     for code, results in existing.items():
@@ -383,25 +460,36 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--push', action='store_true')
-    parser.add_argument('--meeting-slug', default='austria')
-    parser.add_argument('--race-name-en', default='Austria')
-    parser.add_argument('--round', type=int, default=8)
+    parser.add_argument('--no-commit', action='store_true')
+    parser.add_argument('--meeting-id', type=int)
+    parser.add_argument('--meeting-slug')
+    parser.add_argument('--race-name-en')
+    parser.add_argument('--round', type=int)
     parser.add_argument('--sprint', action='store_true')
     args = parser.parse_args()
+
+    if args.meeting_id and args.meeting_slug and args.race_name_en and args.round:
+        target = RaceTarget(args.round, args.meeting_id, args.meeting_slug, args.race_name_en, args.sprint)
+    elif not any((args.meeting_id, args.meeting_slug, args.race_name_en, args.round, args.sprint)):
+        target = discover_latest_completed_race()
+    else:
+        parser.error('manual mode requires --meeting-id, --meeting-slug, --race-name-en, and --round')
+
+    print(f'Updating F1 standings for {target.race_name_en} GP (R{target.round}, meeting {target.meeting}/{target.slug}, sprint={target.sprint})')
 
     text = INDEX_PATH.read_text()
     date_str = datetime.now().strftime('%Y-%m-%d')
     driver_standings = parse_driver_standings()
     team_standings = parse_team_standings()
-    race_results = build_updated_race_results(text, args.round, args.meeting_slug, args.race_name_en, args.sprint)
+    race_results = build_updated_race_results(text, target.round, target.meeting, target.slug, target.race_name_en, target.sprint)
 
     text = replace_const_block(text, 'RACE_RESULTS_2026', format_race_results(race_results))
     text = replace_const_block(text, 'DRIVER_STANDINGS', format_driver_standings(driver_standings))
     text = replace_const_block(text, 'TEAM_STANDINGS', format_team_standings(team_standings))
-    race_name_cn = RACE_NAME_MAP.get(args.race_name_en, args.race_name_en)
-    text = update_comment(text, '2026 分站成绩', args.round, race_name_cn, date_str)
-    text = update_comment(text, '2026 积分榜', args.round, race_name_cn, date_str)
-    text = update_comment(text, '车队积分榜', args.round, race_name_cn, date_str)
+    race_name_cn = RACE_NAME_MAP.get(target.race_name_en, target.race_name_en)
+    text = update_comment(text, '2026 分站成绩', target.round, race_name_cn, date_str)
+    text = update_comment(text, '2026 积分榜', target.round, race_name_cn, date_str)
+    text = update_comment(text, '车队积分榜', target.round, race_name_cn, date_str)
 
     if args.dry_run:
         tmp = INDEX_PATH.with_suffix('.index.tmp')
@@ -410,8 +498,11 @@ def main() -> int:
         return 0
 
     INDEX_PATH.write_text(text)
+    if args.no_commit:
+        print('updated index.html without committing')
+        return 0
     subprocess.run(['git', '-C', str(REPO_DIR), 'add', 'index.html'], check=True)
-    msg = f'Update F1 standings after {args.race_name_en} GP (R{args.round})'
+    msg = f'Update F1 standings after {target.race_name_en} GP (R{target.round})'
     commit = subprocess.run(['git', '-C', str(REPO_DIR), 'commit', '-m', msg], capture_output=True, text=True)
     if commit.returncode != 0:
         if 'nothing to commit' not in commit.stdout.lower() and 'nothing to commit' not in commit.stderr.lower():
@@ -425,3 +516,4 @@ def main() -> int:
 
 if __name__ == '__main__':
     raise SystemExit(main())
+

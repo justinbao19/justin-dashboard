@@ -66,20 +66,31 @@ justin-dashboard/
 ### Dashboard Briefing
 
 - 文件: `.github/workflows/dashboard-briefing.yml`
-- 定时: 每天北京时间 `08:40` 和 `18:40`
+- 定时: 每天北京时间 `08:20` 和 `22:50`
 - 流程:
   1. 更新 `data/market.json` 的行情快照
   2. 更新 `data/news.json` 的新闻与配图
   3. 调用兼容 OpenAI 的 LLM API 生成市场分析字段
   4. 校验 JSON 与图片
   5. 提交数据变更回仓库
-  6. 发送 Telegram 简报，并附带 Dashboard 链接
+
+### F1 Standings Refresh
+
+- 文件: `.github/workflows/f1-standings.yml`
+- 定时: 每天北京时间 `09:15`
+- 手动: 支持 `workflow_dispatch`
+- 流程:
+  1. 从 formula1.com 自动发现 2026 最新已完赛分站
+  2. 更新 `index.html` 内的 `RACE_RESULTS_2026`、`DRIVER_STANDINGS`、`TEAM_STANDINGS`
+  3. 跑 deploy guard 和 Vercel build 校验
+  4. 有变化时自动提交并 push，触发 Vercel 部署
 
 相关脚本:
 
 - `scripts/update_market.py`
 - `scripts/update_news.py`
 - `scripts/generate_market_analysis.py`
+- `scripts/update_f1_standings.py`
 - `scripts/send_telegram_briefing.py`
 - `scripts/send_wechat_briefing.py`
 - `scripts/briefing_content.py`

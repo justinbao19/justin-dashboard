@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-astryx-theme="chocolate">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@astryxdesign/theme-chocolate@0.1.4/dist/theme.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
@@ -26,6 +27,8 @@
             --market-section-bg: rgba(0,0,0,0.03);
             --market-meta-bg: rgba(0,113,227,0.05);
             --market-chain-bg: rgba(0,0,0,0.035);
+            --bg-elevated: rgba(255, 255, 255, 0.98);
+            --bg-tertiary: rgba(0, 0, 0, 0.04);
         }
 
         [data-theme="dark"] {
@@ -41,6 +44,8 @@
             --market-section-bg: rgba(255,255,255,0.04);
             --market-meta-bg: rgba(255,255,255,0.06);
             --market-chain-bg: rgba(255,255,255,0.05);
+            --bg-elevated: rgba(36, 36, 38, 0.98);
+            --bg-tertiary: rgba(255, 255, 255, 0.07);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1583,7 +1588,7 @@
         .f1-standings { margin-top: 24px; }
         .f1-standings-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             margin-bottom: 12px;
         }
@@ -1615,11 +1620,18 @@
             color: #e10600;
         }
         .f1-standings-more {
-            background: none; border: none;
+            display: block;
+            width: 100%;
+            min-height: 44px;
+            margin-top: 10px;
+            background: rgba(225,6,0,0.08);
+            border: 1px solid rgba(225,6,0,0.18);
+            border-radius: 14px;
             color: #e10600;
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
+            text-align: center;
         }
         
         .f1-standings-list { display: flex; flex-direction: column; gap: 8px; }
@@ -4041,6 +4053,1227 @@
 
             .market-price { font-size: 18px; }
         }
+
+        /* Mobile polish for information-heavy sections. Weather intentionally left untouched. */
+        @media (max-width: 760px) {
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+                overscroll-behavior: none;
+            }
+
+            body {
+                height: 100vh;
+                height: 100dvh;
+            }
+
+            .pages {
+                position: fixed;
+                inset: 0;
+                overflow: hidden;
+                padding-bottom: 0;
+            }
+
+            .page {
+                min-height: 0;
+                height: 100vh;
+                height: 100dvh;
+                overflow-x: hidden;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: calc(86px + env(safe-area-inset-bottom));
+            }
+
+            #page-market .page-shell,
+            #page-news .page-shell,
+            #page-f1 .page-shell {
+                padding: 0 12px 18px;
+            }
+
+            #page-market .page-content,
+            #page-news .page-content,
+            #page-f1 .page-content {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            #page-market .card,
+            #page-news .card,
+            #page-f1 .card {
+                border-radius: 18px;
+                margin-bottom: 14px;
+                box-shadow: none;
+            }
+
+            #page-market .card-title,
+            #page-news .card-title,
+            #page-f1 .card-title {
+                font-size: 12px;
+                letter-spacing: 0.04em;
+                margin-bottom: 12px;
+            }
+
+            .market-dashboard,
+            .market-pulse-board,
+            .trading-playground,
+            .news-hub {
+                gap: 14px;
+                min-width: 0;
+            }
+
+            .market-page-header {
+                padding: 28px 0 14px;
+            }
+
+            .market-page-header h1 {
+                font-size: 24px;
+                line-height: 1.08;
+            }
+
+            .market-header-meta {
+                margin-top: 8px;
+            }
+
+            .market-refresh-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 13px;
+            }
+
+            .market-segment-control {
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 3px;
+                width: 100%;
+                margin-top: 14px;
+                border: 1px solid var(--border);
+                background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+                backdrop-filter: saturate(180%) blur(18px);
+            }
+
+            .segment-btn {
+                min-height: 40px;
+                padding: 8px 6px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            .segment-btn i {
+                display: none;
+            }
+
+            .market-summary-bar {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: minmax(236px, 82%);
+                grid-template-columns: none;
+                gap: 10px;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                contain: inline-size;
+                overflow-x: auto;
+                padding: 0 2px 6px;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+            }
+
+            .market-summary-bar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .market-summary-item {
+                min-height: 122px;
+                padding: 14px 15px;
+                border-radius: 16px;
+                scroll-snap-align: start;
+            }
+
+            .market-summary-label {
+                margin-bottom: 8px;
+                font-size: 10px;
+            }
+
+            .market-summary-value {
+                font-size: 17px;
+                line-height: 1.24;
+            }
+
+            .market-summary-meta {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+
+            .market-list-card,
+            .forex-card,
+            .sentiment-card,
+            .treasury-card,
+            .events-card,
+            .market-analysis-card,
+            .market-overview-card,
+            .market-advice-card,
+            .advice-card,
+            .trading-chart-card,
+            .trading-positions-card,
+            .trading-log-card,
+            .trading-decision-card {
+                padding: 15px;
+            }
+
+            .market-card-header {
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+
+            .market-card-note {
+                font-size: 11px;
+            }
+
+            #marketList {
+                gap: 7px;
+            }
+
+            .market-item {
+                border-radius: 13px;
+                padding: 11px 12px;
+                background: var(--market-card-bg);
+            }
+
+            .market-item:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .market-name {
+                font-size: 13px;
+            }
+
+            .market-index,
+            .market-chart-label {
+                font-size: 10px;
+            }
+
+            .market-price {
+                font-size: 14px;
+            }
+
+            .market-change {
+                font-size: 11px;
+            }
+
+            .forex-grid {
+                display: flex;
+                gap: 9px;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                contain: inline-size;
+                overflow-x: auto;
+                padding-bottom: 4px;
+                scrollbar-width: none;
+            }
+
+            .forex-grid::-webkit-scrollbar {
+                display: none;
+            }
+
+            .forex-item {
+                min-width: 112px;
+                padding: 10px 8px;
+                border-radius: 12px;
+            }
+
+            .forex-flag {
+                font-size: 20px;
+            }
+
+            .forex-price {
+                font-size: 17px;
+            }
+
+            .sentiment-treasury-row {
+                gap: 12px;
+            }
+
+            .sentiment-item,
+            .treasury-item,
+            .event-item {
+                min-height: 44px;
+                border-radius: 12px;
+                background: var(--market-section-bg);
+            }
+
+            .sentiment-item {
+                display: grid;
+                grid-template-columns: minmax(84px, 1fr) auto auto;
+                gap: 8px;
+            }
+
+            .sentiment-item .sentiment-bar,
+            .sentiment-item .sentiment-gauge {
+                grid-column: 1 / -1;
+                max-width: none;
+                width: 100%;
+            }
+
+            .sentiment-label,
+            .treasury-label,
+            .event-name {
+                white-space: normal;
+            }
+
+            .sentiment-value {
+                font-size: 18px;
+            }
+
+            .events-list {
+                max-height: 196px;
+            }
+
+            .event-main {
+                padding: 9px 10px;
+            }
+
+            .market-analysis,
+            .logic-chain,
+            .market-overview-insights,
+            .advice-summary,
+            .advice-risks {
+                border-radius: 14px;
+                padding: 14px;
+            }
+
+            .market-analysis-content,
+            .market-section-summary {
+                font-size: 13px;
+                line-height: 1.68;
+            }
+
+            .market-section {
+                padding: 15px 0;
+            }
+
+            .market-section-header {
+                align-items: center;
+                margin-bottom: 8px;
+            }
+
+            .market-section-details {
+                font-size: 12px;
+                line-height: 1.58;
+            }
+
+            .market-section-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .trading-metrics {
+                gap: 9px;
+            }
+
+            .trading-metric-card {
+                padding: 14px;
+                border-radius: 14px;
+            }
+
+            .metric-label {
+                font-size: 10px;
+            }
+
+            .metric-value {
+                font-size: 20px;
+                margin: 6px 0 3px;
+            }
+
+            .metric-sub {
+                font-size: 11px;
+            }
+
+            .trading-chart-header,
+            .trading-log-header {
+                align-items: flex-start;
+                gap: 10px;
+                flex-direction: column;
+            }
+
+            .trading-chart-wrap {
+                height: 190px;
+            }
+
+            .news-bg {
+                background: linear-gradient(180deg, #171821 0%, #242936 58%, #111319 100%);
+            }
+
+            #page-news .page-header {
+                padding: 28px 0 14px;
+            }
+
+            #page-news .page-header h1 {
+                font-size: 28px;
+                line-height: 1.08;
+            }
+
+            #page-news .page-header .subtitle {
+                margin-top: 8px;
+            }
+
+            .news-tab-control {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                width: 100%;
+                margin-top: 14px;
+                border: 1px solid rgba(255,255,255,0.1);
+                background: rgba(0,0,0,0.18);
+                backdrop-filter: blur(16px);
+            }
+
+            .news-tab-btn {
+                min-height: 40px;
+                padding: 8px 6px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+
+            .news-hero-card {
+                padding: 18px;
+                border-radius: 20px;
+            }
+
+            .news-hero-card::after,
+            .pulse-overview-card::after {
+                display: none;
+            }
+
+            .news-kicker,
+            .pulse-kicker {
+                margin-bottom: 8px;
+                font-size: 10px;
+            }
+
+            .news-hero-title,
+            .pulse-headline {
+                font-size: 24px;
+                line-height: 1.12;
+                letter-spacing: -0.03em;
+                margin-bottom: 8px;
+            }
+
+            .news-hero-deck,
+            .pulse-deck {
+                font-size: 13px;
+                line-height: 1.62;
+                margin-bottom: 12px;
+            }
+
+            .news-hero-meta,
+            .pulse-meta-row {
+                gap: 6px 12px;
+                font-size: 12px;
+            }
+
+            .news-source-strip,
+            .pulse-source-strip {
+                flex-wrap: nowrap;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                contain: inline-size;
+                overflow-x: auto;
+                padding-bottom: 2px;
+                scrollbar-width: none;
+            }
+
+            .news-source-strip::-webkit-scrollbar,
+            .pulse-source-strip::-webkit-scrollbar {
+                display: none;
+            }
+
+            .news-source-chip,
+            .pulse-source-chip {
+                min-height: 28px;
+                white-space: nowrap;
+                font-size: 11px;
+            }
+
+            .news-layout,
+            .pulse-layout {
+                gap: 12px;
+            }
+
+            .news-feature-card,
+            .pulse-feature-card,
+            .news-stack-card,
+            .pulse-river-card,
+            .news-quick-column,
+            .pulse-source-column {
+                padding: 16px;
+                border-radius: 18px;
+            }
+
+            .news-feature-label,
+            .pulse-feature-label {
+                margin-bottom: 12px;
+                font-size: 10px;
+            }
+
+            .news-feature-title,
+            .pulse-feature-title {
+                font-size: 22px;
+                line-height: 1.22;
+                margin-bottom: 10px;
+            }
+
+            .news-feature-text,
+            .pulse-feature-text {
+                font-size: 13px;
+                line-height: 1.64;
+                margin-bottom: 12px;
+            }
+
+            .news-stack-item,
+            .pulse-river-item {
+                padding: 12px 0;
+            }
+
+            .news-stack-title-link,
+            .pulse-river-title,
+            .news-column-item a,
+            .pulse-column-item a {
+                font-size: 13px;
+                line-height: 1.46;
+            }
+
+            .news-open-link,
+            .pulse-link {
+                min-height: 40px;
+                padding: 0 13px;
+            }
+
+            .news-quick-grid,
+            .pulse-source-columns {
+                gap: 12px;
+            }
+
+            #page-f1 {
+                background: #08090a;
+            }
+
+            #page-f1 .page-shell {
+                padding-top: 14px;
+            }
+
+            .f1-bg {
+                height: 220px;
+                background: linear-gradient(180deg, rgba(225,6,0,0.88) 0%, rgba(225,6,0,0.18) 58%, transparent 100%);
+            }
+
+            .f1-header {
+                padding: 14px 0 8px;
+            }
+
+            .f1-header h1 {
+                font-size: 25px;
+                letter-spacing: -0.02em;
+            }
+
+            .f1-subtitle {
+                font-size: 12px;
+            }
+
+            .f1-next-race {
+                padding: 20px;
+                border-radius: 20px;
+                margin: 12px 0 16px;
+                box-shadow: none;
+                background: linear-gradient(150deg, rgba(18,18,20,0.98), rgba(31,31,34,0.94));
+            }
+
+            .f1-next-race::before {
+                height: 3px;
+            }
+
+            .f1-next-round,
+            .f1-countdown-title {
+                font-size: 10px;
+            }
+
+            .f1-live-badge {
+                top: 12px;
+                right: 12px;
+                border-radius: 999px;
+            }
+
+            .f1-next-name {
+                font-size: 27px;
+                line-height: 1.08;
+                margin: 9px 0 7px;
+            }
+
+            .f1-next-location {
+                font-size: 13px;
+            }
+
+            .f1-next-date {
+                font-size: 12px;
+                border-radius: 999px;
+                padding: 5px 11px;
+            }
+
+            .f1-countdown {
+                margin: 20px 0 16px;
+            }
+
+            .f1-countdown-timer {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .f1-countdown-unit {
+                min-width: 0;
+                padding: 10px 4px;
+                border-radius: 12px;
+            }
+
+            .f1-countdown-unit span {
+                font-size: 25px;
+                letter-spacing: -0.03em;
+            }
+
+            .f1-countdown-unit small {
+                font-size: 9px;
+            }
+
+            .f1-schedule-btn,
+            .f1-race-more {
+                min-height: 44px;
+                width: 100%;
+                justify-content: center;
+                border-radius: 14px;
+            }
+
+            .f1-race-list {
+                margin-top: 18px;
+            }
+
+            .f1-race-list-header {
+                margin-bottom: 10px;
+                padding-left: 2px;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+
+            .f1-race-item {
+                display: grid;
+                grid-template-columns: auto auto minmax(0, 1fr) auto;
+                padding: 12px;
+                border-radius: 15px;
+                margin-bottom: 8px;
+                gap: 10px;
+            }
+
+            .f1-race-item:hover,
+            .f1-standing-item.clickable:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .f1-race-flag {
+                font-size: 25px;
+                margin-right: 0;
+            }
+
+            .f1-race-date {
+                width: 40px;
+                margin-right: 0;
+                padding: 5px 0;
+            }
+
+            .f1-race-date-day {
+                font-size: 18px;
+            }
+
+            .f1-race-name {
+                font-size: 13px;
+                line-height: 1.25;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            .f1-race-meta {
+                font-size: 11px;
+                line-height: 1.35;
+            }
+
+            .f1-race-track {
+                display: none;
+            }
+
+            .f1-race-arrow {
+                margin-left: 0;
+            }
+
+            .f1-standings {
+                margin-top: 18px;
+            }
+
+            .f1-standings-header {
+                justify-content: center;
+                gap: 0;
+            }
+
+            .f1-toggle-switch {
+                width: min(100%, 260px);
+                flex: 0 1 260px;
+                border: 1px solid var(--border);
+            }
+
+            .f1-toggle-btn {
+                flex: 1;
+                min-height: 38px;
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .f1-standings-more {
+                min-height: 38px;
+                padding: 0 10px;
+            }
+
+            .f1-standing-item {
+                padding: 11px 12px;
+                border-radius: 14px;
+            }
+
+            .f1-standing-pos {
+                width: 24px;
+                font-size: 12px;
+            }
+
+            .f1-standing-color {
+                height: 34px;
+                margin-right: 9px;
+            }
+
+            .f1-driver-photo {
+                width: 38px;
+                height: 38px;
+                margin-right: 9px;
+            }
+
+            .f1-team-logo {
+                width: 44px;
+                height: 32px;
+                margin-right: 9px;
+            }
+
+            .f1-standing-name {
+                font-size: 13px;
+                line-height: 1.3;
+            }
+
+            .f1-standing-team {
+                font-size: 11px;
+                line-height: 1.3;
+            }
+
+            .f1-standing-points {
+                font-size: 16px;
+            }
+
+            .f1-driver-detail {
+                padding: 0 0 18px;
+            }
+
+            .f1-back-btn {
+                min-height: 40px;
+                margin: 4px 0 12px;
+            }
+
+            .f1-driver-hero {
+                padding: 18px;
+                border-radius: 18px;
+            }
+
+            .f1-driver-hero-content {
+                gap: 14px;
+                align-items: flex-start;
+            }
+
+            .f1-driver-hero-photo {
+                width: 76px;
+                height: 76px;
+            }
+
+            .f1-driver-hero-name {
+                font-size: 22px;
+                line-height: 1.12;
+                padding-right: 34px;
+            }
+
+            .f1-driver-hero-number {
+                font-size: 38px;
+                right: 16px;
+                top: 8px;
+            }
+
+            .f1-driver-hero-stats,
+            .f1-circuit-stats,
+            .f1-career-grid {
+                gap: 8px;
+            }
+
+            .f1-driver-stat-value,
+            .f1-career-stat-value {
+                font-size: 20px;
+            }
+
+            .f1-points-chart,
+            .f1-results-card,
+            .f1-career-stat {
+                border-radius: 16px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 390px) {
+            .market-summary-bar {
+                grid-auto-columns: minmax(224px, 86%);
+            }
+
+            .segment-btn,
+            .news-tab-btn {
+                font-size: 11px;
+            }
+
+            .market-item {
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 7px 9px;
+            }
+
+            .market-values {
+                min-width: 66px;
+            }
+
+            .news-hero-title,
+            .pulse-headline {
+                font-size: 22px;
+            }
+
+            .f1-next-name {
+                font-size: 24px;
+            }
+
+            .f1-countdown-unit span {
+                font-size: 22px;
+            }
+
+            .f1-standing-nat {
+                display: none;
+            }
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .market-item:hover,
+            .forex-item:hover,
+            .news-open-link:hover,
+            .pulse-link:hover,
+            .f1-schedule-btn:hover,
+            .f1-race-more:hover,
+            .f1-race-item:hover,
+            .f1-standing-item:hover {
+                transform: none;
+                box-shadow: none;
+            }
+
+            .market-item:active,
+            .forex-item:active,
+            .news-open-link:active,
+            .pulse-link:active,
+            .f1-schedule-btn:active,
+            .f1-race-more:active,
+            .f1-race-item:active,
+            .f1-standing-item:active {
+                transform: scale(0.99);
+            }
+        }
+
+        /* ========== Astryx chocolate refinement layer ========== */
+        html[data-astryx-theme="chocolate"][data-theme="light"] {
+            color-scheme: light;
+            --bg-primary: var(--color-background-body);
+            --bg-card: color-mix(in oklab, var(--color-background-popover) 88%, transparent);
+            --bg-elevated: color-mix(in oklab, var(--color-background-popover) 96%, white 4%);
+            --bg-tertiary: var(--color-neutral);
+            --text-primary: var(--color-text-primary);
+            --text-secondary: color-mix(in oklab, var(--color-text-secondary) 82%, var(--color-text-primary) 18%);
+            --text-tertiary: var(--color-text-disabled);
+            --accent: var(--color-accent);
+            --success: var(--color-success);
+            --danger: var(--color-error);
+            --border: color-mix(in oklab, var(--color-border) 72%, transparent);
+            --shadow: var(--shadow-low);
+            --market-card-bg: color-mix(in oklab, var(--color-background-popover) 92%, transparent);
+            --market-card-border: color-mix(in oklab, var(--color-border) 70%, transparent);
+            --market-section-bg: color-mix(in oklab, var(--color-background-muted) 46%, transparent);
+            --market-meta-bg: color-mix(in oklab, var(--color-accent-muted) 86%, transparent);
+            --market-chain-bg: color-mix(in oklab, var(--color-background-muted) 52%, transparent);
+        }
+        html[data-astryx-theme="chocolate"][data-theme="dark"] {
+            color-scheme: dark;
+            --bg-primary: var(--color-background-body);
+            --bg-card: color-mix(in oklab, var(--color-background-popover) 86%, transparent);
+            --bg-elevated: color-mix(in oklab, var(--color-background-popover) 96%, #2f241a 4%);
+            --bg-tertiary: var(--color-neutral);
+            --text-primary: var(--color-text-primary);
+            --text-secondary: var(--color-text-secondary);
+            --text-tertiary: var(--color-text-disabled);
+            --accent: var(--color-accent);
+            --success: var(--color-success);
+            --danger: var(--color-error);
+            --border: color-mix(in oklab, var(--color-border) 70%, transparent);
+            --shadow: var(--shadow-med);
+            --market-card-bg: color-mix(in oklab, var(--color-background-card) 76%, transparent);
+            --market-card-border: color-mix(in oklab, var(--color-border) 76%, transparent);
+            --market-section-bg: color-mix(in oklab, var(--color-background-muted) 50%, transparent);
+            --market-meta-bg: color-mix(in oklab, var(--color-accent-muted) 72%, transparent);
+            --market-chain-bg: color-mix(in oklab, var(--color-background-muted) 58%, transparent);
+        }
+        #page-market,
+        #page-news,
+        #page-f1 {
+            background:
+                radial-gradient(circle at 14% 0%, color-mix(in oklab, var(--color-accent-muted) 64%, transparent), transparent 36rem),
+                radial-gradient(circle at 88% 12%, color-mix(in oklab, var(--color-background-muted) 58%, transparent), transparent 30rem),
+                var(--bg-primary);
+        }
+        [data-theme="dark"] #page-market,
+        [data-theme="dark"] #page-news,
+        [data-theme="dark"] #page-f1 {
+            background:
+                radial-gradient(circle at 18% -8%, rgba(212,160,106,0.14), transparent 34rem),
+                radial-gradient(circle at 92% 10%, rgba(74,53,32,0.44), transparent 30rem),
+                linear-gradient(180deg, #18110d 0%, var(--bg-primary) 64%);
+        }
+        .market-bg,
+        .news-bg,
+        .f1-bg {
+            background: transparent !important;
+        }
+        .theme-mode-toggle {
+            width: auto;
+            height: 42px;
+            min-width: 86px;
+            gap: 8px;
+            padding: 0 13px;
+            border-radius: var(--radius-full, 999px);
+            background: color-mix(in oklab, var(--bg-card) 88%, transparent);
+            border-color: var(--market-card-border);
+            box-shadow: var(--shadow-low);
+            color: var(--text-secondary);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+        .theme-mode-toggle span { font-size: 12px; }
+        .theme-mode-toggle:hover {
+            color: var(--accent);
+            border-color: color-mix(in oklab, var(--accent) 36%, var(--border));
+            box-shadow: var(--shadow-inset-hover), var(--shadow-low);
+        }
+        .market-page-header,
+        #page-news .page-header,
+        .f1-header {
+            position: relative;
+        }
+        .market-page-header::after,
+        #page-news .page-header::after,
+        .f1-header::after {
+            content: 'Astryx · Chocolate';
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            margin-top: 12px;
+            padding: 0 10px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in oklab, var(--accent) 28%, var(--border));
+            background: color-mix(in oklab, var(--color-accent-muted) 82%, transparent);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        #page-news .page-header,
+        .f1-header {
+            color: var(--text-primary);
+        }
+        #page-news .page-header h1,
+        .f1-header h1 {
+            color: var(--text-primary);
+            letter-spacing: -0.05em;
+        }
+        #page-news .page-header .subtitle,
+        .f1-subtitle {
+            color: var(--text-secondary);
+            opacity: 1;
+        }
+        .card,
+        .market-summary-item,
+        .market-item,
+        .forex-item,
+        .sentiment-item,
+        .treasury-item,
+        .pulse-feature-card,
+        .pulse-river-card,
+        .pulse-source-column,
+        .news-feature-card,
+        .news-stack-card,
+        .news-quick-column,
+        .f1-next-race,
+        .f1-race-item,
+        .f1-standings,
+        .f1-standing-item,
+        .f1-session,
+        .f1-results-card,
+        .f1-points-chart {
+            box-shadow: var(--shadow-low);
+            border-color: var(--market-card-border);
+        }
+        .market-summary-item,
+        .market-list-card,
+        .forex-card,
+        .sentiment-card,
+        .treasury-card,
+        .events-card,
+        .market-overview-card,
+        .market-advice-card,
+        .market-analysis-card,
+        .pulse-feature-card,
+        .pulse-river-card,
+        .pulse-source-column,
+        .news-feature-card,
+        .news-stack-card,
+        .news-quick-column,
+        .f1-standings,
+        .f1-race-item,
+        .f1-standing-item,
+        .f1-session {
+            background:
+                linear-gradient(180deg, color-mix(in oklab, var(--market-card-bg) 96%, white 4%), var(--market-card-bg));
+        }
+        [data-theme="dark"] .market-summary-item,
+        [data-theme="dark"] .market-list-card,
+        [data-theme="dark"] .forex-card,
+        [data-theme="dark"] .sentiment-card,
+        [data-theme="dark"] .treasury-card,
+        [data-theme="dark"] .events-card,
+        [data-theme="dark"] .market-overview-card,
+        [data-theme="dark"] .market-advice-card,
+        [data-theme="dark"] .market-analysis-card,
+        [data-theme="dark"] .pulse-feature-card,
+        [data-theme="dark"] .pulse-river-card,
+        [data-theme="dark"] .pulse-source-column,
+        [data-theme="dark"] .news-feature-card,
+        [data-theme="dark"] .news-stack-card,
+        [data-theme="dark"] .news-quick-column,
+        [data-theme="dark"] .f1-standings,
+        [data-theme="dark"] .f1-race-item,
+        [data-theme="dark"] .f1-standing-item,
+        [data-theme="dark"] .f1-session {
+            background:
+                linear-gradient(180deg, color-mix(in oklab, var(--market-card-bg) 92%, #3a2a1d 8%), var(--market-card-bg));
+        }
+        .pulse-overview-card,
+        .news-hero-card,
+        .f1-next-race {
+            border-radius: 28px;
+            background:
+                radial-gradient(circle at 88% 0%, color-mix(in oklab, var(--accent) 20%, transparent), transparent 44%),
+                linear-gradient(145deg, color-mix(in oklab, var(--color-background-popover) 96%, transparent), color-mix(in oklab, var(--color-background-muted) 72%, transparent));
+            border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+        }
+        [data-theme="dark"] .pulse-overview-card,
+        [data-theme="dark"] .news-hero-card,
+        [data-theme="dark"] .f1-next-race {
+            background:
+                radial-gradient(circle at 88% 0%, rgba(212,160,106,0.20), transparent 46%),
+                linear-gradient(145deg, rgba(42,32,24,0.95), rgba(20,16,16,0.94));
+        }
+        .pulse-kicker,
+        .news-kicker,
+        .news-column-label,
+        .pulse-column-label,
+        .market-summary-label,
+        .card-title {
+            color: var(--accent);
+        }
+        .market-segment-control,
+        .news-tab-control,
+        .f1-toggle-switch {
+            border: 1px solid var(--market-card-border);
+            background: color-mix(in oklab, var(--market-section-bg) 78%, transparent);
+            box-shadow: inset 0 1px 0 color-mix(in oklab, white 12%, transparent);
+        }
+        .segment-btn.active,
+        .news-tab-btn.active,
+        .f1-toggle-btn.active {
+            background: var(--accent);
+            color: var(--color-on-accent);
+            box-shadow: var(--shadow-low);
+        }
+        .segment-btn,
+        .news-tab-btn,
+        .f1-toggle-btn {
+            color: var(--text-secondary);
+        }
+        .news-open-link.primary,
+        .pulse-link.primary,
+        .f1-schedule-btn,
+        .f1-race-more,
+        .f1-standings-more {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--color-on-accent);
+        }
+        .news-open-link.secondary,
+        .pulse-link.secondary {
+            color: var(--text-secondary);
+            background: var(--market-section-bg);
+        }
+        .f1-shell {
+            padding-top: calc(30px + env(safe-area-inset-top));
+        }
+        .f1-header {
+            padding: 10px 20px 20px;
+        }
+        .f1-header h1 {
+            font-size: clamp(34px, 7vw, 58px);
+            font-weight: 900;
+            line-height: 0.98;
+        }
+        .f1-next-race {
+            color: var(--text-primary);
+        }
+        .f1-next-round,
+        .f1-next-location,
+        .f1-next-date,
+        .f1-countdown-title {
+            color: var(--text-secondary);
+        }
+        .f1-next-name,
+        .f1-countdown-unit span {
+            color: var(--text-primary);
+        }
+        .f1-countdown-unit,
+        .f1-race-date,
+        .f1-session-date {
+            background: color-mix(in oklab, var(--market-section-bg) 86%, transparent);
+            border: 1px solid var(--market-card-border);
+        }
+        .f1-standing-pos.top3,
+        .f1-race-arrow,
+        .f1-detail-circuit,
+        .f1-stat i,
+        .f1-session.race .f1-session-name {
+            color: var(--accent) !important;
+        }
+        .f1-session.race {
+            border-left-color: var(--accent);
+        }
+        .f1-race-item:hover,
+        .f1-standing-item:hover,
+        .news-stack-item:hover,
+        .pulse-river-item:hover,
+        .market-item:hover {
+            border-color: color-mix(in oklab, var(--accent) 34%, var(--border));
+            transform: translateY(-1px);
+        }
+        .news-stack-item,
+        .pulse-river-item {
+            border-bottom-color: color-mix(in oklab, var(--border) 80%, transparent);
+        }
+        @media (min-width: 1024px) {
+            .market-dashboard,
+            .market-pulse-board,
+            .news-hub,
+            #f1-list-view {
+                max-width: 1180px;
+                margin: 0 auto;
+            }
+            .f1-next-race {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: end;
+                gap: 18px 32px;
+            }
+            .f1-countdown,
+            .f1-schedule-btn {
+                grid-column: 2;
+            }
+        }
+        @media (max-width: 760px) {
+            .theme-mode-toggle {
+                top: calc(10px + env(safe-area-inset-top));
+                right: 12px;
+                min-width: 74px;
+                height: 38px;
+                padding: 0 11px;
+            }
+            .theme-mode-toggle span { font-size: 11px; }
+            #page-news .page-header,
+            .f1-header {
+                padding-top: 32px;
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .pulse-overview-card,
+            .news-hero-card,
+            .f1-next-race {
+                border-radius: 22px;
+            }
+            .f1-shell {
+                padding-top: 0;
+            }
+            .f1-header h1 {
+                font-size: 36px;
+            }
+        }
+
+
+        /* Astryx final contrast pass */
+        .segment-btn.active,
+        .news-tab-btn.active,
+        .f1-toggle-btn.active,
+        .tab-item.active {
+            background: var(--accent) !important;
+            color: var(--color-on-accent) !important;
+        }
+        [data-theme="dark"] .segment-btn.active,
+        [data-theme="dark"] .news-tab-btn.active,
+        [data-theme="dark"] .f1-toggle-btn.active,
+        [data-theme="dark"] .tab-item.active {
+            color: #24170f !important;
+        }
+        .tab-nav {
+            background: color-mix(in oklab, var(--bg-card) 86%, transparent);
+            border-color: var(--market-card-border);
+            box-shadow: var(--shadow-med);
+        }
+        .tab-item {
+            border-radius: 18px;
+            transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        }
+        .tab-item.active {
+            transform: translateY(-1px);
+        }
+
     </style>
 </head>
 <body>
@@ -4062,7 +5295,7 @@
     <div class="page-bg news-bg" id="bg-news"></div>
     <div class="page-bg flight-bg" id="bg-flight"></div>
 
-    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon" id="themeIcon"></i></button>
+    <button class="theme-toggle theme-mode-toggle" onclick="toggleThemeMode()" title="主题：自动 / 浅色 / 深色"><i class="fas fa-circle-half-stroke" id="themeIcon"></i><span id="themeModeLabel">自动</span></button>
 
     <div class="pages">
         <!-- Weather -->
@@ -4254,7 +5487,7 @@
                                 <div class="skeleton skeleton-line w-60"></div>
                             </div>
                         </div>
-                        
+
                         <!-- 市场情绪 + 美债 + 事件：三栏网格 -->
                         <div class="sentiment-treasury-row">
                             <!-- 市场情绪板块 -->
@@ -4284,7 +5517,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- 美债收益率板块 -->
                             <div class="card treasury-card" id="treasuryCard">
                                 <div class="market-card-header">
@@ -4676,9 +5909,9 @@
                                 <button id="f1ToggleDriver" class="f1-toggle-btn active" onclick="toggleStandingsMode('driver')">Drivers</button>
                                 <button id="f1ToggleTeam" class="f1-toggle-btn" onclick="toggleStandingsMode('team')">Constructors</button>
                             </div>
-                            <button class="f1-standings-more" onclick="toggleF1Standings()">See All</button>
                         </div>
                         <div class="f1-standings-list" id="f1StandingsList"></div>
+                        <button class="f1-standings-more" onclick="toggleF1Standings()">See All</button>
                     </div>
                 </div>
                 
@@ -4800,9 +6033,46 @@
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
 
-        let theme = localStorage.getItem('theme') || (new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'dark' : 'light');
-        const applyTheme = () => { document.documentElement.setAttribute('data-theme', theme); document.getElementById('themeIcon').className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; };
-        const toggleTheme = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('theme', theme); applyTheme(); };
+        const THEME_MODES = ['auto', 'light', 'dark'];
+        let themeMode = localStorage.getItem('themeMode') || localStorage.getItem('theme') || 'auto';
+        if (!THEME_MODES.includes(themeMode)) themeMode = 'auto';
+        const systemThemeQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+        const getTimeTheme = () => {
+            const hour = new Date().getHours();
+            return hour >= 18 || hour < 6 ? 'dark' : 'light';
+        };
+        const resolveTheme = () => {
+            if (themeMode === 'light' || themeMode === 'dark') return themeMode;
+            return systemThemeQuery ? (systemThemeQuery.matches ? 'dark' : 'light') : getTimeTheme();
+        };
+        let theme = resolveTheme();
+        const applyTheme = () => {
+            theme = resolveTheme();
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.style.colorScheme = theme;
+            const icon = document.getElementById('themeIcon');
+            const label = document.getElementById('themeModeLabel');
+            if (icon) {
+                icon.className = themeMode === 'auto'
+                    ? 'fas fa-circle-half-stroke'
+                    : (theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon');
+            }
+            if (label) label.textContent = themeMode === 'auto' ? '自动' : (theme === 'dark' ? '深色' : '浅色');
+        };
+        const toggleThemeMode = () => {
+            const nextIndex = (THEME_MODES.indexOf(themeMode) + 1) % THEME_MODES.length;
+            themeMode = THEME_MODES[nextIndex];
+            localStorage.setItem('themeMode', themeMode);
+            localStorage.removeItem('theme');
+            applyTheme();
+        };
+        const toggleTheme = toggleThemeMode;
+        if (systemThemeQuery) {
+            const onSystemThemeChange = () => { if (themeMode === 'auto') applyTheme(); };
+            systemThemeQuery.addEventListener?.('change', onSystemThemeChange);
+            systemThemeQuery.addListener?.(onSystemThemeChange);
+        }
+        setInterval(() => { if (themeMode === 'auto' && !systemThemeQuery) applyTheme(); }, 10 * 60 * 1000);
         applyTheme();
 
         function normalizePage(page) {

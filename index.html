@@ -5887,6 +5887,91 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 30px rgba(0,0,0,0.22) !important;
         }
 
+
+        /* F1 standings final polish: match race list glass, remove hard block */
+        #page-f1 .f1-standings-list {
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            border-radius: 0 !important;
+        }
+        #page-f1 .f1-standing-item {
+            background: var(--f1-glass) !important;
+            border: 1px solid rgba(255,255,255,0.50) !important;
+            margin-bottom: 8px !important;
+            border-radius: var(--f1-radius-item) !important;
+            box-shadow: var(--f1-card-inner), 0 12px 34px rgba(39,91,116,0.10) !important;
+            backdrop-filter: blur(24px) saturate(1.45);
+            -webkit-backdrop-filter: blur(24px) saturate(1.45);
+        }
+        [data-theme="dark"] #page-f1 .f1-standing-item {
+            border-color: rgba(210,232,255,0.12) !important;
+            box-shadow: var(--f1-card-inner), 0 14px 38px rgba(0,0,0,0.26) !important;
+        }
+        #page-f1 .f1-standing-item + .f1-standing-item {
+            border-top: none !important;
+        }
+        #page-f1 .f1-standing-item:hover {
+            transform: translateY(-1px) !important;
+            border-color: var(--f1-accent-border) !important;
+        }
+        /* Toggle radius alignment */
+        #page-f1 .f1-toggle-switch {
+            border-radius: var(--f1-radius-control) !important;
+            overflow: hidden;
+        }
+        #page-f1 .f1-toggle-btn {
+            border-radius: 0 !important;
+        }
+        #page-f1 .f1-toggle-btn:first-child {
+            border-radius: var(--f1-radius-control) 0 0 var(--f1-radius-control) !important;
+        }
+        #page-f1 .f1-toggle-btn:last-child {
+            border-radius: 0 var(--f1-radius-control) var(--f1-radius-control) 0 !important;
+        }
+        /* Light mode standings text fix */
+        [data-theme="light"] #page-f1 .f1-standing-name,
+        [data-theme="light"] #page-f1 .f1-standing-points {
+            color: #0f2a33 !important;
+        }
+        [data-theme="light"] #page-f1 .f1-standing-team,
+        [data-theme="light"] #page-f1 .f1-standing-pts {
+            color: rgba(15,42,51,0.55) !important;
+        }
+
+
+        /* Race day highlight without left stripe */
+        #page-f1 .f1-session.race {
+            border-left: none !important;
+            position: relative;
+            background: color-mix(in oklab, var(--f1-accent) 8%, var(--f1-glass)) !important;
+            border: 1px solid var(--f1-accent-border) !important;
+        }
+        [data-theme="dark"] #page-f1 .f1-session.race {
+            background: color-mix(in oklab, var(--f1-accent) 14%, var(--f1-glass)) !important;
+            border-color: color-mix(in oklab, var(--f1-accent) 36%, rgba(210,232,255,0.12)) !important;
+        }
+        #page-f1 .f1-session.race .f1-session-name {
+            padding-left: 0 !important;
+            color: var(--f1-accent) !important;
+            font-weight: 800;
+        }
+        #page-f1 .f1-session.race::after {
+            content: 'RACE DAY';
+            position: absolute;
+            right: 16px;
+            top: 14px;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            padding: 2px 9px;
+            border-radius: 999px;
+            background: var(--f1-accent);
+            color: #fff;
+            box-shadow: 0 4px 12px color-mix(in oklab, var(--f1-accent) 26%, transparent);
+        }
+
     </style>
 </head>
 <body>

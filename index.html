@@ -5958,7 +5958,7 @@
             font-weight: 800;
         }
         #page-f1 .f1-session.race::after {
-            content: 'RACE DAY';
+            content: '比赛日';
             position: absolute;
             right: 16px;
             top: 14px;
@@ -6604,12 +6604,12 @@
                     <div class="f1-standings">
                         <div class="f1-standings-header">
                             <div class="f1-toggle-switch">
-                                <button id="f1ToggleDriver" class="f1-toggle-btn active" onclick="toggleStandingsMode('driver')">Drivers</button>
-                                <button id="f1ToggleTeam" class="f1-toggle-btn" onclick="toggleStandingsMode('team')">Constructors</button>
+                                <button id="f1ToggleDriver" class="f1-toggle-btn active" onclick="toggleStandingsMode('driver')">车手排行</button>
+                                <button id="f1ToggleTeam" class="f1-toggle-btn" onclick="toggleStandingsMode('team')">车队排行</button>
                             </div>
                         </div>
                         <div class="f1-standings-list" id="f1StandingsList"></div>
-                        <button class="f1-standings-more" onclick="toggleF1Standings()">See All</button>
+                        <button class="f1-standings-more" onclick="toggleF1Standings()">展开全部</button>
                     </div>
                 </div>
 
@@ -8451,7 +8451,7 @@
             }).join('');
 
             document.getElementById('f1StandingsList').innerHTML = html;
-            document.querySelector('.f1-standings-more').textContent = _f1ShowAllDrivers ? 'Show Less' : 'See All';
+            document.querySelector('.f1-standings-more').textContent = _f1ShowAllDrivers ? '收起' : (_f1StandingsMode === 'driver' ? '展开全部车手' : '展开全部车队');
         }
 
         function toggleStandingsMode(mode) {

@@ -1290,7 +1290,11 @@
             border-radius: 20px;
             padding: 28px;
             margin: 16px 0;
-            border: 1px solid rgba(25
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
         .f1-next-race,
         .f1-race-item,
         .f1-standing-item,
@@ -1310,13 +1314,26 @@
             background:
                 linear-gradient(180deg, color-mix(in oklab, var(--bg-card) 88%, white 4%), var(--bg-card));
         }
-5,255,255,0.08);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            position: relative;
-            overflow: hidden;
-        }
 
         .f1-next-round { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        /* 下一场卡片右侧赛道水印 */
+        .f1-next-track {
+            position: absolute;
+            top: 50%;
+            right: -18px;
+            transform: translateY(-50%);
+            width: 250px;
+            height: 210px;
+            background: var(--f1-accent);
+            opacity: 0.10;
+            -webkit-mask: center / contain no-repeat;
+            mask: center / contain no-repeat;
+            pointer-events: none;
+            z-index: 0;
+            display: none;
+        }
+        [data-theme="dark"] .f1-next-track { opacity: 0.16; }
+        .f1-next-race > *:not(.f1-next-track) { position: relative; z-index: 1; }
         .f1-live-badge {
             position: absolute;
             top: 14px;
@@ -1462,6 +1479,7 @@
         .f1-race-meta { font-size: 12px; color: var(--f1-accent); margin-top: 3px; font-weight: 500; }
         .f1-race-meta span { color: var(--text-tertiary); font-weight: 400; }
 
+        /* 赛道缩略图:用 accent 着色的 mask,浅/深两套都清晰 */
         .f1-race-track {
             width: 48px;
             height: 48px;
@@ -1469,14 +1487,12 @@
             margin-right: 8px;
             opacity: 0.6;
             flex-shrink: 0;
+            background: var(--f1-accent);
+            -webkit-mask: center / contain no-repeat;
+            mask: center / contain no-repeat;
+            transition: opacity 0.2s ease;
         }
-        .f1-race-track img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: invert(0.3);
-        }
-        .f1-race-item:hover .f1-race-track { opacity: 1; }
+        .f1-race-item:hover .f1-race-track { opacity: 0.95; }
 
         .f1-race-arrow {
             color: var(--text-tertiary);
@@ -1487,11 +1503,15 @@
         }
         .f1-race-item:hover .f1-race-arrow { opacity: 1; color: var(--f1-accent); transform: translateX(4px); }
         .f1-race-more {
-            width: 100%;
-            padding: 14px;
-            margin-top: 8px;
-            background: rgba(91,141,239,0.10);
-            border: 1px solid rgba(91,141,239,0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            max-width: 100%;
+            margin: 14px auto 4px;
+            padding: 11px 22px;
+            background: var(--f1-accent-soft);
+            border: 1px solid var(--f1-accent-border);
             border-radius: 14px;
             color: var(--f1-accent);
             font-size: 14px;
@@ -1500,53 +1520,35 @@
             transition: all 0.2s;
         }
         .f1-race-more:hover {
-            background: rgba(91,141,239,0.12);
-            border-color: rgba(91,141,239,0.22);
+            background: color-mix(in oklab, var(--f1-accent) 16%, transparent);
+            border-color: var(--f1-accent);
         }
 
         /* F1 详情页 */
-        .f1-back-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 8px 14px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-        .f1-back-btn:hover { background: rgba(255,255,255,0.2); }
         .f1-detail-header { margin: 20px 0; }
         .f1-detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
         .f1-detail-info { flex: 1; }
-        .f1-detail-round { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+        .f1-detail-round { font-size: 11px; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         .f1-detail-name { font-size: 32px; font-weight: 800; color: #fff; margin: 12px 0 8px; letter-spacing: -1px; }
         .f1-detail-circuit { font-size: 16px; color: var(--f1-accent); font-weight: 600; }
         .f1-detail-date {
             font-size: 14px;
-            color: white;
+            color: #fff;
             margin-top: 10px;
             padding: 6px 14px;
-            background: rgba(91,141,239,0.82);
-            border-radius: 6px;
+            background: var(--f1-accent);
+            border-radius: 8px;
             display: inline-block;
-            font-weight: 500;
+            font-weight: 600;
         }
         .f1-track-image {
             width: 120px;
             height: 100px;
             flex-shrink: 0;
-        }
-        .f1-track-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: brightness(0) invert(1);
-            opacity: 0.8;
+            background: var(--f1-accent);
+            opacity: 0.85;
+            -webkit-mask: center / contain no-repeat;
+            mask: center / contain no-repeat;
         }
 
         .f1-circuit-stats {
@@ -1560,13 +1562,13 @@
             flex-direction: column;
             align-items: center;
             padding: 16px 8px;
-            background: rgba(255,255,255,0.05);
+            background: var(--bg-tertiary);
             border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid var(--border);
         }
         .f1-stat i { color: var(--f1-accent); font-size: 16px; margin-bottom: 8px; }
-        .f1-stat-value { font-size: 22px; font-weight: 700; color: #fff; }
-        .f1-stat-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .f1-stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+        .f1-stat-label { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
 
         .f1-weekend { margin-top: 24px; }
         .f1-weekend h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; }
@@ -1635,18 +1637,21 @@
             color: var(--f1-accent);
         }
         .f1-standings-more {
-            display: block;
-            width: 100%;
-            min-height: 44px;
-            margin-top: 10px;
-            background: rgba(91,141,239,0.08);
-            border: 1px solid rgba(91,141,239,0.16);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            max-width: 100%;
+            min-height: 42px;
+            margin: 12px auto 0;
+            padding: 0 22px;
+            background: var(--f1-accent-soft);
+            border: 1px solid var(--f1-accent-border);
             border-radius: 14px;
             color: var(--f1-accent);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            text-align: center;
         }
 
         .f1-standings-list { display: flex; flex-direction: column; gap: 8px; }
@@ -1887,22 +1892,27 @@
             margin-top: 4px;
         }
 
-        /* Back button */
+        /* Back button — theme-aware,浅色可读 */
         .f1-back-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 10px 16px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 10px;
-            color: #fff;
+            background: var(--f1-accent-soft);
+            border: 1px solid var(--f1-accent-border);
+            border-radius: 12px;
+            color: var(--f1-accent);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             margin-bottom: 16px;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
         }
-        .f1-back-btn:hover { background: rgba(255,255,255,0.15); }
+        .f1-back-btn:hover {
+            background: var(--f1-accent);
+            border-color: var(--f1-accent);
+            color: #fff;
+        }
 
         /* Standings item clickable */
         .f1-standing-item.clickable { cursor: pointer; }
@@ -4570,10 +4580,6 @@
                 gap: 12px;
             }
 
-            #page-f1 {
-                background: #08090a;
-            }
-
             #page-f1 .page-shell {
                 padding-top: 14px;
             }
@@ -4660,12 +4666,18 @@
                 font-size: 9px;
             }
 
-            .f1-schedule-btn,
-            .f1-race-more {
+            .f1-schedule-btn {
                 min-height: 44px;
                 width: 100%;
                 justify-content: center;
                 border-radius: 14px;
+            }
+
+            .f1-race-more,
+            .f1-standings-more {
+                width: fit-content;
+                max-width: 100%;
+                min-height: 42px;
             }
 
             .f1-race-list {
@@ -4722,12 +4734,17 @@
                 line-height: 1.35;
             }
 
+            /* 移动端保留赛道缩略图,隐藏冗余箭头(整行可点) */
             .f1-race-track {
-                display: none;
+                display: block;
+                width: 34px;
+                height: 34px;
+                margin-right: 0;
+                opacity: 0.7;
             }
 
             .f1-race-arrow {
-                margin-left: 0;
+                display: none;
             }
 
             .f1-standings {
@@ -4753,8 +4770,8 @@
             }
 
             .f1-standings-more {
-                min-height: 38px;
-                padding: 0 10px;
+                min-height: 40px;
+                padding: 0 20px;
             }
 
             .f1-standing-item {
@@ -4924,9 +4941,9 @@
             --fresh-mint: #dff8ef;
             --fresh-lilac: #e9edff;
             --fresh-ink: #17323a;
-            --f1-accent: #5b8cff;
-            --f1-accent-soft: rgba(91, 140, 255, 0.12);
-            --f1-accent-border: rgba(91, 140, 255, 0.24);
+            --f1-accent: #e10600;
+            --f1-accent-soft: rgba(225, 6, 0, 0.12);
+            --f1-accent-border: rgba(225, 6, 0, 0.28);
         }
         html[data-theme="light"] {
             color-scheme: light;
@@ -4967,9 +4984,9 @@
             --market-section-bg: rgba(114, 221, 210, 0.08);
             --market-meta-bg: rgba(114, 221, 210, 0.12);
             --market-chain-bg: rgba(255, 255, 255, 0.06);
-            --f1-accent: #8fb2ff;
-            --f1-accent-soft: rgba(143, 178, 255, 0.13);
-            --f1-accent-border: rgba(143, 178, 255, 0.24);
+            --f1-accent: #ff5a52;
+            --f1-accent-soft: rgba(255, 90, 82, 0.16);
+            --f1-accent-border: rgba(255, 90, 82, 0.34);
         }
         #page-market,
         #page-news,
@@ -5173,7 +5190,7 @@
             padding: 10px 20px 20px;
         }
         .f1-header h1 {
-            font-size: clamp(34px, 7vw, 58px);
+            font-size: clamp(32px, 5.2vw, 46px);
             font-weight: 900;
             line-height: 0.98;
         }
@@ -5187,6 +5204,22 @@
             margin-right: 0.12em;
             color: var(--f1-accent);
             vertical-align: -0.03em;
+        }
+        /* 官方 F1 logo(内联,accent 着色,可自适应) */
+        .f1-logo {
+            display: inline-block;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+        .f1-header h1 .f1-title-logo {
+            height: 0.66em;
+            width: auto;
+            color: var(--f1-accent);
+        }
+        .tab-item .f1-tab-logo {
+            height: 13px;
+            width: auto;
+            margin: 5px 0;
         }
         #page-f1 .f1-next-race {
             color: var(--text-primary);
@@ -5234,7 +5267,7 @@
             background: var(--f1-accent);
             border-color: var(--f1-accent);
             color: #fff;
-            box-shadow: 0 10px 22px rgba(217, 111, 99, 0.18);
+            box-shadow: 0 10px 22px color-mix(in oklab, var(--f1-accent) 22%, transparent);
         }
         #page-f1 .f1-toggle-btn:hover:not(.active),
         #page-f1 .f1-race-more:hover,
@@ -5246,7 +5279,7 @@
         .f1-next-race::before,
         .f1-sprint-badge,
         .f1-live-badge {
-            background: linear-gradient(90deg, var(--f1-accent), color-mix(in oklab, var(--f1-accent) 62%, #7aa8ff));
+            background: linear-gradient(90deg, var(--f1-accent), color-mix(in oklab, var(--f1-accent) 60%, #ff9a8f));
         }
         .f1-session.race {
             border-left-color: var(--f1-accent);
@@ -5275,15 +5308,30 @@
                 max-width: 1180px;
                 margin: 0 auto;
             }
-            .f1-next-race {
+            /* 左列堆叠全部信息,右列专放赛道图(无图时自动收起) */
+            #page-f1 .f1-next-race {
                 display: grid;
                 grid-template-columns: minmax(0, 1fr) auto;
-                align-items: end;
-                gap: 18px 32px;
+                align-items: center;
+                gap: 20px 44px;
             }
-            .f1-countdown,
-            .f1-schedule-btn {
+            .f1-next-main {
+                grid-column: 1;
+                min-width: 0;
+            }
+            #page-f1 .f1-next-track {
+                position: static;
+                transform: none;
+                right: auto;
+                top: auto;
                 grid-column: 2;
+                align-self: center;
+                width: clamp(220px, 22vw, 300px);
+                height: 200px;
+                opacity: 0.8;
+            }
+            [data-theme="dark"] #page-f1 .f1-next-track {
+                opacity: 0.9;
             }
         }
         @media (max-width: 760px) {
@@ -5436,220 +5484,7 @@
         }
 
 
-        /* ========== F1 Premium Refinement (Boxbox-inspired) ========== */
-        html[data-astryx-theme="fresh"] .f1-shell {
-            padding-top: 12px;
-        }
-        html[data-astryx-theme="fresh"] .f1-header {
-            padding: 8px 4px 18px;
-        }
-        html[data-astryx-theme="fresh"] .f1-header h1 {
-            font-size: clamp(32px, 7vw, 46px);
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            color: var(--text-primary);
-        }
-        html[data-astryx-theme="fresh"] .f1-subtitle {
-            color: var(--text-tertiary);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* Next race card — 克制优雅 */
-        html[data-astryx-theme="fresh"] .f1-next-race {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 26px;
-            padding: 26px 24px 24px;
-            box-shadow: var(--shadow-low);
-            position: relative;
-            overflow: hidden;
-        }
-        html[data-astryx-theme="fresh"][data-theme="dark"] .f1-next-race {
-            background: color-mix(in oklab, var(--bg-card) 94%, #0a1726 6%);
-            border-color: color-mix(in oklab, var(--border) 70%, transparent);
-        }
-        html[data-astryx-theme="fresh"] .f1-next-race::before {
-            display: none; /* 移除老的渐变装饰 */
-        }
-        html[data-astryx-theme="fresh"] .f1-live-badge {
-            position: absolute;
-            top: 22px;
-            right: 24px;
-            background: var(--f1-accent);
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            padding: 3px 11px 2px;
-            border-radius: 999px;
-            box-shadow: 0 2px 8px color-mix(in oklab, var(--f1-accent) 38%, transparent);
-        }
-        html[data-astryx-theme="fresh"][data-theme="dark"] .f1-live-badge {
-            box-shadow: 0 2px 10px color-mix(in oklab, var(--f1-accent) 46%, transparent);
-        }
-
-        /* 倒计时更克制 */
-        html[data-astryx-theme="fresh"] .f1-countdown {
-            margin: 22px 0 16px;
-        }
-        html[data-astryx-theme="fresh"] .f1-countdown-unit {
-            background: var(--bg-tertiary);
-            border-radius: 16px;
-            padding: 10px 0 8px;
-            min-width: 58px;
-        }
-        html[data-astryx-theme="fresh"][data-theme="dark"] .f1-countdown-unit {
-            background: color-mix(in oklab, var(--bg-tertiary) 60%, transparent);
-        }
-        html[data-astryx-theme="fresh"] .f1-countdown-unit span {
-            font-size: 28px;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-        /* 赛程列表卡片 */
-        html[data-astryx-theme="fresh"] .f1-race-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 16px 18px;
-            margin-bottom: 10px;
-            box-shadow: var(--shadow-low);
-            transition: transform .2s cubic-bezier(0.23,1,0.32,1), box-shadow .2s;
-        }
-        html[data-astryx-theme="fresh"] .f1-race-item:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-med);
-            border-color: color-mix(in oklab, var(--accent) 18%, var(--border));
-        }
-        html[data-astryx-theme="fresh"] .f1-race-item.past {
-            opacity: .72;
-        }
-        html[data-astryx-theme="fresh"] .f1-race-item.canceled {
-            opacity: .55;
-        }
-        html[data-astryx-theme="fresh"] .f1-race-date {
-            background: var(--bg-tertiary);
-            border-radius: 14px;
-        }
-        html[data-astryx-theme="fresh"] .f1-race-name {
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        html[data-astryx-theme="fresh"] .f1-race-meta {
-            color: var(--text-tertiary);
-            font-size: 12px;
-        }
-
-        /* 积分榜 */
-        html[data-astryx-theme="fresh"] .f1-standings-list {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 6px 0;
-            box-shadow: var(--shadow-low);
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-item {
-            background: transparent;
-            border: none;
-            padding: 13px 20px;
-            border-radius: 0;
-            margin: 0;
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-item:hover {
-            background: var(--bg-tertiary);
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-pos {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--text-tertiary);
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-pos.top3 {
-            color: var(--f1-accent);
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-color {
-            width: 3.5px;
-            height: 28px;
-            border-radius: 3px;
-            margin-right: 14px;
-            opacity: .85;
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-name {
-            font-weight: 700;
-        }
-        html[data-astryx-theme="fresh"] .f1-standing-team {
-            font-size: 12.5px;
-            color: var(--text-tertiary);
-        }
-
-        /* 详情页 */
-        html[data-astryx-theme="fresh"] .f1-detail-header {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 22px 24px;
-        }
-        html[data-astryx-theme="fresh"] .f1-detail-date {
-            background: var(--f1-accent);
-            color: white;
-            font-weight: 700;
-            border-radius: 8px;
-            padding: 5px 13px;
-            font-size: 13px;
-        }
-        html[data-astryx-theme="fresh"] .f1-session {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-        }
-        html[data-astryx-theme="fresh"] .f1-session.race {
-            border-left: none;
-            position: relative;
-        }
-        html[data-astryx-theme="fresh"] .f1-session.race::before {
-            content: '';
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 5px;
-            height: 5px;
-            background: var(--f1-accent);
-            border-radius: 50%;
-        }
-        html[data-astryx-theme="fresh"] .f1-session.race .f1-session-name {
-            padding-left: 14px;
-        }
-
-        /* 移除所有旧的红色硬编码 */
-        html[data-astryx-theme="fresh"] .f1-sprint-badge {
-            background: var(--f1-accent);
-            color: white;
-            font-weight: 700;
-        }
-
-
-        [data-theme="light"] .f1-next-race,
-        [data-theme="light"] .f1-driver-hero {
-            background:
-                linear-gradient(145deg, rgba(255,255,255,0.92), rgba(243,251,249,0.88));
-            color: var(--text-primary);
-        }
-        [data-theme="light"] .f1-next-name,
-        [data-theme="light"] .f1-countdown-unit span,
-        [data-theme="light"] .f1-detail-name {
-            color: var(--text-primary) !important;
-        }
-        [data-theme="light"] .f1-next-round,
-        [data-theme="light"] .f1-next-location,
-        [data-theme="light"] .f1-countdown-title,
-        [data-theme="light"] .f1-next-date {
-            color: var(--text-secondary) !important;
-        }
-
-        [data-theme="light"] .f1-next-race,
-        [data-theme="light"] .f1-driver-hero {
+        [data-theme="light"] .f1-next-race {
             background:
                 linear-gradient(145deg, rgba(255,255,255,0.96), rgba(243,251,249,0.92));
             color: var(--text-primary);
@@ -5671,9 +5506,9 @@
 
         /* ========== F1 Boxbox polish pass: remove AI strips, align glass system ========== */
         :root {
-            --f1-accent: #5b8cff;
-            --f1-accent-soft: rgba(91, 140, 255, 0.12);
-            --f1-accent-border: rgba(91, 140, 255, 0.24);
+            --f1-accent: #e10600;
+            --f1-accent-soft: rgba(225, 6, 0, 0.12);
+            --f1-accent-border: rgba(225, 6, 0, 0.28);
             --f1-glass: rgba(255, 255, 255, 0.58);
             --f1-glass-strong: rgba(255, 255, 255, 0.72);
             --f1-radius-card: 26px;
@@ -5681,9 +5516,9 @@
             --f1-radius-control: 16px;
         }
         [data-theme="dark"] {
-            --f1-accent: #8fb2ff;
-            --f1-accent-soft: rgba(143, 178, 255, 0.13);
-            --f1-accent-border: rgba(143, 178, 255, 0.24);
+            --f1-accent: #ff5a52;
+            --f1-accent-soft: rgba(255, 90, 82, 0.16);
+            --f1-accent-border: rgba(255, 90, 82, 0.34);
             --f1-glass: rgba(13, 29, 38, 0.58);
             --f1-glass-strong: rgba(17, 39, 52, 0.70);
         }
@@ -5783,7 +5618,7 @@
         [data-theme="dark"] #page-f1 .f1-race-more,
         [data-theme="dark"] #page-f1 .f1-standings-more,
         [data-theme="dark"] #page-f1 .f1-toggle-btn.active {
-            color: #061220 !important;
+            color: #fff !important;
         }
         #page-f1 .f1-race-item {
             border-radius: var(--f1-radius-item) !important;
@@ -5836,15 +5671,6 @@
         #page-f1 .f1-standing-color {
             display: none !important;
         }
-        #page-f1 .f1-session.race {
-            border-left: 0 !important;
-        }
-        #page-f1 .f1-session.race::before {
-            display: none !important;
-        }
-        #page-f1 .f1-session.race .f1-session-name {
-            padding-left: 0 !important;
-        }
         #page-f1 .f1-live-badge,
         #page-f1 .f1-sprint-badge {
             border-radius: 999px !important;
@@ -5854,18 +5680,16 @@
         }
 
 
-        /* F1 token specificity fix */
-        html[data-theme="light"],
-        html[data-theme="light"][data-astryx-theme="fresh"] {
-            --f1-accent: #5b8cff;
-            --f1-accent-soft: rgba(91, 140, 255, 0.12);
-            --f1-accent-border: rgba(91, 140, 255, 0.24);
+        /* F1 token — 加强主题色:偏 cyan 的电光蓝,与 mint/teal 玻璃体系融合 */
+        html[data-theme="light"] {
+            --f1-accent: #e10600;
+            --f1-accent-soft: rgba(225, 6, 0, 0.12);
+            --f1-accent-border: rgba(225, 6, 0, 0.28);
         }
-        html[data-theme="dark"],
-        html[data-theme="dark"][data-astryx-theme="fresh"] {
-            --f1-accent: #8fb2ff;
-            --f1-accent-soft: rgba(143, 178, 255, 0.13);
-            --f1-accent-border: rgba(143, 178, 255, 0.24);
+        html[data-theme="dark"] {
+            --f1-accent: #ff5a52;
+            --f1-accent-soft: rgba(255, 90, 82, 0.16);
+            --f1-accent-border: rgba(255, 90, 82, 0.34);
         }
 
 
@@ -5916,19 +5740,13 @@
             transform: translateY(-1px) !important;
             border-color: var(--f1-accent-border) !important;
         }
-        /* Toggle radius alignment */
+        /* Toggle radius alignment — 内层同心圆角(外半径 16 − padding 3 = 13) */
         #page-f1 .f1-toggle-switch {
             border-radius: var(--f1-radius-control) !important;
-            overflow: hidden;
+            padding: 3px !important;
         }
         #page-f1 .f1-toggle-btn {
-            border-radius: 0 !important;
-        }
-        #page-f1 .f1-toggle-btn:first-child {
-            border-radius: var(--f1-radius-control) 0 0 var(--f1-radius-control) !important;
-        }
-        #page-f1 .f1-toggle-btn:last-child {
-            border-radius: 0 var(--f1-radius-control) var(--f1-radius-control) 0 !important;
+            border-radius: 13px !important;
         }
         /* Light mode standings text fix */
         [data-theme="light"] #page-f1 .f1-standing-name,
@@ -5941,35 +5759,60 @@
         }
 
 
-        /* Race day highlight without left stripe */
+        /* Race day highlight — 克制优雅:柔和 tint + 发丝描边 + 轻量描边标签(无左色条/发光) */
         #page-f1 .f1-session.race {
-            border-left: none !important;
             position: relative;
-            background: color-mix(in oklab, var(--f1-accent) 8%, var(--f1-glass)) !important;
+            overflow: visible;
+            padding-left: 16px !important;
+            background: color-mix(in oklab, var(--f1-accent) 6%, var(--f1-glass)) !important;
             border: 1px solid var(--f1-accent-border) !important;
+            box-shadow: var(--f1-card-inner), 0 12px 34px rgba(39,91,116,0.10) !important;
         }
         [data-theme="dark"] #page-f1 .f1-session.race {
-            background: color-mix(in oklab, var(--f1-accent) 14%, var(--f1-glass)) !important;
-            border-color: color-mix(in oklab, var(--f1-accent) 36%, rgba(210,232,255,0.12)) !important;
+            background: color-mix(in oklab, var(--f1-accent) 11%, var(--f1-glass)) !important;
+            border-color: color-mix(in oklab, var(--f1-accent) 38%, transparent) !important;
+            box-shadow: var(--f1-card-inner), 0 14px 38px rgba(0,0,0,0.26) !important;
+        }
+        #page-f1 .f1-session.race::before {
+            display: none !important;
         }
         #page-f1 .f1-session.race .f1-session-name {
             padding-left: 0 !important;
             color: var(--f1-accent) !important;
-            font-weight: 800;
+            font-weight: 700;
         }
+        /* 轻量描边标签,替代填充渐变徽章 */
         #page-f1 .f1-session.race::after {
             content: '比赛日';
             position: absolute;
             right: 16px;
-            top: 14px;
-            font-size: 9px;
-            font-weight: 900;
-            letter-spacing: 1.5px;
-            padding: 2px 9px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            padding: 4px 11px;
             border-radius: 999px;
-            background: var(--f1-accent);
-            color: #fff;
-            box-shadow: 0 4px 12px color-mix(in oklab, var(--f1-accent) 26%, transparent);
+            background: var(--f1-accent-soft);
+            color: var(--f1-accent) !important;
+            border: 1px solid var(--f1-accent-border);
+        }
+
+        /* 比赛时间排版强化 */
+        #page-f1 .f1-session-time {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary) !important;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.02em;
+            margin-top: 3px;
+        }
+        #page-f1 .f1-session.race .f1-session-time {
+            color: color-mix(in oklab, var(--f1-accent) 78%, var(--text-secondary)) !important;
+            font-weight: 600;
+        }
+        #page-f1 .f1-session-date-day {
+            font-variant-numeric: tabular-nums;
         }
 
     </style>
@@ -6568,31 +6411,34 @@
                 <!-- 列表视图 -->
                 <div id="f1-list-view">
                     <div class="f1-header">
-                        <h1><i class="ph ph-flag-checkered f1-title-icon"></i> F1 2026</h1>
+                        <h1><svg class="f1-logo f1-title-logo" viewBox="0 9 24 6" role="img" aria-label="Formula 1"><path d="M9.6 11.24h7.91L19.75 9H9.39c-2.85 0-3.62.34-5.17 1.81C2.71 12.3 0 15 0 15h3.38c.77-.75 2.2-2.13 2.85-2.75.92-.87 1.37-1.01 3.37-1.01zM20.39 9l-6 6H18l6-6h-3.61zm-3.25 2.61H9.88c-2.22 0-2.6.12-3.55 1.07C5.44 13.57 4 15 4 15h3.15l.75-.75c.49-.49.75-.55 1.78-.55h5.37l2.09-2.09z"/></svg><span>2026</span></h1>
                         <div class="f1-subtitle">近期赛程</div>
                     </div>
 
                     <!-- 下一场比赛倒计时 -->
                     <div class="f1-next-race" id="f1NextRace">
-                        <div class="f1-next-round" id="f1NextRound">Round --</div>
                         <div class="f1-live-badge" id="f1LiveBadge" style="display: none;">🔴 LIVE</div>
-                        <div class="f1-next-name" id="f1NextName">Loading...</div>
-                        <div class="f1-next-location" id="f1NextLocation">--</div>
-                        <div class="f1-next-date" id="f1NextDate">--</div>
+                        <div class="f1-next-main">
+                            <div class="f1-next-round" id="f1NextRound">Round --</div>
+                            <div class="f1-next-name" id="f1NextName">Loading...</div>
+                            <div class="f1-next-location" id="f1NextLocation">--</div>
+                            <div class="f1-next-date" id="f1NextDate">--</div>
 
-                        <div class="f1-countdown">
-                            <div class="f1-countdown-title" id="f1CountdownTitle">Practice 1 Starts in</div>
-                            <div class="f1-countdown-timer">
-                                <div class="f1-countdown-unit"><span id="f1CountDays">--</span><small>Days</small></div>
-                                <div class="f1-countdown-unit"><span id="f1CountHours">--</span><small>Hrs</small></div>
-                                <div class="f1-countdown-unit"><span id="f1CountMins">--</span><small>Mins</small></div>
-                                <div class="f1-countdown-unit"><span id="f1CountSecs">--</span><small>Secs</small></div>
+                            <div class="f1-countdown">
+                                <div class="f1-countdown-title" id="f1CountdownTitle">Practice 1 Starts in</div>
+                                <div class="f1-countdown-timer">
+                                    <div class="f1-countdown-unit"><span id="f1CountDays">--</span><small>Days</small></div>
+                                    <div class="f1-countdown-unit"><span id="f1CountHours">--</span><small>Hrs</small></div>
+                                    <div class="f1-countdown-unit"><span id="f1CountMins">--</span><small>Mins</small></div>
+                                    <div class="f1-countdown-unit"><span id="f1CountSecs">--</span><small>Secs</small></div>
+                                </div>
                             </div>
-                        </div>
 
-                        <button class="f1-schedule-btn" onclick="showF1Detail(window._f1NextMeeting)">
-                            <i class="fas fa-arrow-right"></i> 查看赛程
-                        </button>
+                            <button class="f1-schedule-btn" onclick="showF1Detail(window._f1NextMeeting)">
+                                <i class="fas fa-arrow-right"></i> 查看赛程
+                            </button>
+                        </div>
+                        <div class="f1-next-track" id="f1NextTrack"></div>
                     </div>
 
                     <!-- 赛程列表 -->
@@ -6685,9 +6531,7 @@
                                 <div class="f1-detail-circuit" id="f1DetailCircuit">--</div>
                                 <div class="f1-detail-date" id="f1DetailDate">--</div>
                             </div>
-                            <div class="f1-track-image">
-                                <img id="f1TrackImage" src="" alt="Track layout" onerror="this.style.display='none'">
-                            </div>
+                            <div class="f1-track-image" id="f1TrackImage" role="img" aria-label="赛道布局"></div>
                         </div>
                     </div>
 
@@ -6711,7 +6555,7 @@
         <button class="tab-item active" data-page="weather"><i class="ph ph-cloud-sun"></i><span>天气</span></button>
         <button class="tab-item" data-page="market"><i class="ph ph-chart-line-up"></i><span>市场</span></button>
         <button class="tab-item" data-page="news"><i class="ph ph-newspaper-clipping"></i><span>要闻</span></button>
-        <button class="tab-item" data-page="f1"><i class="ph ph-flag-checkered"></i><span>F1</span></button>
+        <button class="tab-item" data-page="f1"><svg class="f1-logo f1-tab-logo" viewBox="0 9 24 6" role="img" aria-label="F1"><path d="M9.6 11.24h7.91L19.75 9H9.39c-2.85 0-3.62.34-5.17 1.81C2.71 12.3 0 15 0 15h3.38c.77-.75 2.2-2.13 2.85-2.75.92-.87 1.37-1.01 3.37-1.01zM20.39 9l-6 6H18l6-6h-3.61zm-3.25 2.61H9.88c-2.22 0-2.6.12-3.55 1.07C5.44 13.57 4 15 4 15h3.15l.75-.75c.49-.49.75-.55 1.78-.55h5.37l2.09-2.09z"/></svg><span>F1</span></button>
     </nav>
 
     <script>
@@ -8195,6 +8039,22 @@
                 document.getElementById('f1NextName').textContent = next.gp_name;
                 document.getElementById('f1NextLocation').textContent = next.location;
                 document.getElementById('f1NextDate').textContent = `${startDate.getDate()} - ${endDate.getDate()} ${MONTHS[startDate.getMonth()]}`;
+
+                // 右侧赛道水印
+                const nextTrackEl = document.getElementById('f1NextTrack');
+                if (nextTrackEl) {
+                    const nextCircuit = (next.circuit || '').toLowerCase();
+                    const nextKey = Object.keys(CIRCUIT_TRACKS).find(k => nextCircuit.includes(k)) || '';
+                    const nextTrackId = CIRCUIT_TRACKS[nextKey] || '';
+                    if (nextTrackId) {
+                        const url = `url("/tracks/${nextTrackId}.svg")`;
+                        nextTrackEl.style.webkitMaskImage = url;
+                        nextTrackEl.style.maskImage = url;
+                        nextTrackEl.style.display = 'block';
+                    } else {
+                        nextTrackEl.style.display = 'none';
+                    }
+                }
             }
 
             // 赛程列表：默认看接下来 5 场；展开后显示完整赛季，避免已完赛数据看起来“丢失”
@@ -8212,7 +8072,7 @@
                 const circuitLower = (r.circuit || '').toLowerCase();
                 const trackKey = Object.keys(CIRCUIT_TRACKS).find(k => circuitLower.includes(k)) || '';
                 const trackId = CIRCUIT_TRACKS[trackKey] || '';
-                const trackImg = trackId && !isCanceled ? `<div class="f1-race-track"><img src="/tracks/${trackId}.svg" alt=""></div>` : '';
+                const trackImg = trackId && !isCanceled ? `<div class="f1-race-track" style="-webkit-mask-image:url('/tracks/${trackId}.svg');mask-image:url('/tracks/${trackId}.svg')"></div>` : '';
                 const clickHandler = isCanceled ? '' : `onclick="showF1Detail(${r.meeting_key})"`;
                 return `<div class="f1-race-item${stateClass}" ${clickHandler}>
                     <div class="f1-race-flag">${r.country_flag || '🏁'}</div>
@@ -8370,7 +8230,9 @@
                 const trackId = CIRCUIT_TRACKS[trackKey] || '';
                 const trackImg = document.getElementById('f1TrackImage');
                 if (trackId) {
-                    trackImg.src = `/tracks/${trackId}.svg`;
+                    const trackUrl = `url("/tracks/${trackId}.svg")`;
+                    trackImg.style.webkitMaskImage = trackUrl;
+                    trackImg.style.maskImage = trackUrl;
                     trackImg.style.display = 'block';
                 } else {
                     trackImg.style.display = 'none';
@@ -8427,7 +8289,6 @@
                     const photoUrl = `${F1_CDN}/c_lfill,w_64/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/${d.teamId}/${d.driverCode}/2026${d.teamId}${d.driverCode}right.webp`;
                     return `<div class="f1-standing-item clickable" onclick="showDriverDetail('${d.driverCode}')">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
-                        <div class="f1-standing-color" style="background:#${d.color}"></div>
                         <img class="f1-driver-photo" src="${photoUrl}" onerror="this.style.opacity='0.3'" alt="">
                         <div class="f1-standing-info">
                             <div class="f1-standing-name">${d.name} <span class="f1-standing-nat">${d.nat}</span></div>
@@ -8440,7 +8301,6 @@
                     const logoUrl = TEAM_LOGOS[d.name] || '';
                     return `<div class="f1-standing-item">
                         <div class="f1-standing-pos ${posClass}">${String(d.pos).padStart(2,'0')}</div>
-                        <div class="f1-standing-color" style="background:#${d.color}"></div>
                         <img class="f1-team-logo" src="${logoUrl}" onerror="this.style.opacity='0.3'" alt="">
                         <div class="f1-standing-info">
                             <div class="f1-standing-name">${d.name}</div>

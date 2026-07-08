@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-astryx-theme="chocolate">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -7,7 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/@astryxdesign/theme-chocolate@0.1.4/dist/theme.css">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/fill/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         :root {
@@ -1275,7 +1276,7 @@
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 300px;
-            background: linear-gradient(180deg, #e10600 0%, rgba(225,6,0,0.3) 50%, transparent 100%);
+            background: linear-gradient(180deg, var(--f1-accent) 0%, rgba(91,141,239,0.22) 50%, transparent 100%);
             z-index: 0;
         }
         .f1-shell { position: relative; z-index: 1; }
@@ -1299,7 +1300,7 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 4px;
-            background: linear-gradient(90deg, #e10600, #ff4444);
+            background: linear-gradient(90deg, var(--f1-accent), #8db5ff);
         }
         .f1-next-round { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
         .f1-live-badge { 
@@ -1322,13 +1323,13 @@
             50% { opacity: 0.85; transform: scale(1.02); }
         }
         .f1-next-name { font-size: 32px; font-weight: 800; color: #fff; margin: 10px 0 6px; letter-spacing: -0.5px; }
-        .f1-next-location { font-size: 15px; color: #e10600; font-weight: 600; }
+        .f1-next-location { font-size: 15px; color: var(--f1-accent); font-weight: 600; }
         .f1-next-date { 
             font-size: 14px; 
             color: white;
             margin-top: 8px;
             padding: 4px 12px;
-            background: rgba(225,6,0,0.85);
+            background: rgba(91,141,239,0.82);
             border-radius: 6px;
             display: inline-block;
             font-weight: 500;
@@ -1349,7 +1350,7 @@
         
         .f1-schedule-btn {
             display: inline-flex; align-items: center; gap: 8px;
-            background: #e10600;
+            background: var(--f1-accent);
             border: none;
             color: #fff;
             padding: 12px 24px;
@@ -1359,7 +1360,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .f1-schedule-btn:hover { background: #ff1a1a; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(225,6,0,0.4); }
+        .f1-schedule-btn:hover { background: var(--f1-accent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(91,141,239,0.28); }
         
         .f1-race-list { margin-top: 24px; }
         .f1-race-list-header {
@@ -1381,7 +1382,7 @@
             transition: all 0.2s;
         }
         .f1-race-item:hover { 
-            border-color: rgba(225,6,0,0.3); 
+            border-color: rgba(91,141,239,0.22);
             background: var(--bg-tertiary);
             transform: translateX(4px); 
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -1420,7 +1421,7 @@
         .f1-race-flag { font-size: 32px; margin-right: 14px; }
         .f1-sprint-badge {
             display: inline-block;
-            background: linear-gradient(135deg, #e10600, #ff3333);
+            background: linear-gradient(135deg, var(--f1-accent), var(--f1-accent));
             color: #fff;
             font-size: 8px;
             font-weight: 700;
@@ -1444,7 +1445,7 @@
         
         .f1-race-info { flex: 1; min-width: 0; }
         .f1-race-name { font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; }
-        .f1-race-meta { font-size: 12px; color: #e10600; margin-top: 3px; font-weight: 500; }
+        .f1-race-meta { font-size: 12px; color: var(--f1-accent); margin-top: 3px; font-weight: 500; }
         .f1-race-meta span { color: var(--text-tertiary); font-weight: 400; }
         
         .f1-race-track {
@@ -1470,23 +1471,23 @@
             opacity: 0.5;
             transition: all 0.2s;
         }
-        .f1-race-item:hover .f1-race-arrow { opacity: 1; color: #e10600; transform: translateX(4px); }
+        .f1-race-item:hover .f1-race-arrow { opacity: 1; color: var(--f1-accent); transform: translateX(4px); }
         .f1-race-more {
             width: 100%;
             padding: 14px;
             margin-top: 8px;
-            background: rgba(225,6,0,0.1);
-            border: 1px solid rgba(225,6,0,0.2);
+            background: rgba(91,141,239,0.10);
+            border: 1px solid rgba(91,141,239,0.18);
             border-radius: 14px;
-            color: #e10600;
+            color: var(--f1-accent);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
         .f1-race-more:hover {
-            background: rgba(225,6,0,0.15);
-            border-color: rgba(225,6,0,0.3);
+            background: rgba(91,141,239,0.12);
+            border-color: rgba(91,141,239,0.22);
         }
         
         /* F1 详情页 */
@@ -1510,13 +1511,13 @@
         .f1-detail-info { flex: 1; }
         .f1-detail-round { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
         .f1-detail-name { font-size: 32px; font-weight: 800; color: #fff; margin: 12px 0 8px; letter-spacing: -1px; }
-        .f1-detail-circuit { font-size: 16px; color: #e10600; font-weight: 600; }
+        .f1-detail-circuit { font-size: 16px; color: var(--f1-accent); font-weight: 600; }
         .f1-detail-date { 
             font-size: 14px; 
             color: white;
             margin-top: 10px;
             padding: 6px 14px;
-            background: rgba(225,6,0,0.85);
+            background: rgba(91,141,239,0.82);
             border-radius: 6px;
             display: inline-block;
             font-weight: 500;
@@ -1549,7 +1550,7 @@
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.08);
         }
-        .f1-stat i { color: #e10600; font-size: 16px; margin-bottom: 8px; }
+        .f1-stat i { color: var(--f1-accent); font-size: 16px; margin-bottom: 8px; }
         .f1-stat-value { font-size: 22px; font-weight: 700; color: #fff; }
         .f1-stat-label { font-size: 9px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
         
@@ -1565,7 +1566,7 @@
             border: 1px solid var(--border);
             transition: all 0.2s;
         }
-        .f1-session:hover { border-color: rgba(225,6,0,0.2); }
+        .f1-session:hover { border-color: rgba(91,141,239,0.18); }
         .f1-session-date { 
             width: 48px; 
             text-align: center; 
@@ -1579,8 +1580,8 @@
         .f1-session-info { flex: 1; }
         .f1-session-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
         .f1-session-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
-        .f1-session.race .f1-session-name { color: #e10600; }
-        .f1-session.race { border-left: 3px solid #e10600; }
+        .f1-session.race .f1-session-name { color: var(--f1-accent); }
+        .f1-session.race { border-left: 3px solid var(--f1-accent); }
         
         .f1-loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
         
@@ -1611,23 +1612,23 @@
             transition: all 0.2s;
         }
         .f1-toggle-btn.active {
-            background: #e10600;
+            background: var(--f1-accent);
             color: white;
-            box-shadow: 0 2px 4px rgba(225,6,0,0.3);
+            box-shadow: 0 2px 4px rgba(91,141,239,0.22);
         }
         .f1-toggle-btn:hover:not(.active) {
-            background: rgba(225,6,0,0.1);
-            color: #e10600;
+            background: rgba(91,141,239,0.10);
+            color: var(--f1-accent);
         }
         .f1-standings-more {
             display: block;
             width: 100%;
             min-height: 44px;
             margin-top: 10px;
-            background: rgba(225,6,0,0.08);
-            border: 1px solid rgba(225,6,0,0.18);
+            background: rgba(91,141,239,0.08);
+            border: 1px solid rgba(91,141,239,0.16);
             border-radius: 14px;
-            color: #e10600;
+            color: var(--f1-accent);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -1644,14 +1645,14 @@
             border: 1px solid var(--border);
             transition: all 0.2s;
         }
-        .f1-standing-item:hover { border-color: rgba(225,6,0,0.2); }
+        .f1-standing-item:hover { border-color: rgba(91,141,239,0.18); }
         .f1-standing-pos {
             width: 28px;
             font-size: 14px;
             font-weight: 700;
             color: var(--text-tertiary);
         }
-        .f1-standing-pos.top3 { color: #e10600; }
+        .f1-standing-pos.top3 { color: var(--f1-accent); }
         .f1-standing-color {
             width: 4px;
             height: 36px;
@@ -1898,7 +1899,7 @@
         .f1-standing-item.clickable { cursor: pointer; }
         .f1-standing-item.clickable:hover { 
             transform: translateX(4px);
-            border-color: rgba(225,6,0,0.4);
+            border-color: rgba(91,141,239,0.28);
         }
 
         /* Macro overview block */
@@ -4570,7 +4571,7 @@
 
             .f1-bg {
                 height: 220px;
-                background: linear-gradient(180deg, rgba(225,6,0,0.88) 0%, rgba(225,6,0,0.18) 58%, transparent 100%);
+                background: linear-gradient(180deg, rgba(91,141,239,0.82) 0%, rgba(91,141,239,0.16) 58%, transparent 100%);
             }
 
             .f1-header {
@@ -4905,62 +4906,78 @@
             }
         }
 
-        /* ========== Astryx chocolate refinement layer ========== */
-        html[data-astryx-theme="chocolate"][data-theme="light"] {
-            color-scheme: light;
-            --bg-primary: var(--color-background-body);
-            --bg-card: color-mix(in oklab, var(--color-background-popover) 88%, transparent);
-            --bg-elevated: color-mix(in oklab, var(--color-background-popover) 96%, white 4%);
-            --bg-tertiary: var(--color-neutral);
-            --text-primary: var(--color-text-primary);
-            --text-secondary: color-mix(in oklab, var(--color-text-secondary) 82%, var(--color-text-primary) 18%);
-            --text-tertiary: var(--color-text-disabled);
-            --accent: var(--color-accent);
-            --success: var(--color-success);
-            --danger: var(--color-error);
-            --border: color-mix(in oklab, var(--color-border) 72%, transparent);
-            --shadow: var(--shadow-low);
-            --market-card-bg: color-mix(in oklab, var(--color-background-popover) 92%, transparent);
-            --market-card-border: color-mix(in oklab, var(--color-border) 70%, transparent);
-            --market-section-bg: color-mix(in oklab, var(--color-background-muted) 46%, transparent);
-            --market-meta-bg: color-mix(in oklab, var(--color-accent-muted) 86%, transparent);
-            --market-chain-bg: color-mix(in oklab, var(--color-background-muted) 52%, transparent);
+        /* ========== Fresh glass refinement layer ========== */
+        :root {
+            --color-on-accent: #f8fffd;
+            --fresh-accent: #2aaea4;
+            --fresh-accent-strong: #137f79;
+            --fresh-sky: #8fd8ff;
+            --fresh-mint: #dff8ef;
+            --fresh-lilac: #e9edff;
+            --fresh-ink: #17323a;
+            --f1-accent: #d96f63;
+            --f1-accent-soft: rgba(217, 111, 99, 0.12);
+            --f1-accent-border: rgba(217, 111, 99, 0.24);
         }
-        html[data-astryx-theme="chocolate"][data-theme="dark"] {
+        html[data-theme="light"] {
+            color-scheme: light;
+            --bg-primary: #f3fbf9;
+            --bg-card: rgba(255, 255, 255, 0.72);
+            --bg-elevated: rgba(255, 255, 255, 0.9);
+            --bg-tertiary: rgba(32, 160, 150, 0.08);
+            --text-primary: #17323a;
+            --text-secondary: rgba(23, 50, 58, 0.68);
+            --text-tertiary: rgba(23, 50, 58, 0.42);
+            --accent: #229d95;
+            --success: #2bb673;
+            --danger: #e85d4f;
+            --border: rgba(36, 123, 132, 0.14);
+            --shadow: 0 18px 45px rgba(63, 135, 145, 0.13);
+            --market-card-bg: rgba(255, 255, 255, 0.76);
+            --market-card-border: rgba(43, 128, 138, 0.15);
+            --market-section-bg: rgba(32, 160, 150, 0.08);
+            --market-meta-bg: rgba(143, 216, 255, 0.18);
+            --market-chain-bg: rgba(229, 247, 242, 0.72);
+        }
+        html[data-theme="dark"] {
             color-scheme: dark;
-            --bg-primary: var(--color-background-body);
-            --bg-card: color-mix(in oklab, var(--color-background-popover) 86%, transparent);
-            --bg-elevated: color-mix(in oklab, var(--color-background-popover) 96%, #2f241a 4%);
-            --bg-tertiary: var(--color-neutral);
-            --text-primary: var(--color-text-primary);
-            --text-secondary: var(--color-text-secondary);
-            --text-tertiary: var(--color-text-disabled);
-            --accent: var(--color-accent);
-            --success: var(--color-success);
-            --danger: var(--color-error);
-            --border: color-mix(in oklab, var(--color-border) 70%, transparent);
-            --shadow: var(--shadow-med);
-            --market-card-bg: color-mix(in oklab, var(--color-background-card) 76%, transparent);
-            --market-card-border: color-mix(in oklab, var(--color-border) 76%, transparent);
-            --market-section-bg: color-mix(in oklab, var(--color-background-muted) 50%, transparent);
-            --market-meta-bg: color-mix(in oklab, var(--color-accent-muted) 72%, transparent);
-            --market-chain-bg: color-mix(in oklab, var(--color-background-muted) 58%, transparent);
+            --bg-primary: #071316;
+            --bg-card: rgba(13, 29, 33, 0.78);
+            --bg-elevated: rgba(18, 39, 44, 0.9);
+            --bg-tertiary: rgba(114, 221, 210, 0.08);
+            --text-primary: #edfdf9;
+            --text-secondary: rgba(237, 253, 249, 0.68);
+            --text-tertiary: rgba(237, 253, 249, 0.42);
+            --accent: #72ddd2;
+            --success: #61d394;
+            --danger: #ff8a7c;
+            --border: rgba(180, 244, 236, 0.14);
+            --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+            --market-card-bg: rgba(13, 29, 33, 0.76);
+            --market-card-border: rgba(180, 244, 236, 0.14);
+            --market-section-bg: rgba(114, 221, 210, 0.08);
+            --market-meta-bg: rgba(114, 221, 210, 0.12);
+            --market-chain-bg: rgba(255, 255, 255, 0.06);
+            --f1-accent: #ff9a90;
+            --f1-accent-soft: rgba(255, 154, 144, 0.13);
+            --f1-accent-border: rgba(255, 154, 144, 0.25);
         }
         #page-market,
         #page-news,
         #page-f1 {
             background:
-                radial-gradient(circle at 14% 0%, color-mix(in oklab, var(--color-accent-muted) 64%, transparent), transparent 36rem),
-                radial-gradient(circle at 88% 12%, color-mix(in oklab, var(--color-background-muted) 58%, transparent), transparent 30rem),
+                radial-gradient(circle at 12% -8%, rgba(151, 226, 219, 0.34), transparent 32rem),
+                radial-gradient(circle at 88% 8%, rgba(171, 216, 255, 0.26), transparent 30rem),
+                radial-gradient(circle at 55% 112%, rgba(233, 237, 255, 0.36), transparent 34rem),
                 var(--bg-primary);
         }
         [data-theme="dark"] #page-market,
         [data-theme="dark"] #page-news,
         [data-theme="dark"] #page-f1 {
             background:
-                radial-gradient(circle at 18% -8%, rgba(212,160,106,0.14), transparent 34rem),
-                radial-gradient(circle at 92% 10%, rgba(74,53,32,0.44), transparent 30rem),
-                linear-gradient(180deg, #18110d 0%, var(--bg-primary) 64%);
+                radial-gradient(circle at 15% -10%, rgba(114, 221, 210, 0.14), transparent 32rem),
+                radial-gradient(circle at 90% 6%, rgba(117, 174, 255, 0.12), transparent 30rem),
+                linear-gradient(180deg, #08181b 0%, var(--bg-primary) 68%);
         }
         .market-bg,
         .news-bg,
@@ -4973,42 +4990,32 @@
             min-width: 86px;
             gap: 8px;
             padding: 0 13px;
-            border-radius: var(--radius-full, 999px);
-            background: color-mix(in oklab, var(--bg-card) 88%, transparent);
-            border-color: var(--market-card-border);
-            box-shadow: var(--shadow-low);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.46);
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.75),
+                0 12px 30px rgba(69, 132, 145, 0.15);
             color: var(--text-secondary);
             font-weight: 700;
             letter-spacing: 0.02em;
         }
+        [data-theme="dark"] .theme-mode-toggle {
+            background: rgba(16, 36, 40, 0.52);
+            border-color: rgba(202, 255, 246, 0.16);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.09),
+                0 14px 34px rgba(0, 0, 0, 0.34);
+        }
         .theme-mode-toggle span { font-size: 12px; }
         .theme-mode-toggle:hover {
             color: var(--accent);
-            border-color: color-mix(in oklab, var(--accent) 36%, var(--border));
-            box-shadow: var(--shadow-inset-hover), var(--shadow-low);
+            border-color: color-mix(in oklab, var(--accent) 38%, white 22%);
         }
         .market-page-header,
         #page-news .page-header,
         .f1-header {
             position: relative;
-        }
-        .market-page-header::after,
-        #page-news .page-header::after,
-        .f1-header::after {
-            content: 'Astryx · Chocolate';
-            display: inline-flex;
-            align-items: center;
-            min-height: 24px;
-            margin-top: 12px;
-            padding: 0 10px;
-            border-radius: 999px;
-            border: 1px solid color-mix(in oklab, var(--accent) 28%, var(--border));
-            background: color-mix(in oklab, var(--color-accent-muted) 82%, transparent);
-            color: var(--accent);
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
         }
         #page-news .page-header,
         .f1-header {
@@ -5043,7 +5050,7 @@
         .f1-session,
         .f1-results-card,
         .f1-points-chart {
-            box-shadow: var(--shadow-low);
+            box-shadow: var(--shadow);
             border-color: var(--market-card-border);
         }
         .market-summary-item,
@@ -5066,7 +5073,10 @@
         .f1-standing-item,
         .f1-session {
             background:
-                linear-gradient(180deg, color-mix(in oklab, var(--market-card-bg) 96%, white 4%), var(--market-card-bg));
+                linear-gradient(180deg, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0.18)),
+                var(--market-card-bg);
+            backdrop-filter: blur(22px) saturate(1.28);
+            -webkit-backdrop-filter: blur(22px) saturate(1.28);
         }
         [data-theme="dark"] .market-summary-item,
         [data-theme="dark"] .market-list-card,
@@ -5088,23 +5098,27 @@
         [data-theme="dark"] .f1-standing-item,
         [data-theme="dark"] .f1-session {
             background:
-                linear-gradient(180deg, color-mix(in oklab, var(--market-card-bg) 92%, #3a2a1d 8%), var(--market-card-bg));
+                linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+                var(--market-card-bg);
         }
         .pulse-overview-card,
         .news-hero-card,
         .f1-next-race {
             border-radius: 28px;
             background:
-                radial-gradient(circle at 88% 0%, color-mix(in oklab, var(--accent) 20%, transparent), transparent 44%),
-                linear-gradient(145deg, color-mix(in oklab, var(--color-background-popover) 96%, transparent), color-mix(in oklab, var(--color-background-muted) 72%, transparent));
-            border: 1px solid color-mix(in oklab, var(--accent) 16%, var(--border));
+                radial-gradient(circle at 88% 0%, rgba(143, 216, 255, 0.28), transparent 44%),
+                radial-gradient(circle at 0% 100%, rgba(223, 248, 239, 0.38), transparent 42%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.74), rgba(245, 253, 251, 0.58));
+            border: 1px solid rgba(72, 149, 158, 0.17);
+            backdrop-filter: blur(24px) saturate(1.32);
+            -webkit-backdrop-filter: blur(24px) saturate(1.32);
         }
         [data-theme="dark"] .pulse-overview-card,
         [data-theme="dark"] .news-hero-card,
         [data-theme="dark"] .f1-next-race {
             background:
-                radial-gradient(circle at 88% 0%, rgba(212,160,106,0.20), transparent 46%),
-                linear-gradient(145deg, rgba(42,32,24,0.95), rgba(20,16,16,0.94));
+                radial-gradient(circle at 88% 0%, rgba(114, 221, 210, 0.15), transparent 46%),
+                linear-gradient(145deg, rgba(16, 38, 42, 0.86), rgba(8, 20, 24, 0.82));
         }
         .pulse-kicker,
         .news-kicker,
@@ -5118,15 +5132,14 @@
         .news-tab-control,
         .f1-toggle-switch {
             border: 1px solid var(--market-card-border);
-            background: color-mix(in oklab, var(--market-section-bg) 78%, transparent);
-            box-shadow: inset 0 1px 0 color-mix(in oklab, white 12%, transparent);
+            background: color-mix(in oklab, var(--market-section-bg) 82%, transparent);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36);
         }
         .segment-btn.active,
-        .news-tab-btn.active,
-        .f1-toggle-btn.active {
+        .news-tab-btn.active {
             background: var(--accent);
             color: var(--color-on-accent);
-            box-shadow: var(--shadow-low);
+            box-shadow: 0 8px 20px rgba(34, 157, 149, 0.20);
         }
         .segment-btn,
         .news-tab-btn,
@@ -5134,10 +5147,7 @@
             color: var(--text-secondary);
         }
         .news-open-link.primary,
-        .pulse-link.primary,
-        .f1-schedule-btn,
-        .f1-race-more,
-        .f1-standings-more {
+        .pulse-link.primary {
             background: var(--accent);
             border-color: var(--accent);
             color: var(--color-on-accent);
@@ -5158,12 +5168,30 @@
             font-weight: 900;
             line-height: 0.98;
         }
-        .f1-next-race {
+
+        .f1-title-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 0.86em;
+            height: 0.86em;
+            margin-right: 0.12em;
+            color: var(--f1-accent);
+            vertical-align: -0.03em;
+        }
+        #page-f1 .f1-next-race {
             color: var(--text-primary);
+            background:
+                radial-gradient(circle at 92% 8%, var(--f1-accent-soft), transparent 42%),
+                linear-gradient(145deg, rgba(255,255,255,0.76), rgba(245,253,251,0.58));
+            border-color: var(--f1-accent-border);
+        }
+        [data-theme="dark"] #page-f1 .f1-next-race {
+            background:
+                radial-gradient(circle at 92% 8%, var(--f1-accent-soft), transparent 44%),
+                linear-gradient(145deg, rgba(16, 38, 42, 0.88), rgba(8, 20, 24, 0.84));
         }
         .f1-next-round,
-        .f1-next-location,
-        .f1-next-date,
         .f1-countdown-title {
             color: var(--text-secondary);
         }
@@ -5171,21 +5199,48 @@
         .f1-countdown-unit span {
             color: var(--text-primary);
         }
+        .f1-next-location,
+        .f1-next-date,
+        .f1-detail-circuit,
+        .f1-stat i,
+        .f1-session.race .f1-session-name,
+        .f1-standing-pos.top3,
+        .f1-race-arrow {
+            color: var(--f1-accent) !important;
+        }
+        .f1-next-date {
+            background: var(--f1-accent-soft);
+            border: 1px solid var(--f1-accent-border);
+        }
         .f1-countdown-unit,
         .f1-race-date,
         .f1-session-date {
             background: color-mix(in oklab, var(--market-section-bg) 86%, transparent);
             border: 1px solid var(--market-card-border);
         }
-        .f1-standing-pos.top3,
-        .f1-race-arrow,
-        .f1-detail-circuit,
-        .f1-stat i,
-        .f1-session.race .f1-session-name {
-            color: var(--accent) !important;
+        #page-f1 .f1-toggle-btn.active,
+        #page-f1 .f1-schedule-btn,
+        #page-f1 .f1-race-more,
+        #page-f1 .f1-standings-more {
+            background: var(--f1-accent);
+            border-color: var(--f1-accent);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(217, 111, 99, 0.18);
+        }
+        #page-f1 .f1-toggle-btn:hover:not(.active),
+        #page-f1 .f1-race-more:hover,
+        #page-f1 .f1-standings-more:hover {
+            background: var(--f1-accent-soft);
+            border-color: var(--f1-accent-border);
+            color: var(--f1-accent);
+        }
+        .f1-next-race::before,
+        .f1-sprint-badge,
+        .f1-live-badge {
+            background: linear-gradient(90deg, var(--f1-accent), color-mix(in oklab, var(--f1-accent) 58%, var(--accent) 42%));
         }
         .f1-session.race {
-            border-left-color: var(--accent);
+            border-left-color: var(--f1-accent);
         }
         .f1-race-item:hover,
         .f1-standing-item:hover,
@@ -5194,6 +5249,10 @@
         .market-item:hover {
             border-color: color-mix(in oklab, var(--accent) 34%, var(--border));
             transform: translateY(-1px);
+        }
+        #page-f1 .f1-race-item:hover,
+        #page-f1 .f1-standing-item:hover {
+            border-color: var(--f1-accent-border);
         }
         .news-stack-item,
         .pulse-river-item {
@@ -5246,32 +5305,125 @@
             }
         }
 
-
-        /* Astryx final contrast pass */
-        .segment-btn.active,
-        .news-tab-btn.active,
-        .f1-toggle-btn.active,
-        .tab-item.active {
-            background: var(--accent) !important;
-            color: var(--color-on-accent) !important;
-        }
-        [data-theme="dark"] .segment-btn.active,
-        [data-theme="dark"] .news-tab-btn.active,
-        [data-theme="dark"] .f1-toggle-btn.active,
-        [data-theme="dark"] .tab-item.active {
-            color: #24170f !important;
-        }
+        /* Liquid glass bottom navigation */
         .tab-nav {
-            background: color-mix(in oklab, var(--bg-card) 86%, transparent);
-            border-color: var(--market-card-border);
-            box-shadow: var(--shadow-med);
+            left: max(12px, env(safe-area-inset-left));
+            right: max(12px, env(safe-area-inset-right));
+            bottom: max(10px, env(safe-area-inset-bottom));
+            padding: 8px;
+            gap: 6px;
+            border-radius: 28px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.60), rgba(255,255,255,0.28)),
+                rgba(234, 250, 247, 0.46);
+            border: 1px solid rgba(255,255,255,0.66);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.78),
+                inset 0 -18px 36px rgba(255,255,255,0.16),
+                0 18px 50px rgba(44, 121, 132, 0.20);
+            backdrop-filter: blur(28px) saturate(1.65);
+            -webkit-backdrop-filter: blur(28px) saturate(1.65);
+        }
+        [data-theme="dark"] .tab-nav {
+            background:
+                linear-gradient(180deg, rgba(25, 56, 62, 0.64), rgba(8, 20, 24, 0.42)),
+                rgba(9, 23, 27, 0.58);
+            border-color: rgba(207, 255, 248, 0.16);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.12),
+                inset 0 -18px 36px rgba(255,255,255,0.03),
+                0 18px 48px rgba(0,0,0,0.38);
         }
         .tab-item {
-            border-radius: 18px;
-            transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+            position: relative;
+            min-width: 0;
+            flex: 1;
+            padding: 9px 10px;
+            border-radius: 21px;
+            transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .tab-item i {
+            font-size: 23px;
+            line-height: 1;
         }
         .tab-item.active {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.38)) !important;
+            color: var(--accent) !important;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.85),
+                0 10px 24px rgba(49, 139, 148, 0.17);
             transform: translateY(-1px);
+        }
+        [data-theme="dark"] .tab-item.active {
+            background: rgba(207, 255, 248, 0.12) !important;
+            color: var(--accent) !important;
+        }
+        .tab-item[data-page="f1"].active {
+            color: var(--f1-accent) !important;
+        }
+        @media (min-width: 1200px) {
+            .tab-nav {
+                left: 50%;
+                right: auto;
+                bottom: 24px;
+                transform: translateX(-50%);
+                width: auto;
+                min-width: 420px;
+                padding: 10px;
+            }
+            .tab-item {
+                min-width: 92px;
+                padding: 10px 18px;
+            }
+        }
+
+
+        /* Fresh F1 readability pass */
+        .f1-countdown-unit small,
+        .f1-countdown-title,
+        .f1-next-round,
+        .f1-next-date,
+        .f1-race-date-month,
+        .f1-standing-pts {
+            color: var(--text-tertiary) !important;
+        }
+        .f1-countdown-unit span,
+        .f1-next-name,
+        .f1-race-date-day,
+        .f1-standing-points {
+            color: var(--text-primary) !important;
+        }
+        .f1-next-date {
+            background: var(--f1-accent-soft) !important;
+            border: 1px solid rgba(91,141,239,0.18);
+            font-weight: 700;
+        }
+        .f1-countdown-unit {
+            background: rgba(255,255,255,0.42) !important;
+        }
+        [data-theme="dark"] .f1-countdown-unit {
+            background: rgba(121,184,255,0.08) !important;
+        }
+
+
+        /* Phosphor heading icons */
+        .market-page-header h1,
+        #page-news .page-header h1,
+        .f1-header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .market-page-header h1 i,
+        #page-news .page-header h1 i,
+        .f1-header h1 i {
+            color: var(--accent);
+            font-size: 0.76em;
+            line-height: 1;
+        }
+        .f1-header h1 i {
+            color: var(--f1-accent);
         }
 
     </style>
@@ -5295,7 +5447,7 @@
     <div class="page-bg news-bg" id="bg-news"></div>
     <div class="page-bg flight-bg" id="bg-flight"></div>
 
-    <button class="theme-toggle theme-mode-toggle" onclick="toggleThemeMode()" title="主题：自动 / 浅色 / 深色"><i class="fas fa-circle-half-stroke" id="themeIcon"></i><span id="themeModeLabel">自动</span></button>
+    <button class="theme-toggle theme-mode-toggle" onclick="toggleThemeMode()" title="主题：自动 / 浅色 / 深色"><i class="ph ph-circle-half-tilt" id="themeIcon"></i><span id="themeModeLabel">自动</span></button>
 
     <div class="pages">
         <!-- Weather -->
@@ -5418,7 +5570,7 @@
         <div class="page" id="page-market">
             <div class="page-shell">
                 <div class="page-header market-page-header">
-                    <h1><i class="fas fa-chart-line"></i> <span id="marketPageTitle">市场行情</span></h1>
+                    <h1><i class="ph ph-chart-line-up"></i> <span id="marketPageTitle">市场行情</span></h1>
                     <div class="market-header-meta">
                         <span class="subtitle" id="marketDate">2026年3月9日</span>
                         <button class="market-refresh-btn" id="marketRefreshBtn" onclick="refreshMarketPrices()" title="刷新实时行情">
@@ -5777,7 +5929,7 @@
         <div class="page" id="page-news">
             <div class="page-shell">
                 <div class="page-header">
-                    <h1>📰 新闻雷达</h1>
+                    <h1><i class="ph ph-newspaper-clipping"></i> 新闻雷达</h1>
                     <div class="subtitle" id="newsDate">2026年3月9日</div>
                     <div class="news-tab-control">
                         <button class="news-tab-btn active" data-news-tab="general" onclick="switchNewsTab('general')">综合</button>
@@ -5870,7 +6022,7 @@
                 <!-- 列表视图 -->
                 <div id="f1-list-view">
                     <div class="f1-header">
-                        <h1>🏎️ F1 2026</h1>
+                        <h1><i class="ph ph-flag-checkered f1-title-icon"></i> F1 2026</h1>
                         <div class="f1-subtitle">Upcoming Races</div>
                     </div>
                     
@@ -6010,10 +6162,10 @@
     </div>
 
     <nav class="tab-nav">
-        <button class="tab-item active" data-page="weather"><i class="fas fa-cloud-sun"></i><span>天气</span></button>
-        <button class="tab-item" data-page="market"><i class="fas fa-chart-line"></i><span>市场</span></button>
-        <button class="tab-item" data-page="news"><i class="fas fa-newspaper"></i><span>要闻</span></button>
-        <button class="tab-item" data-page="f1"><i class="fas fa-flag-checkered"></i><span>F1</span></button>
+        <button class="tab-item active" data-page="weather"><i class="ph ph-cloud-sun"></i><span>天气</span></button>
+        <button class="tab-item" data-page="market"><i class="ph ph-chart-line-up"></i><span>市场</span></button>
+        <button class="tab-item" data-page="news"><i class="ph ph-newspaper-clipping"></i><span>要闻</span></button>
+        <button class="tab-item" data-page="f1"><i class="ph ph-flag-checkered"></i><span>F1</span></button>
     </nav>
 
     <script>
@@ -6054,8 +6206,8 @@
             const label = document.getElementById('themeModeLabel');
             if (icon) {
                 icon.className = themeMode === 'auto'
-                    ? 'fas fa-circle-half-stroke'
-                    : (theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon');
+                    ? 'ph ph-circle-half-tilt'
+                    : (theme === 'dark' ? 'ph ph-sun' : 'ph ph-moon');
             }
             if (label) label.textContent = themeMode === 'auto' ? '自动' : (theme === 'dark' ? '深色' : '浅色');
         };

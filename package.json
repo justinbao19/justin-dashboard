@@ -22,7 +22,7 @@
   "homepage": "https://github.com/justinbao19/justin-dashboard#readme",
   "dependencies": {
     "@astryxdesign/core": "^0.1.4",
-    "@astryxdesign/theme-chocolate": "^0.1.4",
+    "@phosphor-icons/web": "^2.1.2",
     "stock-sdk": "^2.2.2"
   }
 }

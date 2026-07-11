@@ -5448,24 +5448,35 @@
         }
         .dock-mini-trigger {
             display: none;
+            position: relative;
             width: 100%;
             height: 100%;
             align-items: center;
             justify-content: center;
-            gap: 5px;
+            gap: 3px;
             padding: 0;
             border: 0;
             border-radius: 999px;
             background: transparent;
             color: var(--text-secondary);
             cursor: pointer;
+            opacity: 0.58;
+            transition: opacity 0.18s ease;
+        }
+        .dock-mini-trigger::before {
+            content: '';
+            position: absolute;
+            inset: -11px -5px;
+        }
+        .dock-mini-trigger:hover,
+        .dock-mini-trigger:focus-visible {
+            opacity: 0.9;
         }
         .dock-mini-trigger span {
-            width: 5px;
-            height: 5px;
+            width: 3px;
+            height: 3px;
             border-radius: 50%;
             background: currentColor;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
         }
         @media (min-width: 761px) and (max-width: 1199px) {
             .tab-nav {
@@ -5482,11 +5493,22 @@
                 transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
             }
             .tab-nav.is-collapsed {
-                width: 64px;
-                height: 44px;
-                padding: 4px;
+                width: 38px;
+                height: 22px;
+                padding: 0;
                 gap: 0;
                 border-radius: 999px;
+                overflow: visible;
+                background: rgba(234, 250, 247, 0.28);
+                border-color: rgba(255,255,255,0.38);
+                box-shadow: 0 4px 14px rgba(44, 121, 132, 0.10);
+                backdrop-filter: blur(12px) saturate(1.2);
+                -webkit-backdrop-filter: blur(12px) saturate(1.2);
+            }
+            [data-theme="dark"] .tab-nav.is-collapsed {
+                background: rgba(9, 23, 27, 0.32);
+                border-color: rgba(207, 255, 248, 0.10);
+                box-shadow: 0 4px 14px rgba(0,0,0,0.18);
             }
             .tab-nav.is-collapsed .tab-item {
                 display: none;
@@ -6767,7 +6789,7 @@
         function scheduleTabletDockCollapse() {
             clearTabletDockTimer();
             if (!tabletDockQuery.matches || tabNav.classList.contains('is-collapsed')) return;
-            tabletDockTimer = setTimeout(() => setTabletDockCollapsed(true), 3000);
+            tabletDockTimer = setTimeout(() => setTabletDockCollapsed(true), 2000);
         }
 
         function initializeTabletDock() {

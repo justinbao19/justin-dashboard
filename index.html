@@ -440,8 +440,8 @@
         .typhoon-alert-badge[data-alert="orange"] { background: rgba(255,149,0,0.78); }
         .typhoon-alert-badge[data-alert="red"] { background: rgba(255,59,48,0.8); }
         .typhoon-alert-badge[data-alert="unknown"] { background: rgba(255,255,255,0.16); }
-        .typhoon-status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; color: #dff7ff; background: rgba(90,200,250,0.18); font-weight: 650; }
-        .typhoon-status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #5ac8fa; box-shadow: 0 0 0 3px rgba(90,200,250,0.12); }
+        .typhoon-status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 999px; color: #dff7ff; background: rgba(90,200,250,0.18); font-size: 11px; font-weight: 650; line-height: 1.2; letter-spacing: 0.01em; }
+        .typhoon-status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #5ac8fa; box-shadow: 0 0 0 2px rgba(90,200,250,0.12); }
         .typhoon-entry-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(20px,2vw,27px); font-weight: 650; line-height: 1.14; letter-spacing: -0.35px; }
         .typhoon-entry-meta { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 6px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.35; }
         .typhoon-entry-action { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.12); font-size: 18px; }
@@ -3418,6 +3418,10 @@
             .weather-card {
                 padding: 16px;
                 border-radius: 18px;
+            }
+
+            .weather-card.typhoon-entry-card {
+                padding: 0;
             }
 
             .weather-card .card-title {

@@ -44,7 +44,10 @@
             <i class="ph ph-stack"></i><span>图层</span>
           </button>
           <button class="toolbar-button icon-only" id="focusCurrentButton" type="button" aria-label="定位当前台风">
-            <i class="ph ph-crosshair"></i>
+            <i class="ph ph-hurricane"></i>
+          </button>
+          <button class="toolbar-button icon-only" id="userLocationButton" type="button" aria-label="查看天气页位置" hidden>
+            <i class="ph ph-navigation-arrow"></i>
           </button>
         </div>
 
@@ -54,10 +57,16 @@
             <button id="closeLayerButton" type="button" aria-label="关闭图层面板"><i class="ph ph-x"></i></button>
           </div>
           <div class="layer-options" id="weatherLayerOptions"></div>
+          <div class="layer-clock" id="layerClockStatus" role="status">
+            <i class="ph ph-clock"></i><span>正在对齐观测时次</span>
+          </div>
           <label class="opacity-control">
             <span>图层透明度</span>
             <input id="weatherOpacity" type="range" min="20" max="90" value="58">
           </label>
+          <div class="weather-legend" id="weatherLegend" hidden>
+            <span>弱</span><i></i><span>强</span>
+          </div>
           <p>雷达由 RainViewer 提供，云图与降水估算由 NASA GIBS 提供。</p>
         </div>
 
@@ -75,7 +84,7 @@
         <div class="map-attribution">CARTO · OpenStreetMap · Esri · RainViewer · NASA GIBS</div>
       </section>
 
-      <aside class="insight-panel" aria-label="台风实时信息">
+      <aside class="insight-panel" id="insightPanel" aria-label="台风实时信息">
         <section class="storm-overview">
           <div class="storm-heading-row">
             <div>
@@ -83,15 +92,15 @@
               <h1 id="stormName">—</h1>
               <p id="stormSubtitle">正在加载台风资料</p>
             </div>
-            <i class="ph ph-hurricane storm-mark" aria-hidden="true"></i>
+            <span class="overview-time"><i class="ph ph-clock"></i><span id="overviewUpdated">等待更新</span></span>
           </div>
           <div class="primary-metrics">
-            <div><span>最大风速</span><strong id="windValue">—</strong><small id="windNote">等待数据</small></div>
-            <div><span>中心气压</span><strong id="pressureValue">—</strong><small id="pressureNote">等待数据</small></div>
+            <div><span><i class="ph ph-wind"></i>最大风速</span><strong id="windValue">—</strong><small id="windNote">等待数据</small></div>
+            <div><span><i class="ph ph-gauge"></i>中心气压</span><strong id="pressureValue">—</strong><small id="pressureNote">等待数据</small></div>
           </div>
           <div class="position-block">
-            <div><span>中心位置</span><strong id="positionValue">—</strong><small id="positionTime">等待数据</small></div>
-            <div><span>参考位置</span><strong id="referenceValue">正在定位</strong><small id="referenceNote">按天气页所在地计算</small></div>
+            <div><span><i class="ph ph-crosshair"></i>中心位置</span><strong id="positionValue">—</strong><small id="positionTime">等待数据</small></div>
+            <div><span><i class="ph ph-map-pin"></i>参考位置</span><strong id="referenceValue">正在定位</strong><small id="referenceNote">按天气页所在地计算</small></div>
           </div>
         </section>
 
@@ -108,12 +117,14 @@
           <div class="agency-list" id="agencyList"></div>
         </section>
 
-        <section class="source-section">
-          <div class="section-heading"><span>数据说明</span><small id="dataStatus">读取中</small></div>
-          <div class="source-health" id="sourceHealth"></div>
-          <p class="disclaimer" id="disclaimer"></p>
-          <a class="report-link" id="reportLink" href="https://typhoon.slt.zj.gov.cn/" target="_blank" rel="noopener noreferrer">查看来源页面 <i class="ph ph-arrow-up-right"></i></a>
-        </section>
+        <details class="source-section">
+          <summary><span>数据来源与说明</span><small id="dataStatus">读取中</small><i class="ph ph-caret-down"></i></summary>
+          <div class="source-section-body">
+            <div class="source-health" id="sourceHealth"></div>
+            <p class="disclaimer" id="disclaimer"></p>
+            <a class="report-link" id="reportLink" href="https://typhoon.slt.zj.gov.cn/" target="_blank" rel="noopener noreferrer">查看来源页面 <i class="ph ph-arrow-up-right"></i></a>
+          </div>
+        </details>
       </aside>
     </main>
 
@@ -124,6 +135,6 @@
     </div>
   </div>
   <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
-  <script src="/typhoon.js" defer></script>
+  <script type="module" src="/typhoon.js"></script>
 </body>
 </html>

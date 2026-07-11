@@ -12,6 +12,7 @@ const html = await readFile(path.join(root, 'index.html'), 'utf8');
 const typhoonHtml = await readFile(path.join(root, 'typhoon.html'), 'utf8');
 const typhoonCss = await readFile(path.join(root, 'typhoon.css'), 'utf8');
 const typhoonJs = await readFile(path.join(root, 'typhoon.js'), 'utf8');
+const typhoonLayerClock = await readFile(path.join(root, 'typhoon-layer-clock.mjs'), 'utf8');
 const data = {};
 for (const name of await readdir(path.join(root, 'data'))) {
   if (name.endsWith('.json') || name.endsWith('.geojson')) data[`/data/${name}`] = await readFile(path.join(root, 'data', name), 'utf8');
@@ -29,6 +30,7 @@ const html = ${JSON.stringify(html)};
 const typhoonHtml = ${JSON.stringify(typhoonHtml)};
 const typhoonCss = ${JSON.stringify(typhoonCss)};
 const typhoonJs = ${JSON.stringify(typhoonJs)};
+const typhoonLayerClock = ${JSON.stringify(typhoonLayerClock)};
 const data = ${JSON.stringify(data)};
 const tracks = ${JSON.stringify(tracks)};
 
@@ -123,6 +125,7 @@ export default {
     }
     if (pathname === '/typhoon.css') return new Response(typhoonCss, { headers: { 'content-type': 'text/css; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
     if (pathname === '/typhoon.js') return new Response(typhoonJs, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    if (pathname === '/typhoon-layer-clock.mjs') return new Response(typhoonLayerClock, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
     if (data[pathname]) return json(data[pathname]);
     if (tracks[pathname]) return new Response(tracks[pathname], { headers: { 'content-type': 'image/svg+xml', 'cache-control': 'public, max-age=86400' } });
 

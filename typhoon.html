@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#182734">
+  <title>台风追踪 · Pulse</title>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css">
+  <link rel="stylesheet" href="/typhoon.css">
+</head>
+<body>
+  <div class="typhoon-app" id="typhoonApp">
+    <header class="topbar">
+      <a class="icon-button" href="/weather" aria-label="返回天气"><i class="ph ph-arrow-left"></i></a>
+      <div class="topbar-title">
+        <span>台风追踪</span>
+        <strong id="topbarStormName">正在读取</strong>
+      </div>
+      <div class="topbar-status">
+        <span class="status-dot" id="topbarStatusDot"></span>
+        <span id="topbarUpdated">连接数据源</span>
+      </div>
+      <button class="icon-button" id="shareButton" type="button" aria-label="分享当前台风"><i class="ph ph-share-network"></i></button>
+    </header>
+
+    <main class="workspace">
+      <section class="map-panel" aria-label="台风路径地图">
+        <div id="typhoonMap"></div>
+        <div class="map-fallback" id="mapFallback" hidden>
+          <i class="ph ph-map-trifold"></i>
+          <strong>地图暂时无法加载</strong>
+          <span>实时台风信息仍可在右侧查看</span>
+        </div>
+
+        <div class="map-toolbar" aria-label="地图工具">
+          <div class="basemap-switch" role="group" aria-label="底图类型">
+            <button class="active" type="button" data-basemap="standard">地图</button>
+            <button type="button" data-basemap="satellite">卫星</button>
+          </div>
+          <button class="toolbar-button" id="layerButton" type="button" aria-expanded="false">
+            <i class="ph ph-stack"></i><span>图层</span>
+          </button>
+          <button class="toolbar-button icon-only" id="focusCurrentButton" type="button" aria-label="定位当前台风">
+            <i class="ph ph-crosshair"></i>
+          </button>
+        </div>
+
+        <div class="layer-panel" id="layerPanel" hidden>
+          <div class="layer-panel-heading">
+            <div><span>天气图层</span><small>可叠加显示</small></div>
+            <button id="closeLayerButton" type="button" aria-label="关闭图层面板"><i class="ph ph-x"></i></button>
+          </div>
+          <div class="layer-options" id="weatherLayerOptions"></div>
+          <label class="opacity-control">
+            <span>图层透明度</span>
+            <input id="weatherOpacity" type="range" min="20" max="90" value="58">
+          </label>
+          <p>雷达由 RainViewer 提供，云图与降水估算由 NASA GIBS 提供。</p>
+        </div>
+
+        <div class="source-strip" id="sourceStrip" aria-label="路径数据源"></div>
+
+        <article class="node-card" id="nodeCard" hidden aria-live="polite">
+          <div class="node-card-heading">
+            <div><span id="nodeSource">路径节点</span><strong id="nodeTime">时间待确认</strong></div>
+            <button id="closeNodeButton" type="button" aria-label="关闭节点详情"><i class="ph ph-x"></i></button>
+          </div>
+          <div class="node-metrics" id="nodeMetrics"></div>
+          <div class="node-context" id="nodeContext"></div>
+        </article>
+
+        <div class="map-attribution">CARTO · OpenStreetMap · Esri · RainViewer · NASA GIBS</div>
+      </section>
+
+      <aside class="insight-panel" aria-label="台风实时信息">
+        <section class="storm-overview">
+          <div class="storm-heading-row">
+            <div>
+              <span class="live-badge"><i></i>实时位置</span>
+              <h1 id="stormName">—</h1>
+              <p id="stormSubtitle">正在加载台风资料</p>
+            </div>
+            <i class="ph ph-hurricane storm-mark" aria-hidden="true"></i>
+          </div>
+          <div class="primary-metrics">
+            <div><span>最大风速</span><strong id="windValue">—</strong><small id="windNote">等待数据</small></div>
+            <div><span>中心气压</span><strong id="pressureValue">—</strong><small id="pressureNote">等待数据</small></div>
+          </div>
+          <div class="position-block">
+            <div><span>中心位置</span><strong id="positionValue">—</strong><small id="positionTime">等待数据</small></div>
+            <div><span>参考位置</span><strong id="referenceValue">正在定位</strong><small id="referenceNote">按天气页所在地计算</small></div>
+          </div>
+        </section>
+
+        <section class="trend-section">
+          <div class="section-heading"><span>未来趋势</span><small id="trendSource">预报来源待确认</small></div>
+          <div class="trend-summary">
+            <i class="ph ph-navigation-arrow"></i>
+            <div><strong id="trendTitle">趋势计算中</strong><span id="trendDetail">等待最新预报路径</span></div>
+          </div>
+        </section>
+
+        <section class="agency-section">
+          <div class="section-heading"><span>多机构路径</span><small id="agencyCount">0 个来源</small></div>
+          <div class="agency-list" id="agencyList"></div>
+        </section>
+
+        <section class="source-section">
+          <div class="section-heading"><span>数据说明</span><small id="dataStatus">读取中</small></div>
+          <div class="source-health" id="sourceHealth"></div>
+          <p class="disclaimer" id="disclaimer"></p>
+          <a class="report-link" id="reportLink" href="https://typhoon.slt.zj.gov.cn/" target="_blank" rel="noopener noreferrer">查看来源页面 <i class="ph ph-arrow-up-right"></i></a>
+        </section>
+      </aside>
+    </main>
+
+    <div class="page-state" id="pageState" role="status" aria-live="polite">
+      <div class="state-spinner"></div>
+      <strong>正在连接台风数据</strong>
+      <span>同步实况与多机构预报路径</span>
+    </div>
+  </div>
+  <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
+  <script src="/typhoon.js" defer></script>
+</body>
+</html>

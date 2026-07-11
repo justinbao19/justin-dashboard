@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
-  res.setHeader('Cache-Control', 's-maxage=300'); // 缓存5分钟
+  res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=900');
   
   const { lon = DEFAULT_LON, lat = DEFAULT_LAT } = req.query;
   const url = `https://api.caiyunapp.com/v2.6/${CAIYUN_KEY}/${lon},${lat}/weather?dailysteps=7&hourlysteps=24`;

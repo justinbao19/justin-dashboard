@@ -421,6 +421,39 @@
             color: white;
         }
         .weather-card .card-title { color: rgba(255,255,255,0.7); }
+        .typhoon-entry-card { position: relative; overflow: hidden; padding: 0; background: rgba(18,43,64,0.48); }
+        .typhoon-entry-link {
+            min-height: 102px; display: grid; grid-template-columns: auto minmax(0,1fr) auto;
+            align-items: center; gap: 14px; padding: 14px 18px; color: inherit; text-decoration: none;
+            transition: background 180ms ease, transform 180ms ease;
+        }
+        .typhoon-entry-link:hover { background: rgba(255,255,255,0.06); }
+        .typhoon-entry-link:active { transform: scale(0.995); }
+        .typhoon-entry-link:focus-visible, .typhoon-mobile-trigger:focus-visible { outline: 2px solid #5ac8fa; outline-offset: 3px; }
+        .typhoon-entry-symbol { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.14); font-size: 28px; }
+        .typhoon-entry-copy { min-width: 0; }
+        .typhoon-entry-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: rgba(255,255,255,0.72); font-size: 12px; line-height: 1.3; }
+        .typhoon-alert-badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px; color: #fff; font-weight: 600; }
+        .typhoon-alert-badge[data-alert="green"] { background: rgba(52,199,89,0.72); }
+        .typhoon-alert-badge[data-alert="blue"] { background: rgba(10,132,255,0.78); }
+        .typhoon-alert-badge[data-alert="yellow"] { background: rgba(255,204,0,0.88); color: #3a3100; }
+        .typhoon-alert-badge[data-alert="orange"] { background: rgba(255,149,0,0.78); }
+        .typhoon-alert-badge[data-alert="red"] { background: rgba(255,59,48,0.8); }
+        .typhoon-alert-badge[data-alert="unknown"] { background: rgba(255,255,255,0.16); }
+        .typhoon-status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; color: #dff7ff; background: rgba(90,200,250,0.18); font-weight: 650; }
+        .typhoon-status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #5ac8fa; box-shadow: 0 0 0 3px rgba(90,200,250,0.12); }
+        .typhoon-entry-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(20px,2vw,27px); font-weight: 650; line-height: 1.14; letter-spacing: -0.35px; }
+        .typhoon-entry-meta { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 6px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.35; }
+        .typhoon-entry-action { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.12); font-size: 18px; }
+        .typhoon-header-trigger, .typhoon-mobile-trigger { border: 1px solid rgba(255,255,255,0.16); color: #fff; background: rgba(0,0,0,0.2); backdrop-filter: blur(18px) saturate(160%); cursor: pointer; }
+        .typhoon-header-trigger { display: none; width: 100%; min-height: 52px; align-items: center; gap: 11px; margin-top: 16px; padding: 9px 12px; border-radius: 16px; text-align: left; cursor: default; }
+        .typhoon-header-trigger i { font-size: 23px; }
+        .typhoon-header-trigger-copy { min-width: 0; flex: 1; }
+        .typhoon-header-trigger-copy strong, .typhoon-header-trigger-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .typhoon-header-trigger-copy strong { font-size: 13px; }
+        .typhoon-header-trigger-copy span { margin-top: 2px; font-size: 11px; opacity: 0.7; }
+        .typhoon-mobile-trigger { position: fixed; z-index: 22; top: calc(18px + env(safe-area-inset-top)); left: 16px; width: 44px; height: 44px; display: none; place-items: center; border-radius: 50%; font-size: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.16); cursor: default; }
+        .typhoon-mobile-count { position: absolute; top: -3px; right: -3px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border-radius: 999px; background: #ff453a; color: #fff; border: 2px solid rgba(35,58,76,0.9); font-size: 9px; font-weight: 700; }
         .weather-stack {
             display: grid;
             gap: 16px;
@@ -3284,6 +3317,13 @@
         }
 
         @media (max-width: 760px) {
+            .typhoon-mobile-trigger:not([hidden]) { display: grid; }
+            .typhoon-entry-link { min-height: 92px; grid-template-columns: 44px minmax(0,1fr) 34px; gap: 11px; padding: 12px 14px; }
+            .typhoon-entry-symbol { width: 44px; height: 44px; font-size: 24px; }
+            .typhoon-entry-action { width: 34px; height: 34px; font-size: 15px; }
+            .typhoon-entry-name { font-size: 19px; }
+            .typhoon-entry-meta { gap: 4px 10px; margin-top: 6px; font-size: 12px; }
+            .typhoon-entry-meta span:nth-child(n+3) { display: none; }
             .weather-header {
                 display: flex;
                 flex-direction: column;
@@ -3824,6 +3864,8 @@
                 backdrop-filter: blur(16px);
             }
 
+            .typhoon-header-trigger:not([hidden]) { display: flex; }
+
             .weather-content {
                 display: grid;
                 grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -3841,6 +3883,8 @@
             .weather-hourly-card {
                 grid-column: 1 / -1;
             }
+
+            .typhoon-entry-card { grid-column: 1 / -1; }
 
             .weather-daily-card {
                 grid-column: span 6;
@@ -5945,6 +5989,9 @@
     <div class="page-bg flight-bg" id="bg-flight"></div>
 
     <button class="theme-toggle theme-mode-toggle" onclick="toggleThemeMode()" title="主题：自动 / 浅色 / 深色"><i class="ph ph-circle-half-tilt" id="themeIcon"></i><span id="themeModeLabel">自动</span></button>
+    <div class="typhoon-mobile-trigger" id="typhoonMobileTrigger" role="status" aria-label="当前有活跃台风" hidden>
+        <i class="ph ph-hurricane" aria-hidden="true"></i><span class="typhoon-mobile-count" id="typhoonMobileCount">1</span>
+    </div>
 
     <div class="pages">
         <!-- Weather -->
@@ -5976,8 +6023,14 @@
                             </div>
                         </div>
                         <div class="weather-header-note" id="weatherHeaderNote" hidden></div>
+                        <div class="typhoon-header-trigger" id="typhoonHeaderTrigger" hidden>
+                            <i class="ph ph-hurricane" aria-hidden="true"></i>
+                            <span class="typhoon-header-trigger-copy"><strong id="typhoonHeaderTitle">活跃台风</strong><span id="typhoonHeaderMeta">查看路径与卫星云图</span></span>
+                            <span class="typhoon-status-badge">活跃中</span>
+                        </div>
                     </div>
                 <div class="weather-content">
+                    <div class="weather-card typhoon-entry-card" id="typhoonEntryCard" hidden aria-live="polite"></div>
                     <div class="weather-card weather-hourly-card">
                         <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
                         <div class="hourly-scroll" id="hourlyScroll"></div>
@@ -6685,6 +6738,8 @@
         const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
         const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
         const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
+        const WEATHER_LOCATION_STORAGE_KEY = 'pulse.weather.location.v1';
+        const TYPHOON_STORAGE_KEY = 'pulse.typhoons.v1';
         const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
@@ -6693,6 +6748,19 @@
         let lastResolvedWeatherLocation = null;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
+
+        function readSessionCache(key, maxAge) {
+            try {
+                const cached = JSON.parse(sessionStorage.getItem(key) || 'null');
+                if (!cached || !cached.savedAt || Date.now() - cached.savedAt > maxAge) return null;
+                return cached.value;
+            } catch { return null; }
+        }
+
+        function writeSessionCache(key, value) {
+            try { sessionStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value })); }
+            catch {}
+        }
 
         const THEME_MODES = ['auto', 'light', 'dark'];
         let themeMode = localStorage.getItem('themeMode') || localStorage.getItem('theme') || 'auto';
@@ -6845,6 +6913,7 @@
         function clearWeatherLocationCache() {
             weatherLocationPromise = null;
             weatherLocationCache = null;
+            try { sessionStorage.removeItem(WEATHER_LOCATION_STORAGE_KEY); } catch {}
         }
 
         function escapeHtml(value = '') {
@@ -6875,6 +6944,8 @@
             return {
                 lon: data.lon,
                 lat: data.lat,
+                city: data.city || '',
+                region: data.region || '',
                 displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
                 source: data.source || 'default',
                 error: data.error || ''
@@ -6972,6 +7043,10 @@
 
         async function getWeatherLocation({ forceRefresh = false, preferDevice = false, allowCachedDevice = true } = {}) {
             if (forceRefresh) clearWeatherLocationCache();
+            if (!weatherLocationCache) {
+                const storedLocation = readSessionCache(WEATHER_LOCATION_STORAGE_KEY, WEATHER_LOCATION_CACHE_TTL);
+                if (storedLocation) weatherLocationCache = { location: storedLocation, updatedAt: Date.now() };
+            }
             const now = Date.now();
             const cacheValid = weatherLocationCache && (now - weatherLocationCache.updatedAt < WEATHER_LOCATION_CACHE_TTL);
             if (cacheValid) return weatherLocationCache.location;
@@ -6980,6 +7055,7 @@
                 weatherLocationPromise = resolveWeatherLocation({ preferDevice, allowCachedDevice })
                     .then(location => {
                         weatherLocationCache = { location, updatedAt: Date.now() };
+                        writeSessionCache(WEATHER_LOCATION_STORAGE_KEY, location);
                         return location;
                     })
                     .finally(() => { weatherLocationPromise = null; });
@@ -7022,6 +7098,154 @@
             return geolocationPermissionPromise;
         }
 
+        let typhoonDataCache = null;
+        let typhoonDataLoadedAt = 0;
+        let typhoonDataPromise = null;
+        let localTyphoonWarning = null;
+        const TYPHOON_CACHE_MS = 5 * 60 * 1000;
+
+        function getLocationLabel(location) {
+            const city = String(location?.city || '').trim();
+            if (city) return city.replace(/市$/, '');
+            const displayName = String(location?.displayName || '').trim();
+            const primary = displayName.split(/\s*[·・|]\s*/)[0].trim();
+            return primary && primary !== '当前位置' ? primary.replace(/市$/, '') : '所在地';
+        }
+
+        function extractLocalTyphoonWarning(alert) {
+            const entries = Array.isArray(alert?.content) ? alert.content : (Array.isArray(alert) ? alert : []);
+            const levels = { 蓝色: 1, 黄色: 2, 橙色: 3, 红色: 4 };
+            return entries.map(item => {
+                const text = `${item?.title || ''} ${item?.description || ''}`;
+                const match = text.match(/台风\s*(蓝色|黄色|橙色|红色)预警/);
+                if (!match) return null;
+                return { level: ({ 蓝色: 'blue', 黄色: 'yellow', 橙色: 'orange', 红色: 'red' })[match[1]], label: `${match[1]}预警`, score: levels[match[1]], source: item?.title || '当地气象台' };
+            }).filter(Boolean).sort((a, b) => b.score - a.score)[0] || null;
+        }
+
+        function typhoonDistanceKm(from, to) {
+            const lat1 = Number(from?.lat), lon1 = Number(from?.lon), lat2 = Number(to?.lat), lon2 = Number(to?.lon);
+            if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) return null;
+            const rad = value => value * Math.PI / 180;
+            const dLat = rad(lat2 - lat1), dLon = rad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
+            return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function typhoonDirection(from, to) {
+            const lat1 = Number(from?.lat), lon1 = Number(from?.lon), lat2 = Number(to?.lat), lon2 = Number(to?.lon);
+            if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) return '';
+            const rad = value => value * Math.PI / 180;
+            const y = Math.sin(rad(lon2 - lon1)) * Math.cos(rad(lat2));
+            const x = Math.cos(rad(lat1)) * Math.sin(rad(lat2)) - Math.sin(rad(lat1)) * Math.cos(rad(lat2)) * Math.cos(rad(lon2 - lon1));
+            const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+            return ['北','东北','东','东南','南','西南','西','西北'][Math.round(bearing / 45) % 8];
+        }
+
+        function choosePrimaryTyphoon(storms, location) {
+            return [...storms].sort((a, b) => {
+                const distanceA = typhoonDistanceKm(location, a.position);
+                const distanceB = typhoonDistanceKm(location, b.position);
+                if (distanceA !== null && distanceB !== null && Math.abs(distanceA - distanceB) > 1) return distanceA - distanceB;
+                return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+            })[0];
+        }
+
+        function hideTyphoonEntry() {
+            ['typhoonEntryCard', 'typhoonHeaderTrigger', 'typhoonMobileTrigger'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.hidden = true;
+            });
+        }
+
+        function renderTyphoonEntry(payload, location = lastResolvedWeatherLocation) {
+            const storms = Array.isArray(payload?.storms) ? payload.storms.filter(storm => storm?.active) : [];
+            if (!payload || payload.active !== true || !storms.length) { hideTyphoonEntry(); return; }
+            const storm = choosePrimaryTyphoon(storms, location) || storms[0];
+            const detailPath = /^\/typhoon\/gdacs-tc-\d+$/.test(storm.detailUrl || '') ? storm.detailUrl : `/typhoon/${encodeURIComponent(storm.id)}`;
+            const href = storm.providerIds?.zhejiang ? `${detailPath}?zj=${encodeURIComponent(storm.providerIds.zhejiang)}` : detailPath;
+            const distance = typhoonDistanceKm(location, storm.position);
+            const direction = distance === null ? '' : typhoonDirection(location, storm.position);
+            const placeName = getLocationLabel(location);
+            const locationLabel = distance === null
+                ? '位置数据待更新'
+                : `位于${placeName}以${direction}约 ${Math.round(distance).toLocaleString('zh-CN')} 公里`;
+            const hasCurrentWind = storm.intensity?.basis === 'current_analysis' && Number.isFinite(Number(storm.intensity?.value));
+            const windForceLabel = storm.intensity?.windForceScale !== null && storm.intensity?.windForceScale !== undefined
+                ? ` · ${storm.intensity.windForceScale}级`
+                : '';
+            const windLabel = hasCurrentWind
+                ? `台风最大风速 ${Math.round(Number(storm.intensity.value))} ${storm.intensity.unit || ''}${windForceLabel}`
+                : '台风风速待更新';
+            const updated = storm.updatedAt ? new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(storm.updatedAt)) : '更新时间待确认';
+            const classLabels = { super_typhoon: '超强台风', severe_typhoon: '强台风', typhoon: '台风', severe_tropical_storm: '强热带风暴', tropical_storm: '热带风暴', tropical_depression: '热带低压', tropical_disturbance: '热带扰动', unknown: '强度待更新' };
+            const moreLabel = storms.length > 1 ? ` · 另有 ${storms.length - 1} 个活跃系统` : '';
+            const staleLabel = storm.stale ? ' · 数据更新延迟' : '';
+            const displayName = storm.name?.zh
+                ? `${storm.name.zh}${storm.name?.en ? `（${storm.name.en}）` : ''}`
+                : (storm.name?.display || '未命名热带系统');
+            const warningBadge = localTyphoonWarning
+                ? `<span class="typhoon-alert-badge" data-alert="${escapeHtml(localTyphoonWarning.level)}" title="${escapeHtml(localTyphoonWarning.source)}">${escapeHtml(localTyphoonWarning.label)}</span>`
+                : '';
+            const card = document.getElementById('typhoonEntryCard');
+            card.innerHTML = `
+                <a class="typhoon-entry-link" href="${href}" aria-label="查看台风 ${escapeHtml(displayName)} 详情">
+                    <span class="typhoon-entry-symbol"><i class="ph ph-hurricane" aria-hidden="true"></i></span>
+                    <span class="typhoon-entry-copy">
+                        <span class="typhoon-entry-kicker"><span class="typhoon-status-badge">活跃中</span>${warningBadge}<span>${escapeHtml(classLabels[storm.classification] || classLabels.unknown)}${escapeHtml(moreLabel)}</span></span>
+                        <span class="typhoon-entry-name">${escapeHtml(displayName)}</span>
+                        <span class="typhoon-entry-meta"><span>${escapeHtml(locationLabel)}</span><span>${escapeHtml(windLabel)}</span><span>更新 ${escapeHtml(updated)}${escapeHtml(staleLabel)}</span></span>
+                    </span>
+                    <span class="typhoon-entry-action"><i class="ph ph-arrow-up-right" aria-hidden="true"></i></span>
+                </a>`;
+            card.hidden = false;
+
+            const title = displayName;
+            document.getElementById('typhoonHeaderTitle').textContent = `${title} · ${classLabels[storm.classification] || classLabels.unknown}`;
+            document.getElementById('typhoonHeaderMeta').textContent = `${locationLabel}${moreLabel}${staleLabel}`;
+            const headerTrigger = document.getElementById('typhoonHeaderTrigger');
+            headerTrigger.hidden = false;
+            const mobileTrigger = document.getElementById('typhoonMobileTrigger');
+            mobileTrigger.setAttribute('aria-label', `${title} 活跃中，共 ${storms.length} 个活跃系统`);
+            document.getElementById('typhoonMobileCount').textContent = storms.length > 9 ? '9+' : String(storms.length);
+            mobileTrigger.hidden = false;
+        }
+
+        async function loadTyphoons({ force = false, location = lastResolvedWeatherLocation } = {}) {
+            if (!force && !typhoonDataCache) {
+                const storedPayload = readSessionCache(TYPHOON_STORAGE_KEY, TYPHOON_CACHE_MS);
+                if (storedPayload) {
+                    typhoonDataCache = storedPayload;
+                    typhoonDataLoadedAt = Date.now();
+                }
+            }
+            if (!force && typhoonDataCache && Date.now() - typhoonDataLoadedAt < TYPHOON_CACHE_MS) {
+                renderTyphoonEntry(typhoonDataCache, location);
+                return typhoonDataCache;
+            }
+            if (!typhoonDataPromise) {
+                typhoonDataPromise = fetch('/api/typhoons', { headers: { accept: 'application/json' } })
+                    .then(async response => {
+                        const payload = await response.json().catch(() => null);
+                        if (!response.ok || !payload || payload.active === null) throw new Error(payload?.error?.message || `Typhoon API ${response.status}`);
+                        typhoonDataCache = payload;
+                        typhoonDataLoadedAt = Date.now();
+                        writeSessionCache(TYPHOON_STORAGE_KEY, payload);
+                        return payload;
+                    })
+                    .finally(() => { typhoonDataPromise = null; });
+            }
+            try {
+                const payload = await typhoonDataPromise;
+                renderTyphoonEntry(payload, location);
+                return payload;
+            } catch (error) {
+                hideTyphoonEntry();
+                console.warn('Typhoon entry unavailable:', error);
+                return null;
+            }
+        }
+
         async function loadWeather({ forceRelocate = false } = {}) {
             let resolvedLocation = null;
             try {
@@ -7037,6 +7261,7 @@
                 });
                 resolvedLocation = location;
                 lastResolvedWeatherLocation = location;
+                loadTyphoons({ location });
                 const locationDetail = location.source === 'device'
                     ? '已同步当前设备位置'
                     : (location.source === 'ip'
@@ -7045,10 +7270,13 @@
                 renderWeatherLocation(location, { detail: locationDetail });
 
                 // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
-                const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
+                const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`, { cache: forceRelocate ? 'reload' : 'default' });
                 if (!r.ok) return;
-                const d = (await r.json()).result;
+                const d = (await r.json())?.result;
+                if (!d) return;
                 const rt = d?.realtime || {};
+                localTyphoonWarning = extractLocalTyphoonWarning(d?.alert);
+                if (typhoonDataCache) renderTyphoonEntry(typhoonDataCache, location);
                 updateScene(rt.skycon || 'CLEAR_DAY');
                 document.getElementById('tempMain').textContent = Math.round(rt.temperature ?? 0) + '°';
                 document.getElementById('condition').textContent = SKYCON_LABELS[rt.skycon] || '多云';
@@ -8661,8 +8889,8 @@
             `).join('');
         }
 
-        loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
-        setInterval(() => { loadWeather(); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
+        loadWeather(); loadTyphoons(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
+        setInterval(() => { loadWeather(); loadTyphoons({ force: true }); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
 
         // ========== TRADING PLAYGROUND ==========
         let tradingData = null;

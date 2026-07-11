@@ -9,9 +9,12 @@ await mkdir(path.join(dist, 'server'), { recursive: true });
 await mkdir(path.join(dist, '.openai'), { recursive: true });
 
 const html = await readFile(path.join(root, 'index.html'), 'utf8');
+const typhoonHtml = await readFile(path.join(root, 'typhoon.html'), 'utf8');
+const typhoonCss = await readFile(path.join(root, 'typhoon.css'), 'utf8');
+const typhoonJs = await readFile(path.join(root, 'typhoon.js'), 'utf8');
 const data = {};
 for (const name of await readdir(path.join(root, 'data'))) {
-  if (name.endsWith('.json')) data[`/data/${name}`] = await readFile(path.join(root, 'data', name), 'utf8');
+  if (name.endsWith('.json') || name.endsWith('.geojson')) data[`/data/${name}`] = await readFile(path.join(root, 'data', name), 'utf8');
 }
 
 const tracks = {};
@@ -20,7 +23,12 @@ for (const name of await readdir(path.join(root, 'tracks'))) {
 }
 
 const worker = `
+import { CACHE_CONTROL, getActiveTyphoons, getTyphoonDetail, TyphoonServiceError } from './typhoon-service.mjs';
+
 const html = ${JSON.stringify(html)};
+const typhoonHtml = ${JSON.stringify(typhoonHtml)};
+const typhoonCss = ${JSON.stringify(typhoonCss)};
+const typhoonJs = ${JSON.stringify(typhoonJs)};
 const data = ${JSON.stringify(data)};
 const tracks = ${JSON.stringify(tracks)};
 
@@ -110,6 +118,11 @@ export default {
     if (pathname === '/' || pathname === '/weather' || pathname === '/market' || pathname === '/news' || pathname === '/f1') {
       return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
     }
+    if (/^\/typhoon\/gdacs-tc-\d+\/?$/.test(pathname)) {
+      return new Response(typhoonHtml, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
+    }
+    if (pathname === '/typhoon.css') return new Response(typhoonCss, { headers: { 'content-type': 'text/css; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    if (pathname === '/typhoon.js') return new Response(typhoonJs, { headers: { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
     if (data[pathname]) return json(data[pathname]);
     if (tracks[pathname]) return new Response(tracks[pathname], { headers: { 'content-type': 'image/svg+xml', 'cache-control': 'public, max-age=86400' } });
 
@@ -118,7 +131,7 @@ export default {
       const lat = request.cf?.latitude || '31.123';
       const city = request.cf?.city || '上海';
       const region = request.cf?.region || '闵行';
-      return json({ lon: String(lon), lat: String(lat), city, region, country: request.cf?.country || '中国', displayName: [city, region].filter(Boolean).join(' · '), source: request.cf ? 'ip' : 'default' });
+      return json({ lon: String(lon), lat: String(lat), city, region, country: request.cf?.country || '中国', displayName: [city, region].filter(Boolean).join(' · '), source: request.cf ? 'ip' : 'default' }, 200, 'private, max-age=300');
     }
     if (pathname === '/api/weather') {
       const key = env.CAIYUN_API_TOKEN || env.CAIYUN_KEY;
@@ -126,6 +139,14 @@ export default {
       const lon = url.searchParams.get('lon') || '121.405';
       const lat = url.searchParams.get('lat') || '31.123';
       return proxy(request, 'https://api.caiyunapp.com/v2.6/' + key + '/' + lon + ',' + lat + '/weather?dailysteps=7&hourlysteps=24');
+    }
+    if (pathname === '/api/typhoons') {
+      try { return json(await getActiveTyphoons({ cwaApiKey: env.CWA_API_KEY || '' }), 200, CACHE_CONTROL); }
+      catch (error) { const e=error instanceof TyphoonServiceError?error:new TyphoonServiceError('台风数据暂时不可用'); return json({schemaVersion:'1',status:'degraded',active:null,generatedAt:new Date().toISOString(),sources:[{id:'gdacs',status:'error',lastUpdatedAt:null,message:e.message}],storms:[],error:{code:e.code,message:e.message}},e.status,'public, s-maxage=60'); }
+    }
+    if (pathname === '/api/typhoon') {
+      try { return json(await getTyphoonDetail(url.searchParams.get('id'), { zhejiangId: url.searchParams.get('zj') || '' }), 200, CACHE_CONTROL); }
+      catch (error) { const e=error instanceof TyphoonServiceError?error:new TyphoonServiceError('台风详情暂时不可用'); return json({schemaVersion:'1',status:'degraded',generatedAt:new Date().toISOString(),error:{code:e.code,message:e.message}},e.status,'public, s-maxage=60'); }
     }
     if (pathname === '/api/reverse-geocode') {
       const lat = url.searchParams.get('lat');
@@ -147,5 +168,6 @@ export default {
 `;
 
 await writeFile(path.join(dist, 'server', 'index.js'), worker);
+await writeFile(path.join(dist, 'server', 'typhoon-service.mjs'), await readFile(path.join(root, 'lib', 'typhoon-service.mjs')));
 await writeFile(path.join(dist, '.openai', 'hosting.json'), await readFile(path.join(root, '.openai', 'hosting.json')));
 console.log('Sites bundle created in dist/');

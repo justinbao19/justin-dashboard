@@ -5446,6 +5446,67 @@
         .tab-item[data-page="f1"].active {
             color: var(--f1-accent) !important;
         }
+        .dock-mini-trigger {
+            display: none;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 0;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .dock-mini-trigger span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+        }
+        @media (min-width: 761px) and (max-width: 1199px) {
+            .tab-nav {
+                left: 50%;
+                right: auto;
+                bottom: 20px;
+                width: min(calc(100vw - 64px), 520px);
+                transform: translateX(-50%);
+                transition: width 0.28s ease, padding 0.28s ease, border-radius 0.28s ease;
+            }
+            .tab-nav .tab-item {
+                min-width: 0;
+                transition: opacity 0.16s ease, background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+            }
+            .tab-nav.is-collapsed {
+                width: 64px;
+                height: 44px;
+                padding: 4px;
+                gap: 0;
+                border-radius: 999px;
+            }
+            .tab-nav.is-collapsed .tab-item {
+                position: absolute;
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+            }
+            .tab-nav.is-collapsed .dock-mini-trigger {
+                display: flex;
+            }
+            .dock-mini-trigger:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .tab-nav,
+            .tab-nav .tab-item {
+                transition: none !important;
+            }
+        }
         @media (min-width: 1200px) {
             .tab-nav {
                 left: 50%;
@@ -6583,6 +6644,9 @@
         <button class="tab-item" data-page="market"><i class="ph ph-chart-line-up"></i><span>市场</span></button>
         <button class="tab-item" data-page="news"><i class="ph ph-newspaper-clipping"></i><span>要闻</span></button>
         <button class="tab-item" data-page="f1"><svg class="f1-logo f1-tab-logo" viewBox="0 9 24 6" role="img" aria-label="F1"><path d="M9.6 11.24h7.91L19.75 9H9.39c-2.85 0-3.62.34-5.17 1.81C2.71 12.3 0 15 0 15h3.38c.77-.75 2.2-2.13 2.85-2.75.92-.87 1.37-1.01 3.37-1.01zM20.39 9l-6 6H18l6-6h-3.61zm-3.25 2.61H9.88c-2.22 0-2.6.12-3.55 1.07C5.44 13.57 4 15 4 15h3.15l.75-.75c.49-.49.75-.55 1.78-.55h5.37l2.09-2.09z"/></svg><span>F1</span></button>
+        <button class="dock-mini-trigger" type="button" aria-label="展开导航" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
     </nav>
 
     <script>
@@ -6684,9 +6748,53 @@
             }
         }
 
+        const tabNav = document.querySelector('.tab-nav');
+        const dockMiniTrigger = document.querySelector('.dock-mini-trigger');
+        const tabletDockQuery = window.matchMedia('(min-width: 761px) and (max-width: 1199px)');
+        let tabletDockTimer = null;
+
+        function clearTabletDockTimer() {
+            if (!tabletDockTimer) return;
+            clearTimeout(tabletDockTimer);
+            tabletDockTimer = null;
+        }
+
+        function setTabletDockCollapsed(collapsed) {
+            const shouldCollapse = tabletDockQuery.matches && collapsed;
+            tabNav.classList.toggle('is-collapsed', shouldCollapse);
+            dockMiniTrigger.setAttribute('aria-expanded', String(!shouldCollapse));
+            clearTabletDockTimer();
+        }
+
+        function scheduleTabletDockCollapse() {
+            clearTabletDockTimer();
+            if (!tabletDockQuery.matches || tabNav.classList.contains('is-collapsed')) return;
+            tabletDockTimer = setTimeout(() => setTabletDockCollapsed(true), 3000);
+        }
+
+        function initializeTabletDock() {
+            setTabletDockCollapsed(false);
+            if (tabletDockQuery.matches) scheduleTabletDockCollapse();
+        }
+
         document.querySelectorAll('.tab-item').forEach(t => t.addEventListener('click', () => {
             setActivePage(t.dataset.page, { updateHistory: true });
+            scheduleTabletDockCollapse();
         }));
+        dockMiniTrigger.addEventListener('click', () => {
+            setTabletDockCollapsed(false);
+            scheduleTabletDockCollapse();
+        });
+        tabNav.addEventListener('pointerenter', clearTabletDockTimer);
+        tabNav.addEventListener('pointerleave', scheduleTabletDockCollapse);
+        tabNav.addEventListener('focusin', clearTabletDockTimer);
+        tabNav.addEventListener('focusout', scheduleTabletDockCollapse);
+        if (tabletDockQuery.addEventListener) {
+            tabletDockQuery.addEventListener('change', initializeTabletDock);
+        } else {
+            tabletDockQuery.addListener?.(initializeTabletDock);
+        }
+        initializeTabletDock();
 
         window.addEventListener('popstate', () => {
             setActivePage(getPageFromPathname(), { replaceHistory: false });

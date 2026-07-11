@@ -1,6 +1,5 @@
-import { CACHE_CONTROL, TyphoonServiceError, getTyphoonDetail } from '../lib/typhoon-service.mjs';
-
 export default async function handler(req, res) {
+  const { CACHE_CONTROL, TyphoonServiceError, getTyphoonDetail } = await import('../lib/typhoon-service.mjs');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Cache-Control', CACHE_CONTROL);

@@ -1,4 +1,4 @@
-const USER_AGENT = 'justin-dashboard/1.0 (weather reverse geocode)';
+const USER_AGENT = 'justin-pulse/1.0 (weather reverse geocode)';
 
 function pickFirst(...values) {
   for (const value of values) {

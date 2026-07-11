@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 MARKET_PATH = DATA_DIR / "market.json"
 NEWS_PATH = DATA_DIR / "news.json"
-DASHBOARD_URL = "https://justin-dashboard-xi.vercel.app"
+DASHBOARD_URL = "https://justin-pulse.vercel.app"
 WEATHER_URL = f"{DASHBOARD_URL}/api/weather"
 REMOTE_MARKET_URL = f"{DASHBOARD_URL}/data/market.json"
 REMOTE_NEWS_URL = f"{DASHBOARD_URL}/data/news.json"
@@ -194,7 +194,7 @@ def build_morning_brief(market: dict, news: dict, weather: dict) -> str:
     if isinstance(advice, dict) and advice.get("summary"):
         lines.extend(["", f"💡 操作建议: {advice['summary']}"])
 
-    lines.extend(["", "🔗 Dashboard", DASHBOARD_URL])
+    lines.extend(["", "🔗 Pulse", DASHBOARD_URL])
     return "\n".join(lines).strip()
 
 
@@ -249,7 +249,7 @@ def build_evening_brief(market: dict, news: dict, weather: dict) -> str:
                 continue
             lines.append(f"- {pos.get('asset', '资产')}: {pos.get('action', '观望')}，{pos.get('reasoning', '')}")
 
-    lines.extend(["", "🔗 Dashboard", DASHBOARD_URL])
+    lines.extend(["", "🔗 Pulse", DASHBOARD_URL])
     return "\n".join(lines).strip()
 
 

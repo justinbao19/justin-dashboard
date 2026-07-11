@@ -6,9 +6,9 @@ from zoneinfo import ZoneInfo
 
 import requests
 
-WEATHER_URL = "https://justin-dashboard-xi.vercel.app/api/weather"
-NEWS_URL = "https://justin-dashboard-xi.vercel.app/data/news.json"
-DASHBOARD_WEATHER_URL = "https://justin-dashboard-xi.vercel.app/weather"
+WEATHER_URL = "https://justin-pulse.vercel.app/api/weather"
+NEWS_URL = "https://justin-pulse.vercel.app/data/news.json"
+DASHBOARD_WEATHER_URL = "https://justin-pulse.vercel.app/weather"
 
 SKYCON_LABELS = {
     "CLEAR_DAY": "晴",
@@ -231,6 +231,6 @@ def build_weather_report() -> str:
                 else:
                     lines.append(f"{idx}. {title}")
 
-    lines.extend(["", "🔗 Dashboard 天气页", DASHBOARD_WEATHER_URL])
+    lines.extend(["", "🔗 Pulse 天气页", DASHBOARD_WEATHER_URL])
 
     return "\n".join(lines).strip()

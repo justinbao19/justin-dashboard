@@ -19,5 +19,5 @@
 
 💡 操作建议: 维持美股多头，逢回调加仓科技蓝筹；港股突破确认前轻仓短打；A股观望，黄金区间交易，BTC等待7.5k支撑验证。
 
-🔗 Dashboard
-https://justin-dashboard-xi.vercel.app
+🔗 Pulse
+https://justin-pulse.vercel.app

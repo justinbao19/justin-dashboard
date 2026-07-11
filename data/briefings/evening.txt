@@ -30,5 +30,5 @@
 - A股: 观望，缺乏催化+资金流出
 - 黄金: 区间交易，实际利率压制
 
-🔗 Dashboard
-https://justin-dashboard-xi.vercel.app
+🔗 Pulse
+https://justin-pulse.vercel.app

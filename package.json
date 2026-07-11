@@ -1,7 +1,7 @@
 {
-  "name": "justin-dashboard",
+  "name": "justin-pulse",
   "version": "1.0.0",
-  "description": "个人信息仪表盘，集成天气、市场行情、新闻资讯等模块。",
+  "description": "Pulse 个人信息仪表盘，集成天气、市场行情、新闻资讯与 F1。",
   "main": "index.js",
   "directories": {
     "doc": "docs"

@@ -22,7 +22,7 @@ from briefing_content import build_brief
 WEIXIN_CHANNEL = "openclaw-weixin"
 WEIXIN_ACCOUNT = os.environ.get("WEIXIN_ACCOUNT_ID", "7718db65dcf1-im-bot")
 WEIXIN_TARGET = os.environ.get("WEIXIN_TARGET_ID", "o9cq8097CyKn-7P-8ofBnaMlDlJw@im.wechat")
-DASHBOARD_URL = "https://justin-dashboard-xi.vercel.app"
+DASHBOARD_URL = "https://justin-pulse.vercel.app"
 
 
 def send_message(text: str) -> None:

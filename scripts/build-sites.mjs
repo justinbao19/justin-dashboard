@@ -98,7 +98,7 @@ const json = (value, status = 200, cache = 'no-store') => new Response(
 );
 
 async function proxy(request, target, cache = 'public, max-age=300') {
-  const response = await fetch(target, { headers: { accept: 'application/json', 'user-agent': 'JustinDashboard/1.0' } });
+  const response = await fetch(target, { headers: { accept: 'application/json', 'user-agent': 'JustinPulse/1.0' } });
   return new Response(response.body, { status: response.status, headers: { 'content-type': response.headers.get('content-type') || 'application/json; charset=utf-8', 'cache-control': cache } });
 }
 

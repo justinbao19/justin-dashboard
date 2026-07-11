@@ -2,7 +2,7 @@
 // 数据源: Aviation Weather Center (aviationweather.gov)
 
 const AWC_BASE = 'https://aviationweather.gov/api/data/metar';
-const UA = 'JustinDashboard/1.0';
+const UA = 'JustinPulse/1.0';
 
 // 天气现象代码
 const WEATHER_CODES = {

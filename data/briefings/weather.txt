@@ -28,5 +28,5 @@
 2. 儿童手表“小天才圈”调查：点赞成每日功课，有商家可解除家长管控
    在校园里，孩子们时常举起戴在手腕上的手表，彼此一碰，便加为好友。这种以“安全”为核心卖点的...
 
-🔗 Dashboard 天气页
-https://justin-dashboard-xi.vercel.app/weather
+🔗 Pulse 天气页
+https://justin-pulse.vercel.app/weather

@@ -1,8 +1,8 @@
-# Justin Dashboard
+# Pulse
 
 个人信息仪表盘，集成天气、市场行情、新闻资讯等模块。
 
-**线上地址**: https://justin-dashboard-xi.vercel.app
+**线上地址**: https://justin-pulse.vercel.app
 
 ## 功能模块
 
@@ -63,7 +63,7 @@ justin-dashboard/
 
 项目现在采用 GitHub Actions 作为主调度器，尽量把“内容生成”和“消息分发”从本地机器迁出去。
 
-### Dashboard Briefing
+### Pulse Briefing
 
 - 文件: `.github/workflows/dashboard-briefing.yml`
 - 定时: 每天北京时间 `08:20` 和 `22:50`
@@ -98,13 +98,13 @@ justin-dashboard/
 ### 为什么不用本地 cron 作为主入口
 
 - 笔记本休眠、断网、关机时，本地任务会停
-- Dashboard 数据更新和消息推送会一起失效
+- Pulse 数据更新和消息推送会一起失效
 - GitHub Actions 更适合定时抓取、生成、提交和 Telegram 分发
 
 ### 微信现状
 
 微信当前仍通过本地 OpenClaw 会话发送，因为 `openclaw-weixin` 发送协议依赖会话 `contextToken`。  
-现在已经把内容生成迁到云端可独立运行；微信只保留为“本地最薄转发层”，默认读取线上 Dashboard 最新 `data/*.json`，不再承担内容抓取和分析职责。
+现在已经把内容生成迁到云端可独立运行；微信只保留为“本地最薄转发层”，默认读取线上 Pulse 最新 `data/*.json`，不再承担内容抓取和分析职责。
 
 ## 自主 Paper Trading
 

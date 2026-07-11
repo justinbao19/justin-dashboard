@@ -9,7 +9,7 @@ const vercelConfig = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 
 const project = {
   projectId: process.env.VERCEL_PROJECT_ID || 'prj_wTliLPHm6IRMVL2DjVCEyRtyb2tA',
   orgId: process.env.VERCEL_ORG_ID || 'team_jm6CjyLf6B90x0OMw5Fdlhgu',
-  projectName: process.env.VERCEL_PROJECT_NAME || 'justin-dashboard',
+  projectName: process.env.VERCEL_PROJECT_NAME || 'justin-pulse',
   settings: {
     framework: null,
     devCommand: null,

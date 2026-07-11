@@ -10,7 +10,7 @@ from typing import Any
 
 import requests
 
-DASHBOARD_URL = "https://justin-dashboard-xi.vercel.app"
+DASHBOARD_URL = "https://justin-pulse.vercel.app"
 NEWS_STREAM_URL = f"{DASHBOARD_URL}/api/news"
 
 

@@ -3285,7 +3285,13 @@
 
         @media (max-width: 760px) {
             .weather-header {
+                display: flex;
+                flex-direction: column;
                 padding: 56px 20px 28px;
+            }
+
+            .weather-header-top {
+                order: 1;
             }
 
             .weather-header-badge {
@@ -3307,8 +3313,9 @@
             }
 
             .weather-hero-main {
+                order: 3;
                 gap: 10px;
-                margin-top: 22px;
+                margin-top: 18px;
             }
 
             .weather-header .temp-main {
@@ -3331,6 +3338,7 @@
             }
 
             .weather-header-meta {
+                order: 4;
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 10px;
@@ -3353,9 +3361,14 @@
             }
 
             .weather-header-note {
+                order: 2;
+                align-self: center;
                 font-size: 12px;
-                margin-top: 12px;
-                max-width: 100%;
+                margin-top: 14px;
+                max-width: min(100%, 340px);
+                line-height: 1.5;
+                text-align: center;
+                opacity: 0.76;
             }
 
             .weather-content {
@@ -3751,33 +3764,38 @@
             }
 
             .weather-hero-main {
-                grid-template-columns: auto minmax(0, 1fr);
-                align-items: end;
-                justify-items: stretch;
-                gap: 18px;
-                margin-top: 26px;
+                grid-template-columns: minmax(0, 1fr);
+                align-items: start;
+                justify-items: start;
+                gap: 14px;
+                margin-top: 24px;
             }
 
             .weather-header .temp-main {
-                font-size: clamp(132px, 10vw, 168px);
-                letter-spacing: -9px;
+                font-size: clamp(118px, 9vw, 144px);
+                letter-spacing: -7px;
             }
 
             .weather-hero-copy {
                 justify-items: start;
-                align-self: center;
-                max-width: 260px;
-                padding-bottom: 18px;
+                align-self: start;
+                width: 100%;
+                max-width: 100%;
+                gap: 6px;
+                padding-bottom: 0;
             }
 
             .weather-header .condition {
-                font-size: 30px;
+                font-size: 24px;
+                font-weight: 600;
+                line-height: 1.2;
                 max-width: 100%;
             }
 
             .weather-header .temp-range {
-                font-size: 18px;
-                opacity: 0.82;
+                font-size: 15px;
+                line-height: 1.4;
+                opacity: 0.76;
             }
 
             .weather-header-meta {
@@ -3795,6 +3813,15 @@
             .weather-header-note {
                 margin-top: 18px;
                 max-width: 100%;
+                padding: 14px 16px;
+                border-radius: 16px;
+                background: rgba(0, 0, 0, 0.14);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                font-size: 14px;
+                line-height: 1.55;
+                text-align: left;
+                opacity: 0.82;
+                backdrop-filter: blur(16px);
             }
 
             .weather-content {
@@ -5867,7 +5894,7 @@
                                 <div class="value" id="headerHumidity">--%</div>
                             </div>
                         </div>
-                        <div class="weather-header-note" id="weatherHeaderNote">根据当前体感和小时趋势整理</div>
+                        <div class="weather-header-note" id="weatherHeaderNote" hidden></div>
                     </div>
                 <div class="weather-content">
                     <div class="weather-card weather-hourly-card">
@@ -6561,6 +6588,14 @@
     <script>
         const ICON_BASE = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg/';
         const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','FOG':'fog','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
+        const SKYCON_LABELS = {
+            CLEAR_DAY: '晴', CLEAR_NIGHT: '晴朗',
+            PARTLY_CLOUDY_DAY: '多云', PARTLY_CLOUDY_NIGHT: '多云', CLOUDY: '阴',
+            LIGHT_HAZE: '轻度雾霾', MODERATE_HAZE: '中度雾霾', HEAVY_HAZE: '重度雾霾',
+            LIGHT_RAIN: '小雨', MODERATE_RAIN: '中雨', HEAVY_RAIN: '大雨', STORM_RAIN: '暴雨',
+            FOG: '雾', LIGHT_SNOW: '小雪', MODERATE_SNOW: '中雪', HEAVY_SNOW: '大雪',
+            STORM_SNOW: '暴雪', DUST: '浮尘', SAND: '沙尘', WIND: '大风'
+        };
         const DEFAULT_WEATHER_LOCATION = { lon: '121.405', lat: '31.123', displayName: '上海 · 闵行' };
         const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
         const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
@@ -6888,14 +6923,15 @@
                 const rt = d?.realtime || {};
                 updateScene(rt.skycon || 'CLEAR_DAY');
                 document.getElementById('tempMain').textContent = Math.round(rt.temperature ?? 0) + '°';
-                document.getElementById('condition').textContent = d.hourly?.description || '多云';
+                document.getElementById('condition').textContent = SKYCON_LABELS[rt.skycon] || '多云';
                 const t0 = d.daily?.temperature?.[0];
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(rt.apparent_temperature ?? rt.temperature ?? 0)}°`;
                 document.getElementById('headerHumidity').textContent = `${Math.round((rt.humidity || 0) * 100)}%`;
-                document.getElementById('weatherHeaderNote').textContent = d.hourly?.description
-                    ? `根据当前体感和小时趋势整理 · ${d.hourly.description}`
-                    : '根据当前体感和小时趋势整理';
+                const weatherHeaderNote = document.getElementById('weatherHeaderNote');
+                const hourlyDescription = d.hourly?.description?.trim() || '';
+                weatherHeaderNote.textContent = hourlyDescription;
+                weatherHeaderNote.hidden = !hourlyDescription;
 
                 // Hourly
                 if (d.hourly?.temperature) {

@@ -4,6 +4,7 @@ const path = require('path');
 const root = process.cwd();
 const vercelDir = path.join(root, '.vercel');
 const projectPath = path.join(vercelDir, 'project.json');
+const vercelConfig = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
 
 const project = {
   projectId: process.env.VERCEL_PROJECT_ID || 'prj_wTliLPHm6IRMVL2DjVCEyRtyb2tA',
@@ -14,7 +15,7 @@ const project = {
     devCommand: null,
     installCommand: null,
     buildCommand: null,
-    outputDirectory: null,
+    outputDirectory: vercelConfig.outputDirectory,
     rootDirectory: null,
     directoryListing: false,
     nodeVersion: '24.x'

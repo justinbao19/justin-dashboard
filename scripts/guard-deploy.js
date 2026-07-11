@@ -22,6 +22,10 @@ if (Object.prototype.hasOwnProperty.call(vercel, 'public')) {
   fail('vercel.json must not contain deprecated `public` field');
 }
 
+if (vercel.outputDirectory !== '.') {
+  fail('vercel.json outputDirectory must be `.` so Vercel includes static assets and API functions');
+}
+
 const tracked = execSync('git ls-files', { encoding: 'utf8' }).split('\n').filter(Boolean);
 for (const item of tracked) {
   if (item === '.vercel' || item.startsWith('.vercel/')) {

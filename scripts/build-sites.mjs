@@ -50,6 +50,35 @@ async function getNews() {
   return { date: now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日', updatedAt: now.toISOString(), categories };
 }
 
+function getStaticNews() {
+  const stored = JSON.parse(data['/data/news.json'] || '{"items":[]}');
+  const normalized = (stored.items || []).map((item, index) => ({ id: 'stored:' + index, title: String(item.title || '').trim(), url: item.url || '', desktopUrl: item.url || '', mobileUrl: '', sourceId: 'stored', sourceLabel: item.source || '新闻', rank: index + 1, info: item.summary || '', stamp: '', icon: item.image || '' })).filter(item => item.title && item.url);
+  const techWords = /科技|AI|人工智能|芯片|手机|互联网|机器人|软件|汽车|特斯拉|苹果|华为|小米|字节|腾讯|阿里/i;
+  const socialWords = /热搜|网友|社会|教育|儿童|生活|文化|娱乐|电影|体育|健康/i;
+  const selections = { macro: normalized.slice(0, 14), general: normalized.slice(0, 14), tech: normalized.filter(item => techWords.test(item.title + item.info)), social: normalized.filter(item => socialWords.test(item.title + item.info)) };
+  if (selections.tech.length < 4) selections.tech = normalized.slice(0, 10);
+  if (selections.social.length < 4) selections.social = normalized.slice(0, 10);
+  const categories = {};
+  for (const [key, config] of Object.entries(newsCategories)) { const items = selections[key] || normalized; const groups = [...new Set(items.map(item => item.sourceLabel))].slice(0, 3).map((label, i) => ({ id: 'stored-' + i, label, items: items.filter(item => item.sourceLabel === label).slice(0, 3) })); categories[key] = { key, title: config.title, deck: config.deck, updatedAtMs: Date.now(), updatedLabel: stored.date || '', sources: groups.map(g => g.label), featured: items[0] || null, items: items.slice(1, 12), sourceGroups: groups }; }
+  return { date: stored.date || '', updatedAt: stored.updated_at || new Date().toISOString(), categories };
+}
+
+async function getSentiment(env) {
+  const finnhub = env.FINNHUB_KEY || ''; const fred = env.FRED_KEY || '';
+  const safeJson = async url => { try { const r=await fetch(url); return r.ok ? await r.json() : {}; } catch { return {}; } };
+  const [vix, fear, y10, y2, spread, dxy, events] = await Promise.all([
+    finnhub ? safeJson('https://finnhub.io/api/v1/quote?symbol=VIXY&token=' + encodeURIComponent(finnhub)) : {},
+    safeJson('https://api.alternative.me/fng/?limit=1'),
+    fred ? safeJson('https://api.stlouisfed.org/fred/series/observations?series_id=DGS10&api_key=' + encodeURIComponent(fred) + '&file_type=json&limit=5&sort_order=desc') : {},
+    fred ? safeJson('https://api.stlouisfed.org/fred/series/observations?series_id=DGS2&api_key=' + encodeURIComponent(fred) + '&file_type=json&limit=5&sort_order=desc') : {},
+    fred ? safeJson('https://api.stlouisfed.org/fred/series/observations?series_id=T10Y2Y&api_key=' + encodeURIComponent(fred) + '&file_type=json&limit=14&sort_order=desc') : {},
+    finnhub ? safeJson('https://finnhub.io/api/v1/quote?symbol=UUP&token=' + encodeURIComponent(finnhub)) : {},
+    safeJson('https://nfs.faireconomy.media/ff_calendar_thisweek.json')
+  ]);
+  const fg = fear.data?.[0] || {}; const vixValue=Number(vix.c)||0; const spreadRows=spread.observations||[]; const spreadValue=Number(spreadRows[0]?.value)||0;
+  return { updated_at:new Date().toISOString(), vix:{value:vixValue,change:Number(vix.dp)||0,level:vixValue>30?'extreme':vixValue>20?'elevated':'normal',label:vixValue>30?'恐慌':vixValue>20?'警惕':'平稳'}, fear_greed:{value:Number(fg.value)||50,label:fg.value_classification||'Neutral',timestamp:fg.timestamp}, treasury:{y10:Number(y10.observations?.[0]?.value)||0,y2:Number(y2.observations?.[0]?.value)||0,spread:spreadValue,inverted:spreadValue<0,spread_history:spreadRows.map(row=>Number(row.value)||0).reverse()}, dxy:{value:Number(dxy.c)||0,change:Number(dxy.dp)||0,label:'UUP ETF'}, events:(Array.isArray(events)?events:[]).filter(e=>e.impact==='High'||e.impact==='Medium').slice(0,8).map(e=>({date:e.date?.split('T')[0]||'',time:e.date?.split('T')[1]?.slice(0,5)||'',event:e.title,event_cn:e.title,country:e.country==='USD'?'US':e.country,impact:e.impact==='High'?3:2,forecast:e.forecast,previous:e.previous})) };
+}
+
 const f1Flags = { Australia:'🇦🇺', China:'🇨🇳', Japan:'🇯🇵', Bahrain:'🇧🇭', 'Saudi Arabia':'🇸🇦', 'United States':'🇺🇸', Canada:'🇨🇦', Monaco:'🇲🇨', Spain:'🇪🇸', Austria:'🇦🇹', 'United Kingdom':'🇬🇧', Belgium:'🇧🇪', Hungary:'🇭🇺', Netherlands:'🇳🇱', Italy:'🇮🇹', Azerbaijan:'🇦🇿', Singapore:'🇸🇬', Mexico:'🇲🇽', Brazil:'🇧🇷', Qatar:'🇶🇦', 'United Arab Emirates':'🇦🇪' };
 function gpName(country, location) { if (country === 'United States') return location.includes('Miami') ? 'Miami GP' : location.includes('Las Vegas') ? 'Las Vegas GP' : 'United States GP'; if (country === 'Spain' && location.includes('Madrid')) return 'Madrid GP'; const names = { China:'Chinese GP', Japan:'Japanese GP', Australia:'Australian GP', Bahrain:'Bahrain GP', 'Saudi Arabia':'Saudi Arabian GP', Canada:'Canadian GP', Monaco:'Monaco GP', Spain:'Spanish GP', Austria:'Austrian GP', 'United Kingdom':'British GP', Belgium:'Belgian GP', Hungary:'Hungarian GP', Netherlands:'Dutch GP', Italy:'Italian GP', Azerbaijan:'Azerbaijan GP', Singapore:'Singapore GP', Mexico:'Mexico City GP', Brazil:'São Paulo GP', Qatar:'Qatar GP', 'United Arab Emirates':'Abu Dhabi GP' }; return names[country] || country + ' GP'; }
 async function getF1(url) {
@@ -105,7 +134,8 @@ export default {
       return proxy(request, 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&accept-language=zh-CN', 'public, max-age=86400');
     }
     if (pathname === '/api/market') return json(data['/data/market.json'], 200, 'public, max-age=60');
-    if (pathname === '/api/news') { try { return json(await getNews(), 200, 'public, max-age=240'); } catch { return json(data['/data/news.json'], 200, 'public, max-age=240'); } }
+    if (pathname === '/api/news') { try { const live=await getNews(); const count=Object.values(live.categories).reduce((sum,category)=>sum+(category.items?.length||0)+(category.featured?1:0),0); return json(count ? live : getStaticNews(), 200, 'public, max-age=240'); } catch { return json(getStaticNews(), 200, 'public, max-age=240'); } }
+    if (pathname === '/api/sentiment') return json(await getSentiment(env), 200, 'public, max-age=300');
     if (pathname === '/api/metar') {
       const stations = url.searchParams.get('stations') || 'ZSSS,ZSPD';
       return proxy(request, 'https://aviationweather.gov/api/data/metar?ids=' + encodeURIComponent(stations) + '&format=json');

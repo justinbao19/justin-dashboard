@@ -3285,7 +3285,13 @@
 
         @media (max-width: 760px) {
             .weather-header {
+                display: flex;
+                flex-direction: column;
                 padding: 56px 20px 28px;
+            }
+
+            .weather-header-top {
+                order: 1;
             }
 
             .weather-header-badge {
@@ -3307,8 +3313,9 @@
             }
 
             .weather-hero-main {
+                order: 3;
                 gap: 10px;
-                margin-top: 22px;
+                margin-top: 18px;
             }
 
             .weather-header .temp-main {
@@ -3331,6 +3338,7 @@
             }
 
             .weather-header-meta {
+                order: 4;
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 gap: 10px;
@@ -3353,9 +3361,14 @@
             }
 
             .weather-header-note {
+                order: 2;
+                align-self: center;
                 font-size: 12px;
-                margin-top: 12px;
-                max-width: 100%;
+                margin-top: 14px;
+                max-width: min(100%, 340px);
+                line-height: 1.5;
+                text-align: center;
+                opacity: 0.76;
             }
 
             .weather-content {
@@ -5881,7 +5894,7 @@
                                 <div class="value" id="headerHumidity">--%</div>
                             </div>
                         </div>
-                        <div class="weather-header-note" id="weatherHeaderNote">根据当前体感和小时趋势整理</div>
+                        <div class="weather-header-note" id="weatherHeaderNote" hidden></div>
                     </div>
                 <div class="weather-content">
                     <div class="weather-card weather-hourly-card">
@@ -6915,8 +6928,10 @@
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(rt.apparent_temperature ?? rt.temperature ?? 0)}°`;
                 document.getElementById('headerHumidity').textContent = `${Math.round((rt.humidity || 0) * 100)}%`;
-                document.getElementById('weatherHeaderNote').textContent = d.hourly?.description
-                    || '根据当前体感和小时趋势整理';
+                const weatherHeaderNote = document.getElementById('weatherHeaderNote');
+                const hourlyDescription = d.hourly?.description?.trim() || '';
+                weatherHeaderNote.textContent = hourlyDescription;
+                weatherHeaderNote.hidden = !hourlyDescription;
 
                 // Hourly
                 if (d.hourly?.temperature) {

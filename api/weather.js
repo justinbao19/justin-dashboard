@@ -1,6 +1,3 @@
-import { getCache, waitUntil } from '@vercel/functions';
-import { getWeatherSnapshot } from '../lib/weather-service.mjs';
-
 const DEFAULT_LON = '121.405';
 const DEFAULT_LAT = '31.123';
 
@@ -12,6 +9,10 @@ export default async function handler(req, res) {
 
   const { lon = DEFAULT_LON, lat = DEFAULT_LAT, refresh = '' } = req.query;
   try {
+    const [{ getCache, waitUntil }, { getWeatherSnapshot }] = await Promise.all([
+      import('@vercel/functions'),
+      import('../lib/weather-service.mjs')
+    ]);
     const payload = await getWeatherSnapshot({
       lon,
       lat,

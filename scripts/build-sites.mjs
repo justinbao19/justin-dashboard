@@ -25,6 +25,9 @@ for (const name of await readdir(path.join(root, 'tracks'))) {
 
 const worker = `
 import { CACHE_CONTROL, getActiveTyphoons, getTyphoonDetail, TyphoonServiceError } from './typhoon-service.mjs';
+import { createMemoryWeatherCache, getWeatherSnapshot } from './weather-service.mjs';
+
+const weatherCache = createMemoryWeatherCache();
 
 const html = ${JSON.stringify(html)};
 const typhoonHtml = ${JSON.stringify(typhoonHtml)};
@@ -113,7 +116,7 @@ async function proxy(request, target, cache = 'public, max-age=300') {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, context) {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
@@ -137,11 +140,14 @@ export default {
       return json({ lon: String(lon), lat: String(lat), city, region, country: request.cf?.country || '中国', displayName: [city, region].filter(Boolean).join(' · '), source: request.cf ? 'ip' : 'default' }, 200, 'private, max-age=300');
     }
     if (pathname === '/api/weather') {
-      const key = env.CAIYUN_API_TOKEN || env.CAIYUN_KEY;
-      if (!key) return json({ error: 'Weather API is not configured' }, 503);
       const lon = url.searchParams.get('lon') || '121.405';
       const lat = url.searchParams.get('lat') || '31.123';
-      return proxy(request, 'https://api.caiyunapp.com/v2.6/' + key + '/' + lon + ',' + lat + '/weather?dailysteps=7&hourlysteps=24');
+      try {
+        const payload = await getWeatherSnapshot({ lon, lat, env, cache: weatherCache, refresh: url.searchParams.get('refresh') === '1', schedule: promise => context?.waitUntil?.(promise) });
+        return json(payload, 200, 'public, max-age=60, s-maxage=300, stale-while-revalidate=900');
+      } catch {
+        return json({ schemaVersion:'2', status:'error', error:{ code:'WEATHER_UNAVAILABLE', message:'天气数据暂时不可用' } }, 503);
+      }
     }
     if (pathname === '/api/typhoons') {
       try { return json(await getActiveTyphoons({ cwaApiKey: env.CWA_API_KEY || '' }), 200, CACHE_CONTROL); }
@@ -172,5 +178,6 @@ export default {
 
 await writeFile(path.join(dist, 'server', 'index.js'), worker);
 await writeFile(path.join(dist, 'server', 'typhoon-service.mjs'), await readFile(path.join(root, 'lib', 'typhoon-service.mjs')));
+await writeFile(path.join(dist, 'server', 'weather-service.mjs'), await readFile(path.join(root, 'lib', 'weather-service.mjs')));
 await writeFile(path.join(dist, '.openai', 'hosting.json'), await readFile(path.join(root, '.openai', 'hosting.json')));
 console.log('Sites bundle created in dist/');

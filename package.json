@@ -24,6 +24,7 @@
   "dependencies": {
     "@astryxdesign/core": "^0.1.4",
     "@phosphor-icons/web": "^2.1.2",
+    "@vercel/functions": "^3.7.5",
     "stock-sdk": "^2.2.2"
   }
 }

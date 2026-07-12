@@ -7,9 +7,9 @@
 ## 功能模块
 
 ### 🌤️ 天气
-- 实时天气（彩云天气 API）
-- 逐小时 / 逐日预报
-- 空气质量 / 生活指数
+- 统一天气快照（彩云天气 + 可选 QWeather 增强）
+- 最长 168 小时 / 30 日预报
+- 分钟降水、天气预警、空气质量趋势与扩展生活指数
 - 动态背景（晴/云/雨/夜）
 
 ### 📊 市场行情
@@ -37,7 +37,7 @@
 justin-dashboard/
 ├── index.html          # 主页面（所有前端代码）
 ├── api/
-│   ├── weather.js      # 天气 API 代理（彩云）
+│   ├── weather.js      # 统一天气聚合 API
 │   └── market.js       # 市场 API 代理（Finnhub + 新浪 + CoinGecko）
 ├── data/
 │   ├── market.json     # 市场分析数据（静态，含 analysis/advice）
@@ -50,9 +50,24 @@ justin-dashboard/
 
 ## 数据流
 
-### 实时数据（每次打开页面获取）
-- 天气 → `/api/weather` → 彩云天气 API
+### 实时数据（按缓存周期获取）
+- 天气 → `/api/weather` → 彩云天气 / QWeather 聚合与分资源缓存
 - 市场价格 → `/api/market` → Finnhub + 新浪 + CoinGecko
+
+### QWeather 配置
+
+QWeather 使用推荐的 Ed25519 JWT 认证。配置后会自动增加长期预报、预警、空气质量趋势、月相和扩展生活指数；未配置时继续使用彩云天气。
+
+```text
+QWEATHER_API_HOST
+QWEATHER_PROJECT_ID
+QWEATHER_CREDENTIAL_ID
+QWEATHER_PRIVATE_KEY
+WEATHER_QWEATHER_ENABLED=true
+WEATHER_PRIMARY_PROVIDER=caiyun
+```
+
+完成并行验证后，可将 `WEATHER_PRIMARY_PROVIDER` 改为 `qweather`。默认不自动调用彩云作为 QWeather 故障回退，以保护彩云的一次性额度。
 
 ### 静态数据（定时自动更新）
 - 市场分析/建议 → `data/market.json`

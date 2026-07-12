@@ -43,6 +43,12 @@
           <button class="toolbar-button" id="layerButton" type="button" aria-expanded="false">
             <i class="ph ph-stack"></i><span>图层</span>
           </button>
+          <button class="toolbar-button icon-only field-mode-button" id="windFieldButton" type="button" aria-label="切换近地面风场" aria-pressed="false" title="近地面风场">
+            <i class="ph ph-wind"></i>
+          </button>
+          <button class="toolbar-button icon-only field-mode-button" id="waveHeightButton" type="button" aria-label="切换浪高分布" aria-pressed="false" title="浪高分布">
+            <i class="ph ph-waves"></i>
+          </button>
           <button class="toolbar-button icon-only" id="focusCurrentButton" type="button" aria-label="定位当前台风">
             <i class="ph ph-hurricane"></i>
           </button>
@@ -67,10 +73,34 @@
           <div class="weather-legend" id="weatherLegend" hidden>
             <span>弱</span><i></i><span>强</span>
           </div>
-          <p>雷达由 RainViewer 提供，云图与降水估算由 NASA GIBS 提供。</p>
+          <p>雷达、风场与浪高为互斥主图层；云图和降水估算仍可按需叠加。</p>
         </div>
 
         <div class="source-strip" id="sourceStrip" aria-label="路径数据源"></div>
+        <div class="wind-circle-legend" id="windCircleLegend" hidden aria-live="polite"></div>
+        <div class="radar-intensity-legend" id="radarIntensityLegend" hidden aria-label="气象雷达反射率与降雨强度图例">
+          <div class="radar-legend-heading">
+            <span><i class="ph ph-radar"></i>气象雷达</span>
+            <small>反射率 dBZ</small>
+          </div>
+          <div class="radar-legend-scale" aria-hidden="true"></div>
+          <div class="radar-legend-ticks" aria-hidden="true">
+            <span>10</span><span>20</span><span>35</span><span>45</span><span>55</span><span>60+</span>
+          </div>
+          <div class="radar-legend-bands">
+            <span>微弱</span><span>小到中雨</span><span>强降雨</span><span>暴雨/强对流</span>
+          </div>
+          <p>颜色越暖，降雨或对流越强</p>
+        </div>
+        <div class="field-intensity-legend" id="fieldIntensityLegend" hidden aria-live="polite">
+          <div class="field-legend-heading">
+            <span><i id="fieldLegendIcon" class="ph ph-wind"></i><strong id="fieldLegendTitle">近地面风场</strong></span>
+            <small id="fieldLegendUnit">m/s</small>
+          </div>
+          <div class="field-legend-scale" id="fieldLegendScale" aria-hidden="true"></div>
+          <div class="field-legend-ticks" id="fieldLegendTicks" aria-hidden="true"></div>
+          <div class="field-legend-meta"><span id="fieldLegendTime">按需加载</span><span>模型场</span></div>
+        </div>
 
         <article class="node-card" id="nodeCard" hidden aria-live="polite">
           <div class="node-card-heading">
@@ -81,7 +111,7 @@
           <div class="node-context" id="nodeContext"></div>
         </article>
 
-        <div class="map-attribution">CARTO · OpenStreetMap · Esri · RainViewer · NASA GIBS</div>
+        <div class="map-attribution">CARTO · OpenStreetMap · Esri · RainViewer · NASA GIBS · Open-Meteo</div>
       </section>
 
       <aside class="insight-panel" id="insightPanel" aria-label="台风实时信息">
@@ -102,6 +132,10 @@
             <div><span><i class="ph ph-crosshair"></i>中心位置</span><strong id="positionValue">—</strong><small id="positionTime">等待数据</small></div>
             <div><span><i class="ph ph-map-pin"></i>参考位置</span><strong id="referenceValue">正在定位</strong><small id="referenceNote">按天气页所在地计算</small></div>
           </div>
+          <div class="wind-radius-summary" id="windRadiusSummary">
+            <div class="wind-radius-heading"><span><i class="ph ph-circles-three-plus"></i>当前风圈</span><small id="windRadiusStatus">等待官方数据</small></div>
+            <div class="wind-radius-values" id="windRadiusValues"></div>
+          </div>
         </section>
 
         <section class="trend-section">
@@ -113,7 +147,10 @@
         </section>
 
         <section class="agency-section">
-          <div class="section-heading"><span>多机构路径</span><small id="agencyCount">0 个来源</small></div>
+          <div class="section-heading">
+            <span>多机构路径</span>
+            <div class="agency-heading-actions"><small id="agencyCount">0 个来源</small><button id="clearAgencyFilter" type="button" hidden>显示全部</button></div>
+          </div>
           <div class="agency-list" id="agencyList"></div>
         </section>
 

@@ -66,7 +66,7 @@ test('normalizes the current GDACS advisory using Chinese typhoon thresholds', (
 test('normalizes observed and multi-agency Zhejiang forecast tracks', () => {
   const tracks = normalizeZhejiangTrack({ points: [
     { time: '2026-07-11 21:00:00', lng: '121.7', lat: '27.6', strong: '台风', power: '13', speed: '40', pressure: '950', movespeed: '29', movedirection: '北西' },
-    { time: '2026-07-11 22:00:00', lng: '121.5', lat: '27.8', strong: '台风', power: '13', speed: '40', pressure: '950', movespeed: '29', movedirection: '北西', forecast: [
+    { time: '2026-07-11 22:00:00', lng: '121.5', lat: '27.8', strong: '台风', power: '13', speed: '40', pressure: '950', movespeed: '29', movedirection: '北西', radius7: '400|300|250|200', radius10: '200|150|120|100', radius12: '100|80|70|60', forecast: [
       { tm: '中国', forecastpoints: [
         { time: '2026-07-11 22:00:00', lng: '121.5', lat: '27.8', strong: '台风', power: '13', speed: '40', pressure: '950' },
         { time: '2026-07-12 04:00:00', lng: '120.3', lat: '29.1', strong: '台风', power: '12', speed: '33', pressure: '975' }
@@ -81,8 +81,28 @@ test('normalizes observed and multi-agency Zhejiang forecast tracks', () => {
   assert.equal(tracks.observed[1].validAt, '2026-07-11T14:00:00.000Z');
   assert.equal(tracks.observed[1].intensity.windForceScale, 13);
   assert.equal(tracks.observed[1].movement.directionText, '西北');
+  assert.deepEqual(tracks.observed[1].windCircles[0].quadrants, { northeast: 400, southeast: 300, southwest: 200, northwest: 250 });
+  assert.equal(tracks.observed[1].windCircles[0].minRadiusKm, 200);
+  assert.equal(tracks.observed[1].windCircles[0].maxRadiusKm, 400);
+  assert.equal(tracks.observed[1].windCircles.length, 3);
   assert.deepEqual(tracks.forecasts.map(track => track.id), ['cma', 'jma']);
   assert.equal(tracks.forecasts[0].points[1].intensity.centralPressureHpa, 975);
+});
+
+test('treats upstream zero placeholders as missing forecast intensity', () => {
+  const tracks = normalizeZhejiangTrack({ points: [{
+    time: '2026-07-11 22:00:00', lng: '121.5', lat: '27.8', strong: '台风', power: '13', speed: '40', pressure: '950', forecast: [
+      { tm: '中国台湾', forecastpoints: [
+        { time: '2026-07-11 22:00:00', lng: '121.5', lat: '27.8', strong: '热带风暴', power: '9', speed: '23', pressure: '988' },
+        { time: '2026-07-12 10:00:00', lng: '120.0', lat: '30.0', strong: '热带扰动', power: '0', speed: '0', pressure: '0' }
+      ] }
+    ]
+  }] });
+  const point = tracks.forecasts[0].points[1];
+  assert.equal(point.classification, 'tropical_disturbance');
+  assert.equal(point.intensity.value, null);
+  assert.equal(point.intensity.windForceScale, null);
+  assert.equal(point.intensity.centralPressureHpa, null);
 });
 
 test('filters inactive and out-of-basin events', async () => {

@@ -17,11 +17,15 @@ import {
     basemap: 'standard',
     activeWeather: new Set(['radar']),
     activeSources: new Set(['observed']),
+    selectedAgencyId: null,
+    windCirclePoint: null,
     weatherOpacity: .58,
     markers: [],
     userLocationMarker: null,
     pointsByKey: new Map(),
     layerClock: null,
+    fieldData: null,
+    fieldLoading: null,
     styleGeneration: 0,
     boundLayerIds: new Set(),
     controlsInitialized: false
@@ -34,7 +38,18 @@ import {
     severe_tropical_storm: '强热带风暴', tropical_storm: '热带风暴',
     tropical_depression: '热带低压', tropical_disturbance: '热带扰动', unknown: '热带气旋'
   };
-  const layerIcons = { 'himawari-ir': 'ph-cloud', 'himawari-visible': 'ph-sun-horizon', precipitation: 'ph-drop-half-bottom' };
+  const layerIcons = { 'himawari-ir': 'ph-cloud', 'himawari-visible': 'ph-sun-horizon', precipitation: 'ph-drop-half-bottom', 'wind-field': 'ph-wind', 'wave-height': 'ph-waves' };
+  const exclusiveFieldLayers = new Set(['radar', 'wind-field', 'wave-height']);
+  const modelFieldLayers = new Set(['wind-field', 'wave-height']);
+  const modelFieldStyles = {
+    'wind-field': { payload: 'wind', title: '近地面风场', unit: 'm/s', icon: 'ph-wind', ticks: ['0', '5', '10', '20', '30', '40+'], colors: [[0, '#386b8f'], [5, '#64d2ff'], [10, '#30d158'], [20, '#ffd60a'], [30, '#ff9f0a'], [40, '#ff453a'], [50, '#bf5af2']] },
+    'wave-height': { payload: 'waves', title: '浪高分布', unit: 'm', icon: 'ph-waves', ticks: ['0', '1', '2', '4', '6', '9+'], colors: [[0, '#24577a'], [1, '#64d2ff'], [2, '#30d158'], [4, '#ffd60a'], [6, '#ff9f0a'], [9, '#ff453a'], [12, '#bf5af2']] }
+  };
+  const windCircleStyles = {
+    7: { color: '#ffd60a', label: '7级风圈', fillOpacity: .11 },
+    10: { color: '#ff9f0a', label: '10级风圈', fillOpacity: .15 },
+    12: { color: '#ff375f', label: '12级风圈', fillOpacity: .2 }
+  };
 
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
@@ -190,7 +205,7 @@ import {
 
   async function resolveWeatherLayerClock() {
     const targetAt = state.detail?.storm?.position?.validAt || state.detail?.storm?.updatedAt || new Date().toISOString();
-    const cacheKey = `pulse.typhoon.layers.${targetAt}.v2`;
+    const cacheKey = `pulse.typhoon.layers.${targetAt}.v3`;
     const cached = readCache(cacheKey, LAYER_CACHE_MS);
     if (cached) return cached;
 
@@ -249,6 +264,9 @@ import {
         result.layers.precipitation = { available: false, message: error.message || '降水估算暂不可用' };
       }
     }
+    Object.values(configs).filter(layer => layer.type === 'model-grid').forEach(layer => {
+      result.layers[layer.id] = { available: true, observedAt: null, message: '点击后加载最新模型场' };
+    });
     if (!result.message) result.message = '天气图层时间同步暂不可用';
     writeCache(cacheKey, result);
     return result;
@@ -264,6 +282,7 @@ import {
     if (!map || !map.getStyle() || !state.layerClock) return;
     const config = state.detail?.mapConfig?.weatherLayers || [];
     for (const layer of config) {
+      if (layer.type === 'model-grid') continue;
       const resolved = state.layerClock.layers?.[layer.id];
       if (!resolved?.available || generation !== state.styleGeneration || map.getSource(`weather-${layer.id}`)) continue;
       try {
@@ -287,6 +306,104 @@ import {
     }
   }
 
+  function fieldLayerIds(id) { return [`field-${id}-surface`, `field-${id}-direction`]; }
+
+  function fieldOpacity() { return Math.min(.86, Math.max(.24, state.weatherOpacity * 1.12)); }
+
+  function ensureFieldArrowImage() {
+    if (!state.map || state.map.hasImage('field-direction-arrow')) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 32;
+    canvas.height = 32;
+    const context = canvas.getContext('2d');
+    context.clearRect(0, 0, 32, 32);
+    context.strokeStyle = '#ffffff';
+    context.lineWidth = 3;
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    context.beginPath();
+    context.moveTo(16, 27);
+    context.lineTo(16, 6);
+    context.moveTo(8, 14);
+    context.lineTo(16, 6);
+    context.lineTo(24, 14);
+    context.stroke();
+    state.map.addImage('field-direction-arrow', context.getImageData(0, 0, 32, 32), { pixelRatio: 2, sdf: true });
+  }
+
+  function addModelFieldLayers() {
+    const map = state.map;
+    if (!map?.getStyle() || !state.fieldData?.fields) return;
+    ensureFieldArrowImage();
+    const before = map.getLayer('track-observed-glow') ? 'track-observed-glow' : undefined;
+    for (const [id, style] of Object.entries(modelFieldStyles)) {
+      const field = state.fieldData.fields[style.payload];
+      if (!field?.geojson?.features?.length) continue;
+      const maximum = style.colors.at(-1)[0];
+      const weightStops = style.colors.flatMap(([value]) => [value, Math.max(.04, value / maximum)]);
+      const colorStops = style.colors.slice(1).flatMap(([value, color]) => [value / maximum, color]);
+      const sourceId = `field-${id}`;
+      if (!map.getSource(sourceId)) map.addSource(sourceId, { type: 'geojson', data: field.geojson });
+      const visible = state.activeWeather.has(id) ? 'visible' : 'none';
+      const surfaceId = `field-${id}-surface`;
+      if (!map.getLayer(surfaceId)) map.addLayer({
+        id: surfaceId,
+        type: 'heatmap',
+        source: sourceId,
+        layout: { visibility: visible },
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['get', 'value'], ...weightStops],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 3, .9, 7, 1.15],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 3, 34, 5, 68, 7, 142, 10, 330],
+          'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(36,87,122,0)', .035, style.colors[0][1], ...colorStops],
+          'heatmap-opacity': fieldOpacity() * .9
+        }
+      }, before);
+      const directionId = `field-${id}-direction`;
+      if (!map.getLayer(directionId)) map.addLayer({
+        id: directionId,
+        type: 'symbol',
+        source: sourceId,
+        filter: ['!=', ['get', 'direction'], null],
+        layout: {
+          visibility: visible,
+          'icon-image': 'field-direction-arrow',
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 3, .72, 6, 1, 9, 1.2],
+          'icon-rotate': ['+', ['get', 'direction'], 180],
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        },
+        paint: { 'icon-color': 'rgba(255,255,255,.92)', 'icon-halo-color': 'rgba(5,18,27,.72)', 'icon-halo-width': 1.2, 'icon-opacity': .8 }
+      }, before);
+    }
+  }
+
+  function setModelFieldLayerVisibility(id, visible) {
+    fieldLayerIds(id).forEach(layerId => {
+      if (state.map?.getLayer(layerId)) state.map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    });
+  }
+
+  async function ensureFieldData() {
+    if (state.fieldData) return state.fieldData;
+    if (state.fieldLoading) return state.fieldLoading;
+    const position = state.detail?.storm?.position;
+    const cacheKey = `pulse.typhoon.fields.${Number(position?.lat).toFixed(1)}.${Number(position?.lon).toFixed(1)}.v2`;
+    const cached = readCache(cacheKey, 30 * 60 * 1000);
+    if (cached) {
+      state.fieldData = cached;
+      return cached;
+    }
+    state.fieldLoading = fetchJson(`/api/typhoon-fields?lat=${encodeURIComponent(position.lat)}&lon=${encodeURIComponent(position.lon)}&grid=2`, 20000)
+      .then(payload => {
+        state.fieldData = payload;
+        writeCache(cacheKey, payload);
+        return payload;
+      })
+      .finally(() => { state.fieldLoading = null; });
+    return state.fieldLoading;
+  }
+
   function lineFeature(points, properties = {}) {
     return { type: 'Feature', properties, geometry: { type: 'LineString', coordinates: points.map(point => [point.position.lon, point.position.lat]) } };
   }
@@ -302,11 +419,84 @@ import {
     };
   }
 
+  function destinationCoordinate(position, bearingDegrees, distanceKmValue) {
+    const radiusKm = 6371;
+    const bearing = bearingDegrees * Math.PI / 180;
+    const latitude = Number(position.lat) * Math.PI / 180;
+    const longitude = Number(position.lon) * Math.PI / 180;
+    const angularDistance = Number(distanceKmValue) / radiusKm;
+    const targetLatitude = Math.asin(Math.sin(latitude) * Math.cos(angularDistance) + Math.cos(latitude) * Math.sin(angularDistance) * Math.cos(bearing));
+    const targetLongitude = longitude + Math.atan2(Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latitude), Math.cos(angularDistance) - Math.sin(latitude) * Math.sin(targetLatitude));
+    return [((targetLongitude * 180 / Math.PI + 540) % 360) - 180, targetLatitude * 180 / Math.PI];
+  }
+
+  function windRadiusForBearing(circle, bearing) {
+    const quadrants = circle.quadrants || {};
+    if (bearing < 90) return quadrants.northeast;
+    if (bearing < 180) return quadrants.southeast;
+    if (bearing < 270) return quadrants.southwest;
+    return quadrants.northwest;
+  }
+
+  function windCircleCollection(point) {
+    const position = point?.position;
+    if (![Number(position?.lat), Number(position?.lon)].every(Number.isFinite)) return { type: 'FeatureCollection', features: [] };
+    const features = (point.windCircles || []).map(circle => {
+      const coordinates = [];
+      for (let bearing = 0; bearing < 360; bearing += 3) coordinates.push(destinationCoordinate(position, bearing, windRadiusForBearing(circle, bearing)));
+      if (coordinates.length) coordinates.push(coordinates[0]);
+      return {
+        type: 'Feature',
+        properties: { level: Number(circle.level), minRadiusKm: circle.minRadiusKm, maxRadiusKm: circle.maxRadiusKm },
+        geometry: { type: 'Polygon', coordinates: [coordinates] }
+      };
+    });
+    return { type: 'FeatureCollection', features };
+  }
+
+  function windCircleRange(circle) {
+    if (!circle) return '未提供';
+    return circle.minRadiusKm === circle.maxRadiusKm ? `${circle.maxRadiusKm} km` : `${circle.minRadiusKm}–${circle.maxRadiusKm} km`;
+  }
+
+  function renderWindCircleLegend(point, { historical = false } = {}) {
+    const circles = point?.windCircles || [];
+    const legend = el('windCircleLegend');
+    if (!circles.length) { legend.hidden = true; legend.innerHTML = ''; return; }
+    legend.innerHTML = `<div class="wind-circle-legend-heading"><span>${historical ? '历史风圈' : '当前风圈'}</span><small>${escapeHtml(formatDate(point.validAt || point.position?.validAt, true))}</small></div><div class="wind-circle-legend-items">${circles.map(circle => {
+      const style = windCircleStyles[circle.level] || windCircleStyles[7];
+      return `<span style="--wind-circle-color:${style.color}"><i></i>${style.label}<small>${escapeHtml(windCircleRange(circle))}</small></span>`;
+    }).join('')}</div>`;
+    legend.hidden = false;
+  }
+
+  function setWindCirclePoint(point, { historical = false } = {}) {
+    state.windCirclePoint = point || null;
+    const collection = windCircleCollection(point);
+    el('typhoonMap').dataset.windCircleCount = String(collection.features.length);
+    const source = state.map?.getSource('wind-circles');
+    if (source) source.setData(collection);
+    renderWindCircleLegend(point, { historical });
+  }
+
+  function addWindCircleLayers() {
+    const map = state.map;
+    if (!map || map.getSource('wind-circles')) return;
+    map.addSource('wind-circles', { type: 'geojson', data: windCircleCollection(state.windCirclePoint) });
+    [7, 10, 12].forEach(level => {
+      const style = windCircleStyles[level];
+      map.addLayer({ id: `wind-circle-${level}-fill`, type: 'fill', source: 'wind-circles', filter: ['==', ['get', 'level'], level], paint: { 'fill-color': style.color, 'fill-opacity': style.fillOpacity } });
+      map.addLayer({ id: `wind-circle-${level}-line`, type: 'line', source: 'wind-circles', filter: ['==', ['get', 'level'], level], paint: { 'line-color': style.color, 'line-width': 1.35, 'line-opacity': .88 } });
+    });
+  }
+
   function addTrackLayers() {
     const map = state.map;
     const tracks = state.detail?.tracks;
     if (!map || !map.getStyle() || !tracks) return;
     state.pointsByKey.clear();
+    addWindCircleLayers();
+    setWindCirclePoint(state.windCirclePoint);
     const observed = tracks.observed || [];
     if (observed.length > 1) {
       map.addSource('track-observed', { type: 'geojson', data: lineFeature(observed, { sourceId: 'observed' }) });
@@ -356,7 +546,7 @@ import {
       button.style.setProperty('--source-color', color);
       button.innerHTML = `<span class="dot"></span><small>${escapeHtml(markerLabel(point))}</small>`;
     }
-    button.classList.toggle('is-hidden', !state.activeSources.has(sourceId));
+    button.classList.toggle('is-hidden', !current && !state.activeSources.has(sourceId));
     button.addEventListener('click', event => { event.stopPropagation(); showNode(point, current); });
     const marker = new maplibregl.Marker({ element: button, anchor: 'center' }).setLngLat([point.position.lon, point.position.lat]).addTo(state.map);
     state.markers.push(marker);
@@ -411,16 +601,30 @@ import {
   }
 
   function mapPadding() {
-    if (window.innerWidth <= 640) {
-      const sheet = Math.min(260, Math.max(196, window.innerHeight * .25));
-      return { top: 110, right: 38, bottom: sheet + 84, left: 38 };
+    const mapRect = el('typhoonMap')?.getBoundingClientRect();
+    if (!mapRect?.width || !mapRect?.height) return { top: 92, right: 70, bottom: 76, left: 70 };
+    const topbarRect = document.querySelector('.topbar')?.getBoundingClientRect();
+    const panelRect = el('insightPanel')?.getBoundingClientRect();
+    const stripRect = el('sourceStrip')?.getBoundingClientRect();
+    const padding = {
+      top: Math.max(24, Math.round((topbarRect?.bottom || mapRect.top + 64) - mapRect.top + 12)),
+      right: 38,
+      bottom: 38,
+      left: 38
+    };
+    const panelIsBottomSheet = panelRect?.width > mapRect.width * .62 && panelRect.top > mapRect.top + mapRect.height * .4;
+    if (panelIsBottomSheet) {
+      const visibleBottom = Math.min(
+        panelRect.top,
+        stripRect?.height ? stripRect.top : panelRect.top
+      ) - 12;
+      padding.bottom = Math.max(38, Math.round(mapRect.bottom - visibleBottom));
+    } else if (panelRect?.width && panelRect.left > mapRect.left + mapRect.width * .45) {
+      padding.right = Math.max(70, Math.round(mapRect.right - panelRect.left + 14));
+      padding.bottom = 76;
+      padding.left = 70;
     }
-    if (window.innerWidth <= 900 && matchMedia('(orientation: portrait)').matches) {
-      const sheet = Math.min(390, Math.max(280, window.innerHeight * .34));
-      return { top: 100, right: 50, bottom: sheet + 82, left: 50 };
-    }
-    const panel = window.innerWidth <= 1180 ? 370 : 410;
-    return { top: 92, right: panel, bottom: 76, left: 70 };
+    return padding;
   }
 
   function fitTracks() {
@@ -439,6 +643,7 @@ import {
     renderMarkers();
     bindPointInteractions();
     await addWeatherLayers(generation);
+    addModelFieldLayers();
   }
 
   async function resolveAndLoadWeatherLayers() {
@@ -446,6 +651,9 @@ import {
       state.layerClock = await resolveWeatherLayerClock();
     } catch (error) {
       state.layerClock = { message: '天气图层时间同步暂不可用', layers: {} };
+      (state.detail?.mapConfig?.weatherLayers || []).filter(layer => layer.type === 'model-grid').forEach(layer => {
+        state.layerClock.layers[layer.id] = { available: true, observedAt: null, message: '点击后加载最新模型场' };
+      });
       console.warn('Weather layer clock unavailable:', error);
     }
     renderLayerControls();
@@ -482,20 +690,113 @@ import {
     visible ? state.activeSources.add(id) : state.activeSources.delete(id);
     const layerIds = id === 'observed' ? ['track-observed-glow','track-observed-line','points-observed'] : [`track-${id}`,`points-${id}`];
     layerIds.forEach(layerId => { if (state.map?.getLayer(layerId)) state.map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none'); });
-    document.querySelectorAll(`.track-key-marker[data-source="${id}"], .current-marker[data-source="${id}"]`).forEach(marker => marker.classList.toggle('is-hidden', !visible));
-    document.querySelector(`[data-source-toggle="${id}"]`)?.classList.toggle('active', visible);
+    document.querySelectorAll(`.track-key-marker[data-source="${id}"]`).forEach(marker => marker.classList.toggle('is-hidden', !visible));
+    document.querySelectorAll(`[data-source-toggle="${id}"]`).forEach(button => {
+      button.classList.toggle('active', visible);
+      button.setAttribute('aria-pressed', String(visible));
+    });
+  }
+
+  function syncAgencySelectionUi() {
+    const tracks = state.detail?.tracks?.forecasts || [];
+    const selectedTrack = tracks.find(track => track.id === state.selectedAgencyId) || null;
+    document.querySelectorAll('[data-agency-select]').forEach(button => {
+      const selected = button.dataset.agencySelect === state.selectedAgencyId;
+      button.classList.toggle('selected', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+    el('clearAgencyFilter').hidden = !selectedTrack;
+    el('agencyCount').textContent = selectedTrack ? `${selectedTrack.label} · 单线查看` : `${tracks.length} 个来源`;
+  }
+
+  function fitAgencyTrack(trackId) {
+    if (!state.map) return;
+    if (!trackId) { fitTracks(); return; }
+    const track = state.detail?.tracks?.forecasts?.find(item => item.id === trackId);
+    const current = state.detail?.tracks?.observed?.at(-1);
+    if (!track?.points?.length) return;
+    const bounds = new maplibregl.LngLatBounds();
+    if (current) bounds.extend([current.position.lon, current.position.lat]);
+    track.points.forEach(point => bounds.extend([point.position.lon, point.position.lat]));
+    if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), maxZoom: 7.5, duration: 520 });
+  }
+
+  function selectAgencyTrack(trackId = null) {
+    const tracks = state.detail?.tracks?.forecasts || [];
+    const nextId = trackId && state.selectedAgencyId !== trackId ? trackId : null;
+    state.selectedAgencyId = nextId;
+    setSourceVisible('observed', !nextId);
+    tracks.forEach(track => setSourceVisible(track.id, !nextId || track.id === nextId));
+    syncAgencySelectionUi();
+    fitAgencyTrack(nextId);
   }
 
   function updateLegend() {
-    el('weatherLegend').hidden = !['radar', 'precipitation'].some(id => state.activeWeather.has(id));
+    el('weatherLegend').hidden = !state.activeWeather.has('precipitation');
+    const radar = state.layerClock?.layers?.radar;
+    el('radarIntensityLegend').hidden = !state.activeWeather.has('radar') || !radar?.available;
+    const activeField = [...modelFieldLayers].find(id => state.activeWeather.has(id));
+    const legend = el('fieldIntensityLegend');
+    legend.hidden = !activeField;
+    if (!activeField) return;
+    const style = modelFieldStyles[activeField];
+    const observedAt = state.layerClock?.layers?.[activeField]?.observedAt;
+    el('fieldLegendIcon').className = `ph ${style.icon}`;
+    el('fieldLegendTitle').textContent = style.title;
+    el('fieldLegendUnit').textContent = style.unit;
+    el('fieldLegendScale').className = `field-legend-scale ${style.payload}`;
+    el('fieldLegendTicks').innerHTML = style.ticks.map(tick => `<span>${tick}</span>`).join('');
+    el('fieldLegendTime').textContent = observedAt ? `采样 ${formatDate(observedAt)}` : '正在加载模型场';
   }
 
-  function setWeatherVisible(id, visible) {
+  function syncWeatherControlState() {
+    document.querySelectorAll('[data-weather-layer]').forEach(input => { input.checked = state.activeWeather.has(input.dataset.weatherLayer); });
+    for (const [id, buttonId] of [['wind-field', 'windFieldButton'], ['wave-height', 'waveHeightButton']]) {
+      const button = el(buttonId);
+      const active = state.activeWeather.has(id);
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+      button.setAttribute('aria-busy', String(Boolean(state.fieldLoading && active)));
+    }
+    updateLegend();
+  }
+
+  async function setWeatherVisible(id, visible) {
     const resolved = state.layerClock?.layers?.[id];
     if (visible && !resolved?.available) return;
+    if (visible && exclusiveFieldLayers.has(id)) {
+      exclusiveFieldLayers.forEach(otherId => {
+        if (otherId === id) return;
+        state.activeWeather.delete(otherId);
+        if (modelFieldLayers.has(otherId)) setModelFieldLayerVisibility(otherId, false);
+        else if (state.map?.getLayer(`weather-${otherId}`)) state.map.setLayoutProperty(`weather-${otherId}`, 'visibility', 'none');
+      });
+    }
     visible ? state.activeWeather.add(id) : state.activeWeather.delete(id);
+    if (modelFieldLayers.has(id)) {
+      setModelFieldLayerVisibility(id, visible);
+      syncWeatherControlState();
+      if (visible) {
+        try {
+          await ensureFieldData();
+          const style = modelFieldStyles[id];
+          const field = state.fieldData?.fields?.[style.payload];
+          if (!field?.geojson?.features?.length) throw new Error(`${style.title}当前区域暂无可用数据`);
+          state.layerClock.layers[id] = { available: true, observedAt: field.observedAt, message: 'Open-Meteo 模型场' };
+          addModelFieldLayers();
+          setModelFieldLayerVisibility(id, state.activeWeather.has(id));
+        } catch (error) {
+          state.activeWeather.delete(id);
+          state.layerClock.layers[id] = { available: false, message: error.message || '模型场暂不可用' };
+          console.warn(`${modelFieldStyles[id].title} unavailable:`, error);
+        }
+        renderLayerControls();
+        syncWeatherControlState();
+      }
+      return;
+    }
     if (state.map?.getLayer(`weather-${id}`)) state.map.setLayoutProperty(`weather-${id}`, 'visibility', visible ? 'visible' : 'none');
-    updateLegend();
+    syncWeatherControlState();
   }
 
   function renderLayerControls() {
@@ -509,7 +810,7 @@ import {
       const unavailable = state.layerClock && !resolved?.available;
       const status = !state.layerClock
         ? '正在获取采样时间'
-        : (resolved?.available ? `采样 ${formatDate(resolved.observedAt)}` : (resolved?.message || '该时次不可用'));
+        : (resolved?.available ? (resolved.observedAt ? `采样 ${formatDate(resolved.observedAt)}` : (resolved.message || '按需加载')) : (resolved?.message || '该时次不可用'));
       if (unavailable) state.activeWeather.delete(layer.id);
       return `<label class="layer-option${unavailable ? ' is-unavailable' : ''}">
         ${layerIcon(layer)}
@@ -517,12 +818,12 @@ import {
         <input type="checkbox" data-weather-layer="${escapeHtml(layer.id)}" ${state.activeWeather.has(layer.id) ? 'checked' : ''} ${unavailable ? 'disabled' : ''}>
       </label>`;
     }).join('');
-    el('weatherLayerOptions').querySelectorAll('input').forEach(input => input.addEventListener('change', () => setWeatherVisible(input.dataset.weatherLayer, input.checked)));
+    el('weatherLayerOptions').querySelectorAll('input').forEach(input => input.addEventListener('change', () => { setWeatherVisible(input.dataset.weatherLayer, input.checked); }));
     const clock = el('layerClockStatus');
     const skew = Math.abs(Number(state.layerClock?.skewMinutes || 0));
     clock.classList.toggle('warning', Boolean(state.layerClock && (!state.layerClock.synchronizedAt || skew > 30)));
     clock.querySelector('span').textContent = state.layerClock?.message || '正在对齐观测时次';
-    updateLegend();
+    syncWeatherControlState();
   }
 
   function renderSourceControls() {
@@ -530,10 +831,14 @@ import {
     const sources = [{ id: 'observed', label: '实况', color: '#f2fbff' }, ...tracks.forecasts];
     state.activeSources = new Set(sources.map(source => source.id));
     el('sourceStrip').innerHTML = sources.map(source => `
-      <button class="source-toggle active" type="button" data-source-toggle="${source.id}" style="--source-color:${source.color}">
+      <button class="source-toggle active" type="button" data-source-toggle="${source.id}" style="--source-color:${source.color}" aria-pressed="true">
         <i></i><span>${escapeHtml(source.label)}</span>
       </button>`).join('');
-    el('sourceStrip').querySelectorAll('button').forEach(button => button.addEventListener('click', () => setSourceVisible(button.dataset.sourceToggle, !state.activeSources.has(button.dataset.sourceToggle))));
+    el('sourceStrip').querySelectorAll('button').forEach(button => button.addEventListener('click', () => {
+      state.selectedAgencyId = null;
+      setSourceVisible(button.dataset.sourceToggle, !state.activeSources.has(button.dataset.sourceToggle));
+      syncAgencySelectionUi();
+    }));
   }
 
   function renderAgencyList() {
@@ -542,13 +847,23 @@ import {
     el('agencyList').innerHTML = tracks.map(track => {
       const last = track.points.at(-1);
       const intensity = last?.intensity || {};
-      const strength = classLabels[last?.classification] || '强度待确认';
-      return `<div class="agency-row" style="--source-color:${track.color}"><i class="agency-line"></i><div><strong>${escapeHtml(track.label)}</strong><span>${escapeHtml(track.agency)}</span></div><small>${escapeHtml(strength)}${hasNumber(intensity.windForceScale) ? ` · ${intensity.windForceScale}级` : ''}</small></div>`;
+      const strength = last?.classification && last.classification !== 'unknown' ? classLabels[last.classification] : '强度待确认';
+      const forecastPoints = track.points.filter(point => point.kind === 'forecast');
+      const wind = hasNumber(intensity.windForceScale) && Number(intensity.windForceScale) > 0 ? `${intensity.windForceScale}级` : '风力未提供';
+      return `<button class="agency-row" type="button" data-agency-select="${escapeHtml(track.id)}" aria-pressed="false" style="--source-color:${track.color}">
+        <i class="agency-line" aria-hidden="true"></i>
+        <span class="agency-copy"><span class="agency-name"><strong>${escapeHtml(track.label)}</strong><small>${escapeHtml(track.agency)}</small></span><span class="agency-meta">${forecastPoints.length} 个预报点 · 至 ${escapeHtml(formatDate(last?.validAt, true))}</span></span>
+        <span class="agency-intensity"><strong>${escapeHtml(strength)}</strong><small class="${wind === '风力未提供' ? 'is-missing' : ''}">${escapeHtml(wind)}</small></span>
+        <i class="ph ph-check-circle agency-check" aria-hidden="true"></i>
+      </button>`;
     }).join('');
+    el('agencyList').querySelectorAll('[data-agency-select]').forEach(button => button.addEventListener('click', () => selectAgencyTrack(button.dataset.agencySelect)));
+    syncAgencySelectionUi();
   }
 
   function showNode(point, isCurrent = false) {
     const intensity = point.intensity || {};
+    const isObserved = point.kind === 'observed';
     const reference = isCurrent ? referenceFor(point.position) : null;
     const source = point.sourceLabel || (isCurrent ? '实时位置' : '预报节点');
     el('nodeSource').textContent = source;
@@ -561,9 +876,26 @@ import {
     const rows = [];
     if (reference) rows.push(`<div class="node-context-row"><i class="ph ph-map-pin"></i><span>${escapeHtml(reference.label)}</span></div>`);
     if (isCurrent && state.detail.trend?.summary) rows.push(`<div class="node-context-row"><i class="ph ph-navigation-arrow"></i><span>${escapeHtml(state.detail.trend.summary)}</span></div>`);
-    if (!isCurrent) rows.push(`<div class="node-context-row"><i class="ph ph-info"></i><span>该节点为 ${escapeHtml(source)} 预报位置，路径会随新一轮预报更新。</span></div>`);
+    if (isObserved) rows.push('<div class="node-context-row"><i class="ph ph-clock-counter-clockwise"></i><span>该节点为历史实况位置，风圈对应这一观测时次。</span></div>');
+    else if (!isCurrent) rows.push(`<div class="node-context-row"><i class="ph ph-info"></i><span>该节点为 ${escapeHtml(source)} 预报位置，路径会随新一轮预报更新。</span></div>`);
+    if (point.windCircles?.length) rows.push(`<div class="node-context-row"><i class="ph ph-circles-three-plus"></i><span>${point.windCircles.map(circle => `${circle.level}级 ${windCircleRange(circle)}`).join(' · ')}</span></div>`);
     el('nodeContext').innerHTML = rows.join('');
     el('nodeCard').hidden = false;
+    setWindCirclePoint(point, { historical: !isCurrent });
+  }
+
+  function renderWindRadiusSummary(point) {
+    const circles = point?.windCircles || [];
+    const summary = el('windRadiusSummary');
+    const values = el('windRadiusValues');
+    summary.classList.toggle('is-unavailable', !circles.length);
+    el('windRadiusStatus').textContent = circles.length ? `发布 ${formatDate(point.validAt || point.position?.validAt, true)}` : '当前未发布';
+    values.innerHTML = circles.length
+      ? circles.map(circle => {
+        const style = windCircleStyles[circle.level] || windCircleStyles[7];
+        return `<span style="--wind-circle-color:${style.color}"><i></i><strong>${circle.level}级</strong><small>${escapeHtml(windCircleRange(circle))}</small></span>`;
+      }).join('')
+      : '<p>气象部门当前未提供有效风圈半径，不使用历史数值替代。</p>';
   }
 
   function renderOverview() {
@@ -588,6 +920,7 @@ import {
     el('positionTime').textContent = formatDate(storm.position?.validAt);
     el('referenceValue').textContent = reference?.label || '暂无所在地信息';
     el('referenceNote').textContent = reference?.note || '返回天气页重新定位后可计算';
+    renderWindRadiusSummary(storm);
     const trend = detail.trend || {};
     el('trendSource').textContent = trend.sourceLabel ? `参考 ${trend.sourceLabel}` : '综合最新路径';
     el('trendTitle').textContent = trend.strength || '趋势待确认';
@@ -604,12 +937,14 @@ import {
 
   function focusCurrent() {
     const position = state.detail?.storm?.position;
-    if (state.map && position) state.map.flyTo({ center: [position.lon, position.lat], zoom: 6.3, duration: 650 });
+    const current = state.detail?.tracks?.observed?.at(-1) || state.detail?.storm;
+    setWindCirclePoint(current);
+    if (state.map && position) state.map.flyTo({ center: [position.lon, position.lat], zoom: 6.3, padding: mapPadding(), retainPadding: false, duration: 650 });
   }
 
   function focusUserLocation() {
     const locationData = storedWeatherLocation({ allowDefault: false });
-    if (state.map && locationData) state.map.flyTo({ center: [locationData.lon, locationData.lat], zoom: 7.2, duration: 650 });
+    if (state.map && locationData) state.map.flyTo({ center: [locationData.lon, locationData.lat], zoom: 7.2, padding: mapPadding(), retainPadding: false, duration: 650 });
   }
 
   function setupInteractions() {
@@ -620,13 +955,20 @@ import {
       el('layerButton').setAttribute('aria-expanded', String(opening));
     });
     el('closeLayerButton').addEventListener('click', () => { el('layerPanel').hidden = true; el('layerButton').setAttribute('aria-expanded', 'false'); });
-    el('closeNodeButton').addEventListener('click', () => { el('nodeCard').hidden = true; });
+    el('closeNodeButton').addEventListener('click', () => { el('nodeCard').hidden = true; setWindCirclePoint(state.detail?.tracks?.observed?.at(-1) || state.detail?.storm); });
+    el('windFieldButton').addEventListener('click', () => { setWeatherVisible('wind-field', !state.activeWeather.has('wind-field')); });
+    el('waveHeightButton').addEventListener('click', () => { setWeatherVisible('wave-height', !state.activeWeather.has('wave-height')); });
     el('focusCurrentButton').addEventListener('click', focusCurrent);
     el('userLocationButton').addEventListener('click', focusUserLocation);
+    el('clearAgencyFilter').addEventListener('click', () => selectAgencyTrack(null));
     el('weatherOpacity').addEventListener('input', event => {
       state.weatherOpacity = Number(event.target.value) / 100;
       (state.detail?.mapConfig?.weatherLayers || []).forEach(layer => {
         if (state.map?.getLayer(`weather-${layer.id}`)) state.map.setPaintProperty(`weather-${layer.id}`, 'raster-opacity', layerOpacity(layer));
+      });
+      modelFieldLayers.forEach(id => {
+        const layerId = `field-${id}-surface`;
+        if (state.map?.getLayer(layerId)) state.map.setPaintProperty(layerId, 'heatmap-opacity', fieldOpacity() * .9);
       });
     });
     el('shareButton').addEventListener('click', async () => {
@@ -648,7 +990,7 @@ import {
       return;
     }
     const zhejiangId = new URLSearchParams(location.search).get('zj') || '';
-    const cacheKey = `pulse.typhoon.detail.${state.stormId}.${zhejiangId || 'fallback'}.v4`;
+    const cacheKey = `pulse.typhoon.detail.${state.stormId}.${zhejiangId || 'fallback'}.v6`;
     try {
       let detail = readCache(cacheKey);
       if (!detail || detail.schemaVersion !== '3') {
@@ -656,6 +998,7 @@ import {
         writeCache(cacheKey, detail);
       }
       state.detail = detail;
+      state.windCirclePoint = detail.tracks?.observed?.at(-1) || detail.storm;
       renderOverview();
       renderLayerControls();
       renderSourceControls();

@@ -394,7 +394,7 @@ import {
       state.fieldData = cached;
       return cached;
     }
-    state.fieldLoading = fetchJson(`/api/typhoon-fields?lat=${encodeURIComponent(position.lat)}&lon=${encodeURIComponent(position.lon)}&grid=2`, 20000)
+    state.fieldLoading = fetchJson(`/api/typhoon?fields=1&lat=${encodeURIComponent(position.lat)}&lon=${encodeURIComponent(position.lon)}&grid=2`, 20000)
       .then(payload => {
         state.fieldData = payload;
         writeCache(cacheKey, payload);

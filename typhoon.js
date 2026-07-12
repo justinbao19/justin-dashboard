@@ -4,6 +4,7 @@ import {
   chooseLatestAvailableTime,
   chooseSynchronizedFrame
 } from '/typhoon-layer-clock.mjs';
+import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
 
 (() => {
   const CACHE_MS = 5 * 60 * 1000;
@@ -26,6 +27,7 @@ import {
     layerClock: null,
     fieldData: null,
     fieldLoading: null,
+    fieldRenderer: null,
     styleGeneration: 0,
     boundLayerIds: new Set(),
     controlsInitialized: false
@@ -42,8 +44,8 @@ import {
   const exclusiveFieldLayers = new Set(['radar', 'wind-field', 'wave-height']);
   const modelFieldLayers = new Set(['wind-field', 'wave-height']);
   const modelFieldStyles = {
-    'wind-field': { payload: 'wind', title: '近地面风场', unit: 'm/s', icon: 'ph-wind', ticks: ['0', '5', '10', '20', '30', '40+'], colors: [[0, '#386b8f'], [5, '#64d2ff'], [10, '#30d158'], [20, '#ffd60a'], [30, '#ff9f0a'], [40, '#ff453a'], [50, '#bf5af2']] },
-    'wave-height': { payload: 'waves', title: '浪高分布', unit: 'm', icon: 'ph-waves', ticks: ['0', '1', '2', '4', '6', '9+'], colors: [[0, '#24577a'], [1, '#64d2ff'], [2, '#30d158'], [4, '#ffd60a'], [6, '#ff9f0a'], [9, '#ff453a'], [12, '#bf5af2']] }
+    'wind-field': { payload: 'wind', title: '近地面风场', unit: 'm/s', icon: 'ph-wind', motion: '流线表示风向', ticks: ['0', '5', '10', '20', '30', '40+'], surfaceAlpha: 190, colors: [[0, '#2c7bb6'], [5, '#00a6ca'], [10, '#00ccbc'], [15, '#90eb9d'], [20, '#ffff8c'], [25, '#f9d057'], [30, '#f29e2e'], [35, '#e76818'], [40, '#d7191c'], [50, '#7a0177']] },
+    'wave-height': { payload: 'waves', title: '有效浪高', unit: 'm', icon: 'ph-waves', motion: '波纹表示浪向', ticks: ['0', '1', '2', '4', '8', '12+'], surfaceAlpha: 202, colors: [[0, '#2c7bb6'], [1, '#00a6ca'], [2, '#00ccbc'], [3, '#90eb9d'], [4, '#ffff8c'], [6, '#f9d057'], [8, '#f29e2e'], [10, '#e76818'], [12, '#d7191c'], [15, '#7a0177']] }
   };
   const windCircleStyles = {
     7: { color: '#ffd60a', label: '7级风圈', fillOpacity: .11 },
@@ -306,79 +308,38 @@ import {
     }
   }
 
-  function fieldLayerIds(id) { return [`field-${id}-surface`, `field-${id}-direction`]; }
+  function fieldLayerIds(id) { return [`field-${id}-surface`]; }
 
   function fieldOpacity() { return Math.min(.86, Math.max(.24, state.weatherOpacity * 1.12)); }
 
-  function ensureFieldArrowImage() {
-    if (!state.map || state.map.hasImage('field-direction-arrow')) return;
-    const canvas = document.createElement('canvas');
-    canvas.width = 32;
-    canvas.height = 32;
-    const context = canvas.getContext('2d');
-    context.clearRect(0, 0, 32, 32);
-    context.strokeStyle = '#ffffff';
-    context.lineWidth = 3;
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    context.beginPath();
-    context.moveTo(16, 27);
-    context.lineTo(16, 6);
-    context.moveTo(8, 14);
-    context.lineTo(16, 6);
-    context.lineTo(24, 14);
-    context.stroke();
-    state.map.addImage('field-direction-arrow', context.getImageData(0, 0, 32, 32), { pixelRatio: 2, sdf: true });
+  function destroyModelFieldRenderer(remove = true) {
+    if (!state.fieldRenderer) return;
+    state.fieldRenderer.destroy({ remove });
+    state.fieldRenderer = null;
   }
 
   function addModelFieldLayers() {
     const map = state.map;
     if (!map?.getStyle() || !state.fieldData?.fields) return;
-    ensureFieldArrowImage();
-    const before = map.getLayer('track-observed-glow') ? 'track-observed-glow' : undefined;
-    for (const [id, style] of Object.entries(modelFieldStyles)) {
-      const field = state.fieldData.fields[style.payload];
-      if (!field?.geojson?.features?.length) continue;
-      const maximum = style.colors.at(-1)[0];
-      const weightStops = style.colors.flatMap(([value]) => [value, Math.max(.04, value / maximum)]);
-      const colorStops = style.colors.slice(1).flatMap(([value, color]) => [value / maximum, color]);
-      const sourceId = `field-${id}`;
-      if (!map.getSource(sourceId)) map.addSource(sourceId, { type: 'geojson', data: field.geojson });
-      const visible = state.activeWeather.has(id) ? 'visible' : 'none';
-      const surfaceId = `field-${id}-surface`;
-      if (!map.getLayer(surfaceId)) map.addLayer({
-        id: surfaceId,
-        type: 'heatmap',
-        source: sourceId,
-        layout: { visibility: visible },
-        paint: {
-          'heatmap-weight': ['interpolate', ['linear'], ['get', 'value'], ...weightStops],
-          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 3, .9, 7, 1.15],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 3, 34, 5, 68, 7, 142, 10, 330],
-          'heatmap-color': ['interpolate', ['linear'], ['heatmap-density'], 0, 'rgba(36,87,122,0)', .035, style.colors[0][1], ...colorStops],
-          'heatmap-opacity': fieldOpacity() * .9
-        }
-      }, before);
-      const directionId = `field-${id}-direction`;
-      if (!map.getLayer(directionId)) map.addLayer({
-        id: directionId,
-        type: 'symbol',
-        source: sourceId,
-        filter: ['!=', ['get', 'direction'], null],
-        layout: {
-          visibility: visible,
-          'icon-image': 'field-direction-arrow',
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 3, .72, 6, 1, 9, 1.2],
-          'icon-rotate': ['+', ['get', 'direction'], 180],
-          'icon-allow-overlap': true,
-          'icon-ignore-placement': true
-        },
-        paint: { 'icon-color': 'rgba(255,255,255,.92)', 'icon-halo-color': 'rgba(5,18,27,.72)', 'icon-halo-width': 1.2, 'icon-opacity': .8 }
-      }, before);
+    const id = [...modelFieldLayers].find(layerId => state.activeWeather.has(layerId));
+    if (!id) { destroyModelFieldRenderer(); return; }
+    if (state.fieldRenderer?.id === id && fieldLayerIds(id).every(layerId => map.getLayer(layerId))) {
+      state.fieldRenderer.setVisible(true);
+      return;
     }
+    destroyModelFieldRenderer();
+    const style = modelFieldStyles[id];
+    const field = state.fieldData.fields[style.payload];
+    if (!field?.geojson?.features?.length) return;
+    const before = map.getLayer('track-observed-glow') ? 'track-observed-glow' : undefined;
+    state.fieldRenderer = createFieldRenderer({ map, id, field, style, opacity: fieldOpacity(), beforeLayer: before });
   }
 
   function setModelFieldLayerVisibility(id, visible) {
+    if (state.fieldRenderer?.id === id) {
+      state.fieldRenderer.setVisible(visible);
+      return;
+    }
     fieldLayerIds(id).forEach(layerId => {
       if (state.map?.getLayer(layerId)) state.map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
     });
@@ -682,6 +643,7 @@ import {
     state.basemap = id;
     document.querySelectorAll('[data-basemap]').forEach(button => button.classList.toggle('active', button.dataset.basemap === id));
     removeMarkers();
+    destroyModelFieldRenderer();
     state.map.once('styledata', () => setTimeout(() => hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error)), 0));
     state.map.setStyle(mapStyle());
   }
@@ -747,6 +709,7 @@ import {
     el('fieldLegendScale').className = `field-legend-scale ${style.payload}`;
     el('fieldLegendTicks').innerHTML = style.ticks.map(tick => `<span>${tick}</span>`).join('');
     el('fieldLegendTime').textContent = observedAt ? `采样 ${formatDate(observedAt)}` : '正在加载模型场';
+    el('fieldLegendMotion').textContent = style.motion;
   }
 
   function syncWeatherControlState() {
@@ -967,8 +930,7 @@ import {
         if (state.map?.getLayer(`weather-${layer.id}`)) state.map.setPaintProperty(`weather-${layer.id}`, 'raster-opacity', layerOpacity(layer));
       });
       modelFieldLayers.forEach(id => {
-        const layerId = `field-${id}-surface`;
-        if (state.map?.getLayer(layerId)) state.map.setPaintProperty(layerId, 'heatmap-opacity', fieldOpacity() * .9);
+        if (state.fieldRenderer?.id === id) state.fieldRenderer.setOpacity(fieldOpacity());
       });
     });
     el('shareButton').addEventListener('click', async () => {

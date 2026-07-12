@@ -274,8 +274,8 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .field-legend-heading strong { font-size: 10px; font-weight: 680; letter-spacing: -.08px; }
 .field-legend-heading small { color: var(--faint); font-size: 8px; }
 .field-legend-scale { height: 7px; border-radius: 99px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), 0 1px 4px rgba(0, 0, 0, .16); }
-.field-legend-scale.wind { background: linear-gradient(90deg, #386b8f, #64d2ff, #30d158, #ffd60a, #ff9f0a, #ff453a, #bf5af2); }
-.field-legend-scale.waves { background: linear-gradient(90deg, #24577a, #64d2ff, #30d158, #ffd60a, #ff9f0a, #ff453a, #bf5af2); }
+.field-legend-scale.wind { background: linear-gradient(90deg, #2c7bb6, #00a6ca, #00ccbc, #90eb9d, #ffff8c, #f9d057, #f29e2e, #e76818, #d7191c, #7a0177); }
+.field-legend-scale.waves { background: linear-gradient(90deg, #2c7bb6, #00a6ca, #00ccbc, #90eb9d, #ffff8c, #f9d057, #f29e2e, #e76818, #d7191c, #7a0177); }
 .field-legend-ticks { display: flex; justify-content: space-between; margin-top: 3px; color: var(--faint); font-size: 7px; font-variant-numeric: tabular-nums; }
 .field-legend-meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 6px; color: var(--faint); font-size: 7px; }
 
@@ -409,6 +409,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .maplibregl-ctrl-group { overflow: hidden; border: 1px solid rgba(255,255,255,.2); border-radius: 13px !important; background: rgba(15, 34, 47, .78) !important; box-shadow: 0 10px 28px rgba(0,0,0,.22) !important; backdrop-filter: blur(16px); }
 .maplibregl-ctrl button { width: 40px !important; height: 40px !important; filter: invert(1); }
 .maplibregl-ctrl-attrib { display: none; }
+.model-field-particle-canvas { position: absolute; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: screen; }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .topbar, .map-toolbar, .layer-panel, .source-strip, .wind-circle-legend, .radar-intensity-legend, .field-intensity-legend, .node-card, .insight-panel { background: var(--glass-solid); }

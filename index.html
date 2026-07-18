@@ -1598,6 +1598,29 @@
         .f1-session-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
         .f1-session.race .f1-session-name { color: var(--f1-accent); }
         .f1-session.race { border-left: 2.5px solid color-mix(in oklab, var(--f1-accent) 78%, transparent); }
+        .f1-session.is-clickable { cursor: pointer; min-height: 72px; }
+        .f1-session.is-clickable:hover { border-color: var(--f1-accent-border); transform: translateY(-1px); }
+        .f1-session.is-clickable:focus-visible { outline: 2px solid var(--f1-accent); outline-offset: 2px; }
+        .f1-session-action { display: flex; align-items: center; gap: 8px; color: var(--f1-accent); font-size: 12px; font-weight: 700; }
+        .f1-session-state { color: var(--text-tertiary); font-size: 11px; font-weight: 600; }
+        .f1-session-results[hidden] { display: none; }
+        .f1-session-results { margin-top: 24px; }
+        .f1-session-results-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .f1-results-back { min-height: 44px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-tertiary); color: var(--text-secondary); padding: 0 14px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .f1-session-results-kicker { color: var(--f1-accent); font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+        .f1-session-results-head h3 { margin: 3px 0 0; color: var(--text-primary); font-size: 20px; }
+        .f1-session-results-status { color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; }
+        .f1-session-results-list { overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--market-card-bg); box-shadow: var(--shadow); }
+        .f1-result-row { display: grid; grid-template-columns: 34px 34px minmax(0,1fr) auto; align-items: center; gap: 10px; min-height: 58px; padding: 7px 14px; border-bottom: 1px solid var(--border); }
+        .f1-result-row:last-child { border-bottom: 0; }
+        .f1-result-position { color: var(--text-primary); font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .f1-result-driver-photo { width: 34px; height: 42px; object-fit: contain; object-position: bottom; align-self: end; }
+        .f1-result-driver { min-width: 0; }
+        .f1-result-driver-name { color: var(--text-primary); font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .f1-result-team { margin-top: 2px; color: var(--text-tertiary); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .f1-result-time { text-align: right; color: var(--text-secondary); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; }
+        .f1-result-time strong { display: block; color: var(--text-primary); font-size: 13px; }
+        .f1-results-empty { padding: 28px 18px; color: var(--text-secondary); text-align: center; font-size: 13px; }
 
         .f1-loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
 
@@ -6654,6 +6677,18 @@
                         <h3>Race Weekend</h3>
                         <div class="f1-sessions" id="f1Sessions"></div>
                     </div>
+
+                    <div class="f1-session-results" id="f1SessionResults" hidden>
+                        <div class="f1-session-results-head">
+                            <button class="f1-results-back" type="button" onclick="hideF1SessionResults()"><i class="fas fa-arrow-left"></i> 周末日程</button>
+                            <div>
+                                <div class="f1-session-results-kicker">SESSION RESULTS</div>
+                                <h3 id="f1SessionResultsTitle">--</h3>
+                            </div>
+                        </div>
+                        <div class="f1-session-results-status" id="f1SessionResultsStatus"></div>
+                        <div class="f1-session-results-list" id="f1SessionResultsList"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -8403,6 +8438,8 @@
                 }
 
                 // 日程
+                hideF1SessionResults();
+                const now = Date.now();
                 const sessionsHtml = data.sessions.map(s => {
                     const d = new Date(s.date_start);
                     const endTime = new Date(s.date_end);
@@ -8411,7 +8448,12 @@
                     const isSprint = s.type === 'Race' && s.name === 'Sprint';
                     const sessionClass = isRace ? 'race' : (isSprint ? 'sprint' : '');
                     const icon = isRace ? '🏁' : (isSprint ? '⚡' : '');
-                    return `<div class="f1-session ${sessionClass}">
+                    const hasStarted = d.getTime() <= now;
+                    const stateLabel = now < d.getTime() ? '未开始' : (now <= endTime.getTime() ? '进行中' : '已结束');
+                    const action = hasStarted
+                        ? `<div class="f1-session-action"><span>${stateLabel === '进行中' ? '实时排名' : '查看成绩'}</span><i class="fas fa-chevron-right"></i></div>`
+                        : `<div class="f1-session-state">${stateLabel}</div>`;
+                    return `<div class="f1-session ${sessionClass} ${hasStarted ? 'is-clickable' : ''}" ${hasStarted ? `role="button" tabindex="0" onclick="showF1SessionResults(${s.session_key})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showF1SessionResults(${s.session_key})}"` : ''}>
                         <div class="f1-session-date">
                             <div class="f1-session-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                             <div class="f1-session-date-weekday">${WEEKDAYS[d.getDay()]}</div>
@@ -8420,6 +8462,7 @@
                             <div class="f1-session-name">${icon} ${s.name}</div>
                             <div class="f1-session-time">${timeStr}</div>
                         </div>
+                        ${action}
                     </div>`;
                 }).join('');
                 document.getElementById('f1Sessions').innerHTML = sessionsHtml;
@@ -8432,7 +8475,74 @@
             }
         }
 
+        function formatF1LapTime(value) {
+            const seconds = Array.isArray(value) ? value[value.length - 1] : value;
+            if (!Number.isFinite(Number(seconds))) return '—';
+            const total = Number(seconds);
+            const minutes = Math.floor(total / 60);
+            const remainder = (total % 60).toFixed(3).padStart(6, '0');
+            return minutes ? `${minutes}:${remainder}` : `${remainder}s`;
+        }
+
+        function formatF1Gap(value, result) {
+            if (result.dsq) return 'DSQ';
+            if (result.dns) return 'DNS';
+            if (result.dnf) return 'DNF';
+            const gap = Array.isArray(value) ? value[value.length - 1] : value;
+            if (result.position === 1 || Number(gap) === 0) return 'LEADER';
+            return Number.isFinite(Number(gap)) ? `+${Number(gap).toFixed(3)}s` : '—';
+        }
+
+        async function showF1SessionResults(sessionKey) {
+            const weekend = document.querySelector('.f1-weekend');
+            const panel = document.getElementById('f1SessionResults');
+            const status = document.getElementById('f1SessionResultsStatus');
+            const list = document.getElementById('f1SessionResultsList');
+            weekend.style.display = 'none';
+            panel.hidden = false;
+            status.textContent = '正在读取 OpenF1 成绩…';
+            list.innerHTML = '<div class="f1-results-empty">加载排名中…</div>';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+                const response = await fetch(`/api/f1?year=2026&session=${sessionKey}`);
+                if (!response.ok) throw new Error('成绩暂时不可用');
+                const data = await response.json();
+                document.getElementById('f1SessionResultsTitle').textContent = data.name || 'Session Results';
+                status.textContent = data.status === 'complete' ? `${data.results.length} 位车手 · 官方时序数据` : '比赛尚未产生完整成绩，以下为当前排名';
+                if (!data.results.length) {
+                    list.innerHTML = '<div class="f1-results-empty">本节比赛尚未产生排名，稍后再来看看。</div>';
+                    return;
+                }
+                list.innerHTML = data.results.map(result => {
+                    const teamColor = /^[0-9A-Fa-f]{6}$/.test(result.team_colour || '') ? `#${result.team_colour}` : 'var(--f1-accent)';
+                    const photo = result.headshot_url
+                        ? `<img class="f1-result-driver-photo" src="${escapeHtml(result.headshot_url)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+                        : '<div></div>';
+                    return `<div class="f1-result-row" style="box-shadow:inset 3px 0 0 ${teamColor}">
+                        <div class="f1-result-position">${String(result.position).padStart(2, '0')}</div>
+                        ${photo}
+                        <div class="f1-result-driver">
+                            <div class="f1-result-driver-name">${escapeHtml(result.driver_name)}</div>
+                            <div class="f1-result-team">${escapeHtml(result.team_name)} · ${result.laps ?? 0} LAPS</div>
+                        </div>
+                        <div class="f1-result-time"><strong>${formatF1LapTime(result.duration)}</strong>${formatF1Gap(result.gap_to_leader, result)}</div>
+                    </div>`;
+                }).join('');
+            } catch (error) {
+                status.textContent = '暂时无法读取成绩';
+                list.innerHTML = `<div class="f1-results-empty">${escapeHtml(error.message || 'OpenF1 数据暂时不可用')}</div>`;
+            }
+        }
+
+        function hideF1SessionResults() {
+            const weekend = document.querySelector('.f1-weekend');
+            const panel = document.getElementById('f1SessionResults');
+            if (weekend) weekend.style.display = '';
+            if (panel) panel.hidden = true;
+        }
+
         function hideF1Detail() {
+            hideF1SessionResults();
             document.getElementById('f1-list-view').style.display = 'block';
             document.getElementById('f1-detail-view').style.display = 'none';
         }

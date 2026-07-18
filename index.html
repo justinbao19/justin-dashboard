@@ -370,35 +370,6 @@
         }
         .weather-header .condition { font-size: 24px; line-height: 1.22; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
         .weather-header .temp-range { font-size: 20px; opacity: 0.9; }
-        .weather-header-meta {
-            display: flex;
-            justify-content: center;
-            align-items: stretch;
-            gap: 12px;
-            margin-top: 22px;
-        }
-        .weather-header-stat {
-            min-width: 118px;
-            padding: 12px 14px;
-            border-radius: 18px;
-            background: rgba(0,0,0,0.18);
-            border: 1px solid rgba(255,255,255,0.12);
-            backdrop-filter: blur(18px);
-            text-align: left;
-        }
-        .weather-header-stat .label {
-            font-size: 12px;
-            opacity: 0.68;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .weather-header-stat .value {
-            font-size: 22px;
-            font-weight: 600;
-            line-height: 1.1;
-        }
         .weather-header-note {
             font-size: 13px;
             opacity: 0.78;
@@ -421,6 +392,39 @@
             color: white;
         }
         .weather-card .card-title { color: rgba(255,255,255,0.7); }
+        .typhoon-entry-card { position: relative; overflow: hidden; padding: 0; background: rgba(18,43,64,0.48); }
+        .typhoon-entry-link {
+            min-height: 102px; display: grid; grid-template-columns: auto minmax(0,1fr) auto;
+            align-items: center; gap: 14px; padding: 14px 18px; color: inherit; text-decoration: none;
+            transition: background 180ms ease, transform 180ms ease;
+        }
+        .typhoon-entry-link:hover { background: rgba(255,255,255,0.06); }
+        .typhoon-entry-link:active { transform: scale(0.995); }
+        .typhoon-entry-link:focus-visible, .typhoon-mobile-trigger:focus-visible { outline: 2px solid #5ac8fa; outline-offset: 3px; }
+        .typhoon-entry-symbol { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.14); font-size: 28px; }
+        .typhoon-entry-copy { min-width: 0; }
+        .typhoon-entry-kicker { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: rgba(255,255,255,0.72); font-size: 12px; line-height: 1.3; }
+        .typhoon-alert-badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 999px; color: #fff; font-weight: 600; }
+        .typhoon-alert-badge[data-alert="green"] { background: rgba(52,199,89,0.72); }
+        .typhoon-alert-badge[data-alert="blue"] { background: rgba(10,132,255,0.78); }
+        .typhoon-alert-badge[data-alert="yellow"] { background: rgba(255,204,0,0.88); color: #3a3100; }
+        .typhoon-alert-badge[data-alert="orange"] { background: rgba(255,149,0,0.78); }
+        .typhoon-alert-badge[data-alert="red"] { background: rgba(255,59,48,0.8); }
+        .typhoon-alert-badge[data-alert="unknown"] { background: rgba(255,255,255,0.16); }
+        .typhoon-status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px; border-radius: 999px; color: #dff7ff; background: rgba(90,200,250,0.18); font-size: 11px; font-weight: 650; line-height: 1.2; letter-spacing: 0.01em; }
+        .typhoon-status-badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #5ac8fa; box-shadow: 0 0 0 2px rgba(90,200,250,0.12); }
+        .typhoon-entry-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: clamp(20px,2vw,27px); font-weight: 650; line-height: 1.14; letter-spacing: -0.35px; }
+        .typhoon-entry-meta { display: flex; flex-wrap: wrap; gap: 5px 14px; margin-top: 6px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.35; }
+        .typhoon-entry-action { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.12); font-size: 18px; }
+        .typhoon-header-trigger, .typhoon-mobile-trigger { border: 1px solid rgba(255,255,255,0.16); color: #fff; background: rgba(0,0,0,0.2); backdrop-filter: blur(18px) saturate(160%); cursor: pointer; }
+        .typhoon-header-trigger { display: none; width: 100%; min-height: 52px; align-items: center; gap: 11px; margin-top: 16px; padding: 9px 12px; border-radius: 16px; text-align: left; cursor: default; }
+        .typhoon-header-trigger i { font-size: 23px; }
+        .typhoon-header-trigger-copy { min-width: 0; flex: 1; }
+        .typhoon-header-trigger-copy strong, .typhoon-header-trigger-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .typhoon-header-trigger-copy strong { font-size: 13px; }
+        .typhoon-header-trigger-copy span { margin-top: 2px; font-size: 11px; opacity: 0.7; }
+        .typhoon-mobile-trigger { position: fixed; z-index: 22; top: calc(18px + env(safe-area-inset-top)); left: 16px; width: 44px; height: 44px; display: none; place-items: center; border-radius: 50%; font-size: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.16); cursor: default; }
+        .typhoon-mobile-count { position: absolute; top: -3px; right: -3px; min-width: 17px; height: 17px; padding: 0 4px; display: grid; place-items: center; border-radius: 999px; background: #ff453a; color: #fff; border: 2px solid rgba(35,58,76,0.9); font-size: 9px; font-weight: 700; }
         .weather-stack {
             display: grid;
             gap: 16px;
@@ -495,6 +499,133 @@
         .life-index-item .name { font-size: 12px; opacity: 0.7; margin-bottom: 6px; }
         .life-index-item .level { font-size: 14px; font-weight: 600; }
 
+        .weather-card-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .weather-card-heading .card-title { margin-bottom: 0; }
+        .weather-range-tabs {
+            display: inline-flex;
+            gap: 3px;
+            padding: 3px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.08);
+        }
+        .weather-range-tabs button,
+        .weather-inline-action,
+        .weather-disclosure-button {
+            min-height: 36px;
+            border: 0;
+            color: rgba(255,255,255,0.72);
+            background: transparent;
+            cursor: pointer;
+            font: inherit;
+        }
+        .weather-range-tabs button {
+            padding: 0 11px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .weather-range-tabs button.active {
+            color: white;
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .weather-range-tabs button:disabled { opacity: 0.34; cursor: default; }
+        .weather-inline-action {
+            padding: 0 4px;
+            color: rgba(255,255,255,0.84);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .weather-alert-card {
+            position: relative;
+            grid-column: 1 / -1;
+            overflow: hidden;
+            margin-bottom: 20px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255,204,0,0.24);
+            border-radius: 18px;
+            color: white;
+            background: color-mix(in oklab, rgba(44,55,70,0.8) 78%, rgba(255,204,0,0.42));
+            backdrop-filter: blur(22px) saturate(150%);
+        }
+        .weather-alert-card[data-severity="red"] { border-color: rgba(255,69,58,0.34); background: color-mix(in oklab, rgba(44,55,70,0.82) 74%, rgba(255,69,58,0.5)); }
+        .weather-alert-card[data-severity="orange"] { border-color: rgba(255,149,0,0.34); }
+        .weather-alert-summary {
+            display: grid;
+            grid-template-columns: auto minmax(0,1fr) auto;
+            align-items: center;
+            gap: 13px;
+        }
+        .weather-alert-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,0.14); }
+        .weather-alert-copy { min-width: 0; }
+        .weather-alert-copy strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+        .weather-alert-copy span { display: block; margin-top: 4px; font-size: 12px; opacity: 0.74; }
+        .weather-alert-toggle { width: 40px; height: 40px; border: 0; border-radius: 50%; color: white; background: rgba(255,255,255,0.1); cursor: pointer; }
+        .weather-alert-details { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 180ms ease-out; }
+        .weather-alert-details > div { min-height: 0; overflow: hidden; }
+        .weather-alert-card.expanded .weather-alert-details { grid-template-rows: 1fr; }
+        .weather-alert-body { padding: 14px 0 2px 51px; font-size: 13px; line-height: 1.6; opacity: 0.84; }
+        .weather-alert-source { margin-top: 8px; font-size: 11px; opacity: 0.62; }
+
+        .weather-precip-card { grid-column: 1 / -1; }
+        .weather-precip-card[hidden] { display: none !important; }
+        .precip-summary { margin-bottom: 14px; font-size: 15px; line-height: 1.5; }
+        .precip-chart { width: 100%; height: 72px; display: grid; grid-template-columns: repeat(var(--precip-columns, 24), minmax(0,1fr)); align-items: end; gap: clamp(2px, 0.45vw, 5px); padding-top: 8px; }
+        .precip-bar { min-height: 3px; border-radius: 5px 5px 2px 2px; background: rgba(90,200,250,0.78); transition: transform 180ms ease, opacity 180ms ease; transform-origin: bottom; }
+        .precip-bar.dry { background: rgba(255,255,255,0.14); }
+        .precip-axis { display: flex; justify-content: space-between; margin-top: 8px; color: rgba(255,255,255,0.54); font-size: 11px; }
+
+        .hourly-item { position: relative; }
+        .hourly-date-marker { display: block; min-height: 14px; margin-bottom: 4px; color: rgba(255,255,255,0.62); font-size: 10px; font-weight: 600; }
+        .hourly-rain { min-height: 16px; margin-top: 7px; color: #a6e4ff; font-size: 10px; font-weight: 650; }
+
+        .daily-item.is-extended { display: none; }
+        .weather-daily-card.expanded .daily-item.is-extended { display: flex; }
+        .daily-condition { min-width: 70px; margin-left: 8px; color: rgba(255,255,255,0.62); font-size: 12px; text-align: right; }
+
+        .aqi-trend-block { margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .aqi-trend-header { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: rgba(255,255,255,0.66); }
+        .aqi-trend-header strong { color: rgba(255,255,255,0.88); font-weight: 600; }
+        .aqi-trend { height: 54px; display: grid; grid-template-columns: repeat(24, minmax(2px,1fr)); align-items: end; gap: 2px; margin-top: 12px; }
+        .aqi-trend-bar { min-height: 4px; border-radius: 4px 4px 1px 1px; background: rgba(50,215,75,0.76); }
+        .aqi-trend-bar[data-level="moderate"] { background: rgba(255,214,10,0.82); }
+        .aqi-trend-bar[data-level="poor"] { background: rgba(255,159,10,0.82); }
+        .aqi-health-advice { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.08); font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.78); }
+
+        .weather-disclosure-button {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 12px;
+            font-size: 12px;
+        }
+        .weather-disclosure-button i { transition: transform 180ms ease-out; }
+        .weather-disclosure-button[aria-expanded="true"] i { transform: rotate(180deg); }
+        .life-index-item.is-secondary { display: none; }
+        .weather-life-card.expanded .life-index-item.is-secondary { display: flex; }
+
+        .weather-data-footer {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 2px 4px 8px;
+            color: rgba(255,255,255,0.64);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        .weather-data-footer a { color: inherit; text-underline-offset: 3px; }
+
         /* Sun / Rain */
         .weather-sun-card {
             position: relative;
@@ -546,6 +677,38 @@
         .sun-rain-summary {
             margin-top: 14px;
         }
+        .moon-phase-layout { display: grid; grid-template-columns: 76px minmax(0,1fr); align-items: center; gap: 18px; }
+        .moon-phase-copy { min-width: 0; }
+        .moon-phase-art {
+            position: relative;
+            width: 72px;
+            height: 72px;
+            overflow: hidden;
+            border-radius: 50%;
+            background: #f5f0d9;
+            box-shadow: inset -8px -8px 16px rgba(122,116,99,0.18), 0 8px 24px rgba(0,0,0,0.18);
+        }
+        .moon-phase-art::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            opacity: 0.26;
+            background:
+                radial-gradient(circle at 30% 28%, rgba(116,110,92,0.5) 0 5%, transparent 6%),
+                radial-gradient(circle at 62% 66%, rgba(116,110,92,0.46) 0 8%, transparent 9%),
+                radial-gradient(circle at 66% 26%, rgba(116,110,92,0.34) 0 4%, transparent 5%);
+        }
+        .moon-phase-art span { position: absolute; inset: -2px; z-index: 2; border-radius: 50%; background: #172434; }
+        .moon-phase-art.phase-new { background: #253345; }
+        .moon-phase-art.phase-new span { inset: 0; opacity: 0.82; }
+        .moon-phase-art.phase-full span { display: none; }
+        .moon-phase-art.phase-first-quarter span { inset: 0 50% 0 0; border-radius: 72px 0 0 72px; }
+        .moon-phase-art.phase-last-quarter span { inset: 0 0 0 50%; border-radius: 0 72px 72px 0; }
+        .moon-phase-art.phase-waxing-crescent span { transform: translateX(-18px); }
+        .moon-phase-art.phase-waning-crescent span { transform: translateX(18px); }
+        .moon-phase-art.phase-waxing-gibbous span { transform: translateX(-48px); }
+        .moon-phase-art.phase-waning-gibbous span { transform: translateX(48px); }
         .sun-phase-meta {
             position: relative;
             z-index: 1;
@@ -574,41 +737,82 @@
             position: relative;
             z-index: 1;
             margin-bottom: 16px;
-            padding: 8px 0 4px;
+            padding: 2px 0 4px;
         }
-        .sun-progress-track {
+        .sun-orbit {
             position: relative;
-            height: 10px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(116, 185, 255, 0.32), rgba(255, 220, 120, 0.7), rgba(255, 170, 72, 0.42));
+            height: 106px;
+            border-radius: 18px;
             overflow: hidden;
+            background: linear-gradient(180deg, rgba(70,132,182,0.16), rgba(255,193,92,0.04) 72%, rgba(255,255,255,0.02));
+        }
+        .sun-orbit-sky {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--sun-x, 50%) var(--sun-y, 18%), rgba(255,210,112,0.2), transparent 30%);
+        }
+        .sun-orbit-arc {
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            bottom: 14px;
+            height: 76px;
+            border: 1px dashed rgba(255,255,255,0.28);
+            border-bottom: 0;
+            border-radius: 50% 50% 0 0;
+        }
+        .sun-orbit-horizon {
+            position: absolute;
+            left: 4%;
+            right: 4%;
+            bottom: 13px;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(116,185,255,0.38), rgba(255,219,135,0.7), rgba(255,160,90,0.42));
         }
         .sun-progress-fill {
             position: absolute;
-            inset: 0 auto 0 0;
-            width: 0%;
-            border-radius: inherit;
-            background: linear-gradient(90deg, rgba(255,255,255,0.25), rgba(255,255,255,0.62));
+            left: 5%;
+            bottom: 13px;
+            width: var(--sun-progress-width, 0%);
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,218,117,0.72));
         }
         .sun-progress-dot {
             position: absolute;
-            top: 50%;
-            left: 0%;
-            width: 18px;
-            height: 18px;
+            top: var(--sun-y, 84px);
+            left: var(--sun-x, 5%);
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
             border-radius: 50%;
-            background: #ffd45f;
-            border: 3px solid rgba(255,255,255,0.92);
-            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+            color: #fff0ac;
+            background: radial-gradient(circle, #ffd96b 0 42%, rgba(255,200,74,0.3) 44% 62%, transparent 64%);
+            filter: drop-shadow(0 0 10px rgba(255,207,91,0.54));
             transform: translate(-50%, -50%);
+            transition: left 420ms cubic-bezier(.22,1,.36,1), top 420ms cubic-bezier(.22,1,.36,1);
         }
+        .sun-progress-dot i { font-size: 14px; }
+        .sun-progress-dot.is-night { opacity: 0.56; filter: grayscale(0.25) drop-shadow(0 0 6px rgba(255,207,91,0.24)); }
         .sun-progress-labels {
             display: flex;
             justify-content: space-between;
-            margin-top: 10px;
+            margin-top: 8px;
             font-size: 12px;
             opacity: 0.7;
         }
+        .sun-progress-labels span { display: inline-flex; align-items: center; gap: 5px; }
+        .sun-event-glyph {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            color: #ffbd72;
+            line-height: 1;
+        }
+        .sun-event-glyph .fa-sun { font-size: 0.9em; }
+        .sun-event-glyph .fa-arrow-up,
+        .sun-event-glyph .fa-arrow-down { font-size: 0.62em; }
+        .sun-daylight-length { margin-top: 8px; font-size: 12px; text-align: center; opacity: 0.68; }
         .sun-rain-value {
             display: flex;
             align-items: baseline;
@@ -1598,6 +1802,29 @@
         .f1-session-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
         .f1-session.race .f1-session-name { color: var(--f1-accent); }
         .f1-session.race { border-left: 2.5px solid color-mix(in oklab, var(--f1-accent) 78%, transparent); }
+        .f1-session.is-clickable { cursor: pointer; min-height: 72px; }
+        .f1-session.is-clickable:hover { border-color: var(--f1-accent-border); transform: translateY(-1px); }
+        .f1-session.is-clickable:focus-visible { outline: 2px solid var(--f1-accent); outline-offset: 2px; }
+        .f1-session-action { display: flex; align-items: center; gap: 8px; color: var(--f1-accent); font-size: 12px; font-weight: 700; }
+        .f1-session-state { color: var(--text-tertiary); font-size: 11px; font-weight: 600; }
+        .f1-session-results[hidden] { display: none; }
+        .f1-session-results { margin-top: 24px; }
+        .f1-session-results-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+        .f1-results-back { min-height: 44px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-tertiary); color: var(--text-secondary); padding: 0 14px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .f1-session-results-kicker { color: var(--f1-accent); font-size: 9px; font-weight: 800; letter-spacing: 1.2px; }
+        .f1-session-results-head h3 { margin: 3px 0 0; color: var(--text-primary); font-size: 20px; }
+        .f1-session-results-status { color: var(--text-secondary); font-size: 12px; margin-bottom: 10px; }
+        .f1-session-results-list { overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--market-card-bg); box-shadow: var(--shadow); }
+        .f1-result-row { display: grid; grid-template-columns: 34px 34px minmax(0,1fr) auto; align-items: center; gap: 10px; min-height: 58px; padding: 7px 14px; border-bottom: 1px solid var(--border); }
+        .f1-result-row:last-child { border-bottom: 0; }
+        .f1-result-position { color: var(--text-primary); font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .f1-result-driver-photo { width: 34px; height: 42px; object-fit: contain; object-position: bottom; align-self: end; }
+        .f1-result-driver { min-width: 0; }
+        .f1-result-driver-name { color: var(--text-primary); font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .f1-result-team { margin-top: 2px; color: var(--text-tertiary); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .f1-result-time { text-align: right; color: var(--text-secondary); font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; }
+        .f1-result-time strong { display: block; color: var(--text-primary); font-size: 13px; }
+        .f1-results-empty { padding: 28px 18px; color: var(--text-secondary); text-align: center; font-size: 13px; }
 
         .f1-loading { text-align: center; padding: 40px; color: var(--text-tertiary); }
 
@@ -3284,6 +3511,13 @@
         }
 
         @media (max-width: 760px) {
+            .typhoon-mobile-trigger:not([hidden]) { display: grid; }
+            .typhoon-entry-link { min-height: 92px; grid-template-columns: 44px minmax(0,1fr) 34px; gap: 11px; padding: 12px 14px; }
+            .typhoon-entry-symbol { width: 44px; height: 44px; font-size: 24px; }
+            .typhoon-entry-action { width: 34px; height: 34px; font-size: 15px; }
+            .typhoon-entry-name { font-size: 19px; }
+            .typhoon-entry-meta { gap: 4px 10px; margin-top: 6px; font-size: 12px; }
+            .typhoon-entry-meta span:nth-child(n+3) { display: none; }
             .weather-header {
                 display: flex;
                 flex-direction: column;
@@ -3337,29 +3571,6 @@
                 font-size: 17px;
             }
 
-            .weather-header-meta {
-                order: 4;
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 10px;
-                margin-top: 18px;
-            }
-
-            .weather-header-stat {
-                min-width: 0;
-                padding: 11px 12px;
-                border-radius: 16px;
-            }
-
-            .weather-header-stat .label {
-                font-size: 11px;
-                margin-bottom: 5px;
-            }
-
-            .weather-header-stat .value {
-                font-size: 18px;
-            }
-
             .weather-header-note {
                 order: 2;
                 align-self: center;
@@ -3380,10 +3591,35 @@
                 border-radius: 18px;
             }
 
+            .weather-card.typhoon-entry-card {
+                padding: 0;
+            }
+
             .weather-card .card-title {
                 margin-bottom: 14px;
                 font-size: 13px;
             }
+
+            .weather-card-heading {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+
+            .weather-card-heading .card-title { margin-bottom: 0; }
+
+            .weather-range-tabs { width: 100%; }
+            .weather-range-tabs button { flex: 1; min-height: 38px; padding: 0 8px; }
+
+            .weather-alert-card { margin-bottom: 16px; padding: 14px; border-radius: 16px; }
+            .weather-alert-summary { grid-template-columns: 34px minmax(0,1fr) 38px; gap: 10px; }
+            .weather-alert-icon { width: 34px; height: 34px; }
+            .weather-alert-copy strong { font-size: 14px; }
+            .weather-alert-body { padding-left: 44px; }
+
+            .precip-chart { height: 58px; gap: 2px; }
+            .weather-data-footer { flex-direction: column; gap: 4px; padding-inline: 2px; }
 
             .weather-card-kicker {
                 font-size: 12px;
@@ -3491,19 +3727,20 @@
                 padding-top: 4px;
             }
 
-            .sun-progress-track {
-                height: 8px;
-            }
+            .sun-orbit { height: 96px; }
+            .sun-orbit-arc { height: 66px; }
 
             .sun-progress-dot {
-                width: 16px;
-                height: 16px;
+                width: 28px;
+                height: 28px;
             }
 
             .sun-progress-labels {
                 font-size: 11px;
                 margin-top: 8px;
             }
+            .moon-phase-layout { grid-template-columns: 64px minmax(0,1fr); gap: 14px; }
+            .moon-phase-art { width: 60px; height: 60px; }
 
             .sun-time-item,
             .sun-rain-summary,
@@ -3798,18 +4035,6 @@
                 opacity: 0.76;
             }
 
-            .weather-header-meta {
-                display: grid;
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 12px;
-                margin-top: 24px;
-            }
-
-            .weather-header-stat {
-                min-width: 0;
-                padding: 14px 16px;
-            }
-
             .weather-header-note {
                 margin-top: 18px;
                 max-width: 100%;
@@ -3823,6 +4048,8 @@
                 opacity: 0.82;
                 backdrop-filter: blur(16px);
             }
+
+            .typhoon-header-trigger:not([hidden]) { display: flex; }
 
             .weather-content {
                 display: grid;
@@ -3841,6 +4068,8 @@
             .weather-hourly-card {
                 grid-column: 1 / -1;
             }
+
+            .typhoon-entry-card { grid-column: 1 / -1; }
 
             .weather-daily-card {
                 grid-column: span 6;
@@ -4631,6 +4860,7 @@
 
             .f1-next-race {
                 padding: 20px;
+                padding-top: 54px;
                 border-radius: 20px;
                 margin: 12px 0 16px;
                 box-shadow: none;
@@ -4650,6 +4880,14 @@
                 top: 12px;
                 right: 12px;
                 border-radius: 999px;
+            }
+
+            .f1-next-round {
+                position: absolute;
+                top: 18px;
+                left: 20px;
+                max-width: calc(100% - 118px);
+                white-space: nowrap;
             }
 
             .f1-next-name {
@@ -5945,6 +6183,9 @@
     <div class="page-bg flight-bg" id="bg-flight"></div>
 
     <button class="theme-toggle theme-mode-toggle" onclick="toggleThemeMode()" title="主题：自动 / 浅色 / 深色"><i class="ph ph-circle-half-tilt" id="themeIcon"></i><span id="themeModeLabel">自动</span></button>
+    <div class="typhoon-mobile-trigger" id="typhoonMobileTrigger" role="status" aria-label="当前有活跃台风" hidden>
+        <i class="ph ph-hurricane" aria-hidden="true"></i><span class="typhoon-mobile-count" id="typhoonMobileCount">1</span>
+    </div>
 
     <div class="pages">
         <!-- Weather -->
@@ -5965,65 +6206,85 @@
                                 <div class="temp-range" id="tempRange">最高 13° 最低 6°</div>
                             </div>
                         </div>
-                        <div class="weather-header-meta">
-                            <div class="weather-header-stat">
-                                <div class="label"><i class="fas fa-temperature-half"></i> 体感</div>
-                                <div class="value" id="headerFeelsLike">--°</div>
-                            </div>
-                            <div class="weather-header-stat">
-                                <div class="label"><i class="fas fa-droplet"></i> 湿度</div>
-                                <div class="value" id="headerHumidity">--%</div>
-                            </div>
-                        </div>
                         <div class="weather-header-note" id="weatherHeaderNote" hidden></div>
+                        <div class="typhoon-header-trigger" id="typhoonHeaderTrigger" hidden>
+                            <i class="ph ph-hurricane" aria-hidden="true"></i>
+                            <span class="typhoon-header-trigger-copy"><strong id="typhoonHeaderTitle">活跃台风</strong><span id="typhoonHeaderMeta">查看路径与卫星云图</span></span>
+                            <span class="typhoon-status-badge">活跃中</span>
+                        </div>
                     </div>
                 <div class="weather-content">
+                    <div class="weather-card typhoon-entry-card" id="typhoonEntryCard" hidden aria-live="polite"></div>
+                    <div class="weather-alert-card" id="weatherAlertCard" hidden aria-live="polite"></div>
                     <div class="weather-card weather-hourly-card">
-                        <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
+                        <div class="weather-card-heading">
+                            <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
+                            <div class="weather-range-tabs" id="hourlyRangeTabs" role="group" aria-label="逐小时预报范围">
+                                <button type="button" class="active" data-hours="24" aria-pressed="true">24小时</button>
+                                <button type="button" data-hours="72" aria-pressed="false">3天</button>
+                                <button type="button" data-hours="168" aria-pressed="false">7天</button>
+                            </div>
+                        </div>
                         <div class="hourly-scroll" id="hourlyScroll"></div>
                     </div>
+                    <div class="weather-card weather-precip-card" id="weatherPrecipCard" hidden>
+                        <div class="card-title"><i class="fas fa-cloud-rain"></i> 两小时降水</div>
+                        <div class="precip-summary" id="precipSummary">正在整理短时降水趋势</div>
+                        <div class="precip-chart" id="precipChart" aria-label="未来两小时降水强度"></div>
+                        <div class="precip-axis" id="precipAxis"></div>
+                        <span id="rainChance" hidden></span><span id="rainSummary" hidden></span>
+                    </div>
                     <div class="weather-card weather-daily-card">
-                        <div class="card-title"><i class="fas fa-calendar"></i> 3日预报</div>
+                        <div class="weather-card-heading">
+                            <div class="card-title"><i class="fas fa-calendar"></i> 未来天气</div>
+                            <button type="button" class="weather-inline-action" id="dailyExpandButton" aria-expanded="false" hidden>查看30日</button>
+                        </div>
                         <div id="dailyForecast"></div>
                     </div>
                     <div class="weather-grid weather-details-grid" id="weatherGrid"></div>
                     <div class="weather-stack weather-support-stack">
                         <div class="weather-card weather-sun-card">
-                            <div class="card-title"><i class="fas fa-sun"></i> 日照与降水</div>
+                            <div class="card-title"><i class="fas fa-sun"></i> 日月与光照</div>
                             <div class="sun-phase-meta">
                                 <div class="sun-phase-chip" id="sunPhaseChip"><i class="fas fa-sun"></i><span id="sunPhaseLabel">白昼进行中</span></div>
                                 <div class="sun-phase-note" id="sunPhaseNote">光照节奏平稳</div>
                             </div>
                             <div class="sun-progress">
-                                <div class="sun-progress-track">
+                                <div class="sun-orbit" id="sunOrbit">
+                                    <div class="sun-orbit-sky"></div>
+                                    <div class="sun-orbit-arc"></div>
+                                    <div class="sun-orbit-horizon"></div>
                                     <div class="sun-progress-fill" id="sunProgressFill"></div>
-                                    <div class="sun-progress-dot" id="sunProgressDot"></div>
+                                    <div class="sun-progress-dot" id="sunProgressDot"><i class="fas fa-sun" aria-hidden="true"></i></div>
                                 </div>
                                 <div class="sun-progress-labels">
-                                    <span>日出</span>
+                                    <span><span class="sun-event-glyph is-rise" aria-hidden="true"><i class="fas fa-sun"></i><i class="fas fa-arrow-up"></i></span> 日出</span>
                                     <span>正午</span>
-                                    <span>日落</span>
+                                    <span><span class="sun-event-glyph is-set" aria-hidden="true"><i class="fas fa-sun"></i><i class="fas fa-arrow-down"></i></span> 日落</span>
                                 </div>
+                                <div class="sun-daylight-length" id="daylightLength">白昼 0小时0分钟</div>
                             </div>
                             <div class="sun-times">
                                 <div class="sun-time-item">
-                                    <div class="sun-time-label"><i class="fas fa-sunrise"></i> 日出</div>
+                                    <div class="sun-time-label"><span class="sun-event-glyph is-rise" aria-hidden="true"><i class="fas fa-sun"></i><i class="fas fa-arrow-up"></i></span> 日出</div>
                                     <div class="sun-time-value" id="sunriseTime">--:--</div>
                                     <div class="sun-time-desc" id="sunriseDesc">清晨光线变化</div>
                                 </div>
                                 <div class="sun-time-item">
-                                    <div class="sun-time-label"><i class="fas fa-sunset"></i> 日落</div>
+                                    <div class="sun-time-label"><span class="sun-event-glyph is-set" aria-hidden="true"><i class="fas fa-sun"></i><i class="fas fa-arrow-down"></i></span> 日落</div>
                                     <div class="sun-time-value" id="sunsetTime">--:--</div>
                                     <div class="sun-time-desc" id="sunsetDesc">傍晚收光时间</div>
                                 </div>
                             </div>
                             <div class="sun-rain-summary">
-                                <div class="sun-rain-label"><i class="fas fa-cloud-rain"></i> 降水窗口</div>
-                                <div class="sun-rain-value">
-                                    <div class="sun-rain-main" id="rainChance">0%</div>
-                                    <div class="sun-rain-sub" id="daylightLength">白昼 0小时0分钟</div>
+                                <div class="moon-phase-layout">
+                                    <div class="moon-phase-art phase-new" id="moonPhaseArt" aria-hidden="true"><span></span></div>
+                                    <div class="moon-phase-copy">
+                                        <div class="sun-rain-label"><i class="ph ph-moon-stars"></i> 月相</div>
+                                        <div class="sun-rain-main" id="moonPhase">待更新</div>
+                                        <div class="sun-rain-desc" id="moonSummary">月升月落时间将在数据更新后显示</div>
+                                    </div>
                                 </div>
-                                <div class="sun-rain-desc" id="rainSummary">未来数小时暂无明显降水信号</div>
                             </div>
                         </div>
                         <div class="weather-card weather-aqi-card">
@@ -6039,6 +6300,11 @@
                                 <div>NO₂<strong id="no2">13</strong></div>
                                 <div>CO<strong id="co">0.6</strong></div>
                             </div>
+                            <div class="aqi-trend-block" id="aqiTrendBlock" hidden>
+                                <div class="aqi-trend-header"><span>未来24小时</span><strong id="aqiTrendSummary">整体平稳</strong></div>
+                                <div class="aqi-trend" id="aqiTrend" aria-label="未来24小时空气质量趋势"></div>
+                            </div>
+                            <div class="aqi-health-advice" id="aqiHealthAdvice" hidden></div>
                         </div>
                     </div>
                     <div class="weather-stack weather-primary-stack">
@@ -6057,7 +6323,14 @@
                             <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
                             <div class="weather-card-kicker" id="lifeSummary">根据今天体感、紫外线和湿度整理的生活建议</div>
                             <div class="life-index-grid" id="lifeIndex"></div>
+                            <button type="button" class="weather-disclosure-button" id="lifeExpandButton" aria-expanded="false" hidden>
+                                <span>更多生活指数</span><i class="fas fa-chevron-down" aria-hidden="true"></i>
+                            </button>
                         </div>
+                    </div>
+                    <div class="weather-data-footer" id="weatherDataFooter" aria-live="polite">
+                        <span id="weatherUpdatedAt">天气数据正在同步</span>
+                        <span id="weatherAttribution"></span>
                     </div>
                 </div>
             </div>
@@ -6654,6 +6927,18 @@
                         <h3>Race Weekend</h3>
                         <div class="f1-sessions" id="f1Sessions"></div>
                     </div>
+
+                    <div class="f1-session-results" id="f1SessionResults" hidden>
+                        <div class="f1-session-results-head">
+                            <button class="f1-results-back" type="button" onclick="hideF1SessionResults()"><i class="fas fa-arrow-left"></i> 周末日程</button>
+                            <div>
+                                <div class="f1-session-results-kicker">SESSION RESULTS</div>
+                                <h3 id="f1SessionResultsTitle">--</h3>
+                            </div>
+                        </div>
+                        <div class="f1-session-results-status" id="f1SessionResultsStatus"></div>
+                        <div class="f1-session-results-list" id="f1SessionResultsList"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -6685,6 +6970,8 @@
         const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
         const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
         const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
+        const WEATHER_LOCATION_STORAGE_KEY = 'pulse.weather.location.v1';
+        const TYPHOON_STORAGE_KEY = 'pulse.typhoons.v1';
         const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
@@ -6693,6 +6980,19 @@
         let lastResolvedWeatherLocation = null;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
+
+        function readSessionCache(key, maxAge) {
+            try {
+                const cached = JSON.parse(sessionStorage.getItem(key) || 'null');
+                if (!cached || !cached.savedAt || Date.now() - cached.savedAt > maxAge) return null;
+                return cached.value;
+            } catch { return null; }
+        }
+
+        function writeSessionCache(key, value) {
+            try { sessionStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), value })); }
+            catch {}
+        }
 
         const THEME_MODES = ['auto', 'light', 'dark'];
         let themeMode = localStorage.getItem('themeMode') || localStorage.getItem('theme') || 'auto';
@@ -6845,6 +7145,7 @@
         function clearWeatherLocationCache() {
             weatherLocationPromise = null;
             weatherLocationCache = null;
+            try { sessionStorage.removeItem(WEATHER_LOCATION_STORAGE_KEY); } catch {}
         }
 
         function escapeHtml(value = '') {
@@ -6875,6 +7176,8 @@
             return {
                 lon: data.lon,
                 lat: data.lat,
+                city: data.city || '',
+                region: data.region || '',
                 displayName: data.displayName || DEFAULT_WEATHER_LOCATION.displayName,
                 source: data.source || 'default',
                 error: data.error || ''
@@ -6972,6 +7275,10 @@
 
         async function getWeatherLocation({ forceRefresh = false, preferDevice = false, allowCachedDevice = true } = {}) {
             if (forceRefresh) clearWeatherLocationCache();
+            if (!weatherLocationCache) {
+                const storedLocation = readSessionCache(WEATHER_LOCATION_STORAGE_KEY, WEATHER_LOCATION_CACHE_TTL);
+                if (storedLocation) weatherLocationCache = { location: storedLocation, updatedAt: Date.now() };
+            }
             const now = Date.now();
             const cacheValid = weatherLocationCache && (now - weatherLocationCache.updatedAt < WEATHER_LOCATION_CACHE_TTL);
             if (cacheValid) return weatherLocationCache.location;
@@ -6980,6 +7287,7 @@
                 weatherLocationPromise = resolveWeatherLocation({ preferDevice, allowCachedDevice })
                     .then(location => {
                         weatherLocationCache = { location, updatedAt: Date.now() };
+                        writeSessionCache(WEATHER_LOCATION_STORAGE_KEY, location);
                         return location;
                     })
                     .finally(() => { weatherLocationPromise = null; });
@@ -7022,12 +7330,509 @@
             return geolocationPermissionPromise;
         }
 
+        let typhoonDataCache = null;
+        let typhoonDataLoadedAt = 0;
+        let typhoonDataPromise = null;
+        let localTyphoonWarning = null;
+        const TYPHOON_CACHE_MS = 5 * 60 * 1000;
+
+        function getLocationLabel(location) {
+            const city = String(location?.city || '').trim();
+            if (city) return city.replace(/市$/, '');
+            const displayName = String(location?.displayName || '').trim();
+            const primary = displayName.split(/\s*[·・|]\s*/)[0].trim();
+            return primary && primary !== '当前位置' ? primary.replace(/市$/, '') : '所在地';
+        }
+
+        function extractLocalTyphoonWarning(alert) {
+            const entries = Array.isArray(alert?.content) ? alert.content : (Array.isArray(alert) ? alert : []);
+            const levels = { 蓝色: 1, 黄色: 2, 橙色: 3, 红色: 4 };
+            return entries.map(item => {
+                const text = `${item?.title || ''} ${item?.description || ''}`;
+                const match = text.match(/台风\s*(蓝色|黄色|橙色|红色)预警/);
+                if (!match) return null;
+                return { level: ({ 蓝色: 'blue', 黄色: 'yellow', 橙色: 'orange', 红色: 'red' })[match[1]], label: `${match[1]}预警`, score: levels[match[1]], source: item?.title || '当地气象台' };
+            }).filter(Boolean).sort((a, b) => b.score - a.score)[0] || null;
+        }
+
+        function typhoonDistanceKm(from, to) {
+            const lat1 = Number(from?.lat), lon1 = Number(from?.lon), lat2 = Number(to?.lat), lon2 = Number(to?.lon);
+            if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) return null;
+            const rad = value => value * Math.PI / 180;
+            const dLat = rad(lat2 - lat1), dLon = rad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
+            return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function typhoonDirection(from, to) {
+            const lat1 = Number(from?.lat), lon1 = Number(from?.lon), lat2 = Number(to?.lat), lon2 = Number(to?.lon);
+            if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) return '';
+            const rad = value => value * Math.PI / 180;
+            const y = Math.sin(rad(lon2 - lon1)) * Math.cos(rad(lat2));
+            const x = Math.cos(rad(lat1)) * Math.sin(rad(lat2)) - Math.sin(rad(lat1)) * Math.cos(rad(lat2)) * Math.cos(rad(lon2 - lon1));
+            const bearing = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+            return ['北','东北','东','东南','南','西南','西','西北'][Math.round(bearing / 45) % 8];
+        }
+
+        function choosePrimaryTyphoon(storms, location) {
+            return [...storms].sort((a, b) => {
+                const distanceA = typhoonDistanceKm(location, a.position);
+                const distanceB = typhoonDistanceKm(location, b.position);
+                if (distanceA !== null && distanceB !== null && Math.abs(distanceA - distanceB) > 1) return distanceA - distanceB;
+                return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
+            })[0];
+        }
+
+        function hideTyphoonEntry() {
+            ['typhoonEntryCard', 'typhoonHeaderTrigger', 'typhoonMobileTrigger'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.hidden = true;
+            });
+        }
+
+        function renderTyphoonEntry(payload, location = lastResolvedWeatherLocation) {
+            const storms = Array.isArray(payload?.storms) ? payload.storms.filter(storm => storm?.active) : [];
+            if (!payload || payload.active !== true || !storms.length) { hideTyphoonEntry(); return; }
+            const storm = choosePrimaryTyphoon(storms, location) || storms[0];
+            const detailPath = /^\/typhoon\/gdacs-tc-\d+$/.test(storm.detailUrl || '') ? storm.detailUrl : `/typhoon/${encodeURIComponent(storm.id)}`;
+            const href = storm.providerIds?.zhejiang ? `${detailPath}?zj=${encodeURIComponent(storm.providerIds.zhejiang)}` : detailPath;
+            const distance = typhoonDistanceKm(location, storm.position);
+            const direction = distance === null ? '' : typhoonDirection(location, storm.position);
+            const placeName = getLocationLabel(location);
+            const locationLabel = distance === null
+                ? '位置数据待更新'
+                : `位于${placeName}以${direction}约 ${Math.round(distance).toLocaleString('zh-CN')} 公里`;
+            const hasCurrentWind = storm.intensity?.basis === 'current_analysis' && Number.isFinite(Number(storm.intensity?.value));
+            const windForceLabel = storm.intensity?.windForceScale !== null && storm.intensity?.windForceScale !== undefined
+                ? ` · ${storm.intensity.windForceScale}级`
+                : '';
+            const windLabel = hasCurrentWind
+                ? `台风最大风速 ${Math.round(Number(storm.intensity.value))} ${storm.intensity.unit || ''}${windForceLabel}`
+                : '台风风速待更新';
+            const updated = storm.updatedAt ? new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(storm.updatedAt)) : '更新时间待确认';
+            const classLabels = { super_typhoon: '超强台风', severe_typhoon: '强台风', typhoon: '台风', severe_tropical_storm: '强热带风暴', tropical_storm: '热带风暴', tropical_depression: '热带低压', tropical_disturbance: '热带扰动', unknown: '强度待更新' };
+            const moreLabel = storms.length > 1 ? ` · 另有 ${storms.length - 1} 个活跃系统` : '';
+            const staleLabel = storm.stale ? ' · 数据更新延迟' : '';
+            const displayName = storm.name?.zh
+                ? `${storm.name.zh}${storm.name?.en ? `（${storm.name.en}）` : ''}`
+                : (storm.name?.display || '未命名热带系统');
+            const warningBadge = localTyphoonWarning
+                ? `<span class="typhoon-alert-badge" data-alert="${escapeHtml(localTyphoonWarning.level)}" title="${escapeHtml(localTyphoonWarning.source)}">${escapeHtml(localTyphoonWarning.label)}</span>`
+                : '';
+            const card = document.getElementById('typhoonEntryCard');
+            card.innerHTML = `
+                <a class="typhoon-entry-link" href="${href}" aria-label="查看台风 ${escapeHtml(displayName)} 详情">
+                    <span class="typhoon-entry-symbol"><i class="ph ph-hurricane" aria-hidden="true"></i></span>
+                    <span class="typhoon-entry-copy">
+                        <span class="typhoon-entry-kicker"><span class="typhoon-status-badge">活跃中</span>${warningBadge}<span>${escapeHtml(classLabels[storm.classification] || classLabels.unknown)}${escapeHtml(moreLabel)}</span></span>
+                        <span class="typhoon-entry-name">${escapeHtml(displayName)}</span>
+                        <span class="typhoon-entry-meta"><span>${escapeHtml(locationLabel)}</span><span>${escapeHtml(windLabel)}</span><span>更新 ${escapeHtml(updated)}${escapeHtml(staleLabel)}</span></span>
+                    </span>
+                    <span class="typhoon-entry-action"><i class="ph ph-arrow-up-right" aria-hidden="true"></i></span>
+                </a>`;
+            card.hidden = false;
+
+            const title = displayName;
+            document.getElementById('typhoonHeaderTitle').textContent = `${title} · ${classLabels[storm.classification] || classLabels.unknown}`;
+            document.getElementById('typhoonHeaderMeta').textContent = `${locationLabel}${moreLabel}${staleLabel}`;
+            const headerTrigger = document.getElementById('typhoonHeaderTrigger');
+            headerTrigger.hidden = false;
+            const mobileTrigger = document.getElementById('typhoonMobileTrigger');
+            mobileTrigger.setAttribute('aria-label', `${title} 活跃中，共 ${storms.length} 个活跃系统`);
+            document.getElementById('typhoonMobileCount').textContent = storms.length > 9 ? '9+' : String(storms.length);
+            mobileTrigger.hidden = false;
+        }
+
+        async function loadTyphoons({ force = false, location = lastResolvedWeatherLocation } = {}) {
+            if (!force && !typhoonDataCache) {
+                const storedPayload = readSessionCache(TYPHOON_STORAGE_KEY, TYPHOON_CACHE_MS);
+                if (storedPayload) {
+                    typhoonDataCache = storedPayload;
+                    typhoonDataLoadedAt = Date.now();
+                }
+            }
+            if (!force && typhoonDataCache && Date.now() - typhoonDataLoadedAt < TYPHOON_CACHE_MS) {
+                renderTyphoonEntry(typhoonDataCache, location);
+                return typhoonDataCache;
+            }
+            if (!typhoonDataPromise) {
+                typhoonDataPromise = fetch('/api/typhoons', { headers: { accept: 'application/json' } })
+                    .then(async response => {
+                        const payload = await response.json().catch(() => null);
+                        if (!response.ok || !payload || payload.active === null) throw new Error(payload?.error?.message || `Typhoon API ${response.status}`);
+                        typhoonDataCache = payload;
+                        typhoonDataLoadedAt = Date.now();
+                        writeSessionCache(TYPHOON_STORAGE_KEY, payload);
+                        return payload;
+                    })
+                    .finally(() => { typhoonDataPromise = null; });
+            }
+            try {
+                const payload = await typhoonDataPromise;
+                renderTyphoonEntry(payload, location);
+                return payload;
+            } catch (error) {
+                hideTyphoonEntry();
+                console.warn('Typhoon entry unavailable:', error);
+                return null;
+            }
+        }
+
+        const WEATHER_SNAPSHOT_STORAGE_PREFIX = 'pulse.weather.snapshot.v2:';
+        const WEATHER_SNAPSHOT_LATEST_KEY = 'pulse.weather.snapshot.latest.v2';
+        const WEATHER_SNAPSHOT_FRESH_MS = 10 * 60 * 1000;
+        const WEATHER_SNAPSHOT_MAX_AGE_MS = 2 * 60 * 60 * 1000;
+        let currentWeatherSnapshot = null;
+        let currentHourlyRange = 24;
+
+        const weatherValue = (value, digits = 0) => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value)) ? Number(value).toFixed(digits) : '--';
+        const formatWeatherTime = value => {
+            const date = value ? new Date(value) : null;
+            return date && !Number.isNaN(date.getTime())
+                ? date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
+                : '--:--';
+        };
+        const weatherDirection = deg => Number.isFinite(Number(deg))
+            ? ['北','东北','东','东南','南','西南','西','西北'][Math.round(Number(deg) / 45) % 8] + '风'
+            : '';
+
+        function weatherSnapshotKey(location) {
+            return `${WEATHER_SNAPSHOT_STORAGE_PREFIX}${Number(location.lon).toFixed(2)},${Number(location.lat).toFixed(2)}`;
+        }
+
+        function weatherSnapshotAge(snapshot) {
+            const generatedAt = new Date(snapshot?.snapshot?.generatedAt || 0).getTime();
+            return generatedAt ? Date.now() - generatedAt : Number.POSITIVE_INFINITY;
+        }
+
+        function cacheWeatherSnapshot(snapshot, location) {
+            writeSessionCache(weatherSnapshotKey(location), snapshot);
+            writeSessionCache(WEATHER_SNAPSHOT_LATEST_KEY, { snapshot, location });
+        }
+
+        function renderNormalizedHourly(snapshot, hours = currentHourlyRange) {
+            const items = (snapshot?.hourly || []).slice(0, hours);
+            const container = document.getElementById('hourlyScroll');
+            if (!items.length) {
+                container.innerHTML = '<div class="weather-empty-inline">逐小时趋势暂时不可用</div>';
+                return;
+            }
+            let previousDate = '';
+            container.innerHTML = items.map((item, index) => {
+                const time = new Date(item.time);
+                const dateKey = Number.isNaN(time.getTime()) ? '' : time.toLocaleDateString('zh-CN');
+                const marker = dateKey && dateKey !== previousDate
+                    ? (index === 0 ? '今天' : time.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' }))
+                    : '';
+                previousDate = dateKey;
+                const probability = Math.round(Number(item.precipitationProbability || 0));
+                const rain = probability >= 20 || Number(item.precipitation || 0) > 0.05 ? `${probability || '<20'}%` : '';
+                const label = index === 0 ? '现在' : (Number.isNaN(time.getTime()) ? '--' : `${String(time.getHours()).padStart(2, '0')}:00`);
+                return `<div class="hourly-item ${index === 0 ? 'now' : ''}">
+                    <span class="hourly-date-marker">${escapeHtml(marker)}</span>
+                    <div class="hourly-time">${label}</div>
+                    <div class="hourly-icon"><img src="${getIcon(item.conditionCode || 'CLOUDY')}" alt=""></div>
+                    <div class="hourly-temp">${weatherValue(item.temperature)}°</div>
+                    <div class="hourly-rain">${rain ? `<i class="fas fa-droplet"></i> ${rain}` : ''}</div>
+                </div>`;
+            }).join('');
+            document.querySelectorAll('#hourlyRangeTabs button').forEach(button => {
+                const active = Number(button.dataset.hours) === hours;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-pressed', String(active));
+                button.disabled = Number(button.dataset.hours) > items.length && snapshot.hourly.length <= 24;
+            });
+        }
+
+        function renderNormalizedDaily(snapshot) {
+            const items = (snapshot?.daily || []).slice(0, 30);
+            const container = document.getElementById('dailyForecast');
+            const button = document.getElementById('dailyExpandButton');
+            if (!items.length) {
+                container.innerHTML = '<div class="weather-empty-inline">未来天气趋势暂时不可用</div>';
+                button.hidden = true;
+                return;
+            }
+            const week = ['周日','周一','周二','周三','周四','周五','周六'];
+            const temperatures = items.flatMap(item => [Number(item.temperatureMin), Number(item.temperatureMax)]).filter(Number.isFinite);
+            const globalMin = Math.min(...temperatures);
+            const globalMax = Math.max(...temperatures);
+            const span = Math.max(1, globalMax - globalMin);
+            container.innerHTML = items.map((item, index) => {
+                const date = new Date(`${item.date}T12:00:00`);
+                const day = index === 0 ? '今天' : (Number.isNaN(date.getTime()) ? item.date : week[date.getDay()]);
+                const low = Number(item.temperatureMin);
+                const high = Number(item.temperatureMax);
+                const start = Number.isFinite(low) ? ((low - globalMin) / span) * 55 : 0;
+                const width = Number.isFinite(low) && Number.isFinite(high) ? Math.max(12, ((high - low) / span) * 80) : 20;
+                const condition = item.conditionDayText || SKYCON_LABELS[item.conditionDayCode] || '';
+                return `<div class="daily-item ${index >= 10 ? 'is-extended' : ''}">
+                    <div class="daily-day">${escapeHtml(day)}</div>
+                    <div class="daily-icon"><img src="${getIcon(item.conditionDayCode || 'CLOUDY')}" alt=""></div>
+                    <div class="daily-temps"><span class="daily-low">${weatherValue(low)}°</span><div class="daily-bar" style="background:rgba(255,255,255,.12);position:relative"><span style="position:absolute;left:${start}%;width:${width}%;inset-block:0;border-radius:inherit;background:linear-gradient(90deg,#74b9ff,#ffeaa7,#fd79a8)"></span></div><span class="daily-high">${weatherValue(high)}°</span></div>
+                    <div class="daily-condition">${escapeHtml(condition)}</div>
+                </div>`;
+            }).join('');
+            button.hidden = items.length <= 10;
+        }
+
+        function renderWeatherAlerts(snapshot) {
+            const card = document.getElementById('weatherAlertCard');
+            const alerts = snapshot?.alerts || [];
+            if (!alerts.length) {
+                card.hidden = true;
+                card.innerHTML = '';
+                return;
+            }
+            const alert = alerts[0];
+            const severityText = `${alert.level || ''} ${alert.title || ''}`;
+            const severity = /红|red/i.test(severityText) ? 'red' : (/橙|orange/i.test(severityText) ? 'orange' : 'yellow');
+            const until = alert.endsAt ? `至 ${new Date(alert.endsAt).toLocaleString('zh-CN', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' })}` : '当前生效';
+            const sources = (alert.sources || []).join(' · ') || alert.sender || '气象部门';
+            card.dataset.severity = severity;
+            card.innerHTML = `<div class="weather-alert-summary">
+                <div class="weather-alert-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                <div class="weather-alert-copy"><strong>${escapeHtml(alert.title || '天气预警')}</strong><span>${escapeHtml(`${alert.sender || sources} · ${until}`)}</span></div>
+                <button class="weather-alert-toggle" type="button" aria-label="展开预警详情" aria-expanded="false"><i class="fas fa-chevron-down"></i></button>
+            </div><div class="weather-alert-details"><div><div class="weather-alert-body">${escapeHtml(alert.description || '请关注当地气象部门的最新提示。')}<div class="weather-alert-source">来源：${escapeHtml(sources)}</div></div></div></div>`;
+            card.hidden = false;
+            const toggle = card.querySelector('.weather-alert-toggle');
+            toggle.addEventListener('click', () => {
+                const expanded = card.classList.toggle('expanded');
+                toggle.setAttribute('aria-expanded', String(expanded));
+                toggle.querySelector('i').style.transform = expanded ? 'rotate(180deg)' : '';
+            });
+        }
+
+        function renderPrecipitation(snapshot) {
+            const precipitation = snapshot?.precipitation || {};
+            const card = document.getElementById('weatherPrecipCard');
+            const minutePoints = precipitation.minutes || [];
+            const usesMinuteData = minutePoints.length > 0;
+            let points = usesMinuteData
+                ? minutePoints.slice(0, 120)
+                : (snapshot?.hourly || []).slice(0, 2).map(item => ({ time: item.time, value: item.precipitation || 0, probability: item.precipitationProbability || 0 }));
+            const chart = document.getElementById('precipChart');
+            const summary = document.getElementById('precipSummary');
+            const axis = document.getElementById('precipAxis');
+            const wet = points.filter(item => Number(item.value || 0) > 0.05 || Number(item.probability || 0) >= 35);
+            if (!points.length || !wet.length) {
+                chart.innerHTML = '';
+                axis.innerHTML = '';
+                card.hidden = true;
+                return;
+            }
+            const sampleCount = Math.min(24, points.length);
+            const sampled = Array.from({ length: sampleCount }, (_, index) => points[Math.floor(index * points.length / sampleCount)]);
+            const maxValue = Math.max(0.01, ...sampled.map(item => Number(item.value || 0)));
+            const firstWet = wet[0];
+            const probability = Math.round(Number(firstWet?.probability || 0));
+            summary.textContent = usesMinuteData && precipitation.summary
+                ? precipitation.summary
+                : `预计 ${formatWeatherTime(firstWet?.time)} 左右出现降水${probability ? `，概率约 ${probability}%` : `，最高强度 ${maxValue.toFixed(1)} mm/h`}`;
+            chart.style.setProperty('--precip-columns', String(sampleCount));
+            chart.innerHTML = sampled.map(item => {
+                const value = Number(item.value || 0);
+                const height = value <= 0.02 ? 5 : Math.max(10, Math.round((value / maxValue) * 64));
+                return `<span class="precip-bar ${value <= 0.02 ? 'dry' : ''}" style="height:${height}px" title="${value.toFixed(2)} mm/h"></span>`;
+            }).join('');
+            const midpoint = points[Math.floor((points.length - 1) / 2)]?.time;
+            axis.innerHTML = `<span>现在</span><span>${formatWeatherTime(midpoint)}</span><span>${formatWeatherTime(points[points.length - 1]?.time)}</span>`;
+            card.hidden = false;
+        }
+
+        function renderAirQuality(snapshot) {
+            const air = snapshot?.airQuality;
+            const current = air?.current;
+            if (!current) return;
+            const aqi = Number(current.aqi || 0);
+            document.getElementById('aqiValue').textContent = Number.isFinite(aqi) ? Math.round(aqi) : '--';
+            document.getElementById('aqiLevel').textContent = current.category || (aqi <= 50 ? '优' : aqi <= 100 ? '良' : '需留意');
+            document.getElementById('aqiIndicator').style.left = `${Math.min(aqi / 3, 100)}%`;
+            const pollutants = current.pollutants || {};
+            const pollutantIds = { pm25:'pm2p5', pm10:'pm10', o3:'o3', so2:'so2', no2:'no2', co:'co' };
+            Object.entries(pollutantIds).forEach(([id,key]) => { const element = document.getElementById(id); if (element) element.textContent = pollutants[key] ?? '--'; });
+            document.getElementById('aqiSummary').textContent = current.primaryPollutant
+                ? `主要污染物为 ${current.primaryPollutant}`
+                : (aqi <= 50 ? '空气状态比较干净，适合日常外出' : aqi <= 100 ? '整体还能接受，敏感人群可以稍微留意' : '污染水平上来了，建议减少长时间户外活动');
+            const trend = (air.hourly || []).slice(0, 24).filter(item => Number.isFinite(Number(item.aqi)));
+            const block = document.getElementById('aqiTrendBlock');
+            if (trend.length) {
+                const values = trend.map(item => Number(item.aqi));
+                const max = Math.max(1, ...values);
+                document.getElementById('aqiTrendSummary').textContent = `峰值约 ${Math.round(max)}`;
+                document.getElementById('aqiTrend').innerHTML = trend.map(item => {
+                    const value = Number(item.aqi);
+                    const level = value > 100 ? 'poor' : value > 50 ? 'moderate' : 'good';
+                    return `<span class="aqi-trend-bar" data-level="${level}" style="height:${Math.max(5, Math.round(value / max * 50))}px" title="AQI ${Math.round(value)}"></span>`;
+                }).join('');
+                block.hidden = false;
+            } else block.hidden = true;
+            const advice = current.adviceSensitive || current.adviceGeneral || current.healthEffect || '';
+            const adviceElement = document.getElementById('aqiHealthAdvice');
+            adviceElement.textContent = advice;
+            adviceElement.hidden = !advice;
+        }
+
+        const QWEATHER_INDEX_META = {
+            '1': ['运动','fa-person-running'], '2': ['洗车','fa-car'], '3': ['穿衣','fa-shirt'], '4': ['钓鱼','fa-fish'],
+            '5': ['紫外线','fa-sun'], '6': ['旅游','fa-suitcase-rolling'], '7': ['过敏','fa-head-side-cough'], '8': ['舒适度','fa-face-smile'],
+            '9': ['感冒','fa-virus'], '10': ['空气污染','fa-smog'], '11': ['空调','fa-fan'], '12': ['太阳镜','fa-glasses'],
+            '13': ['化妆','fa-wand-magic-sparkles'], '14': ['晾晒','fa-shirt'], '15': ['交通','fa-road'], '16': ['防晒','fa-umbrella-beach']
+        };
+
+        function renderLifeIndices(snapshot) {
+            const today = (snapshot?.indices || []).filter((item, index, list) => list.findIndex(candidate => candidate.type === item.type) === index);
+            const container = document.getElementById('lifeIndex');
+            const button = document.getElementById('lifeExpandButton');
+            if (!today.length) {
+                container.innerHTML = '';
+                button.hidden = true;
+                return;
+            }
+            const priorityNames = ['穿衣','紫外线','运动','过敏','洗车','舒适度'];
+            const sorted = [...today].sort((a,b) => {
+                const aName = QWEATHER_INDEX_META[a.type]?.[0] || a.name;
+                const bName = QWEATHER_INDEX_META[b.type]?.[0] || b.name;
+                const ai = priorityNames.indexOf(aName), bi = priorityNames.indexOf(bName);
+                return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+            });
+            container.innerHTML = sorted.map((item,index) => {
+                const meta = QWEATHER_INDEX_META[item.type] || [item.name || '生活建议','fa-circle-info'];
+                return `<div class="life-index-item ${index >= 6 ? 'is-secondary' : ''}" title="${escapeHtml(item.text || '')}"><i class="fas ${meta[1]}"></i><div><div class="name">${escapeHtml(meta[0])}</div><div class="level">${escapeHtml(item.category || item.level || '--')}</div></div></div>`;
+            }).join('');
+            button.hidden = sorted.length <= 6;
+            document.getElementById('lifeSummary').textContent = sorted.slice(0,3).map(item => `${QWEATHER_INDEX_META[item.type]?.[0] || item.name}${item.category || item.level || ''}`).join('，');
+        }
+
+        function estimateMoonPhase(dateValue) {
+            const date = dateValue ? new Date(`${String(dateValue).slice(0,10)}T12:00:00`) : new Date();
+            const epoch = Date.UTC(2000, 0, 6, 18, 14);
+            const cycleDays = 29.530588853;
+            const phase = (((date.getTime() - epoch) / 86400000) % cycleDays + cycleDays) % cycleDays / cycleDays;
+            const phases = [
+                ['新月','phase-new'], ['娥眉月','phase-waxing-crescent'], ['上弦月','phase-first-quarter'], ['盈凸月','phase-waxing-gibbous'],
+                ['满月','phase-full'], ['亏凸月','phase-waning-gibbous'], ['下弦月','phase-last-quarter'], ['残月','phase-waning-crescent']
+            ];
+            return { label: phases[Math.round(phase * 8) % 8][0], className: phases[Math.round(phase * 8) % 8][1], estimated: true };
+        }
+
+        function resolveMoonPhase(label, dateValue) {
+            const value = String(label || '').trim();
+            if (!value) return estimateMoonPhase(dateValue);
+            const mappings = [
+                [/新月|朔|new moon/i,'phase-new'], [/娥眉|蛾眉|waxing crescent/i,'phase-waxing-crescent'],
+                [/上弦|first quarter/i,'phase-first-quarter'], [/盈凸|waxing gibbous/i,'phase-waxing-gibbous'],
+                [/满月|望|full moon/i,'phase-full'], [/亏凸|waning gibbous/i,'phase-waning-gibbous'],
+                [/下弦|last quarter/i,'phase-last-quarter'], [/残月|waning crescent/i,'phase-waning-crescent']
+            ];
+            return { label: value, className: mappings.find(([pattern]) => pattern.test(value))?.[1] || estimateMoonPhase(dateValue).className, estimated: false };
+        }
+
+        function renderAstronomy(snapshot) {
+            const today = snapshot?.astronomy?.daily?.[0] || snapshot?.daily?.[0] || {};
+            const sunrise = today.sunrise || '--:--';
+            const sunset = today.sunset || '--:--';
+            document.getElementById('sunriseTime').textContent = sunrise;
+            document.getElementById('sunsetTime').textContent = sunset;
+            const moonPhase = resolveMoonPhase(today.moonPhase, today.date || snapshot?.daily?.[0]?.date);
+            document.getElementById('moonPhase').textContent = moonPhase.label;
+            const moonArt = document.getElementById('moonPhaseArt');
+            moonArt.className = `moon-phase-art ${moonPhase.className}`;
+            const moonParts = [];
+            if (today.moonrise) moonParts.push(`月升 ${today.moonrise}`);
+            if (today.moonset) moonParts.push(`月落 ${today.moonset}`);
+            document.getElementById('moonSummary').textContent = moonParts.join(' · ') || (moonPhase.estimated ? '依据日期估算 · 接入 QWeather 后显示月升月落' : '月升月落时间暂未返回');
+            const sunriseDate = parseClockToDate(sunrise);
+            const sunsetDate = parseClockToDate(sunset);
+            const now = new Date();
+            const daylightMinutes = sunriseDate && sunsetDate ? Math.max(0, Math.round((sunsetDate - sunriseDate) / 60000)) : 0;
+            const sinceSunrise = sunriseDate ? Math.max(0, Math.round((now - sunriseDate) / 60000)) : 0;
+            const progress = daylightMinutes ? Math.min(100, Math.max(0, sinceSunrise / daylightMinutes * 100)) : 0;
+            const orbitX = 5 + progress * 0.9;
+            const orbitY = 84 - Math.sin(Math.PI * progress / 100) * 68;
+            const orbit = document.getElementById('sunOrbit');
+            orbit.style.setProperty('--sun-x', `${orbitX}%`);
+            orbit.style.setProperty('--sun-y', `${orbitY}px`);
+            orbit.style.setProperty('--sun-progress-width', `${progress * 0.9}%`);
+            document.getElementById('daylightLength').textContent = daylightMinutes ? `白昼 ${formatDurationMinutes(daylightMinutes)}` : '白昼时长待更新';
+            const beforeSunrise = sunriseDate && now < sunriseDate;
+            const afterSunset = sunsetDate && now > sunsetDate;
+            document.getElementById('sunProgressDot').classList.toggle('is-night', Boolean(beforeSunrise || afterSunset));
+            document.getElementById('sunPhaseLabel').textContent = beforeSunrise ? '黎明将近' : afterSunset ? '夜间时段' : '白昼进行中';
+            document.getElementById('sunPhaseNote').textContent = beforeSunrise ? `距日出 ${formatDurationMinutes(Math.round((sunriseDate - now) / 60000))}` : afterSunset ? '太阳已经落下' : `今天日照已进行 ${Math.round(progress)}%`;
+            document.getElementById('sunriseDesc').textContent = beforeSunrise ? '今日尚未日出' : '今日晨光时间';
+            document.getElementById('sunsetDesc').textContent = afterSunset ? '今日已经日落' : '今日收光时间';
+        }
+
+        function renderNormalizedWeather(snapshot, location) {
+            currentWeatherSnapshot = snapshot;
+            const current = snapshot.current || {};
+            updateScene(current.conditionCode || 'CLEAR_DAY');
+            document.getElementById('tempMain').textContent = `${weatherValue(current.temperature)}°`;
+            document.getElementById('condition').textContent = current.conditionText || SKYCON_LABELS[current.conditionCode] || '天气更新中';
+            const today = snapshot.daily?.[0];
+            document.getElementById('tempRange').textContent = today ? `最高 ${weatherValue(today.temperatureMax)}° 最低 ${weatherValue(today.temperatureMin)}°` : '高低温待更新';
+            const note = document.getElementById('weatherHeaderNote');
+            note.textContent = snapshot.narrative || '';
+            note.hidden = !note.textContent;
+            localTyphoonWarning = extractLocalTyphoonWarning(snapshot.result?.alert);
+            if (typhoonDataCache) renderTyphoonEntry(typhoonDataCache, location);
+
+            const metrics = [
+                { icon:'fa-temperature-half', label:'体感温度', value:weatherValue(current.feelsLike ?? current.temperature), unit:'°' },
+                { icon:'fa-droplet', label:'湿度', value:weatherValue(current.humidity), unit:'%' },
+                { icon:'fa-wind', label:'风速', value:weatherValue(current.windSpeed,1), unit:' km/h', desc:weatherDirection(current.windDirection) },
+                { icon:'fa-eye', label:'能见度', value:weatherValue(current.visibility,1), unit:' km' },
+                { icon:'fa-gauge', label:'气压', value:weatherValue(current.pressure), unit:' hPa' },
+                { icon:'fa-sun', label:'紫外线', value:weatherValue(today?.uvIndex), unit:'', desc:Number(today?.uvIndex) >= 6 ? '注意防晒' : '' },
+                { icon:'fa-temperature-arrow-down', label:'露点', value:weatherValue(current.dewPoint), unit:'°' },
+                { icon:'fa-cloud', label:'云量', value:weatherValue(current.cloudCover), unit:'%' }
+            ];
+            document.getElementById('weatherGrid').innerHTML = metrics.map(item => `<div class="weather-detail-card"><div class="label"><i class="fas ${item.icon}"></i> ${item.label}</div><div class="value">${item.value}<span class="unit">${item.unit}</span></div>${item.desc ? `<div class="desc">${item.desc}</div>` : ''}</div>`).join('');
+            renderNormalizedHourly(snapshot);
+            renderNormalizedDaily(snapshot);
+            renderWeatherAlerts(snapshot);
+            renderPrecipitation(snapshot);
+            renderAirQuality(snapshot);
+            renderLifeIndices(snapshot);
+            renderAstronomy(snapshot);
+
+            const legacy = snapshot.result || {};
+            const commuteItems = buildCommuteAdvice(legacy.realtime || {}, legacy.hourly || {});
+            const hasRainRisk = commuteItems.some(item => item.name === '备伞建议' && item.value !== '可不带伞');
+            document.getElementById('commuteSummaryMain').textContent = hasRainRisk ? '通勤建议留一点天气余量' : '当前出门节奏比较轻松';
+            document.getElementById('commuteSummarySub').textContent = hasRainRisk ? '短时天气可能发生变化，备伞和路径选择更重要' : '风力、降水和体感整体平稳';
+            document.getElementById('commuteSummaryBadge').innerHTML = hasRainRisk ? '<i class="fas fa-cloud-rain"></i><span>留意天气变化</span>' : '<i class="fas fa-route"></i><span>通勤友好</span>';
+            document.getElementById('commuteAdvice').innerHTML = commuteItems.map(item => `<div class="commute-item"><div class="commute-icon"><i class="fas ${item.icon}"></i></div><div class="commute-name">${item.name}</div><div class="commute-value">${item.value}</div><div class="commute-desc">${item.desc}</div></div>`).join('');
+
+            const effectiveAt = snapshot.snapshot?.effectiveAt || snapshot.snapshot?.generatedAt;
+            const sourceState = snapshot.status === 'stale' ? ' · 数据更新延迟' : snapshot.status === 'partial' ? ' · 部分数据暂不可用' : '';
+            document.getElementById('weatherUpdatedAt').textContent = `更新于 ${formatWeatherTime(effectiveAt)}${sourceState}`;
+            document.getElementById('weatherAttribution').innerHTML = (snapshot.attribution || []).map(item => `<a href="${item.url}" target="_blank" rel="noopener">天气服务由 ${escapeHtml(item.label)} 提供</a>`).join(' · ') || '天气服务由彩云天气提供';
+        }
+
         async function loadWeather({ forceRelocate = false } = {}) {
             let resolvedLocation = null;
+            let renderedSnapshotGeneratedAt = '';
             try {
-                renderWeatherLocation({ displayName: '正在定位', source: 'default' }, {
-                    detail: forceRelocate ? '正在刷新当前位置天气' : '正在读取当前天气位置'
-                });
+                const latestBundle = !forceRelocate ? readSessionCache(WEATHER_SNAPSHOT_LATEST_KEY, WEATHER_SNAPSHOT_MAX_AGE_MS) : null;
+                if (latestBundle?.snapshot?.schemaVersion === '2' && latestBundle.location) {
+                    resolvedLocation = latestBundle.location;
+                    lastResolvedWeatherLocation = latestBundle.location;
+                    renderedSnapshotGeneratedAt = latestBundle.snapshot.snapshot?.generatedAt || '';
+                    renderWeatherLocation(latestBundle.location);
+                    renderNormalizedWeather(latestBundle.snapshot, latestBundle.location);
+                    loadTyphoons({ location: latestBundle.location });
+                    if (weatherSnapshotAge(latestBundle.snapshot) < WEATHER_SNAPSHOT_FRESH_MS) {
+                        updateRelocateBadge(false);
+                        return;
+                    }
+                } else {
+                    renderWeatherLocation({ displayName: '正在定位', source: 'default' }, {
+                        detail: forceRelocate ? '正在刷新当前位置天气' : '正在读取当前天气位置'
+                    });
+                }
                 if (forceRelocate) updateRelocateBadge(true);
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
                 const location = await getWeatherLocation({
@@ -7037,6 +7842,7 @@
                 });
                 resolvedLocation = location;
                 lastResolvedWeatherLocation = location;
+                loadTyphoons({ location });
                 const locationDetail = location.source === 'device'
                     ? '已同步当前设备位置'
                     : (location.source === 'ip'
@@ -7045,17 +7851,40 @@
                 renderWeatherLocation(location, { detail: locationDetail });
 
                 // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
-                const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
+                const snapshotKey = weatherSnapshotKey(location);
+                const cachedSnapshot = readSessionCache(snapshotKey, WEATHER_SNAPSHOT_MAX_AGE_MS);
+                if (cachedSnapshot?.schemaVersion === '2') {
+                    writeSessionCache(WEATHER_SNAPSHOT_LATEST_KEY, { snapshot: cachedSnapshot, location });
+                    const cachedGeneratedAt = cachedSnapshot.snapshot?.generatedAt || '';
+                    if (cachedGeneratedAt !== renderedSnapshotGeneratedAt) {
+                        renderNormalizedWeather(cachedSnapshot, location);
+                        renderedSnapshotGeneratedAt = cachedGeneratedAt;
+                    }
+                    if (!forceRelocate && weatherSnapshotAge(cachedSnapshot) < WEATHER_SNAPSHOT_FRESH_MS) {
+                        updateRelocateBadge(false);
+                        return;
+                    }
+                }
+                const refreshParam = forceRelocate ? '&refresh=1' : '';
+                const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}${refreshParam}`, { cache: forceRelocate ? 'reload' : 'default' });
                 if (!r.ok) return;
-                const d = (await r.json()).result;
+                const payload = await r.json();
+                if (payload?.schemaVersion === '2' && payload.current) {
+                    cacheWeatherSnapshot(payload, location);
+                    if ((payload.snapshot?.generatedAt || '') !== renderedSnapshotGeneratedAt) renderNormalizedWeather(payload, location);
+                    updateRelocateBadge(false);
+                    return;
+                }
+                const d = payload?.result;
+                if (!d) return;
                 const rt = d?.realtime || {};
+                localTyphoonWarning = extractLocalTyphoonWarning(d?.alert);
+                if (typhoonDataCache) renderTyphoonEntry(typhoonDataCache, location);
                 updateScene(rt.skycon || 'CLEAR_DAY');
                 document.getElementById('tempMain').textContent = Math.round(rt.temperature ?? 0) + '°';
                 document.getElementById('condition').textContent = SKYCON_LABELS[rt.skycon] || '多云';
                 const t0 = d.daily?.temperature?.[0];
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
-                document.getElementById('headerFeelsLike').textContent = `${Math.round(rt.apparent_temperature ?? rt.temperature ?? 0)}°`;
-                document.getElementById('headerHumidity').textContent = `${Math.round((rt.humidity || 0) * 100)}%`;
                 const weatherHeaderNote = document.getElementById('weatherHeaderNote');
                 const hourlyDescription = d.hourly?.description?.trim() || '';
                 weatherHeaderNote.textContent = hourlyDescription;
@@ -7188,6 +8017,27 @@
 
         document.getElementById('weatherHeaderBadge').addEventListener('click', () => {
             loadWeather({ forceRelocate: true });
+        });
+
+        document.getElementById('hourlyRangeTabs').addEventListener('click', event => {
+            const button = event.target.closest('button[data-hours]');
+            if (!button || button.disabled || !currentWeatherSnapshot) return;
+            currentHourlyRange = Number(button.dataset.hours) || 24;
+            renderNormalizedHourly(currentWeatherSnapshot, currentHourlyRange);
+        });
+
+        document.getElementById('dailyExpandButton').addEventListener('click', event => {
+            const card = event.currentTarget.closest('.weather-daily-card');
+            const expanded = card.classList.toggle('expanded');
+            event.currentTarget.setAttribute('aria-expanded', String(expanded));
+            event.currentTarget.textContent = expanded ? '收起长期趋势' : '查看30日';
+        });
+
+        document.getElementById('lifeExpandButton').addEventListener('click', event => {
+            const card = event.currentTarget.closest('.weather-life-card');
+            const expanded = card.classList.toggle('expanded');
+            event.currentTarget.setAttribute('aria-expanded', String(expanded));
+            event.currentTarget.querySelector('span').textContent = expanded ? '收起生活指数' : '更多生活指数';
         });
 
         ensureGeolocationPermissionState();
@@ -8403,6 +9253,8 @@
                 }
 
                 // 日程
+                hideF1SessionResults();
+                const now = Date.now();
                 const sessionsHtml = data.sessions.map(s => {
                     const d = new Date(s.date_start);
                     const endTime = new Date(s.date_end);
@@ -8411,7 +9263,12 @@
                     const isSprint = s.type === 'Race' && s.name === 'Sprint';
                     const sessionClass = isRace ? 'race' : (isSprint ? 'sprint' : '');
                     const icon = isRace ? '🏁' : (isSprint ? '⚡' : '');
-                    return `<div class="f1-session ${sessionClass}">
+                    const hasStarted = d.getTime() <= now;
+                    const stateLabel = now < d.getTime() ? '未开始' : (now <= endTime.getTime() ? '进行中' : '已结束');
+                    const action = hasStarted
+                        ? `<div class="f1-session-action"><span>${stateLabel === '进行中' ? '实时排名' : '查看成绩'}</span><i class="fas fa-chevron-right"></i></div>`
+                        : `<div class="f1-session-state">${stateLabel}</div>`;
+                    return `<div class="f1-session ${sessionClass} ${hasStarted ? 'is-clickable' : ''}" ${hasStarted ? `role="button" tabindex="0" onclick="showF1SessionResults(${s.session_key})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showF1SessionResults(${s.session_key})}"` : ''}>
                         <div class="f1-session-date">
                             <div class="f1-session-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                             <div class="f1-session-date-weekday">${WEEKDAYS[d.getDay()]}</div>
@@ -8420,6 +9277,7 @@
                             <div class="f1-session-name">${icon} ${s.name}</div>
                             <div class="f1-session-time">${timeStr}</div>
                         </div>
+                        ${action}
                     </div>`;
                 }).join('');
                 document.getElementById('f1Sessions').innerHTML = sessionsHtml;
@@ -8432,7 +9290,74 @@
             }
         }
 
+        function formatF1LapTime(value) {
+            const seconds = Array.isArray(value) ? value[value.length - 1] : value;
+            if (!Number.isFinite(Number(seconds))) return '—';
+            const total = Number(seconds);
+            const minutes = Math.floor(total / 60);
+            const remainder = (total % 60).toFixed(3).padStart(6, '0');
+            return minutes ? `${minutes}:${remainder}` : `${remainder}s`;
+        }
+
+        function formatF1Gap(value, result) {
+            if (result.dsq) return 'DSQ';
+            if (result.dns) return 'DNS';
+            if (result.dnf) return 'DNF';
+            const gap = Array.isArray(value) ? value[value.length - 1] : value;
+            if (result.position === 1 || Number(gap) === 0) return 'LEADER';
+            return Number.isFinite(Number(gap)) ? `+${Number(gap).toFixed(3)}s` : '—';
+        }
+
+        async function showF1SessionResults(sessionKey) {
+            const weekend = document.querySelector('.f1-weekend');
+            const panel = document.getElementById('f1SessionResults');
+            const status = document.getElementById('f1SessionResultsStatus');
+            const list = document.getElementById('f1SessionResultsList');
+            weekend.style.display = 'none';
+            panel.hidden = false;
+            status.textContent = '正在读取 OpenF1 成绩…';
+            list.innerHTML = '<div class="f1-results-empty">加载排名中…</div>';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            try {
+                const response = await fetch(`/api/f1?year=2026&session=${sessionKey}`);
+                if (!response.ok) throw new Error('成绩暂时不可用');
+                const data = await response.json();
+                document.getElementById('f1SessionResultsTitle').textContent = data.name || 'Session Results';
+                status.textContent = data.status === 'complete' ? `${data.results.length} 位车手 · 官方时序数据` : '比赛尚未产生完整成绩，以下为当前排名';
+                if (!data.results.length) {
+                    list.innerHTML = '<div class="f1-results-empty">本节比赛尚未产生排名，稍后再来看看。</div>';
+                    return;
+                }
+                list.innerHTML = data.results.map(result => {
+                    const teamColor = /^[0-9A-Fa-f]{6}$/.test(result.team_colour || '') ? `#${result.team_colour}` : 'var(--f1-accent)';
+                    const photo = result.headshot_url
+                        ? `<img class="f1-result-driver-photo" src="${escapeHtml(result.headshot_url)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
+                        : '<div></div>';
+                    return `<div class="f1-result-row" style="box-shadow:inset 3px 0 0 ${teamColor}">
+                        <div class="f1-result-position">${String(result.position).padStart(2, '0')}</div>
+                        ${photo}
+                        <div class="f1-result-driver">
+                            <div class="f1-result-driver-name">${escapeHtml(result.driver_name)}</div>
+                            <div class="f1-result-team">${escapeHtml(result.team_name)} · ${result.laps ?? 0} LAPS</div>
+                        </div>
+                        <div class="f1-result-time"><strong>${formatF1LapTime(result.duration)}</strong>${formatF1Gap(result.gap_to_leader, result)}</div>
+                    </div>`;
+                }).join('');
+            } catch (error) {
+                status.textContent = '暂时无法读取成绩';
+                list.innerHTML = `<div class="f1-results-empty">${escapeHtml(error.message || 'OpenF1 数据暂时不可用')}</div>`;
+            }
+        }
+
+        function hideF1SessionResults() {
+            const weekend = document.querySelector('.f1-weekend');
+            const panel = document.getElementById('f1SessionResults');
+            if (weekend) weekend.style.display = '';
+            if (panel) panel.hidden = true;
+        }
+
         function hideF1Detail() {
+            hideF1SessionResults();
             document.getElementById('f1-list-view').style.display = 'block';
             document.getElementById('f1-detail-view').style.display = 'none';
         }
@@ -8661,8 +9586,17 @@
             `).join('');
         }
 
-        loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
-        setInterval(() => { loadWeather(); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
+        loadWeather(); loadTyphoons(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
+        setInterval(() => { loadTyphoons({ force: true }); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
+        setInterval(() => {
+            if (!document.hidden && document.getElementById('page-weather')?.classList.contains('active')) loadWeather();
+        }, WEATHER_SNAPSHOT_FRESH_MS);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && document.getElementById('page-weather')?.classList.contains('active')) {
+                const generatedAt = new Date(currentWeatherSnapshot?.snapshot?.generatedAt || 0).getTime();
+                if (!generatedAt || Date.now() - generatedAt >= WEATHER_SNAPSHOT_FRESH_MS) loadWeather();
+            }
+        });
 
         // ========== TRADING PLAYGROUND ==========
         let tradingData = null;

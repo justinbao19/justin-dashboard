@@ -54,6 +54,11 @@ const GP_NAMES = {
   'United Arab Emirates': 'Abu Dhabi GP',
 };
 
+const DRIVER_HEADSHOT_OVERRIDES = {
+  34: 'https://media.formula1.com/image/upload/c_lfill,w_256/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/astonmartin/jakcra01/2026astonmartinjakcra01right.webp',
+  41: 'https://media.formula1.com/image/upload/c_lfill,w_256/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/racingbulls/arvlin01/2026racingbullsarvlin01right.webp',
+};
+
 // 根据城市返回正确的 GP 名称
 function getGPName(country, location) {
   if (country === 'United States') {
@@ -79,13 +84,60 @@ async function fetchOpenF1Sessions(year) {
   }
 }
 
+async function fetchSessionResults(sessionKey) {
+  const [resultsResponse, driversResponse] = await Promise.all([
+    fetch(`https://api.openf1.org/v1/session_result?session_key=${encodeURIComponent(sessionKey)}`),
+    fetch(`https://api.openf1.org/v1/drivers?session_key=${encodeURIComponent(sessionKey)}`),
+  ]);
+  if (!resultsResponse.ok) throw new Error(`OpenF1 results HTTP ${resultsResponse.status}`);
+  if (!driversResponse.ok) throw new Error(`OpenF1 drivers HTTP ${driversResponse.status}`);
+  const [results, drivers] = await Promise.all([resultsResponse.json(), driversResponse.json()]);
+  const driversByNumber = new Map(drivers.map(driver => [driver.driver_number, driver]));
+  return results.map(result => {
+    const driver = driversByNumber.get(result.driver_number) || {};
+    return {
+      position: result.position,
+      driver_number: result.driver_number,
+      driver_name: driver.full_name || driver.broadcast_name || `#${result.driver_number}`,
+      driver_code: driver.name_acronym || '',
+      team_name: driver.team_name || '',
+      team_colour: driver.team_colour || '',
+      headshot_url: DRIVER_HEADSHOT_OVERRIDES[result.driver_number] || driver.headshot_url || '',
+      laps: result.number_of_laps,
+      duration: result.duration,
+      gap_to_leader: result.gap_to_leader,
+      dnf: result.dnf,
+      dns: result.dns,
+      dsq: result.dsq,
+    };
+  });
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200');
 
-  const { year = 2026, meeting } = req.query;
+  const { year = 2026, meeting, session } = req.query;
 
   try {
+    if (session) {
+      const sessionKey = parseInt(session);
+      const sessions = await fetchOpenF1Sessions(year);
+      const sessionMeta = sessions.find(item => item.session_key === sessionKey);
+      if (!sessionMeta) return res.status(404).json({ error: 'Session not found' });
+      const results = await fetchSessionResults(sessionKey);
+      return res.status(200).json({
+        session_key: sessionKey,
+        meeting_key: sessionMeta.meeting_key,
+        name: sessionMeta.session_name,
+        type: sessionMeta.session_type,
+        date_start: sessionMeta.date_start,
+        date_end: sessionMeta.date_end,
+        status: results.length ? 'complete' : 'pending',
+        results,
+      });
+    }
+
     const sessions = await fetchOpenF1Sessions(year);
     
     // 如果请求特定比赛的详情

@@ -1338,20 +1338,33 @@
             position: absolute;
             top: 14px;
             right: 16px;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: color-mix(in oklab, #ef4444 12%, var(--bg-card));
+            border: 1px solid color-mix(in oklab, #ef4444 42%, transparent);
+            color: #ef4444;
             font-size: 11px;
-            font-weight: 700;
+            font-weight: 800;
             padding: 4px 10px;
-            border-radius: 6px;
+            border-radius: 999px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            animation: f1-live-pulse 2s ease-in-out infinite;
-            box-shadow: 0 2px 8px color-mix(in oklab, var(--f1-accent) 42%, transparent);
+            letter-spacing: 0.8px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
         }
-        @keyframes f1-live-pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(1.02); }
+        .f1-live-badge::before {
+            content: '';
+            width: 7px;
+            height: 7px;
+            flex: 0 0 7px;
+            border-radius: 50%;
+            background: #ef4444;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.48);
+            animation: f1-live-dot-breathe 1.8s ease-in-out infinite;
+        }
+        @keyframes f1-live-dot-breathe {
+            0%, 100% { opacity: 0.76; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.12), 0 0 5px rgba(239, 68, 68, 0.34); }
+            50% { opacity: 1; box-shadow: 0 0 0 5px rgba(239, 68, 68, 0), 0 0 12px rgba(239, 68, 68, 0.72); }
         }
         .f1-next-name { font-size: 32px; font-weight: 800; color: #fff; margin: 10px 0 6px; letter-spacing: -0.5px; }
         .f1-next-location { font-size: 15px; color: var(--f1-accent); font-weight: 600; }
@@ -5866,6 +5879,14 @@
         #page-f1 .f1-live-badge,
         #page-f1 .f1-sprint-badge {
             border-radius: 999px !important;
+        }
+        #page-f1 .f1-live-badge {
+            background: color-mix(in oklab, #ef4444 12%, var(--bg-card)) !important;
+            border-color: color-mix(in oklab, #ef4444 42%, transparent) !important;
+            color: #ef4444 !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08) !important;
+        }
+        #page-f1 .f1-sprint-badge {
             background: var(--f1-accent) !important;
             color: #fff !important;
             box-shadow: 0 8px 18px color-mix(in oklab, var(--f1-accent) 22%, transparent) !important;
@@ -6609,7 +6630,7 @@
 
                     <!-- 下一场比赛倒计时 -->
                     <div class="f1-next-race" id="f1NextRace">
-                        <div class="f1-live-badge" id="f1LiveBadge" style="display: none;">🔴 LIVE</div>
+                        <div class="f1-live-badge" id="f1LiveBadge" style="display: none;">LIVE</div>
                         <div class="f1-next-main">
                             <div class="f1-next-round" id="f1NextRound">Round --</div>
                             <div class="f1-next-name" id="f1NextName">Loading...</div>

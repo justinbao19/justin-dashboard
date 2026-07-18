@@ -42,3 +42,11 @@ test('mobile race session state sits below the session title without overlap', a
   assert.match(html, /\.f1-session-state,[\s\S]*?\.f1-session-action\s*\{[\s\S]*?grid-column:\s*2;[\s\S]*?grid-row:\s*2;[\s\S]*?margin-top:\s*7px;/);
   assert.match(html, /\.f1-session-state\s*\{[\s\S]*?border-radius:\s*999px;/);
 });
+
+test('live badge keeps still while only its red dot breathes', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /id="f1LiveBadge"[^>]*>LIVE<\/div>/);
+  assert.match(html, /\.f1-live-badge::before\s*\{[\s\S]*?animation:\s*f1-live-dot-breathe/);
+  assert.match(html, /@keyframes f1-live-dot-breathe/);
+  assert.doesNotMatch(html, /animation:\s*f1-live-pulse/);
+});

@@ -97,10 +97,22 @@ async function getSentiment(env) {
 const f1Flags = { Australia:'🇦🇺', China:'🇨🇳', Japan:'🇯🇵', Bahrain:'🇧🇭', 'Saudi Arabia':'🇸🇦', 'United States':'🇺🇸', Canada:'🇨🇦', Monaco:'🇲🇨', Spain:'🇪🇸', Austria:'🇦🇹', 'United Kingdom':'🇬🇧', Belgium:'🇧🇪', Hungary:'🇭🇺', Netherlands:'🇳🇱', Italy:'🇮🇹', Azerbaijan:'🇦🇿', Singapore:'🇸🇬', Mexico:'🇲🇽', Brazil:'🇧🇷', Qatar:'🇶🇦', 'United Arab Emirates':'🇦🇪' };
 function gpName(country, location) { if (country === 'United States') return location.includes('Miami') ? 'Miami GP' : location.includes('Las Vegas') ? 'Las Vegas GP' : 'United States GP'; if (country === 'Spain' && location.includes('Madrid')) return 'Madrid GP'; const names = { China:'Chinese GP', Japan:'Japanese GP', Australia:'Australian GP', Bahrain:'Bahrain GP', 'Saudi Arabia':'Saudi Arabian GP', Canada:'Canadian GP', Monaco:'Monaco GP', Spain:'Spanish GP', Austria:'Austrian GP', 'United Kingdom':'British GP', Belgium:'Belgian GP', Hungary:'Hungarian GP', Netherlands:'Dutch GP', Italy:'Italian GP', Azerbaijan:'Azerbaijan GP', Singapore:'Singapore GP', Mexico:'Mexico City GP', Brazil:'São Paulo GP', Qatar:'Qatar GP', 'United Arab Emirates':'Abu Dhabi GP' }; return names[country] || country + ' GP'; }
 async function getF1(url) {
-  const year = url.searchParams.get('year') || '2026'; const meeting = url.searchParams.get('meeting');
+  const year = url.searchParams.get('year') || '2026'; const meeting = url.searchParams.get('meeting'); const session = url.searchParams.get('session');
   const response = await fetch('https://api.openf1.org/v1/sessions?year=' + encodeURIComponent(year));
   if (!response.ok) throw new Error('OpenF1 ' + response.status);
   const sessions = await response.json();
+  if (session) {
+    const meta = sessions.find(item => String(item.session_key) === String(session));
+    if (!meta) return null;
+    const [resultsResponse, driversResponse] = await Promise.all([
+      fetch('https://api.openf1.org/v1/session_result?session_key=' + encodeURIComponent(session)),
+      fetch('https://api.openf1.org/v1/drivers?session_key=' + encodeURIComponent(session))
+    ]);
+    if (!resultsResponse.ok || !driversResponse.ok) throw new Error('OpenF1 result data unavailable');
+    const [results, drivers] = await Promise.all([resultsResponse.json(), driversResponse.json()]);
+    const driversByNumber = new Map(drivers.map(driver => [driver.driver_number, driver]));
+    return { session_key:Number(session), meeting_key:meta.meeting_key, name:meta.session_name, type:meta.session_type, date_start:meta.date_start, date_end:meta.date_end, status:results.length?'complete':'pending', results:results.map(result => { const driver=driversByNumber.get(result.driver_number)||{}; return {position:result.position,driver_number:result.driver_number,driver_name:driver.full_name||driver.broadcast_name||('#'+result.driver_number),driver_code:driver.name_acronym||'',team_name:driver.team_name||'',team_colour:driver.team_colour||'',headshot_url:driver.headshot_url||'',laps:result.number_of_laps,duration:result.duration,gap_to_leader:result.gap_to_leader,dnf:result.dnf,dns:result.dns,dsq:result.dsq}; }) };
+  }
   if (meeting) { const list = sessions.filter(s => String(s.meeting_key) === String(meeting)).sort((a,b) => new Date(a.date_start)-new Date(b.date_start)); if (!list.length) return null; const first=list[0]; return { meeting_key:first.meeting_key, circuit:first.circuit_short_name, circuit_full:first.circuit_short_name, country:first.country_name, country_flag:f1Flags[first.country_name]||'', location:first.location, gp_name:gpName(first.country_name,first.location), gmt_offset:first.gmt_offset, sessions:list.map(s=>({session_key:s.session_key,type:s.session_type,name:s.session_name,date_start:s.date_start,date_end:s.date_end})) }; }
   const meetings = new Map();
   for (const s of sessions) { if (s.session_name?.includes('Day')) continue; if (!meetings.has(s.meeting_key)) meetings.set(s.meeting_key,{meeting_key:s.meeting_key,circuit:s.circuit_short_name,country:s.country_name,country_flag:f1Flags[s.country_name]||'',location:s.location,gp_name:gpName(s.country_name,s.location),date_start:s.date_start,date_end:s.date_end||s.date_start,has_sprint:false}); const m=meetings.get(s.meeting_key); if(new Date(s.date_start)<new Date(m.date_start))m.date_start=s.date_start;if(new Date(s.date_end||s.date_start)>new Date(m.date_end))m.date_end=s.date_end||s.date_start;if(s.session_name==='Sprint')m.has_sprint=true; }

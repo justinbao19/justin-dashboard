@@ -35,3 +35,10 @@ test('mobile live badge stays content-sized and flows above the race title', asy
   assert.match(html, /\.f1-next-round\s*\{[\s\S]*?position:\s*static;[\s\S]*?max-width:\s*100%/);
   assert.doesNotMatch(html, /padding-top:\s*54px/);
 });
+
+test('mobile race session state sits below the session title without overlap', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /\.f1-session\s*\{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*48px minmax\(0, 1fr\)/);
+  assert.match(html, /\.f1-session-state,[\s\S]*?\.f1-session-action\s*\{[\s\S]*?grid-column:\s*2;[\s\S]*?grid-row:\s*2;[\s\S]*?margin-top:\s*7px;/);
+  assert.match(html, /\.f1-session-state\s*\{[\s\S]*?border-radius:\s*999px;/);
+});

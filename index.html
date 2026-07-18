@@ -4696,6 +4696,52 @@
                 margin: 9px 0 7px;
             }
 
+            .f1-session {
+                display: grid;
+                grid-template-columns: 48px minmax(0, 1fr);
+                grid-template-rows: auto auto;
+                column-gap: 14px;
+                row-gap: 0;
+                align-items: center;
+            }
+
+            .f1-session-date {
+                grid-column: 1;
+                grid-row: 1 / span 2;
+                width: 48px;
+                margin-right: 0;
+            }
+
+            .f1-session-info {
+                grid-column: 2;
+                grid-row: 1;
+                min-width: 0;
+            }
+
+            .f1-session-name {
+                line-height: 1.25;
+                overflow-wrap: anywhere;
+            }
+
+            .f1-session-state,
+            .f1-session-action {
+                grid-column: 2;
+                grid-row: 2;
+                justify-self: start;
+                width: fit-content;
+                max-width: 100%;
+                margin-top: 7px;
+                white-space: nowrap;
+            }
+
+            .f1-session-state {
+                padding: 4px 9px;
+                border-radius: 999px;
+                background: color-mix(in oklab, var(--bg-tertiary) 82%, transparent);
+                border: 1px solid var(--border);
+                line-height: 1.2;
+            }
+
             .f1-next-location {
                 font-size: 13px;
             }

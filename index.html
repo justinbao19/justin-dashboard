@@ -4707,13 +4707,13 @@
             }
 
             .f1-live-badge {
-                position: relative;
-                top: auto;
-                right: auto;
+                position: absolute;
+                top: 18px;
+                right: 18px;
                 width: fit-content;
                 max-width: 100%;
                 min-height: 26px;
-                margin: 0 0 14px;
+                margin: 0;
                 padding: 5px 11px;
                 line-height: 16px;
                 white-space: nowrap;
@@ -4723,14 +4723,17 @@
 
             .f1-next-round {
                 position: static;
-                max-width: 100%;
+                max-width: calc(100% - 88px);
+                min-height: 26px;
+                display: flex;
+                align-items: center;
                 white-space: nowrap;
             }
 
             .f1-next-name {
                 font-size: 27px;
                 line-height: 1.08;
-                margin: 9px 0 7px;
+                margin: 12px 0 7px;
             }
 
             .f1-session {

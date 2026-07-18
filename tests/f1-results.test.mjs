@@ -50,3 +50,16 @@ test('live badge keeps still while only its red dot breathes', async () => {
   assert.match(html, /@keyframes f1-live-dot-breathe/);
   assert.doesNotMatch(html, /animation:\s*f1-live-pulse/);
 });
+
+test('dashboard refreshes serverless data only on page entry or manual action', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  for (const page of ['weather', 'news', 'f1']) {
+    assert.match(html, new RegExp(`id="${page}ManualRefresh"`));
+  }
+  assert.match(html, /id="marketRefreshBtn" onclick="manualRefreshPage\('market'\)"/);
+  assert.match(html, /refreshPageOnEntry\(normalizedPage\)/);
+  assert.match(html, /function manualRefreshPage\(page\)/);
+  assert.match(html, /visibilitychange[\s\S]*?refreshPageOnEntry\(getPageFromPathname\(\)\)/);
+  assert.doesNotMatch(html, /setInterval\(\(\) => \{ loadWeather\(\); loadMarket\(\); loadNews\(\); loadSentiment\(\); \}, 5 \* 60 \* 1000\)/);
+  assert.doesNotMatch(html, /setInterval\(\(\) => \{ loadMetar\(\); \}, 10 \* 60 \* 1000\)/);
+});

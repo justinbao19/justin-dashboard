@@ -763,6 +763,30 @@
         .market-refresh-btn.spinning i {
             animation: spin-icon 0.65s linear infinite;
         }
+        .page-manual-refresh {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 36px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: color-mix(in oklab, var(--bg-card) 88%, transparent);
+            color: var(--text-secondary);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 650;
+            cursor: pointer;
+            transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+        .page-manual-refresh:hover {
+            color: var(--accent);
+            background: var(--market-meta-bg);
+            border-color: color-mix(in oklab, var(--accent) 28%, var(--border));
+        }
+        .page-manual-refresh:disabled { cursor: default; opacity: 0.56; }
+        .page-manual-refresh.is-refreshing i { animation: spin-icon 0.65s linear infinite; }
         @keyframes spin-icon {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -6057,6 +6081,7 @@
                 <div class="weather-layout">
                     <div class="weather-header">
                         <div class="weather-header-top">
+                            <button class="page-manual-refresh" id="weatherManualRefresh" type="button" onclick="manualRefreshPage('weather')" aria-label="刷新天气"><i class="fas fa-rotate-right"></i><span>刷新天气</span></button>
                             <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
                             <div class="location" id="location">
                                 <span class="weather-location-primary">上海 · 闵行</span>
@@ -6175,7 +6200,7 @@
                     <h1><i class="ph ph-chart-line-up"></i> <span id="marketPageTitle">市场行情</span></h1>
                     <div class="market-header-meta">
                         <span class="subtitle" id="marketDate">2026年3月9日</span>
-                        <button class="market-refresh-btn" id="marketRefreshBtn" onclick="refreshMarketPrices()" title="刷新实时行情">
+                        <button class="market-refresh-btn" id="marketRefreshBtn" onclick="manualRefreshPage('market')" title="刷新市场页面">
                             <i class="fas fa-rotate-right"></i>
                         </button>
                         <span class="market-refresh-hint" id="marketRefreshHint"></span>
@@ -6532,7 +6557,10 @@
             <div class="page-shell">
                 <div class="page-header">
                     <h1><i class="ph ph-newspaper-clipping"></i> 新闻雷达</h1>
-                    <div class="subtitle" id="newsDate">2026年3月9日</div>
+                    <div class="market-header-meta">
+                        <div class="subtitle" id="newsDate">2026年3月9日</div>
+                        <button class="page-manual-refresh" id="newsManualRefresh" type="button" onclick="manualRefreshPage('news')"><i class="fas fa-rotate-right"></i><span>刷新新闻</span></button>
+                    </div>
                     <div class="news-tab-control">
                         <button class="news-tab-btn active" data-news-tab="general" onclick="switchNewsTab('general')">综合</button>
                         <button class="news-tab-btn" data-news-tab="tech" onclick="switchNewsTab('tech')">科技</button>
@@ -6625,7 +6653,10 @@
                 <div id="f1-list-view">
                     <div class="f1-header">
                         <h1><svg class="f1-logo f1-title-logo" viewBox="0 9 24 6" role="img" aria-label="Formula 1"><path d="M9.6 11.24h7.91L19.75 9H9.39c-2.85 0-3.62.34-5.17 1.81C2.71 12.3 0 15 0 15h3.38c.77-.75 2.2-2.13 2.85-2.75.92-.87 1.37-1.01 3.37-1.01zM20.39 9l-6 6H18l6-6h-3.61zm-3.25 2.61H9.88c-2.22 0-2.6.12-3.55 1.07C5.44 13.57 4 15 4 15h3.15l.75-.75c.49-.49.75-.55 1.78-.55h5.37l2.09-2.09z"/></svg><span>2026</span></h1>
-                        <div class="f1-subtitle">近期赛程</div>
+                        <div class="market-header-meta">
+                            <div class="f1-subtitle">近期赛程</div>
+                            <button class="page-manual-refresh" id="f1ManualRefresh" type="button" onclick="manualRefreshPage('f1')"><i class="fas fa-rotate-right"></i><span>刷新赛程</span></button>
+                        </div>
                     </div>
 
                     <!-- 下一场比赛倒计时 -->
@@ -6801,6 +6832,7 @@
         const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
         const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
         const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
+        const pageRefreshInFlight = new Map();
         const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_STALE_MS = 2 * 60 * 1000;
         const WEATHER_DEVICE_LOCATION_FAST_TIMEOUT = 5000;
@@ -6883,6 +6915,40 @@
             } else if (replaceHistory && window.location.pathname !== targetPath) {
                 window.history.replaceState({ page: normalizedPage }, '', targetPath);
             }
+            window.setTimeout(() => refreshPageOnEntry(normalizedPage), 0);
+        }
+
+        function setPageRefreshState(page, refreshing) {
+            const button = document.getElementById(page === 'market' ? 'marketRefreshBtn' : `${page}ManualRefresh`);
+            if (!button) return;
+            button.disabled = refreshing;
+            button.classList.toggle('is-refreshing', refreshing);
+        }
+
+        function refreshPageOnEntry(page) {
+            if (document.hidden || !document.getElementById(`page-${page}`)?.classList.contains('active')) return;
+            return refreshPageData(page);
+        }
+
+        function refreshPageData(page) {
+            if (pageRefreshInFlight.has(page)) return pageRefreshInFlight.get(page);
+            setPageRefreshState(page, true);
+            let task;
+            if (page === 'weather') task = loadWeather();
+            else if (page === 'market') task = Promise.all([loadMarket(), loadSentiment()]);
+            else if (page === 'news') task = loadNews();
+            else if (page === 'f1') task = loadF1();
+            else task = Promise.resolve();
+            const tracked = Promise.resolve(task).finally(() => {
+                pageRefreshInFlight.delete(page);
+                setPageRefreshState(page, false);
+            });
+            pageRefreshInFlight.set(page, tracked);
+            return tracked;
+        }
+
+        function manualRefreshPage(page) {
+            return refreshPageData(normalizePage(page));
         }
 
         const tabNav = document.querySelector('.tab-nav');
@@ -6935,6 +7001,10 @@
 
         window.addEventListener('popstate', () => {
             setActivePage(getPageFromPathname(), { replaceHistory: false });
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) refreshPageOnEntry(getPageFromPathname());
         });
 
         setActivePage(getPageFromPathname(), { replaceHistory: true });
@@ -8853,8 +8923,8 @@
             `).join('');
         }
 
-        loadWeather(); loadMarket(); loadNews(); loadMetar(); loadF1(); loadSentiment();
-        setInterval(() => { loadWeather(); loadMarket(); loadNews(); loadSentiment(); }, 5 * 60 * 1000);
+        // Serverless data is fetched only when its page is entered or when the
+        // user presses that page's refresh button. No background polling.
 
         // ========== TRADING PLAYGROUND ==========
         let tradingData = null;
@@ -9443,7 +9513,7 @@
                 <path class="spread-line" d="${linePath}"/>
             `;
         }
-        setInterval(() => { loadMetar(); }, 10 * 60 * 1000); // METAR 每10分钟刷新
+
 
         // === 美债收益率 Info 弹窗 ===
         const treasuryInfoData = {

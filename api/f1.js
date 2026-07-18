@@ -54,6 +54,11 @@ const GP_NAMES = {
   'United Arab Emirates': 'Abu Dhabi GP',
 };
 
+const DRIVER_HEADSHOT_OVERRIDES = {
+  34: 'https://media.formula1.com/image/upload/c_lfill,w_256/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/astonmartin/jakcra01/2026astonmartinjakcra01right.webp',
+  41: 'https://media.formula1.com/image/upload/c_lfill,w_256/q_auto/d_common:f1:2026:fallback:driver:2026fallbackdriverright.webp/v1740000000/common/f1/2026/racingbulls/arvlin01/2026racingbullsarvlin01right.webp',
+};
+
 // 根据城市返回正确的 GP 名称
 function getGPName(country, location) {
   if (country === 'United States') {
@@ -97,7 +102,7 @@ async function fetchSessionResults(sessionKey) {
       driver_code: driver.name_acronym || '',
       team_name: driver.team_name || '',
       team_colour: driver.team_colour || '',
-      headshot_url: driver.headshot_url || '',
+      headshot_url: DRIVER_HEADSHOT_OVERRIDES[result.driver_number] || driver.headshot_url || '',
       laps: result.number_of_laps,
       duration: result.duration,
       gap_to_leader: result.gap_to_leader,

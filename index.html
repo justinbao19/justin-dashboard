@@ -4654,7 +4654,6 @@
 
             .f1-next-race {
                 padding: 20px;
-                padding-top: 54px;
                 border-radius: 20px;
                 margin: 12px 0 16px;
                 box-shadow: none;
@@ -4671,16 +4670,23 @@
             }
 
             .f1-live-badge {
-                top: 12px;
-                right: 12px;
+                position: relative;
+                top: auto;
+                right: auto;
+                width: fit-content;
+                max-width: 100%;
+                min-height: 26px;
+                margin: 0 0 14px;
+                padding: 5px 11px;
+                line-height: 16px;
+                white-space: nowrap;
+                box-sizing: border-box;
                 border-radius: 999px;
             }
 
             .f1-next-round {
-                position: absolute;
-                top: 18px;
-                left: 20px;
-                max-width: calc(100% - 118px);
+                position: static;
+                max-width: 100%;
                 white-space: nowrap;
             }
 

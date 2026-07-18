@@ -29,8 +29,9 @@ test('missing 2026 driver photos use verified official headshots', async () => {
   }
 });
 
-test('mobile live badge reserves a separate header row from the round label', async () => {
+test('mobile live badge stays content-sized and flows above the race title', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /padding-top:\s*54px/);
-  assert.match(html, /\.f1-next-round\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?max-width:\s*calc\(100% - 118px\)/);
+  assert.match(html, /\.f1-live-badge\s*\{[\s\S]*?position:\s*relative;[\s\S]*?width:\s*fit-content;[\s\S]*?min-height:\s*26px;[\s\S]*?margin:\s*0 0 14px;/);
+  assert.match(html, /\.f1-next-round\s*\{[\s\S]*?position:\s*static;[\s\S]*?max-width:\s*100%/);
+  assert.doesNotMatch(html, /padding-top:\s*54px/);
 });

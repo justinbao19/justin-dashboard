@@ -74,124 +74,254 @@
             height: 100dvh;
             overflow: hidden;
             z-index: 0;
+            isolation: isolate;
+            background: #335a78;
+            --cloud-opacity: 0.34;
+            --cloud-back-duration: 72s;
+            --cloud-mid-duration: 54s;
+            --cloud-front-duration: 40s;
         }
 
-        /* 所有天气都用深色渐变保证文字可读 */
-        .weather-scene.clear-day {
-            background: linear-gradient(180deg, #1e3a5f 0%, #3d6a9c 30%, #5a8fc4 60%, #7eb3e0 100%);
+        .weather-scene::after {
+            content: '';
+            position: absolute;
+            z-index: 8;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(180deg, rgba(4, 18, 32, 0.16), transparent 28%, transparent 68%, rgba(9, 27, 39, 0.12)),
+                radial-gradient(ellipse at 50% 112%, rgba(218, 235, 244, 0.14), transparent 58%);
         }
 
-        .weather-scene.clear-night {
-            background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 40%, #415a77 100%);
+        .weather-sky {
+            position: absolute;
+            z-index: 0;
+            inset: -2px;
+            opacity: 0;
+            transform: scale(1.01);
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .weather-sky.is-active { opacity: 1; }
 
-        .weather-scene.cloudy {
-            background: linear-gradient(180deg, #3d4f5f 0%, #5a6c7a 40%, #7a8c98 100%);
+        .atmospheric-light {
+            position: absolute;
+            z-index: 1;
+            inset: 0;
+            opacity: 0.72;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at var(--light-x, 78%) var(--light-y, 16%), rgba(255, 236, 184, 0.24), transparent 19%),
+                linear-gradient(180deg, transparent 54%, rgba(196, 224, 239, 0.1));
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .weather-scene.scene-night .atmospheric-light { opacity: 0.24; }
+        .weather-scene.scene-rain .atmospheric-light,
+        .weather-scene.scene-fog .atmospheric-light { opacity: 0.18; }
 
-        .weather-scene.rainy {
-            background: linear-gradient(180deg, #2c3e50 0%, #4a6572 50%, #6a8a99 100%);
-        }
-
-        .weather-scene.foggy {
-            background: linear-gradient(180deg, #4a5568 0%, #718096 50%, #a0aec0 100%);
-        }
-
-        /* 太阳 */
+        /* 太阳：缓慢呼吸光晕，位置由当天日照进度决定 */
         .sun {
             position: absolute;
-            top: 8%; right: 12%;
-            width: 100px; height: 100px;
-            background: radial-gradient(circle, rgba(255,255,200,0.9) 0%, rgba(255,200,100,0.6) 40%, transparent 70%);
+            z-index: 2;
+            left: var(--sun-x, 78%);
+            top: var(--sun-y, 14%);
+            width: clamp(92px, 10vw, 148px);
+            aspect-ratio: 1;
             border-radius: 50%;
-            animation: sunPulse 4s ease-in-out infinite;
+            opacity: 0;
+            transform: translate3d(-50%, -50%, 0) scale(0.96);
+            transition: left 700ms cubic-bezier(0.16, 1, 0.3, 1), top 700ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        @keyframes sunPulse {
-            0%, 100% { transform: scale(1); filter: blur(0px); }
-            50% { transform: scale(1.1); filter: blur(2px); }
+        .sun::before,
+        .sun::after {
+            content: '';
+            position: absolute;
+            border-radius: inherit;
+        }
+        .sun::before {
+            inset: 18%;
+            background: radial-gradient(circle at 40% 34%, #fffbe1 0 12%, #ffe49a 40%, rgba(255, 190, 92, 0.7) 68%, transparent 72%);
+            box-shadow: 0 0 34px rgba(255, 224, 148, 0.4);
+        }
+        .sun::after {
+            inset: -42%;
+            background: radial-gradient(circle, rgba(255, 229, 155, 0.2), transparent 66%);
+            animation: solarBreathe 8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+        }
+        .weather-scene.scene-sun .sun { opacity: 0.94; }
+        @keyframes solarBreathe {
+            0%, 100% { opacity: 0.68; transform: scale(0.96); }
+            50% { opacity: 1; transform: scale(1.035); }
         }
 
         /* 月亮 */
         .moon {
             position: absolute;
-            top: 10%; right: 15%;
-            width: 70px; height: 70px;
-            background: radial-gradient(circle at 35% 35%, #f5f5f5 0%, #e0e0e0 50%, #c0c0c0 100%);
+            z-index: 2;
+            left: var(--moon-x, 82%);
+            top: var(--moon-y, 14%);
+            width: clamp(58px, 7vw, 86px);
+            aspect-ratio: 1;
+            background:
+                radial-gradient(circle at 34% 30%, rgba(117, 125, 138, 0.18) 0 5%, transparent 6%),
+                radial-gradient(circle at 65% 57%, rgba(117, 125, 138, 0.13) 0 9%, transparent 10%),
+                radial-gradient(circle at 38% 70%, rgba(117, 125, 138, 0.12) 0 7%, transparent 8%),
+                radial-gradient(circle at 38% 34%, #fbfaf0 0 16%, #e7e8e8 52%, #b9c0c9 100%);
             border-radius: 50%;
-            box-shadow: 0 0 50px 20px rgba(255,255,255,0.1);
-            display: none;
+            box-shadow: 0 0 46px 14px rgba(216, 229, 255, 0.13), inset -7px -5px 12px rgba(36, 48, 64, 0.18);
+            opacity: 0;
+            transform: translate3d(-50%, -50%, 0);
+            transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .weather-scene.scene-night .moon { opacity: 0.88; }
 
         /* 星星 */
-        .stars { position: absolute; width: 100%; height: 100%; }
+        .stars {
+            position: absolute;
+            z-index: 1;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .weather-scene.scene-night .stars { opacity: 0.72; }
         .star {
             position: absolute;
-            width: 2px; height: 2px;
-            background: white;
+            width: var(--star-size, 2px);
+            height: var(--star-size, 2px);
+            background: rgba(235, 243, 255, 0.9);
             border-radius: 50%;
-            animation: twinkle 2s ease-in-out infinite;
+            box-shadow: 0 0 5px rgba(213, 231, 255, 0.35);
+            animation: twinkle var(--twinkle-time, 4s) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+            animation-delay: var(--twinkle-delay, 0s);
         }
         @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 0.92; transform: scale(1.12); }
         }
 
-        /* 云朵 */
-        .clouds { position: absolute; width: 100%; height: 100%; }
-        .cloud {
+        /* 三层体积云：不同速度形成远近景深 */
+        .clouds {
             position: absolute;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 100px;
-            filter: blur(3px);
+            z-index: 3;
+            inset: 0;
+            opacity: var(--cloud-opacity);
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
         }
-        .cloud::before, .cloud::after {
-            content: '';
+        .cloud-layer {
             position: absolute;
-            background: inherit;
-            border-radius: 50%;
+            inset: -14% -24%;
+            transform: translate3d(-10%, 0, 0) scale(1.05);
+            background-repeat: repeat-x;
+            animation-name: cloudDrift;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
         }
-        .cloud-1 { width: 140px; height: 45px; top: 18%; animation: cloudMove 28s linear infinite; }
-        .cloud-1::before { width: 55px; height: 55px; top: -28px; left: 25px; }
-        .cloud-1::after { width: 75px; height: 75px; top: -38px; left: 60px; }
-
-        .cloud-2 { width: 170px; height: 55px; top: 38%; animation: cloudMove 38s linear infinite; animation-delay: -12s; opacity: 0.7; }
-        .cloud-2::before { width: 65px; height: 65px; top: -32px; left: 35px; }
-        .cloud-2::after { width: 90px; height: 90px; top: -45px; left: 80px; }
-
-        .cloud-3 { width: 110px; height: 38px; top: 58%; animation: cloudMove 32s linear infinite; animation-delay: -22s; opacity: 0.5; }
-        .cloud-3::before { width: 45px; height: 45px; top: -22px; left: 18px; }
-        .cloud-3::after { width: 60px; height: 60px; top: -30px; left: 45px; }
-
-        @keyframes cloudMove {
-            0% { left: -250px; }
-            100% { left: 100vw; }
+        .cloud-layer-back {
+            top: -18%;
+            bottom: 42%;
+            opacity: 0.44;
+            filter: blur(18px);
+            background-image:
+                radial-gradient(ellipse at 18% 58%, rgba(237, 244, 248, 0.68) 0 9%, transparent 25%),
+                radial-gradient(ellipse at 45% 42%, rgba(229, 239, 245, 0.56) 0 12%, transparent 29%),
+                radial-gradient(ellipse at 76% 61%, rgba(241, 246, 249, 0.62) 0 10%, transparent 27%);
+            background-size: 78% 100%;
+            animation-duration: var(--cloud-back-duration);
+        }
+        .cloud-layer-mid {
+            top: 7%;
+            bottom: 20%;
+            opacity: 0.56;
+            filter: blur(11px);
+            background-image:
+                radial-gradient(ellipse at 12% 54%, rgba(245, 248, 250, 0.72) 0 8%, transparent 23%),
+                radial-gradient(ellipse at 37% 63%, rgba(228, 237, 242, 0.68) 0 12%, transparent 28%),
+                radial-gradient(ellipse at 69% 46%, rgba(239, 244, 247, 0.7) 0 11%, transparent 27%),
+                radial-gradient(ellipse at 93% 67%, rgba(221, 232, 238, 0.58) 0 9%, transparent 24%);
+            background-size: 88% 100%;
+            animation-duration: var(--cloud-mid-duration);
+            animation-delay: -17s;
+        }
+        .cloud-layer-front {
+            top: 28%;
+            bottom: -24%;
+            opacity: 0.42;
+            filter: blur(7px);
+            background-image:
+                radial-gradient(ellipse at 20% 48%, rgba(244, 248, 250, 0.74) 0 8%, transparent 23%),
+                radial-gradient(ellipse at 52% 67%, rgba(215, 228, 235, 0.66) 0 13%, transparent 30%),
+                radial-gradient(ellipse at 83% 43%, rgba(235, 242, 246, 0.7) 0 10%, transparent 26%);
+            background-size: 95% 100%;
+            animation-duration: var(--cloud-front-duration);
+            animation-delay: -29s;
+        }
+        .weather-scene.scene-clear { --cloud-opacity: 0.22; }
+        .weather-scene.scene-cloud { --cloud-opacity: 0.78; }
+        .weather-scene.scene-rain { --cloud-opacity: 0.9; }
+        .weather-scene.scene-fog { --cloud-opacity: 0.46; }
+        .weather-scene.scene-night .cloud-layer { filter: blur(14px) brightness(0.68) saturate(0.72); }
+        @keyframes cloudDrift {
+            from { transform: translate3d(-11%, 0, 0) scale(1.05); }
+            to { transform: translate3d(11%, 0, 0) scale(1.05); }
         }
 
-        /* 雨 */
-        .rain { position: absolute; width: 100%; height: 100%; }
-        .raindrop {
+        /* Canvas 只负责降水粒子，避免大量 DOM 节点 */
+        .weather-particles {
             position: absolute;
-            width: 2px; height: 18px;
-            background: linear-gradient(transparent, rgba(255,255,255,0.5));
-            animation: rainFall 0.7s linear infinite;
+            z-index: 5;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 360ms cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes rainFall {
-            0% { transform: translateY(-20px); }
-            100% { transform: translateY(100vh); }
-        }
+        .weather-scene.has-particles .weather-particles { opacity: 1; }
 
-        /* 雾 */
+        /* 多层雾带，远近方向相反避免机械平移 */
         .fog {
             position: absolute;
-            width: 200%; height: 100%;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 25%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 75%, transparent 100%);
-            animation: fogMove 25s linear infinite;
-            display: none;
+            z-index: 6;
+            inset: 0;
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes fogMove {
-            0% { transform: translateX(-50%); }
-            100% { transform: translateX(0%); }
+        .weather-scene.scene-fog .fog { opacity: 0.82; }
+        .fog-bank {
+            position: absolute;
+            left: -30%;
+            width: 160%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse, rgba(229, 238, 241, 0.32), rgba(217, 229, 234, 0.12) 48%, transparent 72%);
+            filter: blur(18px);
+            animation: fogDrift 28s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+        }
+        .fog-bank-1 { top: 10%; height: 38%; opacity: 0.66; }
+        .fog-bank-2 { top: 35%; height: 42%; opacity: 0.84; animation-duration: 36s; animation-direction: alternate-reverse; }
+        .fog-bank-3 { top: 62%; height: 34%; opacity: 0.58; animation-duration: 44s; }
+        @keyframes fogDrift {
+            from { transform: translate3d(-7%, 0, 0) scale(1); }
+            to { transform: translate3d(7%, 2%, 0) scale(1.06); }
+        }
+
+        .lightning-flash {
+            position: absolute;
+            z-index: 7;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 68% 16%, rgba(236, 245, 255, 0.86), rgba(189, 216, 239, 0.18) 28%, transparent 58%);
+        }
+        .weather-scene.scene-thunder .lightning-flash {
+            animation: lightningFlash 8.6s steps(1, end) infinite;
+        }
+        @keyframes lightningFlash {
+            0%, 78%, 81%, 83%, 100% { opacity: 0; }
+            79% { opacity: 0.74; }
+            80% { opacity: 0.16; }
+            82% { opacity: 0.46; }
         }
 
         /* 其他页面背景 */
@@ -5577,6 +5707,26 @@
             .weather-typhoon-card {
                 transition: none !important;
             }
+            .weather-sky,
+            .atmospheric-light,
+            .sun,
+            .moon,
+            .stars,
+            .clouds,
+            .fog,
+            .weather-particles {
+                transition: none !important;
+            }
+            .sun::after,
+            .star,
+            .cloud-layer,
+            .fog-bank,
+            .lightning-flash {
+                animation: none !important;
+            }
+            .weather-particles {
+                display: none !important;
+            }
         }
         @media (min-width: 1200px) {
             .tab-nav {
@@ -6379,16 +6529,24 @@
 <body>
     <!-- Weather Scene -->
     <div class="weather-scene clear-day" id="weatherScene">
+        <div class="weather-sky is-active" id="weatherSkyA" style="background:linear-gradient(180deg,#183d63 0%,#4279aa 46%,#8ab8d7 100%)"></div>
+        <div class="weather-sky" id="weatherSkyB"></div>
+        <div class="atmospheric-light"></div>
         <div class="sun"></div>
         <div class="moon"></div>
         <div class="stars" id="stars"></div>
         <div class="clouds">
-            <div class="cloud cloud-1"></div>
-            <div class="cloud cloud-2"></div>
-            <div class="cloud cloud-3"></div>
+            <div class="cloud-layer cloud-layer-back"></div>
+            <div class="cloud-layer cloud-layer-mid"></div>
+            <div class="cloud-layer cloud-layer-front"></div>
         </div>
-        <div class="rain" id="rain"></div>
-        <div class="fog" id="fog"></div>
+        <canvas class="weather-particles" id="weatherParticles" aria-hidden="true"></canvas>
+        <div class="fog" id="fog" aria-hidden="true">
+            <div class="fog-bank fog-bank-1"></div>
+            <div class="fog-bank fog-bank-2"></div>
+            <div class="fog-bank fog-bank-3"></div>
+        </div>
+        <div class="lightning-flash" aria-hidden="true"></div>
     </div>
 
     <div class="page-bg market-bg" id="bg-market"></div>
@@ -7222,23 +7380,308 @@
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) refreshPageOnEntry(getPageFromPathname());
+            if (document.hidden) {
+                stopWeatherSceneAnimation();
+                return;
+            }
+            startWeatherSceneAnimation();
+            refreshPageOnEntry(getPageFromPathname());
         });
 
         setActivePage(getPageFromPathname(), { replaceHistory: true });
 
-        function updateScene(skycon) {
-            const s = document.getElementById('weatherScene');
-            const isNight = skycon.includes('NIGHT'), isRain = skycon.includes('RAIN'), isFog = skycon.includes('FOG') || skycon.includes('HAZE'), isCloudy = skycon.includes('CLOUDY');
-            s.className = 'weather-scene ' + (isNight ? 'clear-night' : isRain ? 'rainy' : isFog ? 'foggy' : isCloudy ? 'cloudy' : 'clear-day');
-            document.querySelector('.sun').style.display = (!isNight && !isRain && !isFog) ? 'block' : 'none';
-            document.querySelector('.moon').style.display = isNight ? 'block' : 'none';
-            document.getElementById('fog').style.display = isFog ? 'block' : 'none';
-            document.getElementById('stars').innerHTML = '';
-            document.getElementById('rain').innerHTML = '';
-            if (isNight) { for(let i=0;i<60;i++) { const st=document.createElement('div'); st.className='star'; st.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*70}%;animation-delay:${Math.random()*2}s`; document.getElementById('stars').appendChild(st); } }
-            if (isRain) { for(let i=0;i<100;i++) { const d=document.createElement('div'); d.className='raindrop'; d.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*0.7}s;animation-duration:${0.5+Math.random()*0.3}s`; document.getElementById('rain').appendChild(d); } }
+        const weatherMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const weatherSceneState = {
+            canvas: document.getElementById('weatherParticles'),
+            context: null,
+            width: 0,
+            height: 0,
+            dpr: 1,
+            frame: null,
+            lastFrameAt: 0,
+            particles: [],
+            particleType: null,
+            intensity: 0,
+            windDrift: 0,
+            skyLayer: 'A',
+            skyGradient: '',
+            lowPower: false
+        };
+
+        const WEATHER_SKIES = {
+            clearDay: 'linear-gradient(180deg,#153b62 0%,#3f75a6 46%,#8ab9d8 100%)',
+            clearNight: 'linear-gradient(180deg,#071421 0%,#122b45 48%,#365269 100%)',
+            cloudDay: 'linear-gradient(180deg,#354b5c 0%,#607889 48%,#8fa3ae 100%)',
+            cloudNight: 'linear-gradient(180deg,#0a1722 0%,#233441 52%,#4b5d68 100%)',
+            rainDay: 'linear-gradient(180deg,#243746 0%,#496270 52%,#738b96 100%)',
+            rainNight: 'linear-gradient(180deg,#08141e 0%,#263b49 54%,#506875 100%)',
+            fogDay: 'linear-gradient(180deg,#526675 0%,#83949e 52%,#afbdc4 100%)',
+            fogNight: 'linear-gradient(180deg,#17242e 0%,#465963 52%,#77878e 100%)',
+            snowDay: 'linear-gradient(180deg,#5f7485 0%,#91a8b7 48%,#c6d4dc 100%)',
+            snowNight: 'linear-gradient(180deg,#101d29 0%,#344b5d 50%,#6e8492 100%)',
+            dustDay: 'linear-gradient(180deg,#63584c 0%,#9a856c 52%,#c7b38f 100%)',
+            dustNight: 'linear-gradient(180deg,#191816 0%,#4b4339 54%,#756854 100%)'
+        };
+
+        function isWeatherSceneVisible() {
+            return Boolean(document.querySelector('#page-weather.active, #page-typhoon.active'));
         }
+
+        function setWeatherSky(gradient) {
+            if (!gradient || weatherSceneState.skyGradient === gradient) return;
+            const current = document.getElementById(`weatherSky${weatherSceneState.skyLayer}`);
+            const nextLayer = weatherSceneState.skyLayer === 'A' ? 'B' : 'A';
+            const next = document.getElementById(`weatherSky${nextLayer}`);
+            next.style.background = gradient;
+            next.classList.add('is-active');
+            current.classList.remove('is-active');
+            weatherSceneState.skyLayer = nextLayer;
+            weatherSceneState.skyGradient = gradient;
+        }
+
+        function ensureWeatherStars() {
+            const stars = document.getElementById('stars');
+            if (stars.childElementCount) return;
+            const count = (weatherSceneState.lowPower || window.innerWidth < 480) ? 30 : 52;
+            const fragment = document.createDocumentFragment();
+            for (let index = 0; index < count; index += 1) {
+                const star = document.createElement('i');
+                const size = 1 + ((index * 17) % 18) / 10;
+                star.className = 'star';
+                star.style.cssText = [
+                    `left:${(index * 37.7) % 100}%`,
+                    `top:${6 + ((index * 23.4) % 62)}%`,
+                    `--star-size:${size.toFixed(1)}px`,
+                    `--twinkle-time:${(3.2 + (index % 7) * 0.54).toFixed(2)}s`,
+                    `--twinkle-delay:-${((index % 11) * 0.41).toFixed(2)}s`
+                ].join(';');
+                fragment.appendChild(star);
+            }
+            stars.appendChild(fragment);
+        }
+
+        function resizeWeatherCanvas() {
+            const { canvas } = weatherSceneState;
+            const scene = document.getElementById('weatherScene');
+            if (!canvas || !scene) return;
+            const rect = scene.getBoundingClientRect();
+            const lowHardware = (navigator.deviceMemory && navigator.deviceMemory <= 4)
+                || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+            weatherSceneState.lowPower = Boolean(lowHardware || rect.width < 480);
+            weatherSceneState.dpr = Math.min(window.devicePixelRatio || 1, weatherSceneState.lowPower ? 1 : 1.5);
+            weatherSceneState.width = Math.max(1, Math.round(rect.width));
+            weatherSceneState.height = Math.max(1, Math.round(rect.height));
+            canvas.width = Math.round(weatherSceneState.width * weatherSceneState.dpr);
+            canvas.height = Math.round(weatherSceneState.height * weatherSceneState.dpr);
+            weatherSceneState.context = canvas.getContext('2d', { alpha: true });
+            weatherSceneState.context?.setTransform(weatherSceneState.dpr, 0, 0, weatherSceneState.dpr, 0, 0);
+        }
+
+        function resolveSceneIntensity(skycon, weather = {}) {
+            const realtime = weather.realtime || weather;
+            const localIntensity = Number(
+                realtime?.precipitation?.local?.intensity
+                ?? realtime?.precipitation?.intensity
+                ?? weather?.hourly?.precipitation?.[0]?.value
+                ?? 0
+            );
+            const conditionBase = skycon.includes('STORM') ? 1
+                : (skycon.includes('HEAVY') ? 0.86
+                    : (skycon.includes('MODERATE') ? 0.62
+                        : ((skycon.includes('LIGHT') || skycon.includes('SNOW')) ? 0.36 : 0)));
+            return Math.min(1, Math.max(conditionBase, localIntensity > 0 ? 0.26 + Math.min(localIntensity / 8, 0.74) : 0));
+        }
+
+        function buildWeatherParticles(type, intensity, windDrift) {
+            resizeWeatherCanvas();
+            const { width, height, lowPower } = weatherSceneState;
+            const baseCount = type === 'rain' ? 138 : (type === 'snow' ? 84 : 68);
+            const count = Math.max(18, Math.round(baseCount * (0.34 + intensity * 0.72) * (lowPower ? 0.58 : 1)));
+            weatherSceneState.particles = Array.from({ length: count }, (_, index) => {
+                const depth = 0.22 + Math.random() * 0.78;
+                return {
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    depth,
+                    length: type === 'rain' ? 10 + depth * 22 + intensity * 10 : 0,
+                    size: type === 'snow' ? 0.8 + depth * 2.5 : 0.7 + depth * 1.3,
+                    speed: type === 'rain'
+                        ? 380 + depth * 520 + intensity * 260
+                        : (type === 'snow' ? 26 + depth * 54 : 34 + depth * 76),
+                    alpha: 0.18 + depth * 0.48,
+                    phase: index * 0.63 + Math.random() * Math.PI,
+                    wind: windDrift * (0.45 + depth * 0.8)
+                };
+            });
+            weatherSceneState.particleType = type;
+            weatherSceneState.intensity = intensity;
+            weatherSceneState.windDrift = windDrift;
+        }
+
+        function drawWeatherParticles(now) {
+            const state = weatherSceneState;
+            const ctx = state.context;
+            if (!ctx || !state.particleType || document.hidden || weatherMotionQuery.matches || !isWeatherSceneVisible()) {
+                state.frame = null;
+                return;
+            }
+            const targetFrameMs = state.lowPower ? 1000 / 30 : 1000 / 60;
+            if (now - state.lastFrameAt < targetFrameMs) {
+                state.frame = requestAnimationFrame(drawWeatherParticles);
+                return;
+            }
+            const deltaSeconds = Math.min((now - (state.lastFrameAt || now)) / 1000, 0.05) || targetFrameMs / 1000;
+            state.lastFrameAt = now;
+            ctx.clearRect(0, 0, state.width, state.height);
+
+            for (const particle of state.particles) {
+                if (state.particleType === 'rain') {
+                    particle.y += particle.speed * deltaSeconds;
+                    particle.x += particle.wind * 150 * deltaSeconds;
+                    const slant = particle.wind * particle.length * 0.7;
+                    ctx.beginPath();
+                    ctx.moveTo(particle.x, particle.y);
+                    ctx.lineTo(particle.x - slant, particle.y - particle.length);
+                    ctx.lineWidth = 0.45 + particle.depth * 1.1;
+                    ctx.strokeStyle = `rgba(220,238,249,${particle.alpha * (0.6 + state.intensity * 0.55)})`;
+                    ctx.stroke();
+                } else if (state.particleType === 'snow') {
+                    particle.phase += deltaSeconds * (0.65 + particle.depth);
+                    particle.y += particle.speed * deltaSeconds;
+                    particle.x += (particle.wind * 34 + Math.sin(particle.phase) * (8 + particle.depth * 14)) * deltaSeconds;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(241,247,250,${particle.alpha * 0.86})`;
+                    ctx.fill();
+                } else {
+                    particle.phase += deltaSeconds * 0.4;
+                    particle.y += Math.sin(particle.phase) * 4 * deltaSeconds;
+                    particle.x += (34 + Math.abs(particle.wind) * 72) * deltaSeconds * Math.sign(particle.wind || 1);
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(222,203,168,${particle.alpha * 0.46})`;
+                    ctx.fill();
+                }
+
+                const margin = 50;
+                if (particle.y > state.height + margin || particle.x > state.width + margin || particle.x < -margin) {
+                    particle.y = state.particleType === 'rain' ? -particle.length : -margin * Math.random();
+                    particle.x = Math.random() * state.width;
+                }
+            }
+            state.frame = requestAnimationFrame(drawWeatherParticles);
+        }
+
+        function stopWeatherSceneAnimation({ clear = false } = {}) {
+            if (weatherSceneState.frame) cancelAnimationFrame(weatherSceneState.frame);
+            weatherSceneState.frame = null;
+            weatherSceneState.lastFrameAt = 0;
+            if (clear && weatherSceneState.context) {
+                weatherSceneState.context.clearRect(0, 0, weatherSceneState.width, weatherSceneState.height);
+            }
+        }
+
+        function startWeatherSceneAnimation() {
+            stopWeatherSceneAnimation();
+            if (!weatherSceneState.particleType || weatherMotionQuery.matches || document.hidden || !isWeatherSceneVisible()) return;
+            weatherSceneState.frame = requestAnimationFrame(drawWeatherParticles);
+        }
+
+        function updateCelestialPosition(scene, astro = {}, isNight = false) {
+            const now = new Date();
+            const sunrise = parseClockToDate(astro?.sunrise?.time || astro?.sunrise);
+            const sunset = parseClockToDate(astro?.sunset?.time || astro?.sunset);
+            let progress;
+            if (sunrise && sunset && sunset > sunrise) {
+                progress = Math.min(1, Math.max(0, (now - sunrise) / (sunset - sunrise)));
+            } else {
+                progress = Math.min(1, Math.max(0, (now.getHours() + now.getMinutes() / 60 - 6) / 12));
+            }
+            const daylightArc = Math.sin(progress * Math.PI);
+            const sunX = 8 + progress * 84;
+            const sunY = 46 - daylightArc * 37;
+            const nightProgress = ((now.getHours() + now.getMinutes() / 60 + 6) % 24) / 12;
+            const moonProgress = Math.min(1, Math.max(0, nightProgress));
+            scene.style.setProperty('--sun-x', `${sunX.toFixed(1)}%`);
+            scene.style.setProperty('--sun-y', `${sunY.toFixed(1)}%`);
+            scene.style.setProperty('--moon-x', `${(12 + moonProgress * 76).toFixed(1)}%`);
+            scene.style.setProperty('--moon-y', `${(44 - Math.sin(moonProgress * Math.PI) * 32).toFixed(1)}%`);
+            scene.style.setProperty('--light-x', `${(isNight ? 82 : sunX).toFixed(1)}%`);
+            scene.style.setProperty('--light-y', `${(isNight ? 14 : sunY).toFixed(1)}%`);
+        }
+
+        function updateScene(skycon, weather = {}) {
+            const scene = document.getElementById('weatherScene');
+            const normalized = String(skycon || 'CLEAR_DAY').toUpperCase();
+            const realtime = weather.realtime || weather;
+            const astro = weather?.astro || {};
+            const now = new Date();
+            const sunrise = parseClockToDate(astro?.sunrise?.time || astro?.sunrise);
+            const sunset = parseClockToDate(astro?.sunset?.time || astro?.sunset);
+            const isNight = sunrise && sunset
+                ? (now < sunrise || now > sunset)
+                : (normalized.includes('NIGHT') || (!normalized.includes('DAY') && (now.getHours() < 6 || now.getHours() >= 18)));
+            const isRain = normalized.includes('RAIN');
+            const isSnow = normalized.includes('SNOW') || normalized.includes('SLEET');
+            const isFog = normalized.includes('FOG') || normalized.includes('HAZE');
+            const isDust = normalized.includes('DUST') || normalized.includes('SAND');
+            const isCloud = normalized.includes('CLOUDY');
+            const isThunder = normalized.includes('STORM') || normalized.includes('THUNDER');
+            const sceneType = isRain ? 'rain' : (isSnow ? 'snow' : (isFog ? 'fog' : (isDust ? 'dust' : (isCloud ? 'cloud' : 'clear'))));
+            const particleType = isRain ? 'rain' : (isSnow ? 'snow' : (isDust ? 'dust' : null));
+            const intensity = resolveSceneIntensity(normalized, weather);
+            const windSpeed = Number(realtime?.wind?.speed || 0);
+            const windDirection = Number(realtime?.wind?.direction || 0);
+            const windDrift = Math.sin((windDirection + 180) * Math.PI / 180) * Math.min(1, 0.16 + windSpeed / 30);
+            const classes = [
+                'weather-scene',
+                `scene-${sceneType}`,
+                isNight ? 'scene-night' : 'scene-day',
+                (!isNight && !isRain && !isFog && !isSnow && !isDust) ? 'scene-sun' : '',
+                isThunder ? 'scene-thunder' : '',
+                particleType ? 'has-particles' : ''
+            ].filter(Boolean);
+            scene.className = classes.join(' ');
+
+            const skyKey = sceneType === 'rain' ? (isNight ? 'rainNight' : 'rainDay')
+                : (sceneType === 'snow' ? (isNight ? 'snowNight' : 'snowDay')
+                    : (sceneType === 'fog' ? (isNight ? 'fogNight' : 'fogDay')
+                        : (sceneType === 'dust' ? (isNight ? 'dustNight' : 'dustDay')
+                            : (sceneType === 'cloud' ? (isNight ? 'cloudNight' : 'cloudDay')
+                                : (isNight ? 'clearNight' : 'clearDay')))));
+            setWeatherSky(WEATHER_SKIES[skyKey]);
+            updateCelestialPosition(scene, astro, isNight);
+            ensureWeatherStars();
+
+            const cloudSpeedFactor = Math.max(0.75, Math.min(2.2, 0.82 + windSpeed / 18));
+            scene.style.setProperty('--cloud-back-duration', `${Math.round(76 / cloudSpeedFactor)}s`);
+            scene.style.setProperty('--cloud-mid-duration', `${Math.round(58 / cloudSpeedFactor)}s`);
+            scene.style.setProperty('--cloud-front-duration', `${Math.round(43 / cloudSpeedFactor)}s`);
+            document.querySelectorAll('.cloud-layer').forEach(layer => {
+                layer.style.animationDirection = windDrift < 0 ? 'reverse' : 'normal';
+            });
+
+            stopWeatherSceneAnimation({ clear: !particleType });
+            if (particleType) {
+                buildWeatherParticles(particleType, intensity || 0.34, windDrift);
+                startWeatherSceneAnimation();
+            } else {
+                weatherSceneState.particleType = null;
+                weatherSceneState.particles = [];
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (!weatherSceneState.particleType) return;
+            buildWeatherParticles(weatherSceneState.particleType, weatherSceneState.intensity, weatherSceneState.windDrift);
+            startWeatherSceneAnimation();
+        }, { passive: true });
+        const handleWeatherMotionPreference = () => {
+            if (weatherMotionQuery.matches) stopWeatherSceneAnimation({ clear: true });
+            else startWeatherSceneAnimation();
+        };
+        weatherMotionQuery.addEventListener?.('change', handleWeatherMotionPreference);
+        weatherMotionQuery.addListener?.(handleWeatherMotionPreference);
 
         function updateRelocateBadge(isLocating = false) {
             const badge = document.getElementById('weatherHeaderBadge');
@@ -7454,7 +7897,11 @@
                 if (!r.ok) return;
                 const d = (await r.json()).result;
                 const rt = d?.realtime || {};
-                updateScene(rt.skycon || 'CLEAR_DAY');
+                updateScene(rt.skycon || 'CLEAR_DAY', {
+                    realtime: rt,
+                    hourly: d.hourly || {},
+                    astro: d.daily?.astro?.[0] || {}
+                });
                 document.getElementById('tempMain').textContent = Math.round(rt.temperature ?? 0) + '°';
                 document.getElementById('condition').textContent = SKYCON_LABELS[rt.skycon] || '多云';
                 const t0 = d.daily?.temperature?.[0];

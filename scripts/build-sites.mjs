@@ -122,7 +122,7 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    if (pathname === '/' || pathname === '/weather' || pathname === '/market' || pathname === '/news' || pathname === '/f1') {
+    if (pathname === '/' || pathname === '/weather' || pathname === '/typhoon' || pathname === '/market' || pathname === '/news' || pathname === '/f1') {
       return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
     }
     if (data[pathname]) return json(data[pathname]);

@@ -1,5 +1,3 @@
-import { attachAstronomy, fetchQWeatherAstronomy } from '../lib/weather-astronomy.mjs';
-
 // Vercel Serverless Function - 彩云天气 + 可选 QWeather 天文增强
 const CAIYUN_KEY = process.env.CAIYUN_API_TOKEN || process.env.CAIYUN_KEY || '';
 const DEFAULT_LON = '121.405';
@@ -25,6 +23,7 @@ export default async function handler(req, res) {
       res.status(response.status).json(data);
       return;
     }
+    const { attachAstronomy, fetchQWeatherAstronomy } = await import('../lib/weather-astronomy.mjs');
     const astronomy = await fetchQWeatherAstronomy({ env: process.env, lon, lat }).catch(error => {
       console.warn('[weather] QWeather astronomy unavailable:', error.message);
       return null;

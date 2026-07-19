@@ -862,6 +862,7 @@
             gap: 18px;
             align-items: end;
         }
+        .nowcast-copy { min-width: 0; }
         .nowcast-summary {
             max-width: 620px;
             font-family: "SF Pro Display", "Helvetica Neue", sans-serif;
@@ -869,6 +870,12 @@
             font-weight: 600;
             line-height: 1.14;
             letter-spacing: -0.45px;
+        }
+        .nowcast-support {
+            margin-top: 9px;
+            color: rgba(255,255,255,0.76);
+            font-size: 13px;
+            line-height: 1.45;
         }
         .nowcast-meta {
             margin-top: 8px;
@@ -893,6 +900,22 @@
             margin-top: 7px;
             color: rgba(255,255,255,0.58);
             font-size: 11px;
+        }
+        .weather-precip-glyph {
+            display: grid !important;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            margin: 0 0 12px auto !important;
+            border-radius: 50%;
+            color: rgba(224, 243, 255, 0.94) !important;
+            background: rgba(151, 211, 247, 0.14);
+            font-size: 19px !important;
+            animation: weatherPrecipFloat 3.8s cubic-bezier(.37,0,.63,1) infinite;
+        }
+        @keyframes weatherPrecipFloat {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            50% { transform: translate3d(0, -3px, 0); }
         }
         .precipitation-timeline {
             display: grid;
@@ -1112,6 +1135,17 @@
         }
 
         /* Hourly */
+        .hourly-swipe-hint {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: rgba(255,255,255,0.48);
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: -0.08px;
+        }
         .hourly-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
         .hourly-scroll::-webkit-scrollbar { display: none; }
         .hourly-item { flex-shrink: 0; text-align: center; padding: 14px 12px; min-width: 65px; border-radius: 32px; background: rgba(255,255,255,0.12); }
@@ -1142,10 +1176,23 @@
             padding: 18px;
             color: white;
         }
-        .weather-detail-card .label { font-size: 14px; opacity: 0.7; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-        .weather-detail-card .value { font-size: 34px; font-weight: 600; }
+        .weather-detail-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .weather-detail-card .label { font-size: 14px; opacity: 0.7; display: flex; align-items: center; gap: 8px; }
+        .weather-detail-card .value { margin-top: 12px; font-size: 34px; font-weight: 600; }
         .weather-detail-card .unit { font-size: 18px; opacity: 0.7; }
         .weather-detail-card .desc { font-size: 15px; opacity: 0.7; margin-top: 6px; }
+        .weather-detail-icon {
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            color: rgba(235,247,255,0.9);
+            background: rgba(255,255,255,0.1);
+            font-size: 17px;
+        }
+        .weather-detail-icon.is-directional i { transform: rotate(var(--metric-angle, 0deg)); transition: transform 320ms cubic-bezier(.22,1,.36,1); }
 
         /* AQI */
         .weather-card-kicker {
@@ -1320,6 +1367,8 @@
             opacity: 0.72;
             text-align: right;
         }
+        .sun-phase-copy { min-width: 0; text-align: right; }
+        .sun-phase-duration { margin-top: 4px; font-size: 11px; opacity: 0.5; }
         .sun-progress {
             position: relative;
             z-index: 1;
@@ -6959,6 +7008,509 @@
             }
         }
 
+        /* Apple Weather-inspired mobile composition: one strict column, horizontal forecast, compact Bento metrics. */
+        @media (max-width: 760px) {
+            #page-weather .weather-layout,
+            #page-weather .weather-header,
+            #page-weather .weather-content {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+            }
+
+            #page-weather .weather-content {
+                grid-template-columns: minmax(0, 1fr);
+                grid-auto-columns: minmax(0, 1fr);
+                gap: 12px;
+                padding: 0 12px 24px;
+                overflow: clip;
+            }
+
+            #page-weather .weather-content > *,
+            #page-weather .weather-content > .weather-grid,
+            #page-weather .weather-content > .weather-stack {
+                grid-column: 1 !important;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                margin: 0;
+            }
+
+            #page-weather .weather-card,
+            #page-weather .weather-card > *,
+            #page-weather .weather-grid > *,
+            #page-weather .weather-stack > * {
+                min-width: 0;
+                max-width: 100%;
+            }
+
+            #page-weather .weather-card {
+                padding: 16px;
+                border: 0;
+                border-radius: 18px;
+                background: rgba(22, 38, 52, 0.52);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+                overflow: hidden;
+            }
+
+            #page-weather .weather-card .card-title {
+                width: 100%;
+                gap: 8px;
+                margin-bottom: 13px;
+                color: rgba(238,247,252,0.66);
+                font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: -0.12px;
+                text-transform: none;
+            }
+
+            #page-weather .weather-card-title-main {
+                min-width: 0;
+            }
+
+            #page-weather .weather-card-source {
+                max-width: 44%;
+                flex: 0 1 auto;
+                text-align: right;
+            }
+
+            .weather-precip-card {
+                background: rgba(20, 49, 70, 0.62) !important;
+            }
+
+            .weather-precip-card::after {
+                right: 0;
+                top: -72px;
+                width: 122px;
+                height: 190px;
+                opacity: 0.72;
+            }
+
+            .weather-precip-card .nowcast-hero {
+                grid-template-columns: minmax(0, 1fr) 76px;
+                align-items: center;
+                gap: 14px;
+            }
+
+            .weather-precip-card .nowcast-summary {
+                max-width: none;
+                font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+                font-size: 21px;
+                font-weight: 600;
+                line-height: 1.16;
+                letter-spacing: -0.42px;
+                overflow-wrap: anywhere;
+            }
+
+            .weather-precip-card .nowcast-support {
+                display: -webkit-box;
+                overflow: hidden;
+                margin-top: 8px;
+                color: rgba(238,247,252,0.74);
+                font-size: 12px;
+                line-height: 1.4;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .weather-precip-card .nowcast-meta {
+                margin-top: 6px;
+                font-size: 10px;
+                line-height: 1.35;
+            }
+
+            .weather-precip-card .nowcast-risk {
+                min-width: 0;
+                text-align: right;
+            }
+
+            .weather-precip-card .nowcast-risk strong {
+                font-size: 30px;
+                letter-spacing: -0.8px;
+            }
+
+            .weather-precip-card .weather-disclosure {
+                width: 100%;
+                max-width: 100%;
+                margin-top: 14px;
+            }
+
+            .weather-precip-card .precipitation-timeline {
+                width: 100%;
+                max-width: 100%;
+                grid-template-columns: repeat(24, minmax(0, 1fr));
+            }
+
+            .weather-typhoon-card {
+                grid-template-columns: 42px minmax(0, 1fr) 40px;
+                min-height: 96px;
+                padding: 13px 12px !important;
+                gap: 11px;
+            }
+
+            .weather-typhoon-card .typhoon-card-icon {
+                width: 42px;
+                height: 42px;
+                border: 0;
+                border-radius: 50%;
+                font-size: 22px;
+            }
+
+            .weather-typhoon-card .typhoon-card-action {
+                width: 40px;
+                min-height: 40px;
+                border: 0;
+                border-radius: 50%;
+            }
+
+            .weather-typhoon-card .typhoon-card-title { font-size: 16px; }
+            .weather-typhoon-card .typhoon-card-description { -webkit-line-clamp: 1; }
+
+            .weather-hourly-card {
+                padding-right: 0 !important;
+                padding-left: 0 !important;
+            }
+
+            .weather-hourly-card .card-title {
+                padding: 0 16px;
+            }
+
+            .hourly-swipe-hint {
+                margin-left: auto;
+                padding-left: 8px;
+                white-space: nowrap;
+            }
+
+            .hourly-swipe-hint i {
+                animation: hourlySwipeCue 2.4s cubic-bezier(.22,1,.36,1) infinite;
+            }
+
+            .hourly-scroll {
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                gap: 6px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 4px 16px 8px;
+                scroll-padding-inline: 16px;
+                scroll-snap-type: x proximity;
+                overscroll-behavior-inline: contain;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-x;
+            }
+
+            .hourly-scroll:focus-visible {
+                outline: 2px solid rgba(104, 190, 255, 0.88);
+                outline-offset: -2px;
+            }
+
+            .hourly-item {
+                flex: 0 0 62px;
+                min-width: 62px;
+                padding: 10px 5px;
+                border-radius: 22px;
+                background: transparent;
+                scroll-snap-align: start;
+            }
+
+            .hourly-item.now {
+                background: rgba(255,255,255,0.18);
+                box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+            }
+
+            .hourly-time { font-size: 12px; }
+            .hourly-icon { width: 30px; height: 30px; }
+            .hourly-temp { font-size: 17px; }
+
+            @keyframes hourlySwipeCue {
+                0%, 70%, 100% { transform: translate3d(0,0,0); opacity: 0.62; }
+                82% { transform: translate3d(3px,0,0); opacity: 1; }
+            }
+
+            .weather-daily-card .daily-item {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .weather-daily-card .daily-temps {
+                min-width: 0;
+            }
+
+            .weather-details-grid {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .weather-detail-card {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                min-height: 112px;
+                aspect-ratio: 1 / 1.08;
+                padding: 12px;
+                border: 0;
+                border-radius: 16px;
+                background: rgba(20, 38, 52, 0.52);
+                box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+                overflow: hidden;
+            }
+
+            .weather-detail-card::after {
+                content: '';
+                position: absolute;
+                right: -24px;
+                bottom: -28px;
+                width: 72px;
+                height: 72px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.035);
+                pointer-events: none;
+            }
+
+            .weather-detail-head {
+                position: relative;
+                z-index: 1;
+            }
+
+            .weather-detail-card .label {
+                margin: 0;
+                color: rgba(238,247,252,0.62);
+                font-size: 10px;
+                font-weight: 600;
+                letter-spacing: -0.08px;
+            }
+
+            .weather-detail-icon {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+
+            .weather-detail-card .value {
+                position: relative;
+                z-index: 1;
+                margin-top: 8px;
+                font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+                font-size: clamp(21px, 6.2vw, 26px);
+                font-weight: 600;
+                line-height: 1;
+                letter-spacing: -0.5px;
+                white-space: nowrap;
+            }
+
+            .weather-detail-card .unit {
+                margin-left: 2px;
+                font-size: 10px;
+                font-weight: 500;
+                letter-spacing: -0.08px;
+            }
+
+            .weather-detail-card .desc {
+                position: relative;
+                z-index: 1;
+                display: -webkit-box;
+                overflow: hidden;
+                min-height: 26px;
+                margin-top: 7px;
+                color: rgba(238,247,252,0.58);
+                font-size: 10px;
+                line-height: 1.3;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                overflow-wrap: anywhere;
+            }
+
+            .weather-detail-humidity .weather-detail-icon i { animation: weatherMetricPulse 3.2s cubic-bezier(.37,0,.63,1) infinite; }
+            .weather-detail-visibility .weather-detail-icon i { animation: weatherMetricFade 3.6s cubic-bezier(.37,0,.63,1) infinite; }
+            .weather-detail-pressure .weather-detail-icon i { animation: weatherMetricTilt 4s cubic-bezier(.37,0,.63,1) infinite; }
+            .weather-detail-uv .weather-detail-icon i { animation: weatherMetricSun 12s linear infinite; }
+
+            @keyframes weatherMetricPulse { 0%,100% { transform: translateY(0) scale(0.94); } 50% { transform: translateY(1px) scale(1.06); } }
+            @keyframes weatherMetricFade { 0%,100% { opacity: 0.68; } 50% { opacity: 1; } }
+            @keyframes weatherMetricTilt { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+            @keyframes weatherMetricSun { to { transform: rotate(360deg); } }
+
+            .weather-sun-card .sun-phase-meta {
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr);
+                align-items: center;
+                gap: 12px;
+            }
+
+            .weather-sun-card::after {
+                right: 0;
+                width: 132px;
+            }
+
+            .weather-sun-card .sun-phase-copy {
+                min-width: 0;
+                text-align: right;
+            }
+
+            .weather-sun-card .sun-phase-note {
+                display: -webkit-box;
+                overflow: hidden;
+                font-size: 11px;
+                line-height: 1.35;
+                text-align: right;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .weather-sun-card .sun-phase-duration {
+                font-size: 10px;
+            }
+
+            .weather-sun-card .sun-times {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .weather-sun-card .sun-time-item,
+            .weather-sun-card .sun-rain-summary {
+                min-width: 0;
+                padding: 12px;
+                border: 0;
+                border-radius: 14px;
+                background: rgba(255,255,255,0.075);
+            }
+
+            .weather-sun-card .sun-time-value { font-size: 24px; }
+            .weather-sun-card .sun-time-desc {
+                display: -webkit-box;
+                overflow: hidden;
+                font-size: 10px;
+                line-height: 1.35;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .weather-sun-card .moon-phase-layout {
+                grid-template-columns: minmax(0, 1fr) 54px;
+            }
+
+            .weather-sun-card .moon-phase-art {
+                grid-column: 2;
+                grid-row: 1;
+            }
+
+            .weather-sun-card .moon-phase-copy {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .weather-sun-card .moon-phase-name { font-size: 21px; }
+            .weather-sun-card .moon-phase-source {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .weather-commute-card .commute-summary {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: start;
+                gap: 10px;
+            }
+
+            .weather-commute-card .commute-summary-main { font-size: 19px; }
+            .weather-commute-card .commute-summary-sub {
+                display: -webkit-box;
+                overflow: hidden;
+                font-size: 11px;
+                line-height: 1.4;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .weather-commute-card .commute-summary-badge {
+                width: 38px;
+                height: 38px;
+                justify-content: center;
+                padding: 0;
+                border: 0;
+                border-radius: 50%;
+            }
+
+            .weather-commute-card .commute-summary-badge span { display: none; }
+
+            .weather-commute-card .commute-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .weather-commute-card .commute-item {
+                min-width: 0;
+                min-height: 132px;
+                padding: 13px;
+                border: 0;
+                border-radius: 15px;
+                background: rgba(255,255,255,0.075);
+            }
+
+            .weather-commute-card .commute-item:nth-child(3) {
+                grid-column: 1 / -1;
+                min-height: 112px;
+                display: grid;
+                grid-template-columns: 36px minmax(0, 1fr);
+                grid-template-areas:
+                    "icon name"
+                    "icon value"
+                    "desc desc";
+                align-items: center;
+                column-gap: 12px;
+            }
+
+            .weather-commute-card .commute-item:nth-child(3) .commute-icon { grid-area: icon; margin: 0; }
+            .weather-commute-card .commute-item:nth-child(3) .commute-name { grid-area: name; margin: 0; }
+            .weather-commute-card .commute-item:nth-child(3) .commute-value { grid-area: value; }
+            .weather-commute-card .commute-item:nth-child(3) .commute-desc { grid-area: desc; margin-top: 9px; }
+
+            .weather-aqi-card .aqi-header {
+                justify-content: space-between;
+                align-items: flex-end;
+            }
+
+            .weather-aqi-card .aqi-details,
+            .weather-life-card .life-index-grid {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .weather-aqi-card .aqi-details { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+            .weather-life-card .life-index-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            .weather-life-card .life-index-item {
+                min-width: 0;
+                padding: 12px;
+                border-radius: 14px;
+                background: rgba(255,255,255,0.075);
+            }
+        }
+
+        @media (max-width: 359px) {
+            #page-weather .weather-content { padding-inline: 10px; }
+            .weather-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .weather-detail-card { aspect-ratio: 1.22 / 1; }
+            .hourly-swipe-hint span { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .weather-precip-glyph,
+            .hourly-swipe-hint i,
+            .weather-detail-icon i {
+                animation: none !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -7041,6 +7593,29 @@
                             <div class="weather-alert-description" id="weatherAlertDescription"></div>
                         </details>
                     </section>
+                    <section class="weather-card weather-nowcast-card weather-precip-card" aria-labelledby="nowcastTitle">
+                        <div class="card-title">
+                            <span class="weather-card-title-main"><i class="ph ph-cloud-rain"></i><span id="nowcastTitle">降水窗口</span></span>
+                            <span class="weather-card-source" id="nowcastSource">QWeather</span>
+                        </div>
+                        <div class="nowcast-hero">
+                            <div class="nowcast-copy">
+                                <div class="nowcast-summary" id="rainSummary">正在判断未来 12 小时降水窗口</div>
+                                <div class="nowcast-support" id="nowcastSummary">正在整理未来两小时天气</div>
+                                <div class="nowcast-meta" id="nowcastMeta">结合分钟降水与逐小时趋势</div>
+                            </div>
+                            <div class="nowcast-risk">
+                                <span class="weather-precip-glyph" aria-hidden="true"><i class="ph ph-umbrella"></i></span>
+                                <strong id="rainChance">--%</strong>
+                                <span>12 小时峰值</span>
+                            </div>
+                        </div>
+                        <details class="weather-disclosure" id="nowcastDisclosure">
+                            <summary><span>查看两小时降水节奏</span></summary>
+                            <div class="precipitation-timeline" id="precipitationTimeline" aria-label="未来两小时降水强度"></div>
+                            <div class="nowcast-axis"><span>现在</span><span>1 小时</span><span>2 小时</span></div>
+                        </details>
+                    </section>
                     <a class="weather-card weather-typhoon-card" href="/typhoon" aria-label="查看台风动态，当前无活跃台风">
                         <span class="typhoon-card-icon" aria-hidden="true"><i class="ph ph-hurricane"></i></span>
                         <span class="typhoon-card-copy">
@@ -7050,27 +7625,12 @@
                         </span>
                         <span class="typhoon-card-action"><span>查看动态</span><i class="ph ph-arrow-right"></i></span>
                     </a>
-                    <section class="weather-card weather-nowcast-card" aria-labelledby="nowcastTitle">
-                        <div class="card-title">
-                            <span class="weather-card-title-main"><i class="ph ph-cloud-rain"></i><span id="nowcastTitle">临近天气</span></span>
-                            <span class="weather-card-source" id="nowcastSource">QWeather</span>
-                        </div>
-                        <div class="nowcast-hero">
-                            <div>
-                                <div class="nowcast-summary" id="nowcastSummary">正在整理未来两小时天气</div>
-                                <div class="nowcast-meta" id="nowcastMeta">结合分钟降水与逐小时趋势</div>
-                            </div>
-                            <div class="nowcast-risk"><strong id="nowcastRisk">--%</strong><span>峰值降水概率</span></div>
-                        </div>
-                        <details class="weather-disclosure" id="nowcastDisclosure">
-                            <summary><span>查看两小时降水节奏</span></summary>
-                            <div class="precipitation-timeline" id="precipitationTimeline" aria-label="未来两小时降水强度"></div>
-                            <div class="nowcast-axis"><span>现在</span><span>1 小时</span><span>2 小时</span></div>
-                        </details>
-                    </section>
                     <div class="weather-card weather-hourly-card">
-                        <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
-                        <div class="hourly-scroll" id="hourlyScroll"></div>
+                        <div class="card-title">
+                            <span class="weather-card-title-main"><i class="fas fa-clock"></i><span>逐小时预报</span></span>
+                            <span class="hourly-swipe-hint"><span>左右滑动</span><i class="ph ph-arrow-right"></i></span>
+                        </div>
+                        <div class="hourly-scroll" id="hourlyScroll" tabindex="0" aria-label="逐小时天气预报，可左右滑动查看"></div>
                     </div>
                     <div class="weather-card weather-daily-card">
                         <div class="card-title"><i class="fas fa-calendar"></i> 3日预报</div>
@@ -7078,10 +7638,13 @@
                     </div>
                     <div class="weather-grid weather-details-grid" id="weatherGrid"></div>
                     <div class="weather-card weather-sun-card">
-                            <div class="card-title"><i class="fas fa-sun"></i> 日照、月相与降水</div>
+                            <div class="card-title"><i class="fas fa-sun"></i> 日照与月相</div>
                             <div class="sun-phase-meta">
                                 <div class="sun-phase-chip" id="sunPhaseChip"><i class="fas fa-sun"></i><span id="sunPhaseLabel">白昼进行中</span></div>
-                                <div class="sun-phase-note" id="sunPhaseNote">光照节奏平稳</div>
+                                <div class="sun-phase-copy">
+                                    <div class="sun-phase-note" id="sunPhaseNote">光照节奏平稳</div>
+                                    <div class="sun-phase-duration" id="daylightLength">白昼时长待更新</div>
+                                </div>
                             </div>
                             <div class="sun-progress">
                                 <div class="sun-progress-track">
@@ -7116,14 +7679,6 @@
                                         <div class="moon-phase-source" id="moonSource">本地天文周期估算</div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="sun-rain-summary">
-                                <div class="sun-rain-label"><i class="fas fa-cloud-rain"></i> 降水窗口</div>
-                                <div class="sun-rain-value">
-                                    <div class="sun-rain-main" id="rainChance">0%</div>
-                                    <div class="sun-rain-sub" id="daylightLength">白昼 0小时0分钟</div>
-                                </div>
-                                <div class="sun-rain-desc" id="rainSummary">未来数小时暂无明显降水信号</div>
                             </div>
                     </div>
                     <div class="weather-card weather-commute-card">
@@ -8500,7 +9055,6 @@
             const summary = String(minutely?.summary || hourly?.description || '').trim()
                 || (peakProbability >= 40 ? '未来几小时存在降水信号' : '未来几小时天气变化平稳');
             document.getElementById('nowcastSummary').textContent = summary;
-            document.getElementById('nowcastRisk').textContent = `${Math.round(peakProbability)}%`;
             document.getElementById('nowcastSource').textContent = isMinuteLevel ? 'QWeather · 5分钟级' : 'QWeather · 逐小时';
             document.getElementById('nowcastMeta').textContent = isMinuteLevel
                 ? '中国区域未来两小时降水趋势，每 5 分钟一个节点'
@@ -8616,16 +9170,51 @@
                     }).join('');
                 }
 
-                // Details
+                // Compact weather metrics: secondary lines add context rather than repeat the headline value.
                 const getDir = deg => ['北','东北','东','东南','南','西南','西','西北'][Math.round(deg/45)%8] + '风';
-                document.getElementById('weatherGrid').innerHTML = [
-                    {icon:'fa-temperature-half',label:'体感温度',val:Math.round(rt.apparent_temperature ?? rt.temperature ?? 0),unit:'°',desc:rt.life_index?.comfort?.desc||''},
-                    {icon:'fa-droplet',label:'湿度',val:Math.round((rt.humidity || 0)*100),unit:'%'},
-                    {icon:'fa-wind',label:'风速',val:Number(rt.wind?.speed || 0).toFixed(1),unit:' km/h',desc:getDir(Number(rt.wind?.direction || 0))},
-                    {icon:'fa-eye',label:'能见度',val:Number(rt.visibility || 0).toFixed(1),unit:' km'},
-                    {icon:'fa-gauge',label:'气压',val:Math.round((rt.pressure || 0)/100),unit:' hPa'},
-                    {icon:'fa-sun',label:'紫外线',val:rt.life_index?.ultraviolet?.index||0,unit:'',desc:rt.life_index?.ultraviolet?.desc||'无'}
-                ].map(x => `<div class="weather-detail-card"><div class="label"><i class="fas ${x.icon}"></i> ${x.label}</div><div class="value">${x.val}<span class="unit">${x.unit}</span></div>${x.desc?`<div class="desc">${x.desc}</div>`:''}</div>`).join('');
+                const actualTemperature = Math.round(rt.temperature ?? 0);
+                const apparentTemperature = Math.round(rt.apparent_temperature ?? rt.temperature ?? 0);
+                const feelsDelta = apparentTemperature - actualTemperature;
+                const humidity = Math.round((rt.humidity || 0) * 100);
+                const visibility = Number(rt.visibility || 0);
+                const pressureHpa = Math.round((rt.pressure || 0) / 100);
+                const windDirection = Number(rt.wind?.direction || 0);
+                const weatherMetrics = [
+                    {
+                        key: 'feels', icon: 'fa-temperature-half', label: '体感', val: apparentTemperature, unit: '°',
+                        desc: feelsDelta === 0 ? (rt.life_index?.comfort?.desc || '接近实温') : `${feelsDelta > 0 ? '高于' : '低于'}实温 ${Math.abs(feelsDelta)}°`
+                    },
+                    {
+                        key: 'humidity', icon: 'fa-droplet', label: '湿度', val: humidity, unit: '%',
+                        desc: Number.isFinite(Number(rt.dewPoint)) ? `露点 ${Math.round(Number(rt.dewPoint))}°` : (humidity >= 75 ? '体感偏潮' : (humidity <= 35 ? '空气偏干' : '湿度适中'))
+                    },
+                    {
+                        key: 'wind', icon: 'fa-location-arrow', label: '风', val: Number(rt.wind?.speed || 0).toFixed(1), unit: 'km/h',
+                        desc: `${rt.wind?.text || getDir(windDirection)}${rt.wind?.scale ? ` · ${rt.wind.scale}级` : ''}`, angle: windDirection
+                    },
+                    {
+                        key: 'visibility', icon: 'fa-eye', label: '能见度', val: visibility.toFixed(1), unit: 'km',
+                        desc: visibility >= 15 ? '视野通透' : (visibility >= 5 ? '能见度一般' : '出行需留意')
+                    },
+                    {
+                        key: 'pressure', icon: 'fa-gauge-high', label: '气压', val: pressureHpa, unit: 'hPa',
+                        desc: pressureHpa >= 1020 ? '气压偏高' : (pressureHpa <= 1000 ? '气压偏低' : '接近常态')
+                    },
+                    {
+                        key: 'uv', icon: 'fa-sun', label: '紫外线', val: rt.life_index?.ultraviolet?.index ?? '--', unit: '',
+                        desc: rt.life_index?.ultraviolet?.desc || '暂无评级'
+                    }
+                ];
+                document.getElementById('weatherGrid').innerHTML = weatherMetrics.map(metric => `
+                    <div class="weather-detail-card weather-detail-${metric.key}">
+                        <div class="weather-detail-head">
+                            <div class="label">${escapeHtml(metric.label)}</div>
+                            <span class="weather-detail-icon ${metric.key === 'wind' ? 'is-directional' : ''}"${metric.key === 'wind' ? ` style="--metric-angle:${metric.angle}deg"` : ''} aria-hidden="true"><i class="fas ${metric.icon}"></i></span>
+                        </div>
+                        <div class="value">${escapeHtml(String(metric.val))}<span class="unit">${escapeHtml(metric.unit)}</span></div>
+                        <div class="desc">${escapeHtml(metric.desc)}</div>
+                    </div>
+                `).join('');
 
                 // AQI
                 const aqi = rt.air_quality?.aqi?.local ?? rt.air_quality?.aqi?.chn ?? null;

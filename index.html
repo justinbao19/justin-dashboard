@@ -436,6 +436,200 @@
             margin-bottom: 0;
         }
 
+        /* Typhoon status entry */
+        .weather-typhoon-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 16px;
+            min-height: 124px;
+            overflow: hidden;
+            color: white;
+            text-decoration: none;
+            isolation: isolate;
+            transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+        }
+        .weather-typhoon-card::before {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            inset: 0;
+            background:
+                radial-gradient(circle at 8% 50%, rgba(137, 207, 240, 0.18), transparent 27%),
+                linear-gradient(115deg, rgba(255,255,255,0.05), transparent 56%);
+            pointer-events: none;
+        }
+        .weather-typhoon-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255,255,255,0.28);
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .weather-typhoon-card:focus-visible,
+        .typhoon-back-link:focus-visible {
+            outline: 3px solid rgba(255,255,255,0.9);
+            outline-offset: 3px;
+        }
+        .typhoon-card-icon {
+            display: grid;
+            place-items: center;
+            width: 58px;
+            height: 58px;
+            border-radius: 19px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.14);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+            font-size: 29px;
+        }
+        .typhoon-card-copy {
+            min-width: 0;
+        }
+        .typhoon-card-eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 7px;
+            color: rgba(255,255,255,0.66);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .typhoon-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #9dd7ee;
+            box-shadow: 0 0 0 4px rgba(157,215,238,0.1);
+        }
+        .typhoon-card-title {
+            font-size: 23px;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.35px;
+        }
+        .typhoon-card-description {
+            margin-top: 7px;
+            max-width: 720px;
+            color: rgba(255,255,255,0.68);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .typhoon-card-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.09);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.78);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        /* Typhoon empty state */
+        .typhoon-page-shell {
+            position: relative;
+            z-index: 2;
+            width: min(100%, 1120px);
+            min-height: 100%;
+            margin: 0 auto;
+            padding: calc(28px + env(safe-area-inset-top)) 20px 128px;
+            color: white;
+        }
+        .typhoon-page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .typhoon-back-link,
+        .typhoon-monitor-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 14px;
+            border-radius: 14px;
+            background: rgba(0,0,0,0.22);
+            border: 1px solid rgba(255,255,255,0.14);
+            color: white;
+            text-decoration: none;
+            backdrop-filter: blur(18px);
+        }
+        .typhoon-monitor-chip {
+            min-height: 36px;
+            color: rgba(255,255,255,0.74);
+            font-size: 12px;
+        }
+        .typhoon-empty-card {
+            display: grid;
+            justify-items: center;
+            align-content: center;
+            min-height: min(620px, calc(100dvh - 190px));
+            margin-top: 28px;
+            padding: 52px 28px;
+            border-radius: 30px;
+            background: rgba(0,0,0,0.24);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 24px 80px rgba(8,23,38,0.18);
+            backdrop-filter: blur(24px);
+            text-align: center;
+        }
+        .typhoon-empty-icon {
+            display: grid;
+            place-items: center;
+            width: 88px;
+            height: 88px;
+            margin-bottom: 26px;
+            border-radius: 28px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07));
+            border: 1px solid rgba(255,255,255,0.16);
+            box-shadow: 0 18px 44px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.18);
+            font-size: 42px;
+        }
+        .typhoon-empty-kicker {
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .typhoon-empty-card h1 {
+            margin-top: 12px;
+            font-size: clamp(32px, 5vw, 52px);
+            line-height: 1.08;
+            letter-spacing: -1.5px;
+        }
+        .typhoon-empty-card p {
+            max-width: 520px;
+            margin-top: 16px;
+            color: rgba(255,255,255,0.68);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        .typhoon-empty-meta {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .typhoon-empty-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 36px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.7);
+            font-size: 12px;
+        }
+
         /* Hourly */
         .hourly-scroll { display: flex; gap: 14px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
         .hourly-scroll::-webkit-scrollbar { display: none; }
@@ -3117,6 +3311,79 @@
                 margin-bottom: 12px;
             }
 
+            .weather-typhoon-card {
+                grid-template-columns: auto minmax(0, 1fr) auto;
+                gap: 12px;
+                min-height: 110px;
+                padding: 14px 14px 14px 15px;
+            }
+
+            .typhoon-card-icon {
+                width: 48px;
+                height: 48px;
+                border-radius: 16px;
+                font-size: 25px;
+            }
+
+            .typhoon-card-eyebrow {
+                margin-bottom: 5px;
+                font-size: 10px;
+            }
+
+            .typhoon-card-title {
+                font-size: 17px;
+            }
+
+            .typhoon-card-description {
+                display: -webkit-box;
+                overflow: hidden;
+                margin-top: 5px;
+                font-size: 12px;
+                line-height: 1.4;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+
+            .typhoon-card-action {
+                width: 44px;
+                min-height: 44px;
+                justify-content: center;
+                padding: 0;
+                border-radius: 14px;
+            }
+
+            .typhoon-card-action span {
+                display: none;
+            }
+
+            .typhoon-page-shell {
+                padding: calc(18px + env(safe-area-inset-top)) 14px calc(108px + env(safe-area-inset-bottom));
+            }
+
+            .typhoon-empty-card {
+                min-height: calc(100dvh - 196px);
+                margin-top: 18px;
+                padding: 38px 20px;
+                border-radius: 24px;
+            }
+
+            .typhoon-empty-icon {
+                width: 76px;
+                height: 76px;
+                margin-bottom: 22px;
+                border-radius: 24px;
+                font-size: 36px;
+            }
+
+            .typhoon-empty-card h1 {
+                font-size: 32px;
+                letter-spacing: -0.8px;
+            }
+
+            .typhoon-monitor-chip span {
+                display: none;
+            }
+
             .hourly-scroll {
                 gap: 12px;
                 padding: 8px 0 4px;
@@ -3565,30 +3832,67 @@
                 margin-bottom: 0;
             }
 
+            .weather-content > .weather-grid,
+            .weather-content > .weather-stack {
+                margin-bottom: 0;
+            }
+
+            .weather-typhoon-card {
+                grid-column: 1 / -1;
+                grid-row: 1;
+            }
+
             .weather-hourly-card {
                 grid-column: 1 / -1;
+                grid-row: 2;
             }
 
             .weather-daily-card {
                 grid-column: span 6;
+                grid-row: 3;
             }
 
             .weather-details-grid {
                 grid-column: span 6;
+                grid-row: 3;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .weather-aqi-card {
-                grid-column: span 6;
-                margin-top: 0 !important;
+            .weather-support-stack,
+            .weather-primary-stack {
+                display: contents;
             }
 
-            .weather-support-stack,
-            .weather-primary-stack,
             .weather-sun-card,
             .weather-commute-card,
+            .weather-aqi-card,
             .weather-life-card {
-                grid-column: span 6;
+                height: 100%;
+                margin: 0;
+            }
+
+            .weather-sun-card,
+            .weather-aqi-card {
+                grid-column: 1 / span 6;
+            }
+
+            .weather-commute-card,
+            .weather-life-card {
+                grid-column: 7 / -1;
+            }
+
+            .weather-sun-card,
+            .weather-commute-card {
+                grid-row: 4;
+            }
+
+            .weather-aqi-card,
+            .weather-life-card {
+                grid-row: 5;
+            }
+
+            .weather-aqi-card {
+                margin-top: 0 !important;
             }
 
             .aqi-details {
@@ -3752,20 +4056,10 @@
 
             .weather-daily-card { grid-column: span 5; }
             .weather-details-grid { grid-column: span 7; }
-            .weather-support-stack { grid-column: span 4; align-self: start; }
-            .weather-primary-stack { grid-column: span 8; align-self: start; }
-
-            .weather-support-stack,
-            .weather-primary-stack {
-                gap: 18px;
-            }
-
             .weather-sun-card,
-            .weather-aqi-card,
+            .weather-aqi-card { grid-column: 1 / span 5; }
             .weather-commute-card,
-            .weather-life-card {
-                grid-column: auto;
-            }
+            .weather-life-card { grid-column: 6 / -1; }
 
             .weather-aqi-card,
             .weather-life-card {
@@ -5279,7 +5573,8 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .tab-nav,
-            .tab-nav .tab-item {
+            .tab-nav .tab-item,
+            .weather-typhoon-card {
                 transition: none !important;
             }
         }
@@ -6133,8 +6428,17 @@
                             </div>
                         </div>
                         <div class="weather-header-note" id="weatherHeaderNote" hidden></div>
-                    </div>
+                </div>
                 <div class="weather-content">
+                    <a class="weather-card weather-typhoon-card" href="/typhoon" aria-label="查看台风动态，当前无活跃台风">
+                        <span class="typhoon-card-icon" aria-hidden="true"><i class="ph ph-hurricane"></i></span>
+                        <span class="typhoon-card-copy">
+                            <span class="typhoon-card-eyebrow"><span class="typhoon-status-dot"></span>热带气旋监测</span>
+                            <span class="typhoon-card-title">当前无活跃台风</span>
+                            <span class="typhoon-card-description">西北太平洋与南海目前没有需要持续跟踪的系统。</span>
+                        </span>
+                        <span class="typhoon-card-action"><span>查看动态</span><i class="ph ph-arrow-right"></i></span>
+                    </a>
                     <div class="weather-card weather-hourly-card">
                         <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
                         <div class="hourly-scroll" id="hourlyScroll"></div>
@@ -6229,6 +6533,27 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Typhoon status -->
+        <div class="page" id="page-typhoon">
+            <main class="typhoon-page-shell">
+                <header class="typhoon-page-header">
+                    <a class="typhoon-back-link" href="/weather"><i class="ph ph-arrow-left"></i><span>返回天气</span></a>
+                    <span class="typhoon-monitor-chip"><i class="ph ph-radar"></i><span>热带气旋监测</span></span>
+                </header>
+                <section class="typhoon-empty-card" aria-labelledby="typhoonEmptyTitle">
+                    <div class="typhoon-empty-icon" aria-hidden="true"><i class="ph ph-hurricane"></i></div>
+                    <div class="typhoon-empty-kicker">Typhoon Monitor</div>
+                    <h1 id="typhoonEmptyTitle">当前无活跃台风</h1>
+                    <p>西北太平洋与南海目前没有需要持续跟踪的热带气旋。出现活跃系统后，这里将展示位置、强度、更新时间与轨迹详情。</p>
+                    <div class="typhoon-empty-meta" aria-label="监测范围">
+                        <span><i class="ph ph-globe-hemisphere-east"></i> 西北太平洋</span>
+                        <span><i class="ph ph-waves"></i> 南海</span>
+                        <span><i class="ph ph-clock"></i> 等待下一次数据更新</span>
+                    </div>
+                </section>
+            </main>
         </div>
 
         <!-- Market -->
@@ -6722,7 +7047,7 @@
         };
         const DEFAULT_WEATHER_LOCATION = { lon: '121.405', lat: '31.123', displayName: '上海 · 闵行' };
         const getIcon = s => ICON_BASE + (ICONS[s] || 'not-available') + '.svg';
-        const PAGE_PATHS = { weather: '/weather', market: '/market', news: '/news', f1: '/f1' };
+        const PAGE_PATHS = { weather: '/weather', typhoon: '/typhoon', market: '/market', news: '/news', f1: '/f1' };
         const VALID_PAGES = new Set(Object.keys(PAGE_PATHS));
         const pageRefreshInFlight = new Map();
         const WEATHER_LOCATION_CACHE_TTL = 5 * 60 * 1000;
@@ -6789,13 +7114,14 @@
 
         function setActivePage(page, { updateHistory = false, replaceHistory = false } = {}) {
             const normalizedPage = normalizePage(page);
+            const navPage = normalizedPage === 'typhoon' ? 'weather' : normalizedPage;
             document.querySelectorAll('.tab-item').forEach(button => {
-                button.classList.toggle('active', button.dataset.page === normalizedPage);
+                button.classList.toggle('active', button.dataset.page === navPage);
             });
             document.querySelectorAll('.page').forEach(panel => {
                 panel.classList.toggle('active', panel.id === `page-${normalizedPage}`);
             });
-            document.getElementById('weatherScene').style.opacity = normalizedPage === 'weather' ? 1 : 0;
+            document.getElementById('weatherScene').style.opacity = (normalizedPage === 'weather' || normalizedPage === 'typhoon') ? 1 : 0;
             ['market','news','flight'].forEach(name => {
                 const element = document.getElementById(`bg-${name}`);
                 if (element) element.style.opacity = name === normalizedPage ? 1 : 0;

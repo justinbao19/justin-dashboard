@@ -546,6 +546,62 @@
         .sun-rain-summary {
             margin-top: 14px;
         }
+        .moon-phase-layout {
+            display: grid;
+            grid-template-columns: 58px minmax(0, 1fr);
+            align-items: center;
+            gap: 14px;
+        }
+        .moon-phase-art {
+            --moon-shadow: 50%;
+            position: relative;
+            width: 54px;
+            height: 54px;
+            overflow: hidden;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #fffdf1 0 16%, #e6e8ef 48%, #b7bdca 100%);
+            border: 1px solid rgba(255,255,255,0.38);
+            box-shadow: 0 0 22px rgba(211, 225, 255, 0.22), inset -5px -4px 9px rgba(38, 48, 72, 0.18);
+        }
+        .moon-phase-art::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(27, 39, 58, 0.92);
+            transform: translateX(var(--moon-shadow));
+            transition: transform 300ms ease, opacity 300ms ease;
+        }
+        .moon-phase-art::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            left: 16px;
+            top: 13px;
+            border-radius: 50%;
+            background: rgba(101, 109, 126, 0.18);
+            box-shadow: 20px 10px 0 3px rgba(101, 109, 126, 0.13), 7px 25px 0 2px rgba(101, 109, 126, 0.14);
+        }
+        .moon-phase-art.phase-new { --moon-shadow: 0%; opacity: 0.64; }
+        .moon-phase-art.phase-waxing-crescent { --moon-shadow: -18%; }
+        .moon-phase-art.phase-first-quarter { --moon-shadow: -50%; }
+        .moon-phase-art.phase-waxing-gibbous { --moon-shadow: -76%; }
+        .moon-phase-art.phase-full { --moon-shadow: -110%; }
+        .moon-phase-art.phase-waning-gibbous { --moon-shadow: 76%; }
+        .moon-phase-art.phase-last-quarter { --moon-shadow: 50%; }
+        .moon-phase-art.phase-waning-crescent { --moon-shadow: 18%; }
+        .moon-phase-copy { min-width: 0; }
+        .moon-phase-name {
+            font-size: 23px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .moon-phase-source {
+            margin-top: 6px;
+            font-size: 12px;
+            opacity: 0.58;
+        }
         .sun-phase-meta {
             position: relative;
             z-index: 1;
@@ -6129,7 +6185,7 @@
                     <div class="weather-grid weather-details-grid" id="weatherGrid"></div>
                     <div class="weather-stack weather-support-stack">
                         <div class="weather-card weather-sun-card">
-                            <div class="card-title"><i class="fas fa-sun"></i> 日照与降水</div>
+                            <div class="card-title"><i class="fas fa-sun"></i> 日照、月相与降水</div>
                             <div class="sun-phase-meta">
                                 <div class="sun-phase-chip" id="sunPhaseChip"><i class="fas fa-sun"></i><span id="sunPhaseLabel">白昼进行中</span></div>
                                 <div class="sun-phase-note" id="sunPhaseNote">光照节奏平稳</div>
@@ -6155,6 +6211,17 @@
                                     <div class="sun-time-label"><i class="fas fa-sunset"></i> 日落</div>
                                     <div class="sun-time-value" id="sunsetTime">--:--</div>
                                     <div class="sun-time-desc" id="sunsetDesc">傍晚收光时间</div>
+                                </div>
+                            </div>
+                            <div class="sun-rain-summary">
+                                <div class="sun-rain-label"><i class="fas fa-moon"></i> 今夜月相</div>
+                                <div class="moon-phase-layout">
+                                    <div class="moon-phase-art phase-first-quarter" id="moonPhaseArt" role="img" aria-label="上弦月"></div>
+                                    <div class="moon-phase-copy">
+                                        <div class="moon-phase-name" id="moonPhase">上弦月</div>
+                                        <div class="sun-rain-desc" id="moonSummary">正在计算今晚的月相</div>
+                                        <div class="moon-phase-source" id="moonSource">本地天文周期估算</div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="sun-rain-summary">
@@ -7321,6 +7388,19 @@
                 const sunPhaseNote = isBeforeSunrise
                     ? `距日出还有 ${formatDurationMinutes(Math.round((sunriseDate - now) / 60000))}`
                     : (isAfterSunset ? '太阳已经落下，夜间体感会更明显' : `今天的日照已进行 ${Math.round(sunProgress)}%`);
+                const weatherDate = String(d.daily?.temperature?.[0]?.date || '').slice(0, 10);
+                const astronomyToday = d.astronomy?.daily?.find(item => item.date === weatherDate)
+                    || d.astronomy?.daily?.[0]
+                    || null;
+                const moon = resolveMoonPhase(astronomyToday?.moonPhase, weatherDate || now);
+                const moonTimes = [
+                    astronomyToday?.moonrise ? `月升 ${astronomyToday.moonrise}` : '',
+                    astronomyToday?.moonset ? `月落 ${astronomyToday.moonset}` : ''
+                ].filter(Boolean);
+                const astronomyUpdatedAt = d.astronomy?.updatedAt ? new Date(d.astronomy.updatedAt) : null;
+                const astronomyUpdatedLabel = astronomyUpdatedAt && Number.isFinite(astronomyUpdatedAt.getTime())
+                    ? ` · 更新 ${astronomyUpdatedAt.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+                    : '';
 
                 document.getElementById('sunriseTime').textContent = sunrise;
                 document.getElementById('sunsetTime').textContent = sunset;
@@ -7339,6 +7419,15 @@
                 document.getElementById('rainSummary').textContent = nextRainTime
                     ? `未来 12 小时最早可能在 ${String(nextRainTime.getHours()).padStart(2, '0')}:00 左右出现降水，通勤建议预留一点机动`
                     : (maxRain.probability >= 20 ? '云量偏多但降水信号还不稳定，可以轻装出行' : '未来数小时暂无明显降水信号');
+                document.getElementById('moonPhase').textContent = moon.name;
+                document.getElementById('moonPhaseArt').className = `moon-phase-art ${moon.className}`;
+                document.getElementById('moonPhaseArt').setAttribute('aria-label', moon.name);
+                document.getElementById('moonSummary').textContent = moonTimes.length
+                    ? moonTimes.join(' · ')
+                    : '依据月球朔望周期估算，月升月落待数据源补充';
+                document.getElementById('moonSource').textContent = d.astronomy?.source === 'qweather'
+                    ? `${d.astronomy.providerLabel || 'QWeather 和风天气'}${astronomyUpdatedLabel}`
+                    : '本地天文周期估算';
 
                 // Commute
                 const commuteItems = buildCommuteAdvice(rt, d.hourly);
@@ -7423,6 +7512,41 @@
             const date = new Date();
             date.setHours(hours, minutes, 0, 0);
             return date;
+        }
+
+        function estimateMoonPhase(dateValue = new Date()) {
+            const date = new Date(dateValue);
+            const safeDate = Number.isFinite(date.getTime()) ? date : new Date();
+            const synodicMonthDays = 29.530588853;
+            const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+            const elapsedDays = (safeDate.getTime() - knownNewMoon) / 86400000;
+            const cycle = ((elapsedDays % synodicMonthDays) + synodicMonthDays) % synodicMonthDays;
+            const index = Math.floor((cycle / synodicMonthDays) * 8 + 0.5) % 8;
+            return [
+                { name: '新月', className: 'phase-new' },
+                { name: '娥眉月', className: 'phase-waxing-crescent' },
+                { name: '上弦月', className: 'phase-first-quarter' },
+                { name: '盈凸月', className: 'phase-waxing-gibbous' },
+                { name: '满月', className: 'phase-full' },
+                { name: '亏凸月', className: 'phase-waning-gibbous' },
+                { name: '下弦月', className: 'phase-last-quarter' },
+                { name: '残月', className: 'phase-waning-crescent' }
+            ][index];
+        }
+
+        function resolveMoonPhase(label, dateValue) {
+            const text = String(label || '').trim().toLowerCase();
+            const mappings = [
+                [/新月|朔|new moon/, { name: '新月', className: 'phase-new' }],
+                [/上弦|first quarter/, { name: '上弦月', className: 'phase-first-quarter' }],
+                [/下弦|last quarter|third quarter/, { name: '下弦月', className: 'phase-last-quarter' }],
+                [/满月|望|full moon/, { name: '满月', className: 'phase-full' }],
+                [/盈凸|waxing gibbous/, { name: '盈凸月', className: 'phase-waxing-gibbous' }],
+                [/亏凸|waning gibbous/, { name: '亏凸月', className: 'phase-waning-gibbous' }],
+                [/娥眉|蛾眉|眉月|waxing crescent/, { name: '娥眉月', className: 'phase-waxing-crescent' }],
+                [/残月|waning crescent/, { name: '残月', className: 'phase-waning-crescent' }]
+            ];
+            return mappings.find(([pattern]) => pattern.test(text))?.[1] || estimateMoonPhase(dateValue);
         }
 
         function formatDurationMinutes(totalMinutes) {

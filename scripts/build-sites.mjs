@@ -20,6 +20,8 @@ for (const name of await readdir(path.join(root, 'tracks'))) {
 }
 
 const worker = `
+import { attachAstronomy, fetchQWeatherAstronomy } from './weather-astronomy.mjs';
+
 const html = ${JSON.stringify(html)};
 const data = ${JSON.stringify(data)};
 const tracks = ${JSON.stringify(tracks)};
@@ -138,7 +140,19 @@ export default {
       if (!key) return json({ error: 'Weather API is not configured' }, 503);
       const lon = url.searchParams.get('lon') || '121.405';
       const lat = url.searchParams.get('lat') || '31.123';
-      return proxy(request, 'https://api.caiyunapp.com/v2.6/' + key + '/' + lon + ',' + lat + '/weather?dailysteps=7&hourlysteps=24');
+      try {
+        const response = await fetch('https://api.caiyunapp.com/v2.6/' + key + '/' + lon + ',' + lat + '/weather?dailysteps=7&hourlysteps=24', { headers: { accept: 'application/json', 'user-agent': 'JustinPulse/1.0' } });
+        const weather = await response.json();
+        if (!response.ok) return json(weather, response.status);
+        const astronomy = await fetchQWeatherAstronomy({ env, lon, lat }).catch(error => {
+          console.warn('[weather] QWeather astronomy unavailable:', error.message);
+          return null;
+        });
+        return json(attachAstronomy(weather, astronomy), 200, 'public, max-age=300, stale-while-revalidate=900');
+      } catch (error) {
+        console.error('[weather] Weather request failed:', error);
+        return json({ error: 'Failed to fetch weather data' }, 500);
+      }
     }
     if (pathname === '/api/reverse-geocode') {
       const lat = url.searchParams.get('lat');
@@ -160,5 +174,6 @@ export default {
 `;
 
 await writeFile(path.join(dist, 'server', 'index.js'), worker);
+await writeFile(path.join(dist, 'server', 'weather-astronomy.mjs'), await readFile(path.join(root, 'lib', 'weather-astronomy.mjs')));
 await writeFile(path.join(dist, '.openai', 'hosting.json'), await readFile(path.join(root, '.openai', 'hosting.json')));
 console.log('Sites bundle created in dist/');

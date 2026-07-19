@@ -1,5 +1,5 @@
 {
-  "date": "2026年7月18日 实时",
+  "date": "2026年7月19日 实时",
   "ndx": {
     "price": "28,593",
     "change": -1.49,
@@ -166,33 +166,33 @@
     ]
   },
   "btc": {
-    "price": "$64,034",
-    "change": 1.29,
+    "price": "$64,648",
+    "change": 1.06,
     "source": "coingecko",
     "sparkline": [
-      63892.79,
       63746.44,
       62242.25,
       64977.36,
       64722.06,
       63788.93,
       63925.51,
-      64032.73
+      64793.26,
+      64643.56
     ]
   },
   "eth": {
-    "price": "$1,843",
-    "change": 1.06,
+    "price": "$1,865",
+    "change": 1.11,
     "source": "coingecko",
     "sparkline": [
-      1790.68,
       1805.54,
       1773.68,
       1890.53,
       1917.35,
       1863.08,
       1841.36,
-      1843.3
+      1861.16,
+      1864.99
     ]
   },
   "macro_summary": "全球风险资产温和反弹，美股三大指数齐涨，恒指与科指强势共振，A股独跌且商品与加密币回落，显示资金仍偏好高弹性成长而非内需旧经济。",
@@ -306,7 +306,7 @@
       "监管突收紧港股平台经济"
     ]
   },
-  "updated_at": "2026-07-18T15:38:52.631Z",
+  "updated_at": "2026-07-19T03:56:26.929Z",
   "us_market_preview": {
     "title": "📊 美股短线预判",
     "summary": "若PCE不超预期且英伟达财报前瞻乐观，纳指有望挑战3万点；反之核心通胀>2.8%将触发科技获利回吐，道指相对抗跌。",
@@ -332,15 +332,15 @@
   },
   "data_source": "stock-sdk primary (Tencent/Eastmoney) + Yahoo Finance 7D sparklines + CoinGecko crypto + open.er-api FX",
   "usdcny": {
-    "price": "6.7846",
+    "price": "6.7892",
     "source": "open-er-api"
   },
   "hkdcny": {
-    "price": "0.8653",
+    "price": "0.8661",
     "source": "open-er-api"
   },
   "eurcny": {
-    "price": "7.7564",
+    "price": "7.7614",
     "source": "open-er-api"
   },
   "jpycny": {
@@ -348,7 +348,7 @@
     "source": "open-er-api"
   },
   "gbpcny": {
-    "price": "9.1220",
+    "price": "9.1263",
     "source": "open-er-api"
   },
   "thbcny": {

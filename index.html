@@ -77,9 +77,10 @@
             isolation: isolate;
             background: #335a78;
             --cloud-opacity: 0.34;
-            --cloud-back-duration: 72s;
-            --cloud-mid-duration: 54s;
-            --cloud-front-duration: 40s;
+            --cloud-back-duration: 46s;
+            --cloud-mid-duration: 32s;
+            --cloud-front-duration: 23s;
+            --cloud-veil-duration: 27s;
         }
 
         .weather-scene::after {
@@ -116,7 +117,16 @@
         }
         .weather-scene.scene-night .atmospheric-light { opacity: 0.24; }
         .weather-scene.scene-rain .atmospheric-light,
+        .weather-scene.scene-sleet .atmospheric-light,
+        .weather-scene.scene-hail .atmospheric-light,
         .weather-scene.scene-fog .atmospheric-light { opacity: 0.18; }
+        .weather-scene.scene-haze .atmospheric-light,
+        .weather-scene.scene-dust .atmospheric-light {
+            opacity: 0.46;
+            background:
+                radial-gradient(circle at var(--light-x, 78%) var(--light-y, 16%), rgba(255, 213, 153, 0.2), transparent 24%),
+                linear-gradient(180deg, rgba(178, 144, 105, 0.08), rgba(219, 196, 159, 0.16));
+        }
 
         /* 太阳：缓慢呼吸光晕，位置由当天日照进度决定 */
         .sun {
@@ -129,7 +139,8 @@
             border-radius: 50%;
             opacity: 0;
             transform: translate3d(-50%, -50%, 0) scale(0.96);
-            transition: left 700ms cubic-bezier(0.16, 1, 0.3, 1), top 700ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+            filter: blur(0);
+            transition: left 700ms cubic-bezier(0.16, 1, 0.3, 1), top 700ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms cubic-bezier(0.16, 1, 0.3, 1), filter 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .sun::before,
         .sun::after {
@@ -148,6 +159,10 @@
             animation: solarBreathe 8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
         }
         .weather-scene.scene-sun .sun { opacity: 0.94; }
+        .weather-scene.scene-diffused-sun .sun {
+            opacity: 0.24;
+            filter: blur(3px) saturate(0.72);
+        }
         @keyframes solarBreathe {
             0%, 100% { opacity: 0.68; transform: scale(0.96); }
             50% { opacity: 1; transform: scale(1.035); }
@@ -170,9 +185,22 @@
             box-shadow: 0 0 46px 14px rgba(216, 229, 255, 0.13), inset -7px -5px 12px rgba(36, 48, 64, 0.18);
             opacity: 0;
             transform: translate3d(-50%, -50%, 0);
-            transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+            filter: blur(0);
+            transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1), filter 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .weather-scene.scene-night .moon { opacity: 0.88; }
+        .weather-scene.scene-cloud.scene-night .moon { opacity: 0.58; }
+        .weather-scene.scene-overcast.scene-night .moon {
+            opacity: 0.24;
+            filter: blur(2px);
+        }
+        .weather-scene.scene-rain.scene-night .moon,
+        .weather-scene.scene-sleet.scene-night .moon,
+        .weather-scene.scene-hail.scene-night .moon,
+        .weather-scene.scene-snow.scene-night .moon,
+        .weather-scene.scene-fog.scene-night .moon,
+        .weather-scene.scene-haze.scene-night .moon,
+        .weather-scene.scene-dust.scene-night .moon { opacity: 0.06; }
 
         /* 星星 */
         .stars {
@@ -183,6 +211,15 @@
             transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .weather-scene.scene-night .stars { opacity: 0.72; }
+        .weather-scene.scene-partly-cloudy.scene-night .stars { opacity: 0.44; }
+        .weather-scene.scene-overcast.scene-night .stars { opacity: 0.08; }
+        .weather-scene.scene-rain.scene-night .stars,
+        .weather-scene.scene-sleet.scene-night .stars,
+        .weather-scene.scene-hail.scene-night .stars,
+        .weather-scene.scene-snow.scene-night .stars,
+        .weather-scene.scene-fog.scene-night .stars,
+        .weather-scene.scene-haze.scene-night .stars,
+        .weather-scene.scene-dust.scene-night .stars { opacity: 0.03; }
         .star {
             position: absolute;
             width: var(--star-size, 2px);
@@ -207,6 +244,65 @@
             transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
         }
+        .clouds::before,
+        .clouds::after {
+            content: '';
+            position: absolute;
+            left: -48%;
+            width: 196%;
+            opacity: 0;
+            pointer-events: none;
+            background-repeat: repeat-x;
+            transform: translate3d(-8%, 0, 0);
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .clouds::before {
+            z-index: 2;
+            top: -7%;
+            height: 46%;
+            filter: blur(10px);
+            background-image:
+                radial-gradient(ellipse at 9% 48%, rgba(210, 220, 226, 0.78) 0 7%, transparent 18%),
+                radial-gradient(ellipse at 28% 39%, rgba(188, 202, 211, 0.82) 0 11%, transparent 24%),
+                radial-gradient(ellipse at 51% 58%, rgba(215, 224, 229, 0.76) 0 10%, transparent 23%),
+                radial-gradient(ellipse at 75% 42%, rgba(181, 196, 206, 0.8) 0 12%, transparent 26%),
+                radial-gradient(ellipse at 94% 61%, rgba(207, 218, 224, 0.76) 0 9%, transparent 21%);
+            background-size: 58% 100%;
+            animation: cloudVeilDrift var(--cloud-veil-duration) linear infinite;
+        }
+        .clouds::after {
+            z-index: 4;
+            top: 11%;
+            height: 44%;
+            filter: blur(14px);
+            background-image:
+                radial-gradient(ellipse at 14% 55%, rgba(202, 214, 221, 0.7) 0 8%, transparent 21%),
+                radial-gradient(ellipse at 43% 43%, rgba(177, 193, 204, 0.74) 0 13%, transparent 28%),
+                radial-gradient(ellipse at 73% 62%, rgba(213, 222, 227, 0.7) 0 11%, transparent 25%);
+            background-size: 72% 100%;
+            animation: cloudVeilDrift calc(var(--cloud-veil-duration) + 9s) linear infinite reverse;
+            animation-delay: -11s;
+        }
+        .weather-scene.scene-cloud .clouds::before { opacity: 0.56; }
+        .weather-scene.scene-cloud .clouds::after { opacity: 0.34; }
+        .weather-scene.scene-partly-cloudy .clouds::before { opacity: 0.34; }
+        .weather-scene.scene-partly-cloudy .clouds::after { opacity: 0.2; }
+        .weather-scene.scene-overcast .clouds::before { opacity: 0.88; }
+        .weather-scene.scene-overcast .clouds::after { opacity: 0.62; }
+        .weather-scene.scene-rain .clouds::before,
+        .weather-scene.scene-rain .clouds::after,
+        .weather-scene.scene-sleet .clouds::before,
+        .weather-scene.scene-sleet .clouds::after,
+        .weather-scene.scene-hail .clouds::before,
+        .weather-scene.scene-hail .clouds::after,
+        .weather-scene.scene-snow .clouds::before,
+        .weather-scene.scene-snow .clouds::after { opacity: 0.9; }
+        .weather-scene.scene-storm .clouds::before { opacity: 0.98; }
+        .weather-scene.scene-storm .clouds::after { opacity: 0.82; }
+        .weather-scene.scene-night .clouds::before,
+        .weather-scene.scene-night .clouds::after {
+            filter: blur(12px) brightness(0.58) saturate(0.72);
+        }
         .cloud-layer {
             position: absolute;
             inset: -14% -24%;
@@ -215,6 +311,7 @@
             animation-name: cloudDrift;
             animation-timing-function: linear;
             animation-iteration-count: infinite;
+            will-change: transform;
         }
         .cloud-layer-back {
             top: -18%;
@@ -258,11 +355,21 @@
         .weather-scene.scene-clear { --cloud-opacity: 0.22; }
         .weather-scene.scene-cloud { --cloud-opacity: 0.78; }
         .weather-scene.scene-rain { --cloud-opacity: 0.9; }
+        .weather-scene.scene-sleet,
+        .weather-scene.scene-hail,
+        .weather-scene.scene-snow { --cloud-opacity: 0.88; }
         .weather-scene.scene-fog { --cloud-opacity: 0.46; }
+        .weather-scene.scene-haze { --cloud-opacity: 0.3; }
+        .weather-scene.scene-dust { --cloud-opacity: 0.38; }
+        .weather-scene.scene-wind { --cloud-opacity: 0.36; }
         .weather-scene.scene-night .cloud-layer { filter: blur(14px) brightness(0.68) saturate(0.72); }
         @keyframes cloudDrift {
-            from { transform: translate3d(-11%, 0, 0) scale(1.05); }
-            to { transform: translate3d(11%, 0, 0) scale(1.05); }
+            from { transform: translate3d(-18%, -0.7%, 0) scale(1.05); }
+            to { transform: translate3d(18%, 0.7%, 0) scale(1.05); }
+        }
+        @keyframes cloudVeilDrift {
+            from { transform: translate3d(-9%, 0, 0) scale(1.02); }
+            to { transform: translate3d(9%, 1.2%, 0) scale(1.04); }
         }
 
         /* Canvas 只负责降水粒子，避免大量 DOM 节点 */
@@ -278,6 +385,70 @@
         }
         .weather-scene.has-particles .weather-particles { opacity: 1; }
 
+        /* 强降水产生近地水汽，轻重等级只改变环境密度而不干扰内容 */
+        .precipitation-mist {
+            position: absolute;
+            z-index: 4;
+            inset: 38% -10% -12%;
+            opacity: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(180deg, transparent, rgba(202, 220, 229, 0.12) 44%, rgba(213, 229, 236, 0.23)),
+                radial-gradient(ellipse at 30% 72%, rgba(226, 238, 242, 0.2), transparent 48%),
+                radial-gradient(ellipse at 76% 66%, rgba(199, 218, 227, 0.18), transparent 46%);
+            filter: blur(10px);
+            transform: translate3d(0, 3%, 0) scale(1.04);
+            transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+            animation: precipitationMist 7s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+        }
+        .weather-scene.scene-rain.scene-moderate .precipitation-mist,
+        .weather-scene.scene-snow.scene-moderate .precipitation-mist { opacity: 0.18; }
+        .weather-scene.scene-rain.scene-heavy .precipitation-mist,
+        .weather-scene.scene-snow.scene-heavy .precipitation-mist,
+        .weather-scene.scene-sleet .precipitation-mist { opacity: 0.3; }
+        .weather-scene.scene-storm .precipitation-mist,
+        .weather-scene.scene-hail .precipitation-mist { opacity: 0.44; }
+        @keyframes precipitationMist {
+            from { transform: translate3d(-1.5%, 3%, 0) scale(1.04); }
+            to { transform: translate3d(1.5%, -1%, 0) scale(1.08); }
+        }
+
+        /* 大风、暴雪和沙尘使用稀疏气流线，不用高成本的全屏滤镜 */
+        .wind-field {
+            position: absolute;
+            z-index: 5;
+            inset: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+            transition: opacity 500ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .weather-scene.scene-wind .wind-field,
+        .weather-scene.scene-blizzard .wind-field,
+        .weather-scene.scene-dust.scene-heavy .wind-field,
+        .weather-scene.scene-dust.scene-storm .wind-field { opacity: 0.55; }
+        .wind-stream {
+            position: absolute;
+            left: -34%;
+            width: 32%;
+            height: 28px;
+            border-top: 1px solid rgba(224, 238, 245, 0.34);
+            border-radius: 50%;
+            filter: blur(0.4px);
+            animation: windStream var(--wind-stream-duration, 5.6s) linear infinite;
+            animation-delay: var(--wind-stream-delay, 0s);
+        }
+        .wind-stream:nth-child(1) { top: 18%; --wind-stream-duration: 5.8s; --wind-stream-delay: -1.7s; }
+        .wind-stream:nth-child(2) { top: 39%; width: 24%; --wind-stream-duration: 4.9s; --wind-stream-delay: -3.1s; }
+        .wind-stream:nth-child(3) { top: 63%; width: 38%; --wind-stream-duration: 7.2s; --wind-stream-delay: -4.4s; }
+        .wind-stream:nth-child(4) { top: 79%; width: 19%; --wind-stream-duration: 5.3s; --wind-stream-delay: -0.8s; }
+        @keyframes windStream {
+            from { transform: translate3d(-10vw, 0, 0) scaleX(0.78); opacity: 0; }
+            16% { opacity: 0.8; }
+            78% { opacity: 0.48; }
+            to { transform: translate3d(154vw, -10px, 0) scaleX(1.12); opacity: 0; }
+        }
+
         /* 多层雾带，远近方向相反避免机械平移 */
         .fog {
             position: absolute;
@@ -289,6 +460,12 @@
             transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
         }
         .weather-scene.scene-fog .fog { opacity: 0.82; }
+        .weather-scene.scene-haze .fog { opacity: 0.48; }
+        .weather-scene.scene-haze.scene-heavy .fog { opacity: 0.68; }
+        .weather-scene.scene-haze .fog-bank {
+            background: radial-gradient(ellipse, rgba(214, 196, 169, 0.26), rgba(180, 164, 143, 0.11) 48%, transparent 72%);
+            filter: blur(24px) saturate(0.72);
+        }
         .fog-bank {
             position: absolute;
             left: -30%;
@@ -5714,12 +5891,18 @@
             .stars,
             .clouds,
             .fog,
+            .precipitation-mist,
+            .wind-field,
             .weather-particles {
                 transition: none !important;
             }
             .sun::after,
             .star,
             .cloud-layer,
+            .clouds::before,
+            .clouds::after,
+            .precipitation-mist,
+            .wind-stream,
             .fog-bank,
             .lightning-flash {
                 animation: none !important;
@@ -6540,6 +6723,10 @@
             <div class="cloud-layer cloud-layer-mid"></div>
             <div class="cloud-layer cloud-layer-front"></div>
         </div>
+        <div class="precipitation-mist" aria-hidden="true"></div>
+        <div class="wind-field" aria-hidden="true">
+            <i class="wind-stream"></i><i class="wind-stream"></i><i class="wind-stream"></i><i class="wind-stream"></i>
+        </div>
         <canvas class="weather-particles" id="weatherParticles" aria-hidden="true"></canvas>
         <div class="fog" id="fog" aria-hidden="true">
             <div class="fog-bank fog-bank-1"></div>
@@ -7194,13 +7381,14 @@
 
     <script>
         const ICON_BASE = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg/';
-        const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','FOG':'fog','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
+        const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','THUNDER_SHOWER':'thunderstorms-rain','DRIZZLE':'drizzle','FOG':'fog','SLEET':'sleet','HAIL':'hail','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
         const SKYCON_LABELS = {
             CLEAR_DAY: '晴', CLEAR_NIGHT: '晴朗',
             PARTLY_CLOUDY_DAY: '多云', PARTLY_CLOUDY_NIGHT: '多云', CLOUDY: '阴',
             LIGHT_HAZE: '轻度雾霾', MODERATE_HAZE: '中度雾霾', HEAVY_HAZE: '重度雾霾',
             LIGHT_RAIN: '小雨', MODERATE_RAIN: '中雨', HEAVY_RAIN: '大雨', STORM_RAIN: '暴雨',
-            FOG: '雾', LIGHT_SNOW: '小雪', MODERATE_SNOW: '中雪', HEAVY_SNOW: '大雪',
+            THUNDER_SHOWER: '雷阵雨', DRIZZLE: '毛毛雨', FOG: '雾', SLEET: '雨夹雪', HAIL: '冰雹',
+            LIGHT_SNOW: '小雪', MODERATE_SNOW: '中雪', HEAVY_SNOW: '大雪',
             STORM_SNOW: '暴雪', DUST: '浮尘', SAND: '沙尘', WIND: '大风'
         };
         const DEFAULT_WEATHER_LOCATION = { lon: '121.405', lat: '31.123', displayName: '上海 · 闵行' };
@@ -7417,10 +7605,16 @@
             rainNight: 'linear-gradient(180deg,#08141e 0%,#263b49 54%,#506875 100%)',
             fogDay: 'linear-gradient(180deg,#526675 0%,#83949e 52%,#afbdc4 100%)',
             fogNight: 'linear-gradient(180deg,#17242e 0%,#465963 52%,#77878e 100%)',
+            hazeDay: 'linear-gradient(180deg,#665f56 0%,#9a8f7e 52%,#c7b9a0 100%)',
+            hazeNight: 'linear-gradient(180deg,#1d1b19 0%,#4d4942 54%,#746d61 100%)',
             snowDay: 'linear-gradient(180deg,#5f7485 0%,#91a8b7 48%,#c6d4dc 100%)',
             snowNight: 'linear-gradient(180deg,#101d29 0%,#344b5d 50%,#6e8492 100%)',
+            sleetDay: 'linear-gradient(180deg,#42596a 0%,#708899 50%,#a9bbc5 100%)',
+            sleetNight: 'linear-gradient(180deg,#0b1823 0%,#2d4353 52%,#627986 100%)',
             dustDay: 'linear-gradient(180deg,#63584c 0%,#9a856c 52%,#c7b38f 100%)',
-            dustNight: 'linear-gradient(180deg,#191816 0%,#4b4339 54%,#756854 100%)'
+            dustNight: 'linear-gradient(180deg,#191816 0%,#4b4339 54%,#756854 100%)',
+            windDay: 'linear-gradient(180deg,#244863 0%,#5d829a 48%,#9db8c6 100%)',
+            windNight: 'linear-gradient(180deg,#081725 0%,#294253 52%,#597180 100%)'
         };
 
         function isWeatherSceneVisible() {
@@ -7488,26 +7682,63 @@
             const conditionBase = skycon.includes('STORM') ? 1
                 : (skycon.includes('HEAVY') ? 0.86
                     : (skycon.includes('MODERATE') ? 0.62
-                        : ((skycon.includes('LIGHT') || skycon.includes('SNOW')) ? 0.36 : 0)));
+                        : ((skycon.includes('HAIL') || skycon.includes('SLEET')) ? 0.58
+                            : ((skycon.includes('LIGHT') || skycon.includes('SNOW') || skycon.includes('DRIZZLE')) ? 0.36 : 0))));
             return Math.min(1, Math.max(conditionBase, localIntensity > 0 ? 0.26 + Math.min(localIntensity / 8, 0.74) : 0));
+        }
+
+        const LOCAL_WEATHER_SCENE_VALUES = new Set(Object.keys(SKYCON_LABELS));
+        function getLocalWeatherScenePreview() {
+            if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) return null;
+            const params = new URLSearchParams(window.location.search);
+            const skycon = String(params.get('scene') || '').toUpperCase();
+            if (!LOCAL_WEATHER_SCENE_VALUES.has(skycon)) return null;
+            const nightParam = params.get('night');
+            const forceNight = nightParam === '1' ? true
+                : (nightParam === '0' ? false
+                    : (skycon.includes('NIGHT') ? true : (skycon.includes('DAY') ? false : undefined)));
+            const intensity = skycon.includes('STORM') ? 8
+                : (skycon.includes('HEAVY') ? 5
+                    : (skycon.includes('MODERATE') ? 2.4
+                        : ((skycon.includes('RAIN') || skycon.includes('SLEET') || skycon.includes('HAIL')) ? 0.7 : 0)));
+            const speed = skycon === 'WIND' ? 30
+                : ((skycon.includes('STORM') || skycon === 'SAND') ? 24 : 12);
+            return {
+                skycon,
+                weather: {
+                    realtime: {
+                        wind: { speed, direction: 108 },
+                        precipitation: { local: { intensity } }
+                    },
+                    hourly: { precipitation: [{ value: intensity }] },
+                    astro: {},
+                    forceNight,
+                    celestialProgress: forceNight ? 0.34 : 0.62
+                }
+            };
         }
 
         function buildWeatherParticles(type, intensity, windDrift) {
             resizeWeatherCanvas();
             const { width, height, lowPower } = weatherSceneState;
-            const baseCount = type === 'rain' ? 138 : (type === 'snow' ? 84 : 68);
+            const baseCounts = { rain: 138, snow: 84, sleet: 116, hail: 92, wind: 42, haze: 48, dust: 68 };
+            const baseCount = baseCounts[type] || 68;
             const count = Math.max(18, Math.round(baseCount * (0.34 + intensity * 0.72) * (lowPower ? 0.58 : 1)));
             weatherSceneState.particles = Array.from({ length: count }, (_, index) => {
                 const depth = 0.22 + Math.random() * 0.78;
+                const kind = type === 'sleet' ? (index % 3 === 0 ? 'snow' : 'rain') : type;
                 return {
                     x: Math.random() * width,
                     y: Math.random() * height,
                     depth,
-                    length: type === 'rain' ? 10 + depth * 22 + intensity * 10 : 0,
-                    size: type === 'snow' ? 0.8 + depth * 2.5 : 0.7 + depth * 1.3,
-                    speed: type === 'rain'
+                    kind,
+                    length: kind === 'rain' ? 10 + depth * 22 + intensity * 10 : (kind === 'wind' ? 26 + depth * 52 : 0),
+                    size: kind === 'snow' ? 0.8 + depth * 2.5 : (kind === 'hail' ? 1.2 + depth * 2.6 : 0.7 + depth * 1.3),
+                    speed: kind === 'rain'
                         ? 380 + depth * 520 + intensity * 260
-                        : (type === 'snow' ? 26 + depth * 54 : 34 + depth * 76),
+                        : (kind === 'snow' ? 26 + depth * 54
+                            : (kind === 'hail' ? 440 + depth * 420
+                                : (kind === 'wind' ? 180 + depth * 260 : 24 + depth * 68))),
                     alpha: 0.18 + depth * 0.48,
                     phase: index * 0.63 + Math.random() * Math.PI,
                     wind: windDrift * (0.45 + depth * 0.8)
@@ -7535,7 +7766,7 @@
             ctx.clearRect(0, 0, state.width, state.height);
 
             for (const particle of state.particles) {
-                if (state.particleType === 'rain') {
+                if (particle.kind === 'rain') {
                     particle.y += particle.speed * deltaSeconds;
                     particle.x += particle.wind * 150 * deltaSeconds;
                     const slant = particle.wind * particle.length * 0.7;
@@ -7545,7 +7776,7 @@
                     ctx.lineWidth = 0.45 + particle.depth * 1.1;
                     ctx.strokeStyle = `rgba(220,238,249,${particle.alpha * (0.6 + state.intensity * 0.55)})`;
                     ctx.stroke();
-                } else if (state.particleType === 'snow') {
+                } else if (particle.kind === 'snow') {
                     particle.phase += deltaSeconds * (0.65 + particle.depth);
                     particle.y += particle.speed * deltaSeconds;
                     particle.x += (particle.wind * 34 + Math.sin(particle.phase) * (8 + particle.depth * 14)) * deltaSeconds;
@@ -7553,20 +7784,44 @@
                     ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
                     ctx.fillStyle = `rgba(241,247,250,${particle.alpha * 0.86})`;
                     ctx.fill();
+                } else if (particle.kind === 'hail') {
+                    particle.y += particle.speed * deltaSeconds;
+                    particle.x += particle.wind * 90 * deltaSeconds;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(226,241,248,${particle.alpha * 0.9})`;
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(particle.x - particle.size * 0.25, particle.y - particle.size * 0.25, particle.size * 0.28, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(250,253,255,${particle.alpha})`;
+                    ctx.fill();
+                } else if (particle.kind === 'wind') {
+                    particle.phase += deltaSeconds * 0.8;
+                    particle.x += (particle.speed + Math.abs(particle.wind) * 160) * deltaSeconds;
+                    particle.y += Math.sin(particle.phase) * 5 * deltaSeconds;
+                    ctx.beginPath();
+                    ctx.moveTo(particle.x, particle.y);
+                    ctx.lineTo(particle.x - particle.length, particle.y + Math.sin(particle.phase) * 3);
+                    ctx.lineWidth = 0.45 + particle.depth * 0.7;
+                    ctx.strokeStyle = `rgba(220,237,245,${particle.alpha * 0.42})`;
+                    ctx.stroke();
                 } else {
                     particle.phase += deltaSeconds * 0.4;
                     particle.y += Math.sin(particle.phase) * 4 * deltaSeconds;
-                    particle.x += (34 + Math.abs(particle.wind) * 72) * deltaSeconds * Math.sign(particle.wind || 1);
+                    const hazeSpeed = particle.kind === 'haze' ? 12 : 34;
+                    particle.x += (hazeSpeed + Math.abs(particle.wind) * 72) * deltaSeconds * Math.sign(particle.wind || 1);
                     ctx.beginPath();
                     ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(222,203,168,${particle.alpha * 0.46})`;
+                    ctx.fillStyle = particle.kind === 'haze'
+                        ? `rgba(218,205,181,${particle.alpha * 0.2})`
+                        : `rgba(222,203,168,${particle.alpha * 0.46})`;
                     ctx.fill();
                 }
 
                 const margin = 50;
                 if (particle.y > state.height + margin || particle.x > state.width + margin || particle.x < -margin) {
-                    particle.y = state.particleType === 'rain' ? -particle.length : -margin * Math.random();
-                    particle.x = Math.random() * state.width;
+                    particle.y = (particle.kind === 'rain' || particle.kind === 'hail') ? -Math.max(particle.length, margin * Math.random()) : -margin * Math.random();
+                    particle.x = particle.kind === 'wind' ? -particle.length : Math.random() * state.width;
                 }
             }
             state.frame = requestAnimationFrame(drawWeatherParticles);
@@ -7587,25 +7842,32 @@
             weatherSceneState.frame = requestAnimationFrame(drawWeatherParticles);
         }
 
-        function updateCelestialPosition(scene, astro = {}, isNight = false) {
+        function updateCelestialPosition(scene, astro = {}, isNight = false, forcedProgress = null) {
             const now = new Date();
             const sunrise = parseClockToDate(astro?.sunrise?.time || astro?.sunrise);
             const sunset = parseClockToDate(astro?.sunset?.time || astro?.sunset);
             let progress;
-            if (sunrise && sunset && sunset > sunrise) {
+            if (Number.isFinite(forcedProgress)) {
+                progress = Math.min(1, Math.max(0, forcedProgress));
+            } else if (sunrise && sunset && sunset > sunrise) {
                 progress = Math.min(1, Math.max(0, (now - sunrise) / (sunset - sunrise)));
             } else {
                 progress = Math.min(1, Math.max(0, (now.getHours() + now.getMinutes() / 60 - 6) / 12));
             }
             const daylightArc = Math.sin(progress * Math.PI);
-            const sunX = 8 + progress * 84;
-            const sunY = 46 - daylightArc * 37;
-            const nightProgress = ((now.getHours() + now.getMinutes() / 60 + 6) % 24) / 12;
+            const compactScene = window.innerWidth < 700;
+            const sunX = compactScene ? 66 + progress * 22 : 8 + progress * 84;
+            const sunY = compactScene ? 36 - daylightArc * 23 : 46 - daylightArc * 37;
+            const nightProgress = Number.isFinite(forcedProgress)
+                ? forcedProgress
+                : ((now.getHours() + now.getMinutes() / 60 + 6) % 24) / 12;
             const moonProgress = Math.min(1, Math.max(0, nightProgress));
             scene.style.setProperty('--sun-x', `${sunX.toFixed(1)}%`);
             scene.style.setProperty('--sun-y', `${sunY.toFixed(1)}%`);
-            scene.style.setProperty('--moon-x', `${(12 + moonProgress * 76).toFixed(1)}%`);
-            scene.style.setProperty('--moon-y', `${(44 - Math.sin(moonProgress * Math.PI) * 32).toFixed(1)}%`);
+            const moonX = compactScene ? 72 + moonProgress * 18 : 12 + moonProgress * 76;
+            const moonY = compactScene ? 31 - Math.sin(moonProgress * Math.PI) * 18 : 44 - Math.sin(moonProgress * Math.PI) * 32;
+            scene.style.setProperty('--moon-x', `${moonX.toFixed(1)}%`);
+            scene.style.setProperty('--moon-y', `${moonY.toFixed(1)}%`);
             scene.style.setProperty('--light-x', `${(isNight ? 82 : sunX).toFixed(1)}%`);
             scene.style.setProperty('--light-y', `${(isNight ? 14 : sunY).toFixed(1)}%`);
         }
@@ -7618,47 +7880,87 @@
             const now = new Date();
             const sunrise = parseClockToDate(astro?.sunrise?.time || astro?.sunrise);
             const sunset = parseClockToDate(astro?.sunset?.time || astro?.sunset);
-            const isNight = sunrise && sunset
-                ? (now < sunrise || now > sunset)
-                : (normalized.includes('NIGHT') || (!normalized.includes('DAY') && (now.getHours() < 6 || now.getHours() >= 18)));
-            const isRain = normalized.includes('RAIN');
-            const isSnow = normalized.includes('SNOW') || normalized.includes('SLEET');
-            const isFog = normalized.includes('FOG') || normalized.includes('HAZE');
-            const isDust = normalized.includes('DUST') || normalized.includes('SAND');
-            const isCloud = normalized.includes('CLOUDY');
-            const isThunder = normalized.includes('STORM') || normalized.includes('THUNDER');
-            const sceneType = isRain ? 'rain' : (isSnow ? 'snow' : (isFog ? 'fog' : (isDust ? 'dust' : (isCloud ? 'cloud' : 'clear'))));
-            const particleType = isRain ? 'rain' : (isSnow ? 'snow' : (isDust ? 'dust' : null));
-            const intensity = resolveSceneIntensity(normalized, weather);
+            const isNight = typeof weather.forceNight === 'boolean'
+                ? weather.forceNight
+                : (sunrise && sunset
+                    ? (now < sunrise || now > sunset)
+                    : (normalized.includes('NIGHT') || (!normalized.includes('DAY') && (now.getHours() < 6 || now.getHours() >= 18))));
             const windSpeed = Number(realtime?.wind?.speed || 0);
             const windDirection = Number(realtime?.wind?.direction || 0);
+            const isSleet = normalized.includes('SLEET');
+            const isHail = normalized.includes('HAIL');
+            const isSnow = normalized.includes('SNOW') && !isSleet;
+            const isThunder = normalized.includes('THUNDER') || normalized === 'STORM_RAIN';
+            const isRain = !isSnow && !isSleet && !isHail
+                && (normalized.includes('RAIN') || normalized.includes('SHOWER') || normalized.includes('DRIZZLE'));
+            const isHaze = normalized.includes('HAZE');
+            const isFog = normalized.includes('FOG');
+            const isDust = normalized.includes('DUST') || normalized.includes('SAND');
+            const isWind = !isDust && (normalized === 'WIND' || normalized.includes('GALE'));
+            const isCloud = normalized.includes('CLOUDY');
+            const isPartlyCloudy = isCloud && normalized.includes('PARTLY');
+            const isBlizzard = isSnow && (normalized.includes('STORM') || windSpeed >= 18);
+            const severity = normalized.includes('STORM') ? 'storm'
+                : ((normalized.includes('HEAVY') || isHail || normalized === 'SAND') ? 'heavy'
+                    : ((normalized.includes('MODERATE') || isThunder || isSleet) ? 'moderate'
+                        : ((normalized.includes('LIGHT') || normalized.includes('DRIZZLE') || normalized === 'DUST') ? 'light' : '')));
+            const sceneType = isHail ? 'hail'
+                : (isSleet ? 'sleet'
+                    : (isRain ? 'rain'
+                        : (isSnow ? 'snow'
+                            : (isFog ? 'fog'
+                                : (isHaze ? 'haze'
+                                    : (isDust ? 'dust'
+                                        : (isWind ? 'wind' : (isCloud ? 'cloud' : 'clear'))))))));
+            const particleType = isHail ? 'hail'
+                : (isSleet ? 'sleet'
+                    : (isRain ? 'rain'
+                        : (isSnow ? 'snow'
+                            : (isDust ? 'dust'
+                                : (isWind ? 'wind' : (isHaze && severity !== 'light' ? 'haze' : null))))));
+            const baseIntensity = resolveSceneIntensity(normalized, weather);
+            const intensity = isWind
+                ? Math.max(baseIntensity, Math.min(1, 0.24 + windSpeed / 36))
+                : baseIntensity;
             const windDrift = Math.sin((windDirection + 180) * Math.PI / 180) * Math.min(1, 0.16 + windSpeed / 30);
             const classes = [
                 'weather-scene',
                 `scene-${sceneType}`,
                 isNight ? 'scene-night' : 'scene-day',
-                (!isNight && !isRain && !isFog && !isSnow && !isDust) ? 'scene-sun' : '',
+                severity ? `scene-${severity}` : '',
+                isCloud ? (isPartlyCloudy ? 'scene-partly-cloudy' : 'scene-overcast') : '',
+                isBlizzard ? 'scene-blizzard' : '',
+                (!isNight && !isRain && !isFog && !isHaze && !isSnow && !isSleet && !isHail && !isDust && (!isCloud || isPartlyCloudy)) ? 'scene-sun' : '',
+                (!isNight && (isFog || isHaze || isDust)) ? 'scene-diffused-sun' : '',
                 isThunder ? 'scene-thunder' : '',
                 particleType ? 'has-particles' : ''
             ].filter(Boolean);
             scene.className = classes.join(' ');
+            scene.dataset.weatherState = normalized;
 
             const skyKey = sceneType === 'rain' ? (isNight ? 'rainNight' : 'rainDay')
-                : (sceneType === 'snow' ? (isNight ? 'snowNight' : 'snowDay')
-                    : (sceneType === 'fog' ? (isNight ? 'fogNight' : 'fogDay')
-                        : (sceneType === 'dust' ? (isNight ? 'dustNight' : 'dustDay')
-                            : (sceneType === 'cloud' ? (isNight ? 'cloudNight' : 'cloudDay')
-                                : (isNight ? 'clearNight' : 'clearDay')))));
+                : ((sceneType === 'sleet' || sceneType === 'hail') ? (isNight ? 'sleetNight' : 'sleetDay')
+                    : (sceneType === 'snow' ? (isNight ? 'snowNight' : 'snowDay')
+                        : (sceneType === 'fog' ? (isNight ? 'fogNight' : 'fogDay')
+                            : (sceneType === 'haze' ? (isNight ? 'hazeNight' : 'hazeDay')
+                                : (sceneType === 'dust' ? (isNight ? 'dustNight' : 'dustDay')
+                                    : (sceneType === 'wind' ? (isNight ? 'windNight' : 'windDay')
+                                        : (sceneType === 'cloud' ? (isNight ? 'cloudNight' : 'cloudDay')
+                                            : (isNight ? 'clearNight' : 'clearDay'))))))));
             setWeatherSky(WEATHER_SKIES[skyKey]);
-            updateCelestialPosition(scene, astro, isNight);
+            updateCelestialPosition(scene, astro, isNight, weather.celestialProgress);
             ensureWeatherStars();
 
-            const cloudSpeedFactor = Math.max(0.75, Math.min(2.2, 0.82 + windSpeed / 18));
-            scene.style.setProperty('--cloud-back-duration', `${Math.round(76 / cloudSpeedFactor)}s`);
-            scene.style.setProperty('--cloud-mid-duration', `${Math.round(58 / cloudSpeedFactor)}s`);
-            scene.style.setProperty('--cloud-front-duration', `${Math.round(43 / cloudSpeedFactor)}s`);
+            const cloudSpeedFactor = Math.max(0.82, Math.min(2.35, 0.92 + windSpeed / 20));
+            scene.style.setProperty('--cloud-back-duration', `${Math.round(48 / cloudSpeedFactor)}s`);
+            scene.style.setProperty('--cloud-mid-duration', `${Math.round(34 / cloudSpeedFactor)}s`);
+            scene.style.setProperty('--cloud-front-duration', `${Math.round(24 / cloudSpeedFactor)}s`);
+            scene.style.setProperty('--cloud-veil-duration', `${Math.round(28 / cloudSpeedFactor)}s`);
             document.querySelectorAll('.cloud-layer').forEach(layer => {
                 layer.style.animationDirection = windDrift < 0 ? 'reverse' : 'normal';
+            });
+            document.querySelectorAll('.wind-stream').forEach(stream => {
+                stream.style.animationDirection = windDrift < 0 ? 'reverse' : 'normal';
             });
 
             stopWeatherSceneAnimation({ clear: !particleType });
@@ -7897,7 +8199,8 @@
                 if (!r.ok) return;
                 const d = (await r.json()).result;
                 const rt = d?.realtime || {};
-                updateScene(rt.skycon || 'CLEAR_DAY', {
+                const scenePreview = getLocalWeatherScenePreview();
+                updateScene(scenePreview?.skycon || rt.skycon || 'CLEAR_DAY', scenePreview?.weather || {
                     realtime: rt,
                     hourly: d.hourly || {},
                     astro: d.daily?.astro?.[0] || {}

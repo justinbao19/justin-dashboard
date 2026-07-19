@@ -161,7 +161,8 @@ def build_weather_report() -> str:
     current_sky = SKYCON_LABELS.get(realtime.get("skycon"), realtime.get("skycon", "未知"))
     current_temp = round_temp(realtime.get("temperature"))
     current_feel = round_temp(realtime.get("apparent_temperature"))
-    comfort = realtime.get("life_index", {}).get("comfort", {}).get("desc", "")
+    comfort_item = realtime.get("life_index", {}).get("comfort") or {}
+    comfort = comfort_item.get("desc", "")
     aqi = realtime.get("air_quality", {}).get("aqi", {}).get("chn")
     humidity = format_percent(realtime.get("humidity"))
     wind_speed = realtime.get("wind", {}).get("speed")
@@ -174,7 +175,8 @@ def build_weather_report() -> str:
     sunset = today_astro.get("sunset", {}).get("time", "-")
     forecast = result.get("forecast_keypoint", "")
     precipitation = hourly.get("precipitation", [])
-    rain_risk = max((item.get("probability", 0) for item in precipitation[:18]), default=0)
+    rain_probability = max((item.get("probability", 0) for item in precipitation[:18]), default=0)
+    rain_risk = rain_probability / 100 if rain_probability > 1 else rain_probability
     day_tip = build_day_tip(now_dt)
     outfit_advice = build_human_advice(
         today_temp.get("min"),
@@ -192,7 +194,7 @@ def build_weather_report() -> str:
         f"🌡️ 此刻天气: {current_sky} {current_temp}，体感 {current_feel}" + (f"，{comfort}" if comfort else ""),
         f"😷 空气质量: AQI {aqi}" if aqi is not None else "😷 空气质量: 暂无",
         f"💧 湿度 / 能见度: {humidity} / {round(float(visibility), 1) if visibility is not None else '-'} km",
-        f"🍃 风速: {round(float(wind_speed), 1)} m/s" if wind_speed is not None else "🍃 风速: 暂无",
+        f"🍃 风速: {round(float(wind_speed), 1)} km/h" if wind_speed is not None else "🍃 风速: 暂无",
         f"📈 今日气温: {round_temp(today_temp.get('min'))} ~ {round_temp(today_temp.get('max'))}",
         f"📅 明日气温: {round_temp(tomorrow_temp.get('min'))} ~ {round_temp(tomorrow_temp.get('max'))}",
         f"🌅 日出 / 🌇 日落: {sunrise} / {sunset}",
@@ -202,7 +204,7 @@ def build_weather_report() -> str:
         lines.extend(["", f"☁️ 天气提示: {forecast}"])
 
     lines.append(
-        f"☔ 降雨提醒: 今日白天降雨概率最高 {round(rain_risk * 100)}%"
+        f"☔ 降雨提醒: 今日白天降雨概率最高 {round(rain_probability if rain_probability > 1 else rain_probability * 100)}%"
     )
 
     hourly_rows = format_hourly_rows(hourly)

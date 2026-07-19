@@ -15,13 +15,26 @@ test('weather exposes a calm, accessible typhoon status entry before hourly fore
   assert.match(html, /<span class="typhoon-card-title">当前无活跃台风<\/span>/);
 });
 
-test('desktop weather cards share explicit grid rows so both columns stay aligned', async () => {
+test('desktop weather cards use dense paired spans so optional alerts do not create gaps', async () => {
   const html = await readFile(new URL('index.html', root), 'utf8');
 
-  assert.match(html, /\.weather-support-stack,\s*\.weather-primary-stack \{\s*display: contents;/);
-  assert.match(html, /\.weather-sun-card,\s*\.weather-commute-card \{\s*grid-row: 4;/);
-  assert.match(html, /\.weather-aqi-card,\s*\.weather-life-card \{\s*grid-row: 5;/);
+  assert.match(html, /grid-auto-flow: row dense;/);
+  assert.match(html, /\.weather-typhoon-card \{[\s\S]*?grid-column: span 5;/);
+  assert.match(html, /\.weather-nowcast-card \{[\s\S]*?grid-column: span 7;/);
+  assert.match(html, /\.weather-daily-card,[\s\S]*?\.weather-aqi-card \{[\s\S]*?grid-column: span 5;/);
+  assert.match(html, /\.weather-commute-card,[\s\S]*?\.weather-life-card \{[\s\S]*?grid-column: span 7;/);
   assert.match(html, /\.weather-content > \.weather-grid,\s*\.weather-content > \.weather-stack \{\s*margin-bottom: 0;/);
+});
+
+test('weather exposes free-tier alert, nowcast and progressive disclosure surfaces', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+
+  assert.match(html, /id="weatherAlertCard"[^>]*hidden/);
+  assert.match(html, /id="nowcastSummary"/);
+  assert.match(html, /id="precipitationTimeline"/);
+  assert.match(html, /id="lifeExpandButton"[^>]*aria-expanded="false"/);
+  assert.match(html, /id="aqiExpandButton"[^>]*aria-expanded="false"/);
+  assert.match(html, /life-index-grid:not\(\.is-expanded\)/);
 });
 
 test('typhoon route renders a useful empty state in Vercel and Sites builds', async () => {

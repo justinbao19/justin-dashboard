@@ -7,10 +7,11 @@
 ## 功能模块
 
 ### 🌤️ 天气
-- 实时天气（彩云天气 API）
+- 实时天气（QWeather 免费套餐）
 - 逐小时 / 逐日预报
-- 空气质量 / 生活指数
-- 日出、日落、月相与降水窗口（QWeather 可选增强）
+- 空气质量、健康建议与可展开生活指数
+- 官方天气预警与中国区域未来两小时分钟降水
+- 日出、日落、月相与降水窗口
 - 动态背景（晴/云/雨/夜）
 
 ### 📊 市场行情
@@ -38,7 +39,7 @@
 justin-dashboard/
 ├── index.html          # 主页面（所有前端代码）
 ├── api/
-│   ├── weather.js      # 天气 API 代理（彩云）
+│   ├── weather.js      # QWeather 免费接口聚合与缓存
 │   └── market.js       # 市场 API 代理（Finnhub + 新浪 + CoinGecko）
 ├── data/
 │   ├── market.json     # 市场分析数据（静态，含 analysis/advice）
@@ -50,7 +51,7 @@ justin-dashboard/
 ## 数据流
 
 ### 实时数据（每次打开页面获取）
-- 天气 → `/api/weather` → 彩云天气 API；配置 QWeather 凭据后自动附加真实月相、月升与月落
+- 天气 → `/api/weather` → QWeather 免费套餐聚合接口；包含实况、逐小时、7 天、空气质量、生活指数、预警、分钟降水与日月天文
 - 市场价格 → `/api/market` → Finnhub + 新浪 + CoinGecko
 
 ### 静态数据（定时自动更新）

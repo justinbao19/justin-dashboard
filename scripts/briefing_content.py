@@ -92,11 +92,8 @@ def format_weather_brief(weather: dict) -> list[str]:
     temp = realtime.get("temperature")
     apparent = realtime.get("apparent_temperature")
     skycon = SKYCON_LABELS.get(realtime.get("skycon"), realtime.get("skycon", "未知"))
-    comfort = (
-        realtime.get("life_index", {})
-        .get("comfort", {})
-        .get("desc")
-    )
+    comfort_item = realtime.get("life_index", {}).get("comfort") or {}
+    comfort = comfort_item.get("desc")
     aqi = (
         realtime.get("air_quality", {})
         .get("aqi", {})

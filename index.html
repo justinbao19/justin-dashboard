@@ -728,6 +728,24 @@
             color: white;
         }
         .weather-card .card-title { color: rgba(255,255,255,0.7); }
+        .weather-card .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+        }
+        .weather-card-title-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .weather-card-source {
+            margin-left: auto;
+            color: rgba(255,255,255,0.5);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: -0.08px;
+        }
         .weather-stack {
             display: grid;
             gap: 16px;
@@ -741,6 +759,160 @@
         }
         .weather-content > :last-child {
             margin-bottom: 0;
+        }
+
+        /* Weather intelligence: alerts and near-term precipitation */
+        .weather-alert-card {
+            position: relative;
+            overflow: hidden;
+            background: rgba(55, 33, 12, 0.48);
+            border-color: rgba(255, 203, 110, 0.26);
+        }
+        .weather-alert-card[hidden] { display: none; }
+        .weather-alert-head {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 15px;
+        }
+        .weather-alert-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: #fff3d2;
+            background: rgba(255, 190, 74, 0.18);
+            font-size: 23px;
+        }
+        .weather-alert-kicker {
+            color: rgba(255,255,255,0.64);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+        }
+        .weather-alert-title {
+            margin-top: 4px;
+            font-family: "SF Pro Display", "Helvetica Neue", sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.16;
+            letter-spacing: -0.35px;
+        }
+        .weather-alert-time {
+            color: rgba(255,255,255,0.58);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .weather-alert-details,
+        .weather-disclosure {
+            margin-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .weather-alert-details summary,
+        .weather-disclosure summary {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: rgba(255,255,255,0.74);
+            font-size: 12px;
+            cursor: pointer;
+            list-style: none;
+        }
+        .weather-alert-details summary::-webkit-details-marker,
+        .weather-disclosure summary::-webkit-details-marker { display: none; }
+        .weather-alert-details summary::after,
+        .weather-disclosure summary::after {
+            content: '\f078';
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transition: transform 220ms cubic-bezier(.22,1,.36,1);
+        }
+        .weather-alert-details[open] summary::after,
+        .weather-disclosure[open] summary::after { transform: rotate(180deg); }
+        .weather-alert-description {
+            padding: 0 0 4px;
+            color: rgba(255,255,255,0.72);
+            font-size: 13px;
+            line-height: 1.58;
+        }
+
+        .weather-nowcast-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .weather-nowcast-card::after {
+            content: '';
+            position: absolute;
+            right: -42px;
+            top: -60px;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(119, 190, 255, 0.16), transparent 68%);
+            pointer-events: none;
+        }
+        .nowcast-hero {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: end;
+        }
+        .nowcast-summary {
+            max-width: 620px;
+            font-family: "SF Pro Display", "Helvetica Neue", sans-serif;
+            font-size: clamp(19px, 2.1vw, 27px);
+            font-weight: 600;
+            line-height: 1.14;
+            letter-spacing: -0.45px;
+        }
+        .nowcast-meta {
+            margin-top: 8px;
+            color: rgba(255,255,255,0.62);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+        .nowcast-risk {
+            min-width: 86px;
+            text-align: right;
+        }
+        .nowcast-risk strong {
+            display: block;
+            font-family: "SF Pro Display", "Helvetica Neue", sans-serif;
+            font-size: 36px;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+        .nowcast-risk span {
+            display: block;
+            margin-top: 7px;
+            color: rgba(255,255,255,0.58);
+            font-size: 11px;
+        }
+        .precipitation-timeline {
+            display: grid;
+            grid-template-columns: repeat(24, minmax(2px, 1fr));
+            align-items: end;
+            gap: 3px;
+            height: 74px;
+            padding: 8px 0 4px;
+        }
+        .precipitation-bar {
+            min-height: 4px;
+            height: calc(4px + (var(--rain, 0) * 58px));
+            border-radius: 999px;
+            background: rgba(171, 221, 255, calc(0.24 + var(--rain, 0) * 0.66));
+        }
+        .nowcast-axis {
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255,255,255,0.44);
+            font-size: 10px;
         }
 
         /* Typhoon status entry */
@@ -810,12 +982,14 @@
             box-shadow: 0 0 0 4px rgba(157,215,238,0.1);
         }
         .typhoon-card-title {
+            display: block;
             font-size: 23px;
             font-weight: 600;
             line-height: 1.2;
             letter-spacing: -0.35px;
         }
         .typhoon-card-description {
+            display: block;
             margin-top: 7px;
             max-width: 720px;
             color: rgba(255,255,255,0.68);
@@ -991,10 +1165,29 @@
 
         /* Life Index */
         .life-index-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; text-align: center; }
-        .life-index-item { padding: 16px 8px; background: rgba(255,255,255,0.08); border-radius: 16px; }
+        .life-index-item { min-width: 0; padding: 16px 8px; background: rgba(255,255,255,0.08); border-radius: 16px; }
         .life-index-item i { font-size: 24px; margin-bottom: 10px; display: block; }
         .life-index-item .name { font-size: 12px; opacity: 0.7; margin-bottom: 6px; }
-        .life-index-item .level { font-size: 14px; font-weight: 600; }
+        .life-index-item .level { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+        .weather-expand-button {
+            display: none;
+            width: 100%;
+            min-height: 44px;
+            margin-top: 12px;
+            border: 0;
+            border-radius: 999px;
+            color: rgba(255,255,255,0.78);
+            background: rgba(255,255,255,0.09);
+            font: inherit;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .weather-expand-button:focus-visible,
+        .weather-alert-details summary:focus-visible,
+        .weather-disclosure summary:focus-visible {
+            outline: 2px solid #2997ff;
+            outline-offset: 3px;
+        }
 
         /* Sun / Rain */
         .weather-sun-card {
@@ -4128,6 +4321,7 @@
             .weather-content {
                 display: grid;
                 grid-template-columns: repeat(12, minmax(0, 1fr));
+                grid-auto-flow: row dense;
                 gap: 24px;
                 align-content: start;
                 padding: 12px 0 0;
@@ -4144,30 +4338,38 @@
                 margin-bottom: 0;
             }
 
-            .weather-typhoon-card {
+            .weather-alert-card {
                 grid-column: 1 / -1;
-                grid-row: 1;
+            }
+
+            .weather-typhoon-card {
+                grid-column: span 5;
+                min-height: 160px;
+            }
+
+            .weather-nowcast-card {
+                grid-column: span 7;
+                min-height: 160px;
             }
 
             .weather-hourly-card {
                 grid-column: 1 / -1;
-                grid-row: 2;
             }
 
-            .weather-daily-card {
-                grid-column: span 6;
-                grid-row: 3;
+            .weather-daily-card,
+            .weather-sun-card,
+            .weather-aqi-card {
+                grid-column: span 5;
             }
 
             .weather-details-grid {
-                grid-column: span 6;
-                grid-row: 3;
+                grid-column: span 7;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .weather-support-stack,
-            .weather-primary-stack {
-                display: contents;
+            .weather-commute-card,
+            .weather-life-card {
+                grid-column: span 7;
             }
 
             .weather-sun-card,
@@ -4178,32 +4380,26 @@
                 margin: 0;
             }
 
-            .weather-sun-card,
-            .weather-aqi-card {
-                grid-column: 1 / span 6;
-            }
-
-            .weather-commute-card,
-            .weather-life-card {
-                grid-column: 7 / -1;
-            }
-
-            .weather-sun-card,
-            .weather-commute-card {
-                grid-row: 4;
-            }
-
-            .weather-aqi-card,
-            .weather-life-card {
-                grid-row: 5;
-            }
-
             .weather-aqi-card {
                 margin-top: 0 !important;
             }
 
             .aqi-details {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+
+            .life-index-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .weather-life-card {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .weather-life-card .life-index-grid {
+                flex: 1;
+                grid-auto-rows: minmax(92px, 1fr);
             }
 
             .page-shell {
@@ -4356,17 +4552,7 @@
                 gap: 28px;
             }
 
-            .weather-details-grid {
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                grid-column: span 6;
-            }
-
-            .weather-daily-card { grid-column: span 5; }
-            .weather-details-grid { grid-column: span 7; }
-            .weather-sun-card,
-            .weather-aqi-card { grid-column: 1 / span 5; }
-            .weather-commute-card,
-            .weather-life-card { grid-column: 6 / -1; }
+            .weather-details-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
             .weather-aqi-card,
             .weather-life-card {
@@ -4396,10 +4582,7 @@
                 font-size: 16px;
             }
 
-            .life-index-grid {
-                grid-template-columns: repeat(5, minmax(0, 1fr));
-                gap: 10px;
-            }
+            .life-index-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 
             .life-index-item {
                 padding: 14px 8px;
@@ -4429,8 +4612,77 @@
             .market-price { font-size: 18px; }
         }
 
-        /* Mobile polish for information-heavy sections. Weather intentionally left untouched. */
+        /* Mobile-first progressive disclosure for dense sections. */
         @media (max-width: 760px) {
+            #page-weather .weather-content {
+                display: grid;
+                gap: 14px;
+            }
+
+            #page-weather .weather-card,
+            #page-weather .weather-grid {
+                margin-bottom: 0;
+            }
+
+            .weather-alert-head {
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 12px;
+            }
+
+            .weather-alert-time {
+                grid-column: 2;
+                margin-top: -5px;
+            }
+
+            .weather-alert-title {
+                font-size: 18px;
+            }
+
+            .weather-nowcast-card {
+                padding: 18px 17px;
+            }
+
+            .nowcast-hero {
+                gap: 12px;
+            }
+
+            .nowcast-summary {
+                font-size: 20px;
+            }
+
+            .nowcast-risk {
+                min-width: 68px;
+            }
+
+            .nowcast-risk strong {
+                font-size: 31px;
+            }
+
+            .precipitation-timeline {
+                gap: 2px;
+                height: 66px;
+            }
+
+            .aqi-details:not(.is-expanded) > div:nth-child(n+4),
+            .life-index-grid:not(.is-expanded) > .life-index-item:nth-child(n+5) {
+                display: none;
+            }
+
+            .weather-expand-button {
+                display: block;
+            }
+
+            .weather-expand-button[hidden] {
+                display: none;
+            }
+
+            .weather-card-source {
+                max-width: 46%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
             html,
             body {
                 height: 100%;
@@ -6775,6 +7027,20 @@
                         <div class="weather-header-note" id="weatherHeaderNote" hidden></div>
                 </div>
                 <div class="weather-content">
+                    <section class="weather-card weather-alert-card" id="weatherAlertCard" aria-live="polite" hidden>
+                        <div class="weather-alert-head">
+                            <span class="weather-alert-icon" aria-hidden="true"><i class="ph ph-warning"></i></span>
+                            <div>
+                                <div class="weather-alert-kicker" id="weatherAlertKicker">官方气象预警</div>
+                                <div class="weather-alert-title" id="weatherAlertTitle">当前区域预警</div>
+                            </div>
+                            <time class="weather-alert-time" id="weatherAlertTime"></time>
+                        </div>
+                        <details class="weather-alert-details">
+                            <summary><span>查看预警内容与行动建议</span></summary>
+                            <div class="weather-alert-description" id="weatherAlertDescription"></div>
+                        </details>
+                    </section>
                     <a class="weather-card weather-typhoon-card" href="/typhoon" aria-label="查看台风动态，当前无活跃台风">
                         <span class="typhoon-card-icon" aria-hidden="true"><i class="ph ph-hurricane"></i></span>
                         <span class="typhoon-card-copy">
@@ -6784,6 +7050,24 @@
                         </span>
                         <span class="typhoon-card-action"><span>查看动态</span><i class="ph ph-arrow-right"></i></span>
                     </a>
+                    <section class="weather-card weather-nowcast-card" aria-labelledby="nowcastTitle">
+                        <div class="card-title">
+                            <span class="weather-card-title-main"><i class="ph ph-cloud-rain"></i><span id="nowcastTitle">临近天气</span></span>
+                            <span class="weather-card-source" id="nowcastSource">QWeather</span>
+                        </div>
+                        <div class="nowcast-hero">
+                            <div>
+                                <div class="nowcast-summary" id="nowcastSummary">正在整理未来两小时天气</div>
+                                <div class="nowcast-meta" id="nowcastMeta">结合分钟降水与逐小时趋势</div>
+                            </div>
+                            <div class="nowcast-risk"><strong id="nowcastRisk">--%</strong><span>峰值降水概率</span></div>
+                        </div>
+                        <details class="weather-disclosure" id="nowcastDisclosure">
+                            <summary><span>查看两小时降水节奏</span></summary>
+                            <div class="precipitation-timeline" id="precipitationTimeline" aria-label="未来两小时降水强度"></div>
+                            <div class="nowcast-axis"><span>现在</span><span>1 小时</span><span>2 小时</span></div>
+                        </details>
+                    </section>
                     <div class="weather-card weather-hourly-card">
                         <div class="card-title"><i class="fas fa-clock"></i> 逐小时预报</div>
                         <div class="hourly-scroll" id="hourlyScroll"></div>
@@ -6793,8 +7077,7 @@
                         <div id="dailyForecast"></div>
                     </div>
                     <div class="weather-grid weather-details-grid" id="weatherGrid"></div>
-                    <div class="weather-stack weather-support-stack">
-                        <div class="weather-card weather-sun-card">
+                    <div class="weather-card weather-sun-card">
                             <div class="card-title"><i class="fas fa-sun"></i> 日照、月相与降水</div>
                             <div class="sun-phase-meta">
                                 <div class="sun-phase-chip" id="sunPhaseChip"><i class="fas fa-sun"></i><span id="sunPhaseLabel">白昼进行中</span></div>
@@ -6842,13 +7125,25 @@
                                 </div>
                                 <div class="sun-rain-desc" id="rainSummary">未来数小时暂无明显降水信号</div>
                             </div>
+                    </div>
+                    <div class="weather-card weather-commute-card">
+                        <div class="card-title"><i class="fas fa-person-walking"></i> 出行建议</div>
+                        <div class="commute-summary">
+                            <div>
+                                <div class="commute-summary-main" id="commuteSummaryMain">当前出门节奏平稳</div>
+                                <div class="commute-summary-sub" id="commuteSummarySub">结合体感、风力和降水做一个轻量判断</div>
+                            </div>
+                            <div class="commute-summary-badge" id="commuteSummaryBadge"><i class="fas fa-route"></i><span>通勤友好</span></div>
                         </div>
-                        <div class="weather-card weather-aqi-card">
+                        <div class="commute-grid" id="commuteAdvice"></div>
+                    </div>
+                    <div class="weather-card weather-aqi-card">
                             <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
                             <div class="weather-card-kicker" id="aqiSummary">空气质量适合日常外出</div>
                             <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
                             <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
-                            <div class="aqi-details">
+                            <div class="weather-card-kicker aqi-health-advice" id="aqiHealthAdvice"></div>
+                            <div class="aqi-details" id="aqiDetails">
                                 <div>PM2.5<strong id="pm25">12</strong></div>
                                 <div>PM10<strong id="pm10">23</strong></div>
                                 <div>O₃<strong id="o3">76</strong></div>
@@ -6856,25 +7151,13 @@
                                 <div>NO₂<strong id="no2">13</strong></div>
                                 <div>CO<strong id="co">0.6</strong></div>
                             </div>
-                        </div>
+                            <button class="weather-expand-button" id="aqiExpandButton" type="button" onclick="toggleWeatherGroup('aqiDetails', 'aqiExpandButton')" aria-controls="aqiDetails" aria-expanded="false">展开全部污染物</button>
                     </div>
-                    <div class="weather-stack weather-primary-stack">
-                        <div class="weather-card weather-commute-card">
-                            <div class="card-title"><i class="fas fa-person-walking"></i> 出行建议</div>
-                            <div class="commute-summary">
-                                <div>
-                                    <div class="commute-summary-main" id="commuteSummaryMain">当前出门节奏平稳</div>
-                                    <div class="commute-summary-sub" id="commuteSummarySub">结合体感、风力和降水做一个轻量判断</div>
-                                </div>
-                                <div class="commute-summary-badge" id="commuteSummaryBadge"><i class="fas fa-route"></i><span>通勤友好</span></div>
-                            </div>
-                            <div class="commute-grid" id="commuteAdvice"></div>
-                        </div>
-                        <div class="weather-card weather-life-card">
-                            <div class="card-title"><i class="fas fa-heart"></i> 生活指数</div>
+                    <div class="weather-card weather-life-card">
+                            <div class="card-title"><i class="fas fa-heart"></i> 生活指数 <span class="weather-card-source">QWeather · 综合建议</span></div>
                             <div class="weather-card-kicker" id="lifeSummary">根据今天体感、紫外线和湿度整理的生活建议</div>
                             <div class="life-index-grid" id="lifeIndex"></div>
-                        </div>
+                            <button class="weather-expand-button" id="lifeExpandButton" type="button" onclick="toggleWeatherGroup('lifeIndex', 'lifeExpandButton')" aria-controls="lifeIndex" aria-expanded="false">查看更多生活建议</button>
                     </div>
                 </div>
             </div>
@@ -8172,6 +8455,102 @@
             return geolocationPermissionPromise;
         }
 
+        function toggleWeatherGroup(groupId, buttonId) {
+            const group = document.getElementById(groupId);
+            const button = document.getElementById(buttonId);
+            if (!group || !button) return;
+            const expanded = !group.classList.contains('is-expanded');
+            group.classList.toggle('is-expanded', expanded);
+            button.setAttribute('aria-expanded', String(expanded));
+            button.textContent = expanded
+                ? (groupId === 'lifeIndex' ? '收起生活建议' : '收起污染物')
+                : (groupId === 'lifeIndex' ? '查看更多生活建议' : '展开全部污染物');
+        }
+
+        function renderWeatherAlerts(alertData) {
+            const card = document.getElementById('weatherAlertCard');
+            const alerts = Array.isArray(alertData?.items) ? alertData.items : [];
+            if (!card) return;
+            if (!alerts.length) {
+                card.hidden = true;
+                return;
+            }
+            const alert = alerts[0];
+            const issued = alert.issuedTime ? new Date(alert.issuedTime) : null;
+            const issuedLabel = issued && Number.isFinite(issued.getTime())
+                ? issued.toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '时间待确认';
+            const provider = alert.senderName || '当地气象机构';
+            document.getElementById('weatherAlertKicker').textContent = alerts.length > 1
+                ? `${provider} · 另有 ${alerts.length - 1} 条预警`
+                : provider;
+            document.getElementById('weatherAlertTitle').textContent = alert.headline || alert.eventType?.name || '当前区域气象预警';
+            document.getElementById('weatherAlertTime').textContent = issuedLabel;
+            document.getElementById('weatherAlertDescription').textContent = [alert.description, alert.instruction]
+                .filter(Boolean)
+                .join('\n\n') || '请关注当地气象机构发布的最新信息。';
+            card.hidden = false;
+        }
+
+        function renderNowcast(minutely, hourly) {
+            const minuteRows = Array.isArray(minutely?.precipitation) ? minutely.precipitation : [];
+            const hourlyRows = Array.isArray(hourly?.precipitation) ? hourly.precipitation.slice(0, 3) : [];
+            const peakProbability = hourlyRows.reduce((peak, item) => Math.max(peak, Number(item?.probability || 0)), 0);
+            const isMinuteLevel = Boolean(minutely?.supported && minuteRows.length);
+            const summary = String(minutely?.summary || hourly?.description || '').trim()
+                || (peakProbability >= 40 ? '未来几小时存在降水信号' : '未来几小时天气变化平稳');
+            document.getElementById('nowcastSummary').textContent = summary;
+            document.getElementById('nowcastRisk').textContent = `${Math.round(peakProbability)}%`;
+            document.getElementById('nowcastSource').textContent = isMinuteLevel ? 'QWeather · 5分钟级' : 'QWeather · 逐小时';
+            document.getElementById('nowcastMeta').textContent = isMinuteLevel
+                ? '中国区域未来两小时降水趋势，每 5 分钟一个节点'
+                : '当前位置暂无分钟级覆盖，已使用逐小时降水趋势';
+            const timeline = document.getElementById('precipitationTimeline');
+            const values = isMinuteLevel
+                ? minuteRows.slice(0, 24).map(item => Number(item.value || 0))
+                : Array.from({ length: 24 }, (_, index) => Number(hourlyRows[Math.min(hourlyRows.length - 1, Math.floor(index / 8))]?.probability || 0) / 100);
+            const peak = Math.max(0.1, ...values);
+            timeline.innerHTML = values.map((value, index) => {
+                const ratio = Math.min(1, Math.max(0, value / peak));
+                return `<span class="precipitation-bar" style="--rain:${ratio.toFixed(2)}" title="${index * 5} 分钟后"></span>`;
+            }).join('');
+        }
+
+        const WEATHER_INDEX_META = {
+            '1': ['运动', 'fa-person-running'], '2': ['洗车', 'fa-car'], '3': ['穿衣', 'fa-shirt'],
+            '4': ['钓鱼', 'fa-fish'], '5': ['紫外线', 'fa-sun'], '6': ['旅行', 'fa-suitcase-rolling'],
+            '7': ['过敏', 'fa-seedling'], '8': ['舒适度', 'fa-face-smile'], '9': ['感冒', 'fa-virus'],
+            '10': ['扩散条件', 'fa-wind'], '11': ['空调', 'fa-fan'], '12': ['太阳镜', 'fa-glasses'],
+            '13': ['化妆', 'fa-wand-magic-sparkles'], '14': ['晾晒', 'fa-shirt'], '15': ['交通', 'fa-road'],
+            '16': ['防晒', 'fa-umbrella-beach']
+        };
+
+        function buildLifeIndexItems(data, realtime, hourly) {
+            const direct = (Array.isArray(data?.indices) ? data.indices : []).map(item => {
+                const [fallbackName, icon] = WEATHER_INDEX_META[String(item.type)] || [item.name || '生活建议', 'fa-circle-info'];
+                return { key: String(item.type), name: fallbackName, icon, level: item.category || item.desc || '查看建议', detail: item.text || '' };
+            });
+            const existingNames = new Set(direct.map(item => item.name));
+            const apparent = Math.round(realtime?.apparent_temperature ?? realtime?.temperature ?? 0);
+            const humidity = Math.round(Number(realtime?.humidity || 0) * 100);
+            const wind = Number(realtime?.wind?.speed || 0);
+            const visibility = Number(realtime?.visibility || 0);
+            const dayTemperature = data?.daily?.temperature?.[0] || {};
+            const temperatureRange = Math.max(0, Math.round(Number(dayTemperature.max || 0) - Number(dayTemperature.min || 0)));
+            const rainRisk = (hourly?.precipitation || []).slice(0, 6).reduce((peak, item) => Math.max(peak, Number(item?.probability || 0)), 0);
+            const derived = [
+                { name: '穿衣', icon: 'fa-shirt', level: apparent >= 28 ? '清凉透气' : (apparent <= 10 ? '注意保暖' : '轻薄舒适') },
+                { name: '舒适度', icon: 'fa-face-smile', level: apparent >= 32 ? '闷热' : (apparent <= 8 ? '偏冷' : '较舒适') },
+                { name: '备伞', icon: 'fa-umbrella', level: rainRisk >= 60 ? '建议携带' : (rainRisk >= 30 ? '带伞更稳' : '暂时不用') },
+                { name: '风感', icon: 'fa-wind', level: wind >= 20 ? '风感明显' : (wind >= 8 ? '轻风' : '平缓') },
+                { name: '补水', icon: 'fa-glass-water', level: apparent >= 28 || humidity < 40 ? '及时补水' : '常规即可' },
+                { name: '能见度', icon: 'fa-eye', level: visibility >= 15 ? '通透' : (visibility >= 5 ? '一般' : '偏低') },
+                { name: '湿度体感', icon: 'fa-droplet', level: humidity >= 75 ? '偏潮湿' : (humidity <= 35 ? '偏干燥' : '适中') },
+                { name: '昼夜温差', icon: 'fa-temperature-half', level: temperatureRange >= 10 ? '温差明显' : (temperatureRange >= 6 ? '适度变化' : '较平稳') }
+            ].filter(item => !existingNames.has(item.name));
+            return [...direct, ...derived].slice(0, 8);
+        }
+
         async function loadWeather({ forceRelocate = false } = {}) {
             let resolvedLocation = null;
             try {
@@ -8195,7 +8574,9 @@
                 renderWeatherLocation(location, { detail: locationDetail });
 
                 // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
-                const r = await fetch(`/api/weather?lon=${encodeURIComponent(location.lon)}&lat=${encodeURIComponent(location.lat)}`);
+                const queryLon = Number(location.lon).toFixed(2);
+                const queryLat = Number(location.lat).toFixed(2);
+                const r = await fetch(`/api/weather?lon=${encodeURIComponent(queryLon)}&lat=${encodeURIComponent(queryLat)}`);
                 if (!r.ok) return;
                 const d = (await r.json()).result;
                 const rt = d?.realtime || {};
@@ -8206,7 +8587,7 @@
                     astro: d.daily?.astro?.[0] || {}
                 });
                 document.getElementById('tempMain').textContent = Math.round(rt.temperature ?? 0) + '°';
-                document.getElementById('condition').textContent = SKYCON_LABELS[rt.skycon] || '多云';
+                document.getElementById('condition').textContent = rt.skyconText || SKYCON_LABELS[rt.skycon] || '多云';
                 const t0 = d.daily?.temperature?.[0];
                 if (t0) document.getElementById('tempRange').textContent = `最高 ${Math.round(t0.max)}° 最低 ${Math.round(t0.min)}°`;
                 document.getElementById('headerFeelsLike').textContent = `${Math.round(rt.apparent_temperature ?? rt.temperature ?? 0)}°`;
@@ -8215,6 +8596,8 @@
                 const hourlyDescription = d.hourly?.description?.trim() || '';
                 weatherHeaderNote.textContent = hourlyDescription;
                 weatherHeaderNote.hidden = !hourlyDescription;
+                renderWeatherAlerts(d.alerts);
+                renderNowcast(d.minutely, d.hourly);
 
                 // Hourly
                 if (d.hourly?.temperature) {
@@ -8245,14 +8628,16 @@
                 ].map(x => `<div class="weather-detail-card"><div class="label"><i class="fas ${x.icon}"></i> ${x.label}</div><div class="value">${x.val}<span class="unit">${x.unit}</span></div>${x.desc?`<div class="desc">${x.desc}</div>`:''}</div>`).join('');
 
                 // AQI
-                const aqi = rt.air_quality?.aqi?.chn || 24;
-                document.getElementById('aqiValue').textContent = aqi;
-                document.getElementById('aqiLevel').textContent = rt.air_quality?.description?.chn || '优';
-                document.getElementById('aqiIndicator').style.left = Math.min(aqi/3,100) + '%';
+                const aqi = rt.air_quality?.aqi?.local ?? rt.air_quality?.aqi?.chn ?? null;
+                document.getElementById('aqiValue').textContent = Number.isFinite(Number(aqi)) ? Math.round(Number(aqi)) : '--';
+                document.getElementById('aqiLevel').textContent = rt.air_quality?.description?.local || rt.air_quality?.description?.chn || '暂无评级';
+                document.getElementById('aqiIndicator').style.left = Number.isFinite(Number(aqi)) ? Math.min(Number(aqi)/3,100) + '%' : '0%';
                 ['pm25','pm10','o3','so2','no2','co'].forEach(k => { const el = document.getElementById(k); if(el) el.textContent = rt.air_quality?.[k] ?? '--'; });
-                document.getElementById('aqiSummary').textContent = aqi <= 50
-                    ? '空气状态比较干净，适合步行和开窗通风'
-                    : (aqi <= 100 ? '整体还能接受，敏感人群外出可以稍微留意' : '污染水平上来了，长时间户外活动建议减少');
+                document.getElementById('aqiSummary').textContent = rt.air_quality?.primaryPollutant
+                    ? `${rt.air_quality.standard || '本地标准'} · 首要污染物 ${rt.air_quality.primaryPollutant}`
+                    : (rt.air_quality?.standard || '根据当前位置空气质量标准评估');
+                document.getElementById('aqiHealthAdvice').textContent = rt.air_quality?.healthAdvice
+                    || (Number(aqi) <= 50 ? '空气状态比较干净，适合日常户外活动' : (Number(aqi) <= 100 ? '敏感人群长时间外出可以稍微留意' : '建议减少长时间高强度户外活动'));
 
                 // Sun / Rain
                 const astro = d.daily?.astro?.[0] || {};
@@ -8340,17 +8725,21 @@
                 `).join('');
 
                 // Life
-                if (d.daily?.life_index) {
-                    const li = d.daily.life_index;
-                    document.getElementById('lifeSummary').textContent = `今天偏${li.dressing?.[0]?.desc || '舒适'}体感，紫外线${li.ultraviolet?.[0]?.desc || '--'}，洗车${li.carWashing?.[0]?.desc || '--'}`;
-                    document.getElementById('lifeIndex').innerHTML = [
-                        {icon:'fa-sun',name:'紫外线',level:li.ultraviolet?.[0]?.desc||'--'},
-                        {icon:'fa-car',name:'洗车',level:li.carWashing?.[0]?.desc||'--'},
-                        {icon:'fa-shirt',name:'穿衣',level:li.dressing?.[0]?.desc||'--'},
-                        {icon:'fa-face-smile',name:'舒适度',level:li.comfort?.[0]?.desc||'--'},
-                        {icon:'fa-virus',name:'感冒',level:li.coldRisk?.[0]?.desc||'--'}
-                    ].map(x => `<div class="life-index-item"><i class="fas ${x.icon}"></i><div><div class="name">${x.name}</div><div class="level">${x.level}</div></div></div>`).join('');
-                }
+                const lifeItems = buildLifeIndexItems(d, rt, d.hourly);
+                const lifeIndex = document.getElementById('lifeIndex');
+                lifeIndex.classList.remove('is-expanded');
+                document.getElementById('lifeExpandButton').setAttribute('aria-expanded', 'false');
+                document.getElementById('lifeExpandButton').textContent = '查看更多生活建议';
+                document.getElementById('lifeExpandButton').hidden = lifeItems.length <= 4;
+                document.getElementById('lifeSummary').textContent = lifeItems.length
+                    ? `结合 ${lifeItems.length} 项天气与生活指标，为今天安排更合适的节奏`
+                    : '根据当前体感、风力与降水整理生活建议';
+                lifeIndex.innerHTML = lifeItems.map(item => `
+                    <div class="life-index-item" title="${escapeHtml(item.detail || item.level)}">
+                        <i class="fas ${item.icon}"></i>
+                        <div><div class="name">${escapeHtml(item.name)}</div><div class="level">${escapeHtml(item.level)}</div></div>
+                    </div>
+                `).join('');
                 updateRelocateBadge(false);
             } catch(e) {
                 console.error('Weather error:', e);

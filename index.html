@@ -1357,12 +1357,16 @@
             display: none;
         }
         [data-theme="dark"] .f1-next-track { opacity: 0.16; }
-        .f1-next-race > *:not(.f1-next-track) { position: relative; z-index: 1; }
+        .f1-next-race > *:not(.f1-next-track):not(.f1-live-badge) { position: relative; z-index: 1; }
         .f1-live-badge {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            display: inline-flex;
+            position: absolute !important;
+            top: 20px;
+            right: 20px;
+            left: auto;
+            bottom: auto;
+            display: inline-flex !important;
+            width: fit-content;
+            max-width: calc(100% - 40px);
             align-items: center;
             gap: 7px;
             background: color-mix(in oklab, #ef4444 12%, var(--bg-card));
@@ -4707,11 +4711,14 @@
             }
 
             .f1-live-badge {
-                position: absolute;
-                top: 18px;
-                right: 18px;
+                position: absolute !important;
+                top: 16px;
+                right: 16px;
+                left: auto;
+                bottom: auto;
+                display: inline-flex !important;
                 width: fit-content;
-                max-width: 100%;
+                max-width: calc(100% - 32px);
                 min-height: 26px;
                 margin: 0;
                 padding: 5px 11px;

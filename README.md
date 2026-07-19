@@ -44,9 +44,7 @@ justin-dashboard/
 │   ├── market.json     # 市场分析数据（静态，含 analysis/advice）
 │   └── news.json       # 新闻数据（静态）
 └── scripts/
-    ├── update_market.py  # 本地市场数据更新脚本
-    ├── trading-engine.js # 兼容入口：运行自主交易周期
-    └── trading/          # 自主 paper trading 模块
+    └── update_market.py  # 本地市场数据更新脚本
 ```
 
 ## 数据流
@@ -58,7 +56,6 @@ justin-dashboard/
 ### 静态数据（定时自动更新）
 - 市场分析/建议 → `data/market.json`
 - 新闻 → `data/news.json`
-- 交易账本/决策日志 → `data/trading.json`
 
 ## 云端调度
 
@@ -106,47 +103,6 @@ justin-dashboard/
 
 微信当前仍通过本地 OpenClaw 会话发送，因为 `openclaw-weixin` 发送协议依赖会话 `contextToken`。  
 现在已经把内容生成迁到云端可独立运行；微信只保留为“本地最薄转发层”，默认读取线上 Pulse 最新 `data/*.json`，不再承担内容抓取和分析职责。
-
-## 自主 Paper Trading
-
-交易引擎已拆成独立周期，不再依赖日报触发才能运行。
-
-### 本地手动运行
-
-```bash
-node scripts/trading-engine.js
-```
-
-只做验证、不写回账本：
-
-```bash
-node scripts/trading-engine.js --dry-run
-```
-
-### API 触发
-
-提供了一个受保护的周期入口：
-
-```bash
-POST /api/trading-cycle
-Authorization: Bearer $TRADING_CRON_SECRET
-```
-
-只做 dry run：
-
-```bash
-POST /api/trading-cycle?dryRun=1
-```
-
-### GitHub Actions 定时运行
-
-仓库已增加 GitHub Actions 工作流：
-
-- 文件: `.github/workflows/trading-cycle.yml`
-- 定时: 每周一到周五北京时间 `05:35` 和 `13:35`
-- 手动: 支持 `workflow_dispatch`，并可选择 `dry_run`
-
-这个方案适合当前项目，因为交易账本需要回写 [trading.json](/Users/justin/Projects/justin-dashboard/data/trading.json) 到仓库；GitHub Actions 可以直接提交变更，而 Vercel Cron 更适合触发函数，不适合把账本持久化回 repo。
 
 ## 本地开发
 

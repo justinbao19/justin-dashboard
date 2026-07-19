@@ -83,4 +83,3 @@ curl -sI "IMAGE_URL" | head -1  # 应返回 HTTP/2 200
 |------|------|----------|
 | `data/market.json` | 市场数据 + 分析 | 每日 2 次 |
 | `data/news.json` | 国际新闻 | 每日 2 次 |
-| `data/trading.json` | 交易信号 | 实时 |

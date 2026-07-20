@@ -26,7 +26,7 @@ const CRYPTO = [
   { key: 'eth', coinId: 'ethereum', prefix: '$', decimals: 0 },
 ];
 
-const SPARKLINE_POINTS = 12;
+const SPARKLINE_POINTS = 48;
 const SPARKLINE_SOURCES = [
   { key: 'spx', symbol: '^GSPC' },
   { key: 'ndx', symbol: '^NDX' },
@@ -85,7 +85,7 @@ async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 12000) {
 
 function normalizeSparkline(values, multiplier = 1, decimals = 2) {
   if (!Array.isArray(values)) return null;
-  const clean = values.map(Number).filter(Number.isFinite);
+  const clean = values.map(Number).filter(value => Number.isFinite(value) && value > 0);
   if (clean.length < 2) return null;
   const sampled = clean.length <= SPARKLINE_POINTS
     ? clean
@@ -159,14 +159,14 @@ async function fetchCryptoQuotes() {
 }
 
 async function fetchYahooSparkline({ symbol, multiplier = 1, decimals = 2 }) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=14d&interval=1d`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=7d&interval=30m&includePrePost=false`;
   const json = await fetchJsonWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const closes = json.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
   return normalizeSparkline(closes, multiplier, decimals);
 }
 
 async function fetchCoinGeckoSparkline(coinId) {
-  const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7&interval=daily`;
+  const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7`;
   const json = await fetchJsonWithTimeout(url);
   return normalizeSparkline(json.prices?.map(p => p?.[1]), 1, 2);
 }

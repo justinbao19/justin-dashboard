@@ -53,6 +53,7 @@ def build_prompt(market: dict, news: dict) -> str:
             key: market.get(key)
             for key in ["date", "ndx", "spx", "dji", "hsi", "hstec", "sse", "gold", "oil", "btc", "eth"]
         },
+        "snapshot_updated_at": market.get("updated_at"),
         "top_news": news_items,
     }
 
@@ -104,7 +105,10 @@ def build_prompt(market: dict, news: dict) -> str:
         "2. 语言是自然、简洁、专业的中文。\n"
         "3. 结论要像日报，不要空话，不要编造不存在的数据源。\n"
         "4. status 只能是 bullish、bearish、neutral。\n"
-        "5. probability 用百分比字符串，例如 45%。\n\n"
+        "5. probability 用百分比字符串，例如 45%。\n"
+        "6. 每一个数字、点位、涨跌方向必须能在 market_snapshot 中找到；输入没有的数据不得编造。\n"
+        "7. 不得使用训练记忆中的市场点位、事件日期或旧新闻补全分析。\n"
+        "8. 行情方向以 market_snapshot 的 change 为准，不能把下跌资产写成上涨。\n\n"
         f"输入数据:\n{json.dumps(input_payload, ensure_ascii=False, indent=2)}\n\n"
         f"输出 JSON 结构:\n{json.dumps(schema, ensure_ascii=False, indent=2)}"
     )
@@ -161,8 +165,10 @@ def main() -> int:
     market = load_json(MARKET_PATH)
     news = load_json(NEWS_PATH)
     analysis = call_llm(build_prompt(market, news))
+    analysis["analysis_generated_at"] = market.get("updated_at")
 
     for field in [
+        "analysis_generated_at",
         "macro_summary",
         "logic_chain",
         "market_analysis",

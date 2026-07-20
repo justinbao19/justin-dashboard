@@ -9513,7 +9513,7 @@
             try {
                 const liveRes = await fetch('/api/market?' + Date.now());
                 const live = liveRes.ok ? await liveRes.json() : {};
-                const d = { ..._marketStaticCache, ...live };
+                const d = mergeMarketSnapshot(_marketStaticCache, live);
                 applyMarketPrices(d);
                 if (hint) {
                     hint.textContent = '已更新';
@@ -9525,6 +9525,16 @@
             } finally {
                 if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
             }
+        }
+
+        function mergeMarketSnapshot(staticData, liveData) {
+            const generatedAt = Date.parse(staticData?.analysis_generated_at || staticData?.updated_at || '');
+            const liveAt = Date.parse(liveData?.updated_at || '');
+            const analysisFresh = Number.isFinite(generatedAt) && Number.isFinite(liveAt)
+                && liveAt - generatedAt <= 24 * 60 * 60 * 1000;
+            return analysisFresh
+                ? { ...staticData, ...liveData, analysis_stale: false }
+                : { ...liveData, analysis_stale: true };
         }
 
         function applyMarketPrices(d) {
@@ -9546,6 +9556,12 @@
             document.getElementById('marketThemeDetail').textContent = primaryThemeDetail;
             document.getElementById('marketRisk').textContent = primaryRisk;
             document.getElementById('marketRiskDetail').textContent = primaryRiskDetail;
+            if (d.analysis_stale) {
+                document.getElementById('marketTheme').textContent = '分析等待刷新';
+                document.getElementById('marketThemeDetail').textContent = '实时行情已更新，旧分析因超过24小时已自动停用';
+                document.getElementById('marketRisk').textContent = '仅展示实时行情';
+                document.getElementById('marketRiskDetail').textContent = '生成新分析前，不沿用旧点位与操作建议';
+            }
 
             // 卡片1 — 情绪色系 + icon + 涨跌比例条
             const moodCard = document.getElementById('summaryCardMood');
@@ -9629,8 +9645,16 @@
                 ]);
                 const live = liveRes.ok ? await liveRes.json() : {};
                 _marketStaticCache = staticRes.ok ? await staticRes.json() : {};
-                const d = { ..._marketStaticCache, ...live };
+                const d = mergeMarketSnapshot(_marketStaticCache, live);
                 applyMarketPrices(d);
+                if (d.analysis_stale) {
+                    document.getElementById('macroSummary').innerHTML = '<p>实时行情已更新；策略分析超过24小时，已停止展示。</p>';
+                    document.getElementById('logicChain').innerHTML = '<div class="logic-chain-step"><div class="step-number">!</div><div class="step-text">等待下一次基于当前行情生成的分析</div></div>';
+                    document.getElementById('marketOverviewInsights').innerHTML = '';
+                    document.getElementById('marketAnalysis').innerHTML = '<div class="market-section"><div class="market-section-summary">旧分析已失效，避免用过期点位误导交易判断。</div></div>';
+                    document.getElementById('marketAdvice').innerHTML = '<div class="advice-summary"><i class="fas fa-circle-info"></i><span>暂无有效操作建议，仅供查看实时行情。</span></div>';
+                    return;
+                }
                 // 宏观概览
                 if (d.macro_summary) document.getElementById('macroSummary').innerHTML = `<p>${d.macro_summary}</p>`;
 

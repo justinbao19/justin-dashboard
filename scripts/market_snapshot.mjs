@@ -163,21 +163,12 @@ async function fetchYahooSparkline({ symbol, multiplier = 1, decimals = 2 }) {
 }
 
 async function fetchCryptoSparkline(coinId) {
-  const symbol = coinId === 'bitcoin' ? 'BTCUSDT' : coinId === 'ethereum' ? 'ETHUSDT' : null;
+  const symbol = coinId === 'bitcoin' ? 'BTC-USD' : coinId === 'ethereum' ? 'ETH-USD' : null;
   if (!symbol) return null;
-  try {
-    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=15m&limit=${SPARKLINE_POINTS}`;
-    const json = await fetchJsonWithTimeout(url);
-    return normalizeSparkline(json.map(row => row?.[4]), 1, 2);
-  } catch (error) {
-    // Binance blocks Vercel's US egress (HTTP 451). CoinGecko's one-day chart
-    // returns dense intraday prices and keeps production from falling back to
-    // the old sparse snapshot.
-    console.warn(`[market] Binance ${symbol} sparkline failed, using CoinGecko: ${error?.message || error}`);
-    const url = `https://api.coingecko.com/api/v3/coins/${encodeURIComponent(coinId)}/market_chart?vs_currency=usd&days=1`;
-    const json = await fetchJsonWithTimeout(url);
-    return normalizeSparkline((json.prices || []).map(row => row?.[1]), 1, 2);
-  }
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=15m&includePrePost=true`;
+  const json = await fetchJsonWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const closes = json.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
+  return normalizeSparkline(closes, 1, 2);
 }
 
 async function fetchSparklines() {

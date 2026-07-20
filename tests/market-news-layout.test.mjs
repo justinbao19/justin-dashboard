@@ -56,7 +56,7 @@ test('market sparklines use dense unsmoothed intraday samples', async () => {
 
   assert.match(source, /const SPARKLINE_POINTS = 120;/);
   assert.match(source, /range=5d&interval=15m/);
-  assert.match(source, /interval=15m&limit=\$\{SPARKLINE_POINTS\}/);
-  assert.match(source, /market_chart\?vs_currency=usd&days=1/);
+  assert.match(source, /BTC-USD/);
+  assert.match(source, /ETH-USD/);
   assert.match(source, /clean\.slice\(-SPARKLINE_POINTS\)/);
 });

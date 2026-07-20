@@ -26,7 +26,7 @@ const CRYPTO = [
   { key: 'eth', coinId: 'ethereum', prefix: '$', decimals: 0 },
 ];
 
-const SPARKLINE_POINTS = 48;
+const SPARKLINE_POINTS = 120;
 const SPARKLINE_SOURCES = [
   { key: 'spx', symbol: '^GSPC' },
   { key: 'ndx', symbol: '^NDX' },
@@ -87,12 +87,9 @@ function normalizeSparkline(values, multiplier = 1, decimals = 2) {
   if (!Array.isArray(values)) return null;
   const clean = values.map(Number).filter(value => Number.isFinite(value) && value > 0);
   if (clean.length < 2) return null;
-  const sampled = clean.length <= SPARKLINE_POINTS
-    ? clean
-    : Array.from({ length: SPARKLINE_POINTS }, (_, i) => {
-        const idx = Math.round((i * (clean.length - 1)) / (SPARKLINE_POINTS - 1));
-        return clean[idx];
-      });
+  // Keep the latest raw closes. Evenly resampling a longer series erases small
+  // intraday moves and makes the mini-chart look artificially smooth.
+  const sampled = clean.slice(-SPARKLINE_POINTS);
   return sampled.map(v => Number((v * multiplier).toFixed(decimals)));
 }
 
@@ -159,7 +156,7 @@ async function fetchCryptoQuotes() {
 }
 
 async function fetchYahooSparkline({ symbol, multiplier = 1, decimals = 2 }) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=7d&interval=30m&includePrePost=false`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=5d&interval=15m&includePrePost=false`;
   const json = await fetchJsonWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const closes = json.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
   return normalizeSparkline(closes, multiplier, decimals);
@@ -168,7 +165,7 @@ async function fetchYahooSparkline({ symbol, multiplier = 1, decimals = 2 }) {
 async function fetchCryptoSparkline(coinId) {
   const symbol = coinId === 'bitcoin' ? 'BTCUSDT' : coinId === 'ethereum' ? 'ETHUSDT' : null;
   if (!symbol) return null;
-  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=4h&limit=${SPARKLINE_POINTS}`;
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=15m&limit=${SPARKLINE_POINTS}`;
   const json = await fetchJsonWithTimeout(url);
   return normalizeSparkline(json.map(row => row?.[4]), 1, 2);
 }
@@ -240,7 +237,7 @@ export async function buildMarketSnapshot({ existing = {}, preserveStatic = fals
   const live = {
     date: formatDate(now),
     updated_at: now.toISOString(),
-    data_source: 'stock-sdk primary (Tencent/Eastmoney) + Yahoo Finance 7D sparklines + CoinGecko crypto + open.er-api FX',
+    data_source: 'stock-sdk primary (Tencent/Eastmoney) + Yahoo Finance/Binance dense intraday sparklines + CoinGecko crypto + open.er-api FX',
     ...(results.stock || {}),
     ...(results.crypto || {}),
     ...(results.forex || {}),

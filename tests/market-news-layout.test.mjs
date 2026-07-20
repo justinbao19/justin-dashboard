@@ -42,3 +42,20 @@ test('wide market and news headers separate controls from the title cluster', as
   assert.match(html, /width: min\(100%, 1180px\);[\s\S]*?margin: 0 auto;/);
   assert.match(html, /#page-market \.market-segment-control,[\s\S]*?#page-news \.news-tab-control \{[\s\S]*?grid-area: controls;[\s\S]*?justify-self: end;/);
 });
+
+test('market analysis stays visible with an explicit stale label', async () => {
+  const html = await readFile(indexPath, 'utf8');
+
+  assert.match(html, /analysis_stale:\s*!analysisFresh/);
+  assert.doesNotMatch(html, /策略分析超过24小时，已停止展示/);
+  assert.match(html, /旧分析，仅供参考/);
+});
+
+test('market sparklines use dense unsmoothed intraday samples', async () => {
+  const source = await readFile(new URL('../scripts/market_snapshot.mjs', import.meta.url), 'utf8');
+
+  assert.match(source, /const SPARKLINE_POINTS = 120;/);
+  assert.match(source, /range=5d&interval=15m/);
+  assert.match(source, /interval=15m&limit=\$\{SPARKLINE_POINTS\}/);
+  assert.match(source, /clean\.slice\(-SPARKLINE_POINTS\)/);
+});

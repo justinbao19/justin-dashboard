@@ -51,6 +51,7 @@ def main():
     # 更新时间戳
     market["date"] = now.strftime("%Y年%-m月%-d日 %H:%M")
     market["updated_at"] = now.isoformat()
+    market["analysis_generated_at"] = now.isoformat()
     
     # 写入文件
     with open(market_file, "w", encoding="utf-8") as f:

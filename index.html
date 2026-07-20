@@ -9532,9 +9532,7 @@
             const liveAt = Date.parse(liveData?.updated_at || '');
             const analysisFresh = Number.isFinite(generatedAt) && Number.isFinite(liveAt)
                 && liveAt - generatedAt <= 24 * 60 * 60 * 1000;
-            return analysisFresh
-                ? { ...staticData, ...liveData, analysis_stale: false }
-                : { ...liveData, analysis_stale: true };
+            return { ...staticData, ...liveData, analysis_stale: !analysisFresh };
         }
 
         function applyMarketPrices(d) {
@@ -9557,10 +9555,8 @@
             document.getElementById('marketRisk').textContent = primaryRisk;
             document.getElementById('marketRiskDetail').textContent = primaryRiskDetail;
             if (d.analysis_stale) {
-                document.getElementById('marketTheme').textContent = '分析等待刷新';
-                document.getElementById('marketThemeDetail').textContent = '实时行情已更新，旧分析因超过24小时已自动停用';
-                document.getElementById('marketRisk').textContent = '仅展示实时行情';
-                document.getElementById('marketRiskDetail').textContent = '生成新分析前，不沿用旧点位与操作建议';
+                document.getElementById('marketThemeDetail').textContent = `旧分析，仅供参考 · ${primaryThemeDetail}`;
+                document.getElementById('marketRiskDetail').textContent = `旧分析，仅供参考 · ${primaryRiskDetail}`;
             }
 
             // 卡片1 — 情绪色系 + icon + 涨跌比例条
@@ -9624,14 +9620,14 @@
             }
 
             // 行情列表
-            document.getElementById('marketListNote').textContent = `${trackedMarkets.length}项资产实时跟踪 · 7D 趋势`;
+            document.getElementById('marketListNote').textContent = `${trackedMarkets.length}项资产实时跟踪 · 近期分时`;
             document.getElementById('marketList').innerHTML = trackedMarkets.map(m => {
                 const it = d[m.k], cls = it.change >= 0 ? 'up' : 'down', sgn = it.change >= 0 ? '+' : '';
                 const hasSparkline = Array.isArray(it.sparkline) && it.sparkline.length > 1;
                 const sparkline = hasSparkline
                     ? createSparkline(it.sparkline, cls === 'up' ? 'up' : 'down')
                     : '<div class="market-sparkline market-sparkline-empty" aria-hidden="true"></div>';
-                const trendLabel = hasSparkline ? '7D 趋势' : '趋势待补充';
+                const trendLabel = hasSparkline ? '近期分时' : '趋势待补充';
                 return `<div class="market-item" data-symbol="${m.k}"><div class="market-info"><div class="market-name"><span class="market-flag">${m.f}</span>${m.n}</div><div class="market-index">${m.i}</div></div><div class="market-chart">${sparkline}<div class="market-chart-label">${trendLabel}</div></div><div class="market-values"><div class="market-price">${it.price}</div><div class="market-change ${cls}">${sgn}${it.change}%</div></div></div>`;
             }).join('');
         }
@@ -9647,16 +9643,8 @@
                 _marketStaticCache = staticRes.ok ? await staticRes.json() : {};
                 const d = mergeMarketSnapshot(_marketStaticCache, live);
                 applyMarketPrices(d);
-                if (d.analysis_stale) {
-                    document.getElementById('macroSummary').innerHTML = '<p>实时行情已更新；策略分析超过24小时，已停止展示。</p>';
-                    document.getElementById('logicChain').innerHTML = '<div class="logic-chain-step"><div class="step-number">!</div><div class="step-text">等待下一次基于当前行情生成的分析</div></div>';
-                    document.getElementById('marketOverviewInsights').innerHTML = '';
-                    document.getElementById('marketAnalysis').innerHTML = '<div class="market-section"><div class="market-section-summary">旧分析已失效，避免用过期点位误导交易判断。</div></div>';
-                    document.getElementById('marketAdvice').innerHTML = '<div class="advice-summary"><i class="fas fa-circle-info"></i><span>暂无有效操作建议，仅供查看实时行情。</span></div>';
-                    return;
-                }
                 // 宏观概览
-                if (d.macro_summary) document.getElementById('macroSummary').innerHTML = `<p>${d.macro_summary}</p>`;
+                if (d.macro_summary) document.getElementById('macroSummary').innerHTML = `${d.analysis_stale ? '<p><strong>旧分析，仅供参考：</strong>实时行情已更新，下面内容不会冒充当前判断。</p>' : ''}<p>${d.macro_summary}</p>`;
 
                 // 逻辑链 — 带序号步骤
                 if (d.logic_chain) document.getElementById('logicChain').innerHTML = d.logic_chain.map((x,i) => `<div class="logic-chain-step"><div class="step-number">${i+1}</div><div class="step-text">${x}</div></div>${i<d.logic_chain.length-1?'<div class="step-connector"></div>':''}`).join('');

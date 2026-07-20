@@ -9528,7 +9528,7 @@
         }
 
         function mergeMarketSnapshot(staticData, liveData) {
-            const generatedAt = Date.parse(staticData?.analysis_generated_at || staticData?.updated_at || '');
+            const generatedAt = Date.parse(staticData?.analysis_generated_at || '');
             const liveAt = Date.parse(liveData?.updated_at || '');
             const analysisFresh = Number.isFinite(generatedAt) && Number.isFinite(liveAt)
                 && liveAt - generatedAt <= 24 * 60 * 60 * 1000;

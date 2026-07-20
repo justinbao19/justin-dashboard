@@ -165,16 +165,18 @@ async function fetchYahooSparkline({ symbol, multiplier = 1, decimals = 2 }) {
   return normalizeSparkline(closes, multiplier, decimals);
 }
 
-async function fetchCoinGeckoSparkline(coinId) {
-  const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7`;
+async function fetchCryptoSparkline(coinId) {
+  const symbol = coinId === 'bitcoin' ? 'BTCUSDT' : coinId === 'ethereum' ? 'ETHUSDT' : null;
+  if (!symbol) return null;
+  const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=4h&limit=${SPARKLINE_POINTS}`;
   const json = await fetchJsonWithTimeout(url);
-  return normalizeSparkline(json.prices?.map(p => p?.[1]), 1, 2);
+  return normalizeSparkline(json.map(row => row?.[4]), 1, 2);
 }
 
 async function fetchSparklines() {
   const tasks = [
     ...SPARKLINE_SOURCES.map(async spec => [spec.key, await fetchYahooSparkline(spec)]),
-    ...CRYPTO.map(async spec => [spec.key, await fetchCoinGeckoSparkline(spec.coinId)]),
+    ...CRYPTO.map(async spec => [spec.key, await fetchCryptoSparkline(spec.coinId)]),
   ];
 
   const entries = await Promise.all(tasks.map(async task => {

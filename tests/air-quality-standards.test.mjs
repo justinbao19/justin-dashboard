@@ -60,6 +60,24 @@ test('converts gas concentrations supplied in ppb before calculating European AQ
   assert.equal(standards.european.primaryPollutant, 'NO₂');
 });
 
+test('calculates US EPA AQI from monitored concentrations when QWeather omits US sub-indexes', () => {
+  const standards = buildAirQualityStandards({
+    indexes: [{ code: 'chn-mee', aqi: 24, category: '优' }],
+    pollutants: [
+      pollutant('pm2p5', 17),
+      pollutant('pm10', 23),
+      pollutant('o3', 68),
+      pollutant('no2', 18),
+      pollutant('so2', 7),
+      pollutant('co', 0.6, null, 'mg/m3')
+    ]
+  });
+
+  assert.equal(standards.us.aqi, 66);
+  assert.equal(standards.us.category, '良');
+  assert.equal(standards.us.primaryPollutant, 'PM2.5');
+});
+
 test('returns unavailable values when an upstream payload has no usable indexes', () => {
   const standards = buildAirQualityStandards({ indexes: [], pollutants: [] });
 

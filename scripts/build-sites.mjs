@@ -168,6 +168,7 @@ export default {
 
 await writeFile(path.join(dist, 'server', 'index.js'), worker);
 await writeFile(path.join(dist, 'server', 'weather-astronomy.mjs'), await readFile(path.join(root, 'lib', 'weather-astronomy.mjs')));
+await writeFile(path.join(dist, 'server', 'air-quality-standards.mjs'), await readFile(path.join(root, 'lib', 'air-quality-standards.mjs')));
 await writeFile(path.join(dist, 'server', 'qweather-weather.mjs'), await readFile(path.join(root, 'lib', 'qweather-weather.mjs')));
 await writeFile(path.join(dist, '.openai', 'hosting.json'), await readFile(path.join(root, '.openai', 'hosting.json')));
 console.log('Sites bundle created in dist/');

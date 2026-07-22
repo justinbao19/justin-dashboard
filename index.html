@@ -1201,6 +1201,34 @@
             opacity: 0.72;
             margin-bottom: 14px;
         }
+        .aqi-standard-switch {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 5px;
+            margin: -2px 0 14px;
+            padding: 4px;
+            border-radius: 12px;
+            background: color-mix(in srgb, var(--card-bg) 78%, var(--text-color) 6%);
+            border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+        }
+        .aqi-standard-button {
+            border: 0;
+            border-radius: 9px;
+            padding: 7px 4px;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-size: 12px;
+            line-height: 1;
+            opacity: 0.62;
+            cursor: pointer;
+            transition: background 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+        }
+        .aqi-standard-button.active {
+            background: var(--card-bg);
+            opacity: 1;
+            box-shadow: 0 2px 8px rgba(24, 50, 77, 0.12);
+        }
         .aqi-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
         .aqi-value { font-size: 44px; font-weight: 600; }
         .aqi-level { font-size: 20px; opacity: 0.8; }
@@ -7694,6 +7722,11 @@
                     </div>
                     <div class="weather-card weather-aqi-card">
                             <div class="card-title"><i class="fas fa-leaf"></i> 空气质量</div>
+                            <div class="aqi-standard-switch" id="aqiStandardSwitch" role="group" aria-label="空气质量标准">
+                                <button class="aqi-standard-button active" type="button" data-aqi-standard="local">本地标准</button>
+                                <button class="aqi-standard-button" type="button" data-aqi-standard="us">美国 EPA</button>
+                                <button class="aqi-standard-button" type="button" data-aqi-standard="european">欧洲 AQI</button>
+                            </div>
                             <div class="weather-card-kicker" id="aqiSummary">空气质量适合日常外出</div>
                             <div class="aqi-header"><span class="aqi-value" id="aqiValue">24</span><span class="aqi-level" id="aqiLevel">优</span></div>
                             <div class="aqi-bar"><div class="aqi-indicator" id="aqiIndicator" style="left:8%"></div></div>
@@ -8243,6 +8276,9 @@
         let lastResolvedWeatherLocation = null;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
+        let latestAirQuality = null;
+        let activeAqiStandard = localStorage.getItem('pulseAqiStandard') || 'local';
+        if (!['local', 'us', 'european'].includes(activeAqiStandard)) activeAqiStandard = 'local';
 
         const THEME_MODES = ['auto', 'light', 'dark'];
         let themeMode = localStorage.getItem('themeMode') || localStorage.getItem('theme') || 'auto';
@@ -9010,6 +9046,53 @@
             return geolocationPermissionPromise;
         }
 
+        function renderAirQuality(airQuality = latestAirQuality) {
+            latestAirQuality = airQuality || null;
+            const standards = airQuality?.standards || {};
+            const fallback = {
+                name: airQuality?.standard || '本地空气质量标准',
+                aqi: airQuality?.aqi?.local ?? airQuality?.aqi?.chn ?? null,
+                category: airQuality?.description?.local || airQuality?.description?.chn || '暂无评级',
+                primaryPollutant: airQuality?.primaryPollutant || null,
+                healthAdvice: airQuality?.healthAdvice || null,
+                scaleMax: 300
+            };
+            const selected = standards[activeAqiStandard] || (activeAqiStandard === 'local' ? fallback : null) || fallback;
+            const aqi = selected.aqi;
+            document.querySelectorAll('[data-aqi-standard]').forEach(button => {
+                const isActive = button.dataset.aqiStandard === activeAqiStandard;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-pressed', String(isActive));
+            });
+            document.getElementById('aqiValue').textContent = Number.isFinite(Number(aqi)) ? Math.round(Number(aqi)) : '--';
+            document.getElementById('aqiLevel').textContent = selected.category || '暂无评级';
+            const scaleMax = Number(selected.scaleMax) || (activeAqiStandard === 'european' ? 100 : 300);
+            document.getElementById('aqiIndicator').style.left = Number.isFinite(Number(aqi))
+                ? `${Math.min(Math.max(Number(aqi) / scaleMax * 100, 0), 100)}%`
+                : '0%';
+            ['pm25','pm10','o3','so2','no2','co'].forEach(key => {
+                const element = document.getElementById(key);
+                if (element) element.textContent = airQuality?.[key] ?? '--';
+            });
+            document.getElementById('aqiSummary').textContent = selected.primaryPollutant
+                ? `${selected.name || '空气质量标准'} · 首要污染物 ${selected.primaryPollutant}`
+                : (selected.name || '根据当前位置空气质量标准评估');
+            document.getElementById('aqiHealthAdvice').textContent = selected.healthAdvice
+                || (Number(aqi) <= 50 ? '空气状态比较干净，适合日常户外活动' : (Number(aqi) <= 100 ? '敏感人群长时间外出可以稍微留意' : '建议减少长时间高强度户外活动'));
+        }
+
+        function setAqiStandard(standard) {
+            if (!['local', 'us', 'european'].includes(standard)) return;
+            activeAqiStandard = standard;
+            localStorage.setItem('pulseAqiStandard', standard);
+            renderAirQuality();
+        }
+
+        document.getElementById('aqiStandardSwitch')?.addEventListener('click', event => {
+            const button = event.target.closest('[data-aqi-standard]');
+            if (button) setAqiStandard(button.dataset.aqiStandard);
+        });
+
         function toggleWeatherGroup(groupId, buttonId) {
             const group = document.getElementById(groupId);
             const button = document.getElementById(buttonId);
@@ -9217,16 +9300,7 @@
                 `).join('');
 
                 // AQI
-                const aqi = rt.air_quality?.aqi?.local ?? rt.air_quality?.aqi?.chn ?? null;
-                document.getElementById('aqiValue').textContent = Number.isFinite(Number(aqi)) ? Math.round(Number(aqi)) : '--';
-                document.getElementById('aqiLevel').textContent = rt.air_quality?.description?.local || rt.air_quality?.description?.chn || '暂无评级';
-                document.getElementById('aqiIndicator').style.left = Number.isFinite(Number(aqi)) ? Math.min(Number(aqi)/3,100) + '%' : '0%';
-                ['pm25','pm10','o3','so2','no2','co'].forEach(k => { const el = document.getElementById(k); if(el) el.textContent = rt.air_quality?.[k] ?? '--'; });
-                document.getElementById('aqiSummary').textContent = rt.air_quality?.primaryPollutant
-                    ? `${rt.air_quality.standard || '本地标准'} · 首要污染物 ${rt.air_quality.primaryPollutant}`
-                    : (rt.air_quality?.standard || '根据当前位置空气质量标准评估');
-                document.getElementById('aqiHealthAdvice').textContent = rt.air_quality?.healthAdvice
-                    || (Number(aqi) <= 50 ? '空气状态比较干净，适合日常户外活动' : (Number(aqi) <= 100 ? '敏感人群长时间外出可以稍微留意' : '建议减少长时间高强度户外活动'));
+                renderAirQuality(rt.air_quality);
 
                 // Sun / Rain
                 const astro = d.daily?.astro?.[0] || {};

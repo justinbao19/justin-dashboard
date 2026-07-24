@@ -64,6 +64,32 @@ test('normalizes the free QWeather bundle into the Pulse weather model', () => {
   assert.equal(result.result.astronomy.daily[0].moonPhase, '娥眉月');
   assert.equal(result.result.minutely.summary, '40分钟后可能有小雨');
   assert.equal(result.result.alerts.count, 1);
+  assert.equal(result.result.realtime.isNight, false);
+  assert.equal(result.result.realtime.life_index.ultraviolet.index, 6);
+  assert.equal(result.result.realtime.life_index.ultraviolet.dailyMax, 8);
+  assert.equal(result.result.realtime.life_index.ultraviolet.estimated, true);
+});
+
+test('uses the observation timezone and never exposes a daytime UV level as a live night value', () => {
+  const result = normalizeQWeatherBundle({
+    now: {
+      ...now,
+      now: { ...now.now, obsTime: '2026-07-20T21:05+08:00', icon: '150', text: '晴' }
+    },
+    hourly,
+    daily,
+    indices: {
+      code: '200',
+      daily: [{ date: '2026-07-20', type: '5', name: '紫外线指数', level: '5', category: '很强', text: '白天注意防晒。' }]
+    },
+    air
+  }, { lon: 121.4, lat: 31.1 });
+
+  assert.equal(result.result.realtime.isNight, true);
+  assert.equal(result.result.realtime.skycon, 'CLEAR_NIGHT');
+  assert.equal(result.result.realtime.life_index.ultraviolet.index, 0);
+  assert.equal(result.result.realtime.life_index.ultraviolet.desc, '低');
+  assert.equal(result.result.realtime.life_index.ultraviolet.dailyMax, 8);
 });
 
 test('fetches only free QWeather endpoints and skips China-only minutely data abroad', async () => {

@@ -56,10 +56,20 @@ test('mobile weather uses a bounded one-column layout, horizontal hourly rail an
   assert.match(html, /露点/);
   assert.match(html, /weather-detail-pressure/);
   assert.match(html, /接近常态/);
-  assert.match(html, /weather-metric-gauge/);
+  assert.match(html, /weather-metric-pressure/);
   assert.match(html, /weather-metric-compass/);
   assert.match(html, /weather-metric-horizon/);
+  assert.match(html, /metric-uv-scale/);
+  assert.match(html, /日落后紫外线已降至 0/);
   assert.match(html, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+});
+
+test('night sky uses seeded irregular positions instead of arithmetic rows', async () => {
+  const html = await readFile(new URL('index.html', root), 'utf8');
+
+  assert.match(html, /const random = \(\) =>/);
+  assert.match(html, /positions\.some\(point =>/);
+  assert.doesNotMatch(html, /left:\$\{\(index \* 37\.7\) % 100\}/);
 });
 
 test('typhoon route renders a useful empty state in Vercel and Sites builds', async () => {

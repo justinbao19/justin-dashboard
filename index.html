@@ -225,12 +225,24 @@
             position: absolute;
             width: var(--star-size, 2px);
             height: var(--star-size, 2px);
-            background: rgba(235, 243, 255, 0.9);
+            background: rgba(235, 243, 255, var(--star-alpha, 0.82));
             border-radius: 50%;
-            box-shadow: 0 0 5px rgba(213, 231, 255, 0.35);
+            box-shadow: 0 0 var(--star-glow, 5px) rgba(213, 231, 255, 0.32);
             animation: twinkle var(--twinkle-time, 4s) cubic-bezier(0.65, 0, 0.35, 1) infinite;
             animation-delay: var(--twinkle-delay, 0s);
         }
+        .star.is-bright::before,
+        .star.is-bright::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            border-radius: 999px;
+            background: rgba(225, 238, 255, 0.32);
+            transform: translate(-50%, -50%);
+        }
+        .star.is-bright::before { width: 1px; height: calc(var(--star-size) * 3.5); }
+        .star.is-bright::after { width: calc(var(--star-size) * 3.5); height: 1px; }
         @keyframes twinkle {
             0%, 100% { opacity: 0.2; transform: scale(0.8); }
             50% { opacity: 0.92; transform: scale(1.12); }
@@ -7548,191 +7560,285 @@
             .hourly-swipe-hint span { display: none; }
         }
 
-        /* Expressive metric tiles: restrained Apple-style instruments, not decorative charts. */
-        .weather-details-grid {
-            align-items: stretch;
-        }
+        /* Apple Weather-style metrics: each value uses the instrument that best explains it. */
+        .weather-details-grid { align-items: stretch; }
         .weather-detail-card {
-            --metric-accent: #90d8ff;
+            --metric-accent: #d8edff;
+            position: relative;
             display: flex;
             flex-direction: column;
             min-width: 0;
-            min-height: 184px;
-            padding: 16px;
-            border-radius: 20px;
-            background: linear-gradient(155deg, rgba(24, 55, 76, 0.62), rgba(15, 34, 48, 0.48));
-            border: 1px solid rgba(255,255,255,0.11);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 12px 30px rgba(5,18,30,0.08);
+            min-height: 206px;
+            padding: 15px 16px 14px;
             aspect-ratio: auto;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 21px;
+            background: linear-gradient(155deg, rgba(30, 48, 75, 0.68), rgba(20, 36, 57, 0.56));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 38px rgba(4,15,30,0.08);
+            backdrop-filter: saturate(135%) blur(20px);
+            -webkit-backdrop-filter: saturate(135%) blur(20px);
         }
+        .weather-detail-card::after { display: none; }
         .weather-detail-card .weather-detail-head {
             position: relative;
-            z-index: 2;
-            min-height: 24px;
+            z-index: 4;
+            min-height: 20px;
         }
         .weather-detail-card .label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             margin: 0;
-            color: rgba(238,247,252,0.68);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0;
+            color: rgba(226,237,250,0.55);
+            font: 600 11px/1.2 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.18px;
         }
         .weather-detail-card .weather-detail-icon {
-            width: 28px;
-            height: 28px;
-            color: color-mix(in srgb, var(--metric-accent) 88%, white);
-            background: color-mix(in srgb, var(--metric-accent) 13%, transparent);
-            border: 1px solid color-mix(in srgb, var(--metric-accent) 18%, transparent);
-            font-size: 13px;
+            display: inline-grid;
+            place-items: center;
+            width: 14px;
+            height: 14px;
+            color: rgba(221,234,249,0.48);
+            border: 0;
+            background: none;
+            font-size: 11px;
         }
         .weather-metric-visual {
             position: relative;
             display: grid;
             place-items: center;
             flex: 1 1 auto;
-            min-height: 96px;
-            margin: 2px -2px 0;
-        }
-        .weather-metric-gauge {
-            width: min(132px, 100%);
-            overflow: visible;
-        }
-        .weather-metric-gauge path {
-            fill: none;
-            stroke-linecap: round;
-            stroke-width: 8;
-        }
-        .weather-metric-gauge .metric-track {
-            stroke: rgba(218,239,250,0.14);
-        }
-        .weather-metric-gauge .metric-progress {
-            stroke: var(--metric-accent);
-            stroke-dasharray: var(--metric-progress, 0) 100;
-            filter: drop-shadow(0 0 5px color-mix(in srgb, var(--metric-accent) 38%, transparent));
-            transition: stroke-dasharray 600ms cubic-bezier(.22,1,.36,1);
-        }
-        .weather-detail-uv .metric-progress {
-            stroke: url(#uvMetricGradient);
+            min-height: 116px;
+            margin: 2px 0 0;
         }
         .weather-metric-reading {
-            position: absolute;
-            left: 50%;
-            top: 58%;
             display: flex;
-            align-items: baseline;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            max-width: 112px;
-            transform: translate(-50%, -50%);
             white-space: nowrap;
         }
+        .metric-primary {
+            display: flex;
+            align-items: baseline;
+            min-width: 0;
+        }
         .weather-metric-reading strong {
-            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            color: rgba(248,252,255,0.98);
-            font-size: clamp(24px, 4vw, 32px);
-            font-weight: 600;
-            line-height: 1;
-            letter-spacing: -1px;
+            color: rgba(249,252,255,0.98);
+            font: 400 clamp(34px, 4.4vw, 43px)/0.98 "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -1.5px;
         }
         .weather-metric-reading span {
-            margin-left: 2px;
-            color: rgba(238,247,252,0.7);
-            font-size: 13px;
-            font-weight: 600;
+            margin-left: 3px;
+            color: rgba(235,243,252,0.72);
+            font: 500 13px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.18px;
         }
         .weather-metric-reading small {
-            position: absolute;
-            top: calc(100% + 6px);
-            left: 50%;
-            color: color-mix(in srgb, var(--metric-accent) 62%, rgba(238,247,252,0.72));
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: .02em;
-            transform: translateX(-50%);
+            margin-top: 7px;
+            color: rgba(244,249,255,0.9);
+            font: 600 13px/1.15 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.22px;
         }
         .weather-detail-card .desc {
             position: relative;
-            z-index: 2;
-            min-height: 34px;
-            margin: 2px 0 0;
-            color: rgba(238,247,252,0.65);
-            font-size: 11px;
-            line-height: 1.45;
+            z-index: 4;
+            display: block;
+            min-height: 31px;
+            margin: 0;
+            overflow: hidden;
+            color: rgba(234,243,252,0.7);
+            font: 400 11px/1.42 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.16px;
             -webkit-line-clamp: 2;
         }
-        .weather-detail-feels { --metric-accent: #ffd071; }
-        .weather-detail-humidity { --metric-accent: #7ed8ff; }
-        .weather-detail-wind { --metric-accent: #a9e7dc; }
-        .weather-detail-visibility { --metric-accent: #c7ddff; }
-        .weather-detail-pressure { --metric-accent: #b8c9ff; }
-        .weather-detail-uv { --metric-accent: #ffcb57; }
-        .weather-detail-pressure .weather-metric-reading strong { font-size: clamp(21px, 3.3vw, 27px); }
-        .weather-detail-uv .weather-metric-reading strong { font-size: clamp(22px, 3.6vw, 29px); }
+
+        .weather-metric-plain {
+            place-items: start;
+            align-content: start;
+            padding-top: 20px;
+        }
+        .weather-metric-plain .weather-metric-reading { align-items: flex-start; }
+        .weather-metric-plain .weather-metric-reading small { color: rgba(244,249,255,0.88); }
+
+        .weather-metric-compass,
+        .weather-metric-pressure {
+            position: relative;
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+        }
         .weather-metric-compass {
-            width: 94px;
-            height: 94px;
-            border-radius: 50%;
             background:
-                repeating-conic-gradient(from -1deg, rgba(221,244,249,.26) 0 1deg, transparent 1deg 9deg),
-                radial-gradient(circle, transparent 0 57%, rgba(218,239,250,.12) 58% 60%, transparent 61%);
-        }
-        .weather-metric-compass::after {
-            content: '';
-            position: absolute;
-            width: 2px;
-            height: 68px;
-            border-radius: 999px;
-            background: linear-gradient(180deg, var(--metric-accent) 0 42%, transparent 43% 56%, rgba(238,247,252,.62) 57%);
-            box-shadow: 0 -4px 10px color-mix(in srgb, var(--metric-accent) 36%, transparent);
-            transform: rotate(var(--metric-angle, 0deg));
-            transition: transform 600ms cubic-bezier(.22,1,.36,1);
-        }
-        .weather-metric-compass .weather-metric-reading {
-            z-index: 2;
-            top: 50%;
-            width: 58px;
-            height: 58px;
-            align-items: center;
-            border-radius: 50%;
-            background: rgba(15,34,48,.82);
-            box-shadow: 0 0 0 1px rgba(255,255,255,.08);
-        }
-        .weather-metric-compass .weather-metric-reading strong {
-            font-size: 24px;
-            letter-spacing: -.5px;
+                radial-gradient(circle, rgba(21,38,59,.96) 0 54%, transparent 55%),
+                repeating-conic-gradient(from -1deg, rgba(224,238,250,.28) 0 1deg, transparent 1deg 6deg);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
         }
         .metric-cardinal {
             position: absolute;
+            z-index: 4;
+            color: rgba(235,244,252,.62);
+            font: 700 9px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        }
+        .metric-cardinal.north { top: 6px; left: 50%; transform: translateX(-50%); }
+        .metric-cardinal.east { right: 7px; top: 50%; transform: translateY(-50%); }
+        .metric-cardinal.south { bottom: 6px; left: 50%; transform: translateX(-50%); }
+        .metric-cardinal.west { left: 7px; top: 50%; transform: translateY(-50%); }
+        .metric-wind-needle {
+            position: absolute;
             z-index: 3;
-            color: rgba(238,247,252,.46);
-            font-size: 8px;
-            font-weight: 700;
+            left: calc(50% - 1px);
+            top: 15px;
+            width: 2px;
+            height: 88px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255,255,255,.96) 0 39%, transparent 40% 61%, rgba(224,236,247,.72) 62% 100%);
+            filter: drop-shadow(0 0 5px rgba(211,232,255,.28));
+            transform: rotate(var(--metric-angle, 0deg));
+            transition: transform 650ms cubic-bezier(.22,1,.36,1);
         }
-        .metric-cardinal.north { top: 4px; left: 50%; transform: translateX(-50%); }
-        .metric-cardinal.east { right: 5px; top: 50%; transform: translateY(-50%); }
-        .metric-cardinal.south { bottom: 4px; left: 50%; transform: translateX(-50%); }
-        .metric-cardinal.west { left: 5px; top: 50%; transform: translateY(-50%); }
-        .weather-metric-horizon {
-            width: min(132px, 100%);
-            height: 84px;
-            overflow: hidden;
-            border-radius: 18px;
-            background: linear-gradient(180deg, rgba(179,220,255,.12), rgba(95,152,196,.03));
-        }
-        .weather-metric-horizon::before,
-        .weather-metric-horizon::after {
+        .metric-wind-needle::before {
             content: '';
             position: absolute;
             left: 50%;
-            border: 1px solid rgba(203,231,255,.2);
+            top: -4px;
+            border-right: 4px solid transparent;
+            border-bottom: 9px solid rgba(255,255,255,.98);
+            border-left: 4px solid transparent;
+            transform: translateX(-50%);
+        }
+        .metric-wind-needle::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(242,248,255,.96);
+            box-shadow: 0 0 0 1px rgba(16,30,48,.3);
+            transform: translateX(-50%);
+        }
+        .weather-metric-compass .weather-metric-reading {
+            position: absolute;
+            z-index: 5;
+            inset: 31px;
+            border-radius: 50%;
+            background: rgba(20,37,58,.94);
+        }
+        .weather-metric-compass .weather-metric-reading strong {
+            font-size: 30px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+        .weather-metric-compass .weather-metric-reading span {
+            margin: 1px 0 0;
+            font-size: 11px;
+        }
+
+        .weather-metric-pressure {
+            background:
+                radial-gradient(circle, rgba(21,38,59,.97) 0 58%, transparent 59%),
+                repeating-conic-gradient(from -2deg, rgba(224,238,250,.27) 0 1.5deg, transparent 1.5deg 7deg);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+        }
+        .metric-pressure-marker {
+            position: absolute;
+            z-index: 3;
+            inset: 0;
+            border-radius: 50%;
+            transform: rotate(var(--metric-angle, 0deg));
+            transition: transform 650ms cubic-bezier(.22,1,.36,1);
+        }
+        .metric-pressure-marker::before {
+            content: '';
+            position: absolute;
+            left: calc(50% - 2px);
+            top: 2px;
+            width: 4px;
+            height: 17px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.98);
+            box-shadow: 0 0 8px rgba(211,231,255,.28);
+        }
+        .weather-metric-pressure .weather-metric-reading {
+            position: absolute;
+            z-index: 4;
+            inset: 29px 21px 28px;
+        }
+        .weather-metric-pressure .weather-metric-reading strong {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -1.1px;
+        }
+        .weather-metric-pressure .weather-metric-reading span {
+            margin: 3px 0 0;
+            font-size: 10px;
+        }
+        .metric-pressure-low,
+        .metric-pressure-high {
+            position: absolute;
+            z-index: 4;
+            bottom: 8px;
+            color: rgba(234,243,252,.72);
+            font: 500 9px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        }
+        .metric-pressure-low { left: 21px; }
+        .metric-pressure-high { right: 21px; }
+
+        .weather-metric-horizon {
+            position: relative;
+            width: 100%;
+            height: 116px;
+            overflow: hidden;
+        }
+        .weather-metric-horizon .weather-metric-reading {
+            position: absolute;
+            z-index: 3;
+            left: 0;
+            top: 17px;
+            align-items: flex-start;
+        }
+        .weather-metric-horizon .weather-metric-reading small { color: rgba(244,249,255,.88); }
+        .metric-horizon-line {
+            position: absolute;
+            left: 50%;
+            border: 1px solid rgba(204,227,247,.17);
             border-bottom: 0;
             border-radius: 50% 50% 0 0;
             transform: translateX(-50%);
         }
-        .weather-metric-horizon::before { bottom: 14px; width: 122px; height: 38px; }
-        .weather-metric-horizon::after { bottom: 14px; width: 76px; height: 23px; }
-        .weather-metric-horizon .weather-metric-reading {
-            z-index: 2;
-            top: 48%;
+        .metric-horizon-line-far { bottom: 1px; width: 142%; height: 42px; }
+        .metric-horizon-line-near { bottom: 1px; width: 86%; height: 25px; }
+
+        .weather-metric-uv {
+            place-items: stretch;
+            align-content: start;
+            padding-top: 17px;
+        }
+        .weather-metric-uv .weather-metric-reading { align-items: flex-start; }
+        .metric-uv-scale {
+            position: relative;
+            width: 100%;
+            height: 6px;
+            margin-top: 18px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #61d66e 0%, #c9e83b 19%, #ffd43b 38%, #ff9d32 58%, #ff5f57 76%, #d357e8 100%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
+        }
+        .metric-uv-marker {
+            position: absolute;
+            left: clamp(3px, var(--metric-progress, 0%), calc(100% - 3px));
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            border: 1px solid rgba(20,35,55,.25);
+            border-radius: 50%;
+            background: #f7fbff;
+            box-shadow: 0 0 0 2px rgba(255,255,255,.12);
+            transform: translate(-50%, -50%);
+            transition: left 650ms cubic-bezier(.22,1,.36,1);
         }
 
         @media (max-width: 760px) {
@@ -7741,25 +7847,31 @@
                 gap: 10px;
             }
             .weather-detail-card {
-                min-height: 174px;
-                padding: 13px;
-                border-radius: 18px;
+                min-height: 194px;
+                padding: 13px 14px 12px;
+                border-radius: 20px;
             }
-            .weather-metric-visual { min-height: 92px; }
-            .weather-metric-reading strong { font-size: clamp(24px, 8vw, 30px); }
-            .weather-detail-card .desc {
-                display: block;
-                min-height: 31px;
-                font-size: 10px;
-            }
+            .weather-metric-visual { min-height: 108px; }
+            .weather-metric-reading strong { font-size: clamp(34px, 10vw, 40px); }
+            .weather-metric-compass,
+            .weather-metric-pressure { width: 108px; height: 108px; }
+            .metric-wind-needle { top: 14px; height: 80px; }
+            .weather-metric-compass .weather-metric-reading { inset: 29px; }
+            .weather-metric-compass .weather-metric-reading strong { font-size: 28px; }
+            .weather-metric-pressure .weather-metric-reading { inset: 28px 18px 27px; }
+            .weather-metric-pressure .weather-metric-reading strong { font-size: 24px; }
+            .metric-pressure-low { left: 18px; }
+            .metric-pressure-high { right: 18px; }
+            .weather-detail-card .desc { min-height: 30px; font-size: 10px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
             .weather-precip-glyph,
             .hourly-swipe-hint i,
             .weather-detail-icon i,
-            .weather-metric-gauge .metric-progress,
-            .weather-metric-compass::after,
+            .metric-wind-needle,
+            .metric-pressure-marker,
+            .metric-uv-marker,
             .weather-typhoon-card.is-active-typhoon .typhoon-status-dot {
                 animation: none !important;
                 transition: none !important;
@@ -8729,19 +8841,40 @@
             if (stars.childElementCount) return;
             const count = (weatherSceneState.lowPower || window.innerWidth < 480) ? 30 : 52;
             const fragment = document.createDocumentFragment();
-            for (let index = 0; index < count; index += 1) {
+            const positions = [];
+            let seed = 0x9e3779b9;
+            const random = () => {
+                seed ^= seed << 13;
+                seed ^= seed >>> 17;
+                seed ^= seed << 5;
+                return (seed >>> 0) / 4294967296;
+            };
+            let attempts = 0;
+            while (positions.length < count && attempts < count * 12) {
+                attempts += 1;
+                const candidate = { x: 2 + random() * 96, y: 3 + random() * 68 };
+                const tooClose = positions.some(point =>
+                    Math.abs(point.x - candidate.x) < 3.2 && Math.abs(point.y - candidate.y) < 2.4
+                );
+                if (!tooClose) positions.push(candidate);
+            }
+            positions.forEach((position, index) => {
                 const star = document.createElement('i');
-                const size = 1 + ((index * 17) % 18) / 10;
-                star.className = 'star';
+                const sizeBias = random();
+                const size = 0.8 + sizeBias * sizeBias * 1.9;
+                const isBright = size > 2.15 && random() > 0.55;
+                star.className = `star${isBright ? ' is-bright' : ''}`;
                 star.style.cssText = [
-                    `left:${(index * 37.7) % 100}%`,
-                    `top:${6 + ((index * 23.4) % 62)}%`,
+                    `left:${position.x.toFixed(2)}%`,
+                    `top:${position.y.toFixed(2)}%`,
                     `--star-size:${size.toFixed(1)}px`,
-                    `--twinkle-time:${(3.2 + (index % 7) * 0.54).toFixed(2)}s`,
-                    `--twinkle-delay:-${((index % 11) * 0.41).toFixed(2)}s`
+                    `--star-alpha:${(0.48 + random() * 0.48).toFixed(2)}`,
+                    `--star-glow:${(2.5 + size * 1.8).toFixed(1)}px`,
+                    `--twinkle-time:${(3.1 + random() * 4.4).toFixed(2)}s`,
+                    `--twinkle-delay:-${(random() * 6.8).toFixed(2)}s`
                 ].join(';');
                 fragment.appendChild(star);
-            }
+            });
             stars.appendChild(fragment);
         }
 
@@ -9409,32 +9542,28 @@
             return Math.max(0, Math.min(100, ((Number(value) - min) / (max - min || 1)) * 100));
         }
 
-        function renderMetricGauge(metric) {
-            const progress = Math.round(Math.max(0, Math.min(100, Number(metric.progress || 0))));
-            const gradient = metric.key === 'uv'
-                ? '<defs><linearGradient id="uvMetricGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#72e085"/><stop offset="42%" stop-color="#ffd84f"/><stop offset="72%" stop-color="#ff7b45"/><stop offset="100%" stop-color="#d65cff"/></linearGradient></defs>'
-                : '';
+        function renderMetricPlain(metric) {
             return `
-                <div class="weather-metric-visual">
-                    <svg class="weather-metric-gauge" viewBox="0 0 120 78" aria-hidden="true">
-                        ${gradient}
-                        <path class="metric-track" pathLength="100" d="M15 67 A45 45 0 0 1 105 67"></path>
-                        <path class="metric-progress" pathLength="100" style="--metric-progress:${progress}" d="M15 67 A45 45 0 0 1 105 67"></path>
-                    </svg>
+                <div class="weather-metric-visual weather-metric-plain">
                     <div class="weather-metric-reading">
-                        <strong>${escapeHtml(String(metric.displayValue))}</strong><span>${escapeHtml(metric.displayUnit || '')}</span>
+                        <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong><span>${escapeHtml(metric.displayUnit || '')}</span></div>
                         <small>${escapeHtml(metric.status || '')}</small>
                     </div>
                 </div>`;
         }
 
         function renderMetricCompass(metric) {
+            const needleAngle = Number(metric.angle || 0) - 180;
             return `
                 <div class="weather-metric-visual">
-                    <div class="weather-metric-compass" style="--metric-angle:${Number(metric.angle || 0)}deg" aria-hidden="true">
+                    <div class="weather-metric-compass" style="--metric-angle:${needleAngle}deg" aria-hidden="true">
                         <span class="metric-cardinal north">北</span><span class="metric-cardinal east">东</span>
                         <span class="metric-cardinal south">南</span><span class="metric-cardinal west">西</span>
-                        <div class="weather-metric-reading"><strong>${escapeHtml(String(metric.displayValue))}</strong></div>
+                        <span class="metric-wind-needle"></span>
+                        <div class="weather-metric-reading">
+                            <strong>${escapeHtml(String(metric.displayValue))}</strong>
+                            <span>${escapeHtml(metric.displayUnit || '')}</span>
+                        </div>
                     </div>
                 </div>`;
         }
@@ -9444,9 +9573,42 @@
                 <div class="weather-metric-visual">
                     <div class="weather-metric-horizon" aria-hidden="true">
                         <div class="weather-metric-reading">
-                            <strong>${escapeHtml(String(metric.displayValue))}</strong><span>${escapeHtml(metric.displayUnit || '')}</span>
+                            <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong><span>${escapeHtml(metric.displayUnit || '')}</span></div>
                             <small>${escapeHtml(metric.status || '')}</small>
                         </div>
+                        <span class="metric-horizon-line metric-horizon-line-far"></span>
+                        <span class="metric-horizon-line metric-horizon-line-near"></span>
+                    </div>
+                </div>`;
+        }
+
+        function renderMetricPressure(metric) {
+            const progress = Math.max(0, Math.min(100, Number(metric.progress || 0)));
+            const markerAngle = -135 + progress * 2.7;
+            return `
+                <div class="weather-metric-visual">
+                    <div class="weather-metric-pressure" style="--metric-angle:${markerAngle.toFixed(1)}deg" aria-hidden="true">
+                        <span class="metric-pressure-marker"></span>
+                        <div class="weather-metric-reading">
+                            <strong>${escapeHtml(String(metric.displayValue))}</strong>
+                            <span>${escapeHtml(metric.displayUnit || '')}</span>
+                        </div>
+                        <span class="metric-pressure-low">低</span>
+                        <span class="metric-pressure-high">高</span>
+                    </div>
+                </div>`;
+        }
+
+        function renderMetricUv(metric) {
+            const progress = Math.max(0, Math.min(100, Number(metric.progress || 0)));
+            return `
+                <div class="weather-metric-visual weather-metric-uv">
+                    <div class="weather-metric-reading">
+                        <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong></div>
+                        <small>${escapeHtml(metric.status || '')}</small>
+                    </div>
+                    <div class="metric-uv-scale" style="--metric-progress:${progress.toFixed(1)}%" aria-hidden="true">
+                        <span class="metric-uv-marker"></span>
                     </div>
                 </div>`;
         }
@@ -9454,12 +9616,15 @@
         function renderWeatherMetric(metric) {
             const visual = metric.kind === 'compass'
                 ? renderMetricCompass(metric)
-                : (metric.kind === 'horizon' ? renderMetricHorizon(metric) : renderMetricGauge(metric));
+                : (metric.kind === 'horizon'
+                    ? renderMetricHorizon(metric)
+                    : (metric.kind === 'pressure'
+                        ? renderMetricPressure(metric)
+                        : (metric.kind === 'uv' ? renderMetricUv(metric) : renderMetricPlain(metric))));
             return `
                 <div class="weather-detail-card weather-detail-${metric.key}">
                     <div class="weather-detail-head">
-                        <div class="label">${escapeHtml(metric.label)}</div>
-                        <span class="weather-detail-icon" aria-hidden="true"><i class="fas ${metric.icon}"></i></span>
+                        <div class="label"><span class="weather-detail-icon" aria-hidden="true"><i class="fas ${metric.icon}"></i></span>${escapeHtml(metric.label)}</div>
                     </div>
                     ${visual}
                     <div class="desc">${escapeHtml(metric.desc)}</div>
@@ -9670,26 +9835,28 @@
                 const pressureHpa = Math.round((rt.pressure || 0) / 100);
                 const windDirection = Number(rt.wind?.direction || 0);
                 const windSpeed = Number(rt.wind?.speed || 0);
-                const ultraviolet = Number(rt.life_index?.ultraviolet?.index);
-                const uvValue = Number.isFinite(ultraviolet) ? ultraviolet : 0;
+                const ultravioletRaw = rt.life_index?.ultraviolet?.index;
+                const ultraviolet = ultravioletRaw === null || ultravioletRaw === undefined ? NaN : Number(ultravioletRaw);
+                const isRealtimeNight = rt.isNight === true || String(rt.skycon || '').includes('NIGHT');
+                const uvValue = isRealtimeNight ? 0 : (Number.isFinite(ultraviolet) ? ultraviolet : 0);
+                const uvStatus = uvValue >= 11 ? '极强' : (uvValue >= 8 ? '很强' : (uvValue >= 6 ? '较强' : (uvValue >= 3 ? '中等' : '低')));
                 const weatherMetrics = [
                     {
-                        key: 'feels', kind: 'gauge', icon: 'fa-temperature-half', label: '体感温度',
-                        displayValue: apparentTemperature, displayUnit: '°C',
-                        progress: clampMetric(apparentTemperature, -10, 40),
+                        key: 'feels', kind: 'plain', icon: 'fa-temperature-half', label: '体感温度',
+                        displayValue: apparentTemperature, displayUnit: '°',
                         status: apparentTemperature >= 32 || (apparentTemperature >= 28 && humidity >= 70) ? '闷热' : (apparentTemperature <= 8 ? '偏冷' : '舒适'),
                         desc: feelsDelta === 0 ? (rt.life_index?.comfort?.desc || '接近实温') : `${feelsDelta > 0 ? '高于' : '低于'}实温 ${Math.abs(feelsDelta)}°`
                     },
                     {
-                        key: 'humidity', kind: 'gauge', icon: 'fa-droplet', label: '空气湿度',
-                        displayValue: humidity, displayUnit: '%', progress: humidity,
+                        key: 'humidity', kind: 'plain', icon: 'fa-droplet', label: '空气湿度',
+                        displayValue: humidity, displayUnit: '%',
                         status: humidity >= 75 ? '潮湿' : (humidity <= 35 ? '偏干' : '适中'),
                         desc: Number.isFinite(Number(rt.dewPoint)) ? `露点 ${Math.round(Number(rt.dewPoint))}°` : (humidity >= 75 ? '体感偏潮' : (humidity <= 35 ? '空气偏干' : '湿度适中'))
                     },
                     {
                         key: 'wind', kind: 'compass', icon: 'fa-location-arrow', label: '风向与风力',
-                        displayValue: `${rt.wind?.scale || '--'}级`, angle: windDirection,
-                        desc: `${rt.wind?.text || getDir(windDirection)} · ${windSpeed.toFixed(1)} km/h`
+                        displayValue: rt.wind?.scale || '--', displayUnit: '级', angle: windDirection,
+                        desc: `${Math.round(windDirection)}° ${rt.wind?.text || getDir(windDirection)} · ${windSpeed.toFixed(1)} km/h`
                     },
                     {
                         key: 'visibility', kind: 'horizon', icon: 'fa-eye', label: '能见度',
@@ -9698,18 +9865,22 @@
                         desc: visibility >= 15 ? '视野通透' : (visibility >= 5 ? '能见度一般' : '出行需留意')
                     },
                     {
-                        key: 'pressure', kind: 'gauge', icon: 'fa-gauge-high', label: '海平面气压',
+                        key: 'pressure', kind: 'pressure', icon: 'fa-gauge-high', label: '海平面气压',
                         displayValue: pressureHpa, displayUnit: 'hPa',
                         progress: clampMetric(pressureHpa, 950, 1050),
                         status: pressureHpa >= 1020 ? '偏高' : (pressureHpa <= 1000 ? '偏低' : '常态'),
                         desc: pressureHpa >= 1020 ? '气压偏高' : (pressureHpa <= 1000 ? '气压偏低' : '接近常态')
                     },
                     {
-                        key: 'uv', kind: 'gauge', icon: 'fa-sun', label: '紫外线',
-                        displayValue: rt.life_index?.ultraviolet?.desc || (Number.isFinite(ultraviolet) ? ultraviolet : '--'),
+                        key: 'uv', kind: 'uv', icon: 'fa-sun', label: '紫外线',
+                        displayValue: Number.isFinite(ultraviolet) || isRealtimeNight ? uvValue : '--',
                         displayUnit: '', progress: clampMetric(uvValue, 0, 11),
-                        status: Number.isFinite(ultraviolet) ? `UV ${ultraviolet}` : '待更新',
-                        desc: uvValue >= 6 ? '辐射较强，外出注意防晒' : (uvValue >= 3 ? '适度防护更安心' : '无需特别防护')
+                        status: Number.isFinite(ultraviolet) || isRealtimeNight ? uvStatus : '待更新',
+                        desc: isRealtimeNight
+                            ? '日落后紫外线已降至 0'
+                            : (rt.life_index?.ultraviolet?.estimated
+                                ? `按太阳高度估算 · 今日峰值 ${rt.life_index.ultraviolet.dailyMax ?? '--'}`
+                                : (uvValue >= 6 ? '辐射较强，外出注意防晒' : (uvValue >= 3 ? '适度防护更安心' : '无需特别防护')))
                     }
                 ];
                 document.getElementById('weatherGrid').innerHTML = weatherMetrics.map(renderWeatherMetric).join('');

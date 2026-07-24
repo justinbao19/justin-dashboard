@@ -16,8 +16,10 @@ test('weather prioritizes precipitation, then exposes a calm typhoon entry befor
   assert.ok(typhoonIndex < hourlyIndex, 'typhoon entry should precede hourly forecast');
   assert.match(html, /id="nowcastTitle">降水窗口<\/span>/);
   assert.match(html, /id="rainChance">--%<\/strong>/);
-  assert.match(html, /href="\/typhoon" aria-label="查看台风动态，当前无活跃台风"/);
-  assert.match(html, /<span class="typhoon-card-title">当前无活跃台风<\/span>/);
+  assert.match(html, /id="typhoonEntryCard" href="\/typhoon"/);
+  assert.match(html, /id="typhoonCardTitle">台风动态<\/span>/);
+  assert.match(html, /Promise\.all\(\[loadWeather\(\), loadTyphoons\(\)\]\)/);
+  assert.match(html, /fetch\('\/api\/typhoons'/);
 });
 
 test('desktop weather cards use dense paired spans so optional alerts do not create gaps', async () => {
@@ -54,6 +56,10 @@ test('mobile weather uses a bounded one-column layout, horizontal hourly rail an
   assert.match(html, /露点/);
   assert.match(html, /weather-detail-pressure/);
   assert.match(html, /接近常态/);
+  assert.match(html, /weather-metric-gauge/);
+  assert.match(html, /weather-metric-compass/);
+  assert.match(html, /weather-metric-horizon/);
+  assert.match(html, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
 });
 
 test('typhoon route renders a useful empty state in Vercel and Sites builds', async () => {

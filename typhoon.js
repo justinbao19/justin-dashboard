@@ -22,6 +22,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     windCirclePoint: null,
     weatherOpacity: .58,
     markers: [],
+    windCircleLabelMarkers: [],
     userLocationMarker: null,
     pointsByKey: new Map(),
     layerClock: null,
@@ -408,7 +409,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       if (coordinates.length) coordinates.push(coordinates[0]);
       return {
         type: 'Feature',
-        properties: { level: Number(circle.level), minRadiusKm: circle.minRadiusKm, maxRadiusKm: circle.maxRadiusKm },
+        properties: { kind: 'area', level: Number(circle.level), minRadiusKm: circle.minRadiusKm, maxRadiusKm: circle.maxRadiusKm },
         geometry: { type: 'Polygon', coordinates: [coordinates] }
       };
     });
@@ -437,6 +438,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     el('typhoonMap').dataset.windCircleCount = String(collection.features.length);
     const source = state.map?.getSource('wind-circles');
     if (source) source.setData(collection);
+    renderWindCircleLabels(point);
     renderWindCircleLegend(point, { historical });
   }
 
@@ -488,8 +490,33 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   function removeMarkers() {
     state.markers.forEach(marker => marker.remove());
     state.markers = [];
+    state.windCircleLabelMarkers.forEach(marker => marker.remove());
+    state.windCircleLabelMarkers = [];
     state.userLocationMarker?.remove();
     state.userLocationMarker = null;
+  }
+
+  function renderWindCircleLabels(point) {
+    state.windCircleLabelMarkers.forEach(marker => marker.remove());
+    state.windCircleLabelMarkers = [];
+    if (!state.map || !point?.position || !point.windCircles?.length) return;
+    const labelBearings = { 7: 214, 10: 308, 12: 42 };
+    point.windCircles.forEach(circle => {
+      const level = Number(circle.level);
+      const style = windCircleStyles[level] || windCircleStyles[7];
+      const bearing = labelBearings[level] ?? 315;
+      const radius = windRadiusForBearing(circle, bearing);
+      if (!hasNumber(radius) || Number(radius) <= 0) return;
+      const markerElement = document.createElement('div');
+      markerElement.className = 'wind-circle-map-label';
+      markerElement.style.setProperty('--wind-circle-color', style.color);
+      markerElement.textContent = `${level}级风圈`;
+      markerElement.setAttribute('aria-hidden', 'true');
+      const marker = new maplibregl.Marker({ element: markerElement, anchor: 'center' })
+        .setLngLat(destinationCoordinate(point.position, bearing, Number(radius)))
+        .addTo(state.map);
+      state.windCircleLabelMarkers.push(marker);
+    });
   }
 
   function markerLabel(point) { return formatDate(point.validAt, true).replace('日', '日 '); }
@@ -544,6 +571,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       });
     }
     renderUserLocationMarker();
+    renderWindCircleLabels(state.windCirclePoint);
   }
 
   function bindPointInteractions() {

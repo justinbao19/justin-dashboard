@@ -85,3 +85,18 @@ test('typhoon route renders a useful empty state in Vercel and Sites builds', as
   assert.match(vercel, /weather\|typhoon\|market\|news\|f1/);
   assert.match(sites, /pathname === '\/typhoon'/);
 });
+
+test('mobile typhoon layout removes duplicate horizontal sources and labels wind circles on-map', async () => {
+  const [css, js] = await Promise.all([
+    readFile(new URL('typhoon.css', root), 'utf8'),
+    readFile(new URL('typhoon.js', root), 'utf8')
+  ]);
+
+  assert.match(css, /@media \(max-width: 640px\)[\s\S]*?\.source-strip,\s*\.wind-circle-legend \{ display: none; \}/);
+  assert.match(css, /\.agency-list \{ width: 100%; gap: 2px; overflow: visible; \}/);
+  assert.match(css, /\.radar-intensity-legend,[\s\S]*?grid-template-columns: auto minmax\(82px, 1fr\) auto;/);
+  assert.match(css, /\.wind-circle-map-label \{/);
+  assert.match(js, /windCircleLabelMarkers/);
+  assert.match(js, /markerElement\.textContent = `\$\{level\}级风圈`/);
+  assert.match(js, /const labelBearings = \{ 7: 214, 10: 308, 12: 42 \};/);
+});

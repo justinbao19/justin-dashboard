@@ -37,8 +37,12 @@
 
         <div class="map-toolbar" aria-label="地图工具">
           <div class="basemap-switch" role="group" aria-label="底图类型">
-            <button class="active" type="button" data-basemap="standard">地图</button>
-            <button type="button" data-basemap="satellite">卫星</button>
+            <button class="active" type="button" data-basemap="standard" aria-label="使用地图底图">
+              <i class="ph ph-map-trifold" aria-hidden="true"></i><span>地图</span>
+            </button>
+            <button type="button" data-basemap="satellite" aria-label="使用卫星底图">
+              <i class="ph ph-globe-hemisphere-east" aria-hidden="true"></i><span>卫星</span>
+            </button>
           </div>
           <button class="toolbar-button" id="layerButton" type="button" aria-expanded="false">
             <i class="ph ph-stack"></i><span>图层</span>
@@ -110,6 +114,20 @@
           <div class="node-metrics" id="nodeMetrics"></div>
           <div class="node-context" id="nodeContext"></div>
         </article>
+
+        <section class="track-playback" id="trackPlayback" aria-label="台风路径播放">
+          <button class="playback-toggle" id="playbackToggle" type="button" aria-label="播放台风路径" aria-pressed="false">
+            <i class="ph ph-play" aria-hidden="true"></i>
+          </button>
+          <div class="playback-content">
+            <div class="playback-heading">
+              <span><strong id="playbackStage">当前位置</strong><small id="playbackSource">中国预报</small></span>
+              <time id="playbackTime">时间待确认</time>
+            </div>
+            <input id="playbackSlider" type="range" min="0" max="0" value="0" step="1" aria-label="拖动查看台风历史与预报位置">
+            <div class="playback-axis" aria-hidden="true"><span>历史</span><i id="playbackNowTick"></i><span>预报</span></div>
+          </div>
+        </section>
 
         <div class="map-attribution">CARTO · OpenStreetMap · Esri · RainViewer · NASA GIBS · Open-Meteo</div>
       </section>

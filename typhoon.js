@@ -24,6 +24,13 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     markers: [],
     windCircleLabelMarkers: [],
     userLocationMarker: null,
+    currentMarker: null,
+    playbackPoints: [],
+    playbackIndex: 0,
+    playbackCurrentIndex: 0,
+    playbackTimer: null,
+    playbackPlaying: false,
+    playbackActive: false,
     pointsByKey: new Map(),
     layerClock: null,
     fieldData: null,
@@ -485,6 +492,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       map.addSource(`points-${track.id}`, { type: 'geojson', data: pointCollection(track.points, track.id, track.color) });
       map.addLayer({ id: `points-${track.id}`, type: 'circle', source: `points-${track.id}`, layout: { visibility: state.activeSources.has(track.id) ? 'visible' : 'none' }, paint: { 'circle-radius': 4, 'circle-color': track.color, 'circle-stroke-color': '#f7fbfd', 'circle-stroke-width': 1.2 } });
     }
+    addPlaybackLayers();
   }
 
   function removeMarkers() {
@@ -494,6 +502,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     state.windCircleLabelMarkers = [];
     state.userLocationMarker?.remove();
     state.userLocationMarker = null;
+    state.currentMarker = null;
   }
 
   function renderWindCircleLabels(point) {
@@ -535,9 +544,15 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       button.innerHTML = `<span class="dot"></span><small>${escapeHtml(markerLabel(point))}</small>`;
     }
     button.classList.toggle('is-hidden', !current && !state.activeSources.has(sourceId));
-    button.addEventListener('click', event => { event.stopPropagation(); showNode(point, current); });
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      if (!current) { showNode(point, false); return; }
+      const playbackPoint = state.playbackPoints[state.playbackIndex]?.point || point;
+      showNode(playbackPoint, state.playbackIndex === state.playbackCurrentIndex);
+    });
     const marker = new maplibregl.Marker({ element: button, anchor: 'center' }).setLngLat([point.position.lon, point.position.lat]).addTo(state.map);
     state.markers.push(marker);
+    if (current) state.currentMarker = marker;
   }
 
   function renderUserLocationMarker() {
@@ -572,6 +587,182 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     }
     renderUserLocationMarker();
     renderWindCircleLabels(state.windCirclePoint);
+    syncPlaybackMap();
+  }
+
+  function playbackForecastTrack() {
+    const tracks = state.detail?.tracks?.forecasts || [];
+    return tracks.find(track => track.id === state.selectedAgencyId)
+      || tracks.find(track => track.id === 'cma')
+      || tracks[0]
+      || null;
+  }
+
+  function buildPlaybackPoints() {
+    const observed = [...(state.detail?.tracks?.observed || [])]
+      .filter(point => hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon))
+      .sort((a, b) => Date.parse(a.validAt) - Date.parse(b.validAt));
+    const current = observed.at(-1);
+    const currentAt = Date.parse(current?.validAt);
+    const forecastTrack = playbackForecastTrack();
+    const forecast = [...(forecastTrack?.points || [])]
+      .filter(point => point.kind === 'forecast' && hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon))
+      .filter(point => !Number.isFinite(currentAt) || Date.parse(point.validAt) > currentAt)
+      .sort((a, b) => Date.parse(a.validAt) - Date.parse(b.validAt));
+    return {
+      points: [
+        ...observed.map(point => ({ point, phase: point === current ? 'current' : 'history', track: null })),
+        ...forecast.map(point => ({ point, phase: 'forecast', track: forecastTrack }))
+      ],
+      currentIndex: Math.max(0, observed.length - 1),
+      forecastTrack
+    };
+  }
+
+  function playbackLine(points) {
+    const coordinates = points.map(item => [Number(item.point.position.lon), Number(item.point.position.lat)]);
+    return coordinates.length > 1
+      ? { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates } }
+      : { type: 'FeatureCollection', features: [] };
+  }
+
+  function playbackSegments(index = state.playbackIndex) {
+    if (!state.playbackActive || !state.playbackPoints.length) {
+      return { history: playbackLine([]), forecast: playbackLine([]) };
+    }
+    const currentIndex = state.playbackCurrentIndex;
+    return {
+      history: playbackLine(state.playbackPoints.slice(0, Math.min(index, currentIndex) + 1)),
+      forecast: playbackLine(index > currentIndex ? state.playbackPoints.slice(currentIndex, index + 1) : [])
+    };
+  }
+
+  function addPlaybackLayers() {
+    const map = state.map;
+    if (!map?.getStyle() || map.getSource('playback-history')) return;
+    const segments = playbackSegments();
+    map.addSource('playback-history', { type: 'geojson', data: segments.history });
+    map.addSource('playback-forecast', { type: 'geojson', data: segments.forecast });
+    map.addLayer({
+      id: 'playback-history-glow',
+      type: 'line',
+      source: 'playback-history',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#64d2ff', 'line-width': 8, 'line-opacity': .23, 'line-blur': 3 }
+    });
+    map.addLayer({
+      id: 'playback-history-line',
+      type: 'line',
+      source: 'playback-history',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#eaf9ff', 'line-width': 3.2, 'line-opacity': .98 }
+    });
+    map.addLayer({
+      id: 'playback-forecast-line',
+      type: 'line',
+      source: 'playback-forecast',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': playbackForecastTrack()?.color || '#ff7a45',
+        'line-width': 3.3,
+        'line-opacity': .98,
+        'line-dasharray': [1.7, 1.25]
+      }
+    });
+  }
+
+  function syncPlaybackMap() {
+    const entry = state.playbackPoints[state.playbackIndex];
+    if (!entry) return;
+    const segments = playbackSegments();
+    state.map?.getSource('playback-history')?.setData(segments.history);
+    state.map?.getSource('playback-forecast')?.setData(segments.forecast);
+    if (state.map?.getLayer('playback-forecast-line')) {
+      state.map.setPaintProperty('playback-forecast-line', 'line-color', playbackForecastTrack()?.color || '#ff7a45');
+    }
+    state.currentMarker?.setLngLat([entry.point.position.lon, entry.point.position.lat]);
+  }
+
+  function pausePlayback() {
+    if (state.playbackTimer) clearTimeout(state.playbackTimer);
+    state.playbackTimer = null;
+    state.playbackPlaying = false;
+    const button = el('playbackToggle');
+    if (!button) return;
+    button.setAttribute('aria-pressed', 'false');
+    button.setAttribute('aria-label', '播放台风路径');
+    button.querySelector('i').className = 'ph ph-play';
+  }
+
+  function keepPlaybackPointVisible(point) {
+    if (!state.map || !point?.position) return;
+    const location = [point.position.lon, point.position.lat];
+    if (state.map.getBounds().contains(location)) return;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    state.map.easeTo({ center: location, padding: mapPadding(), duration: reducedMotion ? 0 : 380 });
+  }
+
+  function updatePlayback(index, { activate = false, keepVisible = false } = {}) {
+    if (!state.playbackPoints.length) return;
+    if (activate) state.playbackActive = true;
+    state.playbackIndex = Math.max(0, Math.min(Number(index) || 0, state.playbackPoints.length - 1));
+    const entry = state.playbackPoints[state.playbackIndex];
+    const slider = el('playbackSlider');
+    slider.value = String(state.playbackIndex);
+    const progress = state.playbackPoints.length > 1 ? state.playbackIndex / (state.playbackPoints.length - 1) * 100 : 0;
+    el('trackPlayback').style.setProperty('--playback-progress', `${progress}%`);
+    const stage = entry.phase === 'history' ? '历史实况' : (entry.phase === 'current' ? '当前位置' : `${entry.track?.label || '机构'}预报`);
+    el('playbackStage').textContent = stage;
+    el('playbackSource').textContent = entry.phase === 'forecast'
+      ? (entry.track?.agency || entry.track?.label || '预报路径')
+      : (entry.point.sourceLabel || '实况路径');
+    el('playbackTime').textContent = formatDate(entry.point.validAt);
+    slider.setAttribute('aria-valuetext', `${stage}，${formatDate(entry.point.validAt)}`);
+    syncPlaybackMap();
+    setWindCirclePoint(entry.point, { historical: entry.phase === 'history' });
+    if (keepVisible) keepPlaybackPointVisible(entry.point);
+  }
+
+  function schedulePlaybackStep() {
+    if (!state.playbackPlaying) return;
+    const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 980 : 720;
+    state.playbackTimer = setTimeout(() => {
+      if (state.playbackIndex >= state.playbackPoints.length - 1) {
+        pausePlayback();
+        return;
+      }
+      updatePlayback(state.playbackIndex + 1, { activate: true, keepVisible: true });
+      schedulePlaybackStep();
+    }, delay);
+  }
+
+  function togglePlayback() {
+    if (state.playbackPlaying) { pausePlayback(); return; }
+    if (state.playbackIndex >= state.playbackPoints.length - 1) updatePlayback(0, { activate: true, keepVisible: true });
+    state.playbackActive = true;
+    state.playbackPlaying = true;
+    const button = el('playbackToggle');
+    button.setAttribute('aria-pressed', 'true');
+    button.setAttribute('aria-label', '暂停台风路径');
+    button.querySelector('i').className = 'ph ph-pause';
+    syncPlaybackMap();
+    schedulePlaybackStep();
+  }
+
+  function preparePlayback() {
+    pausePlayback();
+    const playback = buildPlaybackPoints();
+    state.playbackPoints = playback.points;
+    state.playbackCurrentIndex = playback.currentIndex;
+    state.playbackIndex = playback.currentIndex;
+    state.playbackActive = false;
+    const slider = el('playbackSlider');
+    slider.max = String(Math.max(0, state.playbackPoints.length - 1));
+    slider.value = String(state.playbackIndex);
+    const nowPercent = state.playbackPoints.length > 1 ? state.playbackCurrentIndex / (state.playbackPoints.length - 1) * 100 : 50;
+    el('trackPlayback').style.setProperty('--playback-now', `${nowPercent}%`);
+    el('trackPlayback').hidden = state.playbackPoints.length < 2;
+    updatePlayback(state.playbackIndex);
   }
 
   function bindPointInteractions() {
@@ -595,6 +786,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const topbarRect = document.querySelector('.topbar')?.getBoundingClientRect();
     const panelRect = el('insightPanel')?.getBoundingClientRect();
     const stripRect = el('sourceStrip')?.getBoundingClientRect();
+    const playbackRect = el('trackPlayback')?.getBoundingClientRect();
     const padding = {
       top: Math.max(24, Math.round((topbarRect?.bottom || mapRect.top + 64) - mapRect.top + 12)),
       right: 38,
@@ -605,7 +797,8 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     if (panelIsBottomSheet) {
       const visibleBottom = Math.min(
         panelRect.top,
-        stripRect?.height ? stripRect.top : panelRect.top
+        stripRect?.height ? stripRect.top : panelRect.top,
+        playbackRect?.height ? playbackRect.top : panelRect.top
       ) - 12;
       padding.bottom = Math.max(38, Math.round(mapRect.bottom - visibleBottom));
     } else if (panelRect?.width && panelRect.left > mapRect.left + mapRect.width * .45) {
@@ -718,6 +911,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     setSourceVisible('observed', !nextId);
     tracks.forEach(track => setSourceVisible(track.id, !nextId || track.id === nextId));
     syncAgencySelectionUi();
+    preparePlayback();
     fitAgencyTrack(nextId);
   }
 
@@ -929,6 +1123,9 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   function focusCurrent() {
     const position = state.detail?.storm?.position;
     const current = state.detail?.tracks?.observed?.at(-1) || state.detail?.storm;
+    pausePlayback();
+    state.playbackActive = false;
+    updatePlayback(state.playbackCurrentIndex);
     setWindCirclePoint(current);
     if (state.map && position) state.map.flyTo({ center: [position.lon, position.lat], zoom: 6.3, padding: mapPadding(), retainPadding: false, duration: 650 });
   }
@@ -952,6 +1149,11 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     el('focusCurrentButton').addEventListener('click', focusCurrent);
     el('userLocationButton').addEventListener('click', focusUserLocation);
     el('clearAgencyFilter').addEventListener('click', () => selectAgencyTrack(null));
+    el('playbackToggle').addEventListener('click', togglePlayback);
+    el('playbackSlider').addEventListener('input', event => {
+      pausePlayback();
+      updatePlayback(event.target.value, { activate: true, keepVisible: true });
+    });
     el('weatherOpacity').addEventListener('input', event => {
       state.weatherOpacity = Number(event.target.value) / 100;
       (state.detail?.mapConfig?.weatherLayers || []).forEach(layer => {
@@ -993,6 +1195,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       renderLayerControls();
       renderSourceControls();
       renderAgencyList();
+      preparePlayback();
       initializeMap();
       el('pageState').hidden = true;
     } catch (error) {

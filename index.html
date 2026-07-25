@@ -8684,6 +8684,7 @@
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
         let lastResolvedWeatherLocation = null;
+        let automaticDeviceLocationAttempted = false;
         let geolocationPermissionState = 'unknown';
         let geolocationPermissionPromise = null;
         let latestAirQuality = null;
@@ -9467,6 +9468,17 @@
             `;
         }
 
+        function getWeatherLocationDetail(location = {}) {
+            if (location.source === 'device') return '已同步最新设备位置';
+            if (location.source === 'device-cache') return '设备定位暂时不可用，已保留上次设备位置';
+            if (location.source === 'ip') {
+                return location.deviceError?.includes('拒绝')
+                    ? '定位权限未开启，已根据网络位置匹配天气'
+                    : '设备定位不可用，已根据网络位置匹配天气';
+            }
+            return location.error || '当前位置不可用，已切换默认天气视图';
+        }
+
         async function getLocationFromApi() {
             const response = await fetch('/api/location');
             if (!response.ok) throw new Error('Failed to resolve location from /api/location');
@@ -9499,8 +9511,16 @@
         function requestDevicePosition(options) {
             return new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(
-                    resolve,
-                    error => reject(new Error(describeGeolocationError(error))),
+                    position => {
+                        geolocationPermissionState = 'granted';
+                        resolve(position);
+                    },
+                    error => {
+                        const normalizedError = new Error(describeGeolocationError(error));
+                        normalizedError.code = Number(error?.code) || 0;
+                        if (normalizedError.code === 1) geolocationPermissionState = 'denied';
+                        reject(normalizedError);
+                    },
                     options
                 );
             });
@@ -9534,6 +9554,7 @@
                     };
                 } catch (error) {
                     lastError = error;
+                    if (Number(error?.code) === 1) break;
                 }
             }
 
@@ -9551,6 +9572,18 @@
                     };
                 } catch (error) {
                     console.warn('Device geolocation failed, fallback to /api/location:', error);
+                    const previousDeviceLocation = [
+                        lastResolvedWeatherLocation,
+                        weatherLocationCache?.location
+                    ].find(location => location?.source === 'device' || location?.source === 'device-cache');
+                    if (previousDeviceLocation && Number(error?.code) !== 1) {
+                        return {
+                            ...previousDeviceLocation,
+                            source: 'device-cache',
+                            stale: true,
+                            deviceError: error?.message || '设备定位失败'
+                        };
+                    }
                     const fallback = await getLocationFromApi().catch(apiError => {
                         console.error('Location fallback error:', apiError);
                         return { ...DEFAULT_WEATHER_LOCATION, source: 'default', error: 'IP定位不可用' };
@@ -9994,23 +10027,24 @@
                 });
                 if (forceRelocate) updateRelocateBadge(true);
                 const permissionState = await ensureGeolocationPermissionState({ refresh: forceRelocate });
+                const shouldTryDevice = forceRelocate
+                    || permissionState === 'granted'
+                    || (permissionState !== 'denied' && !automaticDeviceLocationAttempted);
+                if (!forceRelocate && shouldTryDevice && permissionState !== 'granted') {
+                    automaticDeviceLocationAttempted = true;
+                }
                 const location = await getWeatherLocation({
                     forceRefresh: forceRelocate,
-                    preferDevice: forceRelocate || permissionState === 'granted',
+                    preferDevice: shouldTryDevice,
                     allowCachedDevice: !forceRelocate
                 });
                 resolvedLocation = location;
                 lastResolvedWeatherLocation = location;
                 const cachedTyphoons = readTyphoonCache();
                 if (cachedTyphoons) renderTyphoonSummary(cachedTyphoons);
-                const locationDetail = location.source === 'device'
-                    ? '已同步当前设备位置'
-                    : (location.source === 'ip'
-                        ? '已根据网络位置匹配天气'
-                        : (location.error || '当前位置不可用，已切换默认天气视图'));
-                renderWeatherLocation(location, { detail: locationDetail });
+                renderWeatherLocation(location, { detail: getWeatherLocationDetail(location) });
 
-                // 先按访问 IP 解析经纬度，再获取对应城市的实时天气
+                // 使用设备定位优先解析的经纬度，获取对应城市的实时天气
                 const queryLon = Number(location.lon).toFixed(2);
                 const queryLat = Number(location.lat).toFixed(2);
                 const r = await fetch(`/api/weather?lon=${encodeURIComponent(queryLon)}&lat=${encodeURIComponent(queryLat)}`);

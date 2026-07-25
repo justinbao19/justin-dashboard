@@ -630,7 +630,80 @@
             gap: 8px;
         }
 
-        /* ========== WEATHER ========== */
+	        /* ========== WEATHER ========== */
+        #page-weather {
+            position: relative;
+            --weather-pull-offset: 0px;
+            --weather-pull-indicator-y: -12px;
+            --weather-pull-progress: 0;
+            --weather-pull-icon-rotation: 0deg;
+        }
+        #page-weather .weather-layout {
+            transform: translate3d(0, var(--weather-pull-offset), 0);
+        }
+        #page-weather.is-pull-tracking .weather-layout,
+        #page-weather.is-pull-refreshing .weather-layout {
+            will-change: transform;
+        }
+        #page-weather.is-pull-settling .weather-layout {
+            transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .weather-pull-refresh {
+            position: absolute;
+            z-index: 4;
+            top: calc(10px + env(safe-area-inset-top));
+            left: 50%;
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 4px 11px 4px 5px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            background: rgba(13, 31, 44, 0.58);
+            color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(18px) saturate(150%);
+            -webkit-backdrop-filter: blur(18px) saturate(150%);
+            font-size: 11px;
+            font-weight: 620;
+            line-height: 1;
+            white-space: nowrap;
+            opacity: var(--weather-pull-progress);
+            pointer-events: none;
+            transform: translate3d(-50%, var(--weather-pull-indicator-y), 0) scale(calc(0.88 + var(--weather-pull-progress) * 0.12));
+            transform-origin: center;
+        }
+        #page-weather.is-pull-settling .weather-pull-refresh {
+            transition: opacity 220ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .weather-pull-refresh-icon {
+            width: 26px;
+            height: 26px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            color: rgba(255, 255, 255, 0.92);
+        }
+        .weather-pull-refresh-icon i {
+            font-size: 14px;
+            transform: rotate(var(--weather-pull-icon-rotation));
+        }
+        #page-weather.is-pull-ready .weather-pull-refresh-icon {
+            background: rgba(10, 132, 255, 0.9);
+            color: white;
+        }
+        #page-weather.is-pull-refreshing .weather-pull-refresh-icon i {
+            animation: weather-pull-spin 720ms linear infinite;
+        }
+        #page-weather.is-pull-complete .weather-pull-refresh-icon {
+            background: rgba(48, 209, 88, 0.9);
+            color: white;
+        }
+        @keyframes weather-pull-spin {
+            to { transform: rotate(360deg); }
+        }
         .weather-header {
             position: relative;
             z-index: 2;
@@ -6237,12 +6310,17 @@
                 outline-offset: 2px;
             }
         }
-        @media (prefers-reduced-motion: reduce) {
-            .tab-nav,
-            .tab-nav .tab-item,
-            .weather-typhoon-card {
-                transition: none !important;
-            }
+	        @media (prefers-reduced-motion: reduce) {
+	            .tab-nav,
+	            .tab-nav .tab-item,
+	            .weather-typhoon-card,
+                #page-weather .weather-layout,
+                .weather-pull-refresh {
+	                transition: none !important;
+	            }
+                #page-weather.is-pull-refreshing .weather-pull-refresh-icon i {
+                    animation: none !important;
+                }
             .weather-sky,
             .atmospheric-light,
             .sun,
@@ -7913,14 +7991,17 @@
 
     <button class="theme-toggle theme-mode-toggle" onclick="toggleThemeMode()" title="主题：自动 / 浅色 / 深色"><i class="ph ph-circle-half-tilt" id="themeIcon"></i><span id="themeModeLabel">自动</span></button>
 
-    <div class="pages">
-        <!-- Weather -->
-        <div class="page active" id="page-weather">
-                <div class="weather-layout">
-                    <div class="weather-header">
-                        <div class="weather-header-top">
-                            <button class="page-manual-refresh" id="weatherManualRefresh" type="button" onclick="manualRefreshPage('weather')" aria-label="刷新天气"><i class="fas fa-rotate-right"></i><span>刷新天气</span></button>
-                            <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
+	    <div class="pages">
+	        <!-- Weather -->
+	        <div class="page active" id="page-weather">
+                <div class="weather-pull-refresh" id="weatherPullRefresh" role="status" aria-live="polite" aria-hidden="true">
+                    <span class="weather-pull-refresh-icon"><i class="ph ph-arrow-down" aria-hidden="true"></i></span>
+                    <span id="weatherPullRefreshLabel">下拉刷新</span>
+                </div>
+	                <div class="weather-layout">
+	                    <div class="weather-header">
+	                        <div class="weather-header-top">
+	                            <div class="weather-header-badge" id="weatherHeaderBadge"><i class="fas fa-location-dot"></i><span>点击重新定位</span></div>
                             <div class="location" id="location">
                                 <span class="weather-location-primary">上海 · 闵行</span>
                                 <span class="weather-location-secondary">正在准备当前天气视图</span>
@@ -8697,11 +8778,11 @@
             return refreshPageData(page);
         }
 
-        function refreshPageData(page) {
+        function refreshPageData(page, { force = false } = {}) {
             if (pageRefreshInFlight.has(page)) return pageRefreshInFlight.get(page);
             setPageRefreshState(page, true);
             let task;
-            if (page === 'weather') task = Promise.all([loadWeather(), loadTyphoons()]);
+            if (page === 'weather') task = Promise.all([loadWeather(), loadTyphoons({ force })]);
             else if (page === 'market') task = Promise.all([loadMarket(), loadSentiment()]);
             else if (page === 'news') task = loadNews();
             else if (page === 'f1') task = loadF1();
@@ -8715,8 +8796,153 @@
         }
 
         function manualRefreshPage(page) {
-            return refreshPageData(normalizePage(page));
+            return refreshPageData(normalizePage(page), { force: true });
         }
+
+        const WEATHER_PULL_THRESHOLD = 64;
+        const WEATHER_PULL_MAX = 96;
+        const weatherPullState = {
+            eligible: false,
+            tracking: false,
+            refreshing: false,
+            startX: 0,
+            startY: 0,
+            distance: 0,
+            settleTimer: null
+        };
+
+        function weatherPullElements() {
+            return {
+                page: document.getElementById('page-weather'),
+                indicator: document.getElementById('weatherPullRefresh'),
+                label: document.getElementById('weatherPullRefreshLabel')
+            };
+        }
+
+        function setWeatherPullVisual({ offset, progress, label, icon, ready = false }) {
+            const { page, indicator, label: labelElement } = weatherPullElements();
+            if (!page || !indicator) return;
+            const boundedOffset = Math.max(0, Math.min(WEATHER_PULL_MAX, Number(offset) || 0));
+            const boundedProgress = Math.max(0, Math.min(1, Number(progress) || 0));
+            page.style.setProperty('--weather-pull-offset', `${boundedOffset.toFixed(1)}px`);
+            page.style.setProperty('--weather-pull-progress', String(boundedProgress));
+            page.style.setProperty('--weather-pull-indicator-y', `${(-12 + Math.min(16, boundedOffset * 0.24)).toFixed(1)}px`);
+            page.style.setProperty('--weather-pull-icon-rotation', `${Math.round(Math.min(180, boundedProgress * 180))}deg`);
+            page.classList.toggle('is-pull-ready', ready);
+            indicator.setAttribute('aria-hidden', boundedProgress > 0 ? 'false' : 'true');
+            if (label) labelElement.textContent = label;
+            if (icon) indicator.querySelector('i').className = `ph ${icon}`;
+        }
+
+        function finishWeatherPullReset() {
+            const { page } = weatherPullElements();
+            if (!page) return;
+            page.classList.remove('is-pull-tracking', 'is-pull-ready', 'is-pull-refreshing', 'is-pull-complete');
+            weatherPullState.eligible = false;
+            weatherPullState.tracking = false;
+            weatherPullState.distance = 0;
+            clearTimeout(weatherPullState.settleTimer);
+            weatherPullState.settleTimer = setTimeout(() => page.classList.remove('is-pull-settling'), 330);
+        }
+
+        function resetWeatherPull() {
+            const { page } = weatherPullElements();
+            if (!page) return;
+            page.classList.remove('is-pull-tracking', 'is-pull-ready', 'is-pull-refreshing', 'is-pull-complete');
+            page.classList.add('is-pull-settling');
+            setWeatherPullVisual({ offset: 0, progress: 0, label: '下拉刷新', icon: 'ph-arrow-down' });
+            finishWeatherPullReset();
+        }
+
+        async function triggerWeatherPullRefresh() {
+            if (weatherPullState.refreshing) return;
+            const { page } = weatherPullElements();
+            weatherPullState.refreshing = true;
+            weatherPullState.eligible = false;
+            weatherPullState.tracking = false;
+            page.classList.remove('is-pull-tracking', 'is-pull-ready', 'is-pull-complete');
+            page.classList.add('is-pull-settling', 'is-pull-refreshing');
+            setWeatherPullVisual({ offset: 52, progress: 1, label: '正在更新', icon: 'ph-spinner-gap' });
+            let succeeded = true;
+            try {
+                await Promise.all([
+                    manualRefreshPage('weather'),
+                    new Promise(resolve => setTimeout(resolve, 520))
+                ]);
+            } catch (error) {
+                succeeded = false;
+                console.warn('Weather pull refresh failed:', error);
+            }
+            page.classList.remove('is-pull-refreshing');
+            page.classList.add('is-pull-complete');
+            setWeatherPullVisual({
+                offset: 52,
+                progress: 1,
+                label: succeeded ? '已更新' : '更新失败',
+                icon: succeeded ? 'ph-check' : 'ph-warning'
+            });
+            await new Promise(resolve => setTimeout(resolve, 380));
+            weatherPullState.refreshing = false;
+            resetWeatherPull();
+        }
+
+        function initializeWeatherPullRefresh() {
+            const { page } = weatherPullElements();
+            if (!page) return;
+            page.addEventListener('touchstart', event => {
+                if (event.touches.length !== 1 || weatherPullState.refreshing || pageRefreshInFlight.has('weather')) return;
+                if (!page.classList.contains('active') || page.scrollTop > 0) return;
+                const touch = event.touches[0];
+                clearTimeout(weatherPullState.settleTimer);
+                page.classList.remove('is-pull-settling', 'is-pull-complete');
+                weatherPullState.eligible = true;
+                weatherPullState.tracking = false;
+                weatherPullState.startX = touch.clientX;
+                weatherPullState.startY = touch.clientY;
+                weatherPullState.distance = 0;
+            }, { passive: true });
+            page.addEventListener('touchmove', event => {
+                if (!weatherPullState.eligible || event.touches.length !== 1) return;
+                const touch = event.touches[0];
+                const deltaX = touch.clientX - weatherPullState.startX;
+                const deltaY = touch.clientY - weatherPullState.startY;
+                if (page.scrollTop > 0 || deltaY <= 0) {
+                    if (weatherPullState.tracking) resetWeatherPull();
+                    weatherPullState.eligible = false;
+                    return;
+                }
+                if (!weatherPullState.tracking && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    weatherPullState.eligible = false;
+                    return;
+                }
+                if (deltaY < 5 || deltaY < Math.abs(deltaX) * 1.2) return;
+                event.preventDefault();
+                weatherPullState.tracking = true;
+                const damped = Math.min(WEATHER_PULL_MAX, deltaY * 0.46 + Math.sqrt(deltaY) * 1.4);
+                weatherPullState.distance = damped;
+                const ready = damped >= WEATHER_PULL_THRESHOLD;
+                page.classList.add('is-pull-tracking');
+                setWeatherPullVisual({
+                    offset: damped,
+                    progress: Math.min(1, damped / WEATHER_PULL_THRESHOLD),
+                    label: ready ? '松开刷新' : '下拉刷新',
+                    icon: 'ph-arrow-down',
+                    ready
+                });
+            }, { passive: false });
+            page.addEventListener('touchend', () => {
+                if (!weatherPullState.eligible && !weatherPullState.tracking) return;
+                const shouldRefresh = weatherPullState.tracking && weatherPullState.distance >= WEATHER_PULL_THRESHOLD;
+                weatherPullState.eligible = false;
+                shouldRefresh ? triggerWeatherPullRefresh() : resetWeatherPull();
+            }, { passive: true });
+            page.addEventListener('touchcancel', () => {
+                if (weatherPullState.tracking) resetWeatherPull();
+                weatherPullState.eligible = false;
+            }, { passive: true });
+        }
+
+        initializeWeatherPullRefresh();
 
         const tabNav = document.querySelector('.tab-nav');
         const dockMiniTrigger = document.querySelector('.dock-mini-trigger');

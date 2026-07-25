@@ -55,9 +55,14 @@ test('live badge keeps still while only its red dot breathes', async () => {
 
 test('dashboard refreshes serverless data only on page entry or manual action', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  for (const page of ['weather', 'news', 'f1']) {
+  for (const page of ['news', 'f1']) {
     assert.match(html, new RegExp(`id="${page}ManualRefresh"`));
   }
+  assert.doesNotMatch(html, /id="weatherManualRefresh"/);
+  assert.match(html, /id="weatherPullRefresh"/);
+  assert.match(html, /function initializeWeatherPullRefresh\(\)/);
+  assert.match(html, /touchmove[\s\S]*?\{ passive: false \}/);
+  assert.match(html, /manualRefreshPage\('weather'\)/);
   assert.match(html, /id="marketRefreshBtn" onclick="manualRefreshPage\('market'\)"/);
   assert.match(html, /refreshPageOnEntry\(normalizedPage\)/);
   assert.match(html, /function manualRefreshPage\(page\)/);

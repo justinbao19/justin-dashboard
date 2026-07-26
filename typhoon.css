@@ -367,8 +367,43 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .playback-content input::-moz-range-track { height: 4px; border: 0; border-radius: 99px; background: color-mix(in srgb, var(--text) 13%, transparent); }
 .playback-content input::-moz-range-progress { height: 4px; border-radius: 99px; background: var(--accent); }
 .playback-content input::-moz-range-thumb { width: 14px; height: 14px; border: 2px solid var(--glass-solid); border-radius: 50%; background: var(--accent); box-shadow: 0 2px 7px rgba(0, 0, 0, .22); }
-.playback-axis { position: relative; display: flex; justify-content: space-between; color: var(--faint); font-size: 7px; line-height: 1; }
-.playback-axis i { position: absolute; top: -19px; left: var(--playback-now, 50%); width: 2px; height: 7px; border-radius: 2px; background: var(--text); opacity: .64; transform: translateX(-1px); pointer-events: none; }
+.playback-axis { position: relative; height: 10px; color: var(--faint); font-size: 7px; line-height: 1; }
+.playback-date-ticks { position: absolute; inset: 0; }
+.playback-date-ticks span {
+  position: absolute;
+  left: var(--tick-position);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.playback-date-ticks span.is-start { transform: none; }
+.playback-date-ticks span.is-end { transform: translateX(-100%); }
+.playback-axis > i {
+  position: absolute;
+  top: -19px;
+  left: var(--playback-now, 50%);
+  width: 2px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--text);
+  opacity: .72;
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+.playback-axis > i em {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  background: var(--glass-solid);
+  color: var(--muted);
+  font-size: 6px;
+  font-style: normal;
+  font-weight: 650;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
 
 .map-attribution { position: absolute; z-index: 4; left: 14px; top: 78px; padding: 4px 7px; border-radius: 8px; background: rgba(5, 18, 27, .48); color: rgba(242, 249, 252, .72); font-size: 9px; text-shadow: 0 1px 3px rgba(0,0,0,.65); pointer-events: none; backdrop-filter: blur(8px); }
 

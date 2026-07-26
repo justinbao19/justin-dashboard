@@ -3888,7 +3888,7 @@
             .weather-header {
                 display: flex;
                 flex-direction: column;
-                padding: 56px 20px 28px;
+                padding: 48px 20px 24px;
             }
 
             .weather-header-top {
@@ -3896,12 +3896,11 @@
             }
 
             .weather-header-badge {
-                padding: 7px 12px;
-                font-size: 12px;
+                display: none;
             }
 
             .weather-header .location {
-                margin-top: 8px;
+                margin-top: 0;
                 gap: 6px;
             }
 
@@ -7996,7 +7995,7 @@
 	        <div class="page active" id="page-weather">
                 <div class="weather-pull-refresh" id="weatherPullRefresh" role="status" aria-live="polite" aria-hidden="true">
                     <span class="weather-pull-refresh-icon"><i class="ph ph-arrow-down" aria-hidden="true"></i></span>
-                    <span id="weatherPullRefreshLabel">下拉刷新</span>
+                    <span id="weatherPullRefreshLabel">下拉同步天气与位置</span>
                 </div>
 	                <div class="weather-layout">
 	                    <div class="weather-header">
@@ -8779,11 +8778,11 @@
             return refreshPageData(page);
         }
 
-        function refreshPageData(page, { force = false } = {}) {
+        function refreshPageData(page, { force = false, forceRelocate = false } = {}) {
             if (pageRefreshInFlight.has(page)) return pageRefreshInFlight.get(page);
             setPageRefreshState(page, true);
             let task;
-            if (page === 'weather') task = Promise.all([loadWeather(), loadTyphoons({ force })]);
+            if (page === 'weather') task = Promise.all([loadWeather({ forceRelocate }), loadTyphoons({ force })]);
             else if (page === 'market') task = Promise.all([loadMarket(), loadSentiment()]);
             else if (page === 'news') task = loadNews();
             else if (page === 'f1') task = loadF1();
@@ -8851,7 +8850,7 @@
             if (!page) return;
             page.classList.remove('is-pull-tracking', 'is-pull-ready', 'is-pull-refreshing', 'is-pull-complete');
             page.classList.add('is-pull-settling');
-            setWeatherPullVisual({ offset: 0, progress: 0, label: '下拉刷新', icon: 'ph-arrow-down' });
+            setWeatherPullVisual({ offset: 0, progress: 0, label: '下拉同步天气与位置', icon: 'ph-arrow-down' });
             finishWeatherPullReset();
         }
 
@@ -8863,11 +8862,11 @@
             weatherPullState.tracking = false;
             page.classList.remove('is-pull-tracking', 'is-pull-ready', 'is-pull-complete');
             page.classList.add('is-pull-settling', 'is-pull-refreshing');
-            setWeatherPullVisual({ offset: 52, progress: 1, label: '正在更新', icon: 'ph-spinner-gap' });
+            setWeatherPullVisual({ offset: 52, progress: 1, label: '正在定位并更新', icon: 'ph-spinner-gap' });
             let succeeded = true;
             try {
                 await Promise.all([
-                    manualRefreshPage('weather'),
+                    refreshPageData('weather', { force: true, forceRelocate: true }),
                     new Promise(resolve => setTimeout(resolve, 520))
                 ]);
             } catch (error) {
@@ -8879,7 +8878,7 @@
             setWeatherPullVisual({
                 offset: 52,
                 progress: 1,
-                label: succeeded ? '已更新' : '更新失败',
+                label: succeeded ? '位置与天气已同步' : '同步失败',
                 icon: succeeded ? 'ph-check' : 'ph-warning'
             });
             await new Promise(resolve => setTimeout(resolve, 380));
@@ -8926,7 +8925,7 @@
                 setWeatherPullVisual({
                     offset: damped,
                     progress: Math.min(1, damped / WEATHER_PULL_THRESHOLD),
-                    label: ready ? '松开刷新' : '下拉刷新',
+                    label: ready ? '松开同步' : '下拉同步天气与位置',
                     icon: 'ph-arrow-down',
                     ready
                 });
@@ -9466,6 +9465,24 @@
                 <span class="weather-location-primary">${escapeHtml(displayName)}</span>
                 ${detailLine}
             `;
+        }
+
+        function shareWeatherLocationWithTyphoon(location = {}) {
+            const lat = Number(location.lat);
+            const lon = Number(location.lon);
+            if (![lat, lon].every(Number.isFinite)) return;
+            try {
+                sessionStorage.setItem('pulse.weather.location.v1', JSON.stringify({
+                    savedAt: Date.now(),
+                    value: {
+                        lat,
+                        lon,
+                        displayName: location.displayName || '当前位置',
+                        city: location.city || '',
+                        source: location.source || 'unknown'
+                    }
+                }));
+            } catch {}
         }
 
         function getWeatherLocationDetail(location = {}) {
@@ -10040,6 +10057,7 @@
                 });
                 resolvedLocation = location;
                 lastResolvedWeatherLocation = location;
+                shareWeatherLocationWithTyphoon(location);
                 const cachedTyphoons = readTyphoonCache();
                 if (cachedTyphoons) renderTyphoonSummary(cachedTyphoons);
                 renderWeatherLocation(location, { detail: getWeatherLocationDetail(location) });

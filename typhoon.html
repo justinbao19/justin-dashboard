@@ -56,7 +56,7 @@
           <button class="toolbar-button icon-only" id="focusCurrentButton" type="button" aria-label="定位当前台风">
             <i class="ph ph-hurricane"></i>
           </button>
-          <button class="toolbar-button icon-only" id="userLocationButton" type="button" aria-label="查看天气页位置" hidden>
+          <button class="toolbar-button icon-only" id="userLocationButton" type="button" aria-label="定位到我的位置" hidden>
             <i class="ph ph-navigation-arrow"></i>
           </button>
         </div>
@@ -124,8 +124,11 @@
               <span><strong id="playbackStage">当前位置</strong><small id="playbackSource">中国预报</small></span>
               <time id="playbackTime">时间待确认</time>
             </div>
-            <input id="playbackSlider" type="range" min="0" max="0" value="0" step="1" aria-label="拖动查看台风历史与预报位置">
-            <div class="playback-axis" aria-hidden="true"><span>历史</span><i id="playbackNowTick"></i><span>预报</span></div>
+            <input id="playbackSlider" type="range" min="0" max="0" value="0" step="1" aria-label="按时间拖动查看台风历史与预报位置">
+            <div class="playback-axis" aria-hidden="true">
+              <div class="playback-date-ticks" id="playbackDateTicks"></div>
+              <i id="playbackNowTick"><em>当前</em></i>
+            </div>
           </div>
         </section>
 

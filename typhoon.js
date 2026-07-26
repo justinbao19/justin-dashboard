@@ -10,6 +10,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   const CACHE_MS = 5 * 60 * 1000;
   const LAYER_CACHE_MS = 10 * 60 * 1000;
   const LOCATION_CACHE_MS = 24 * 60 * 60 * 1000;
+  const PLAYBACK_HISTORY_WINDOW_MS = 5 * 24 * 60 * 60 * 1000;
   const state = {
     map: null,
     detail: null,
@@ -23,11 +24,21 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     weatherOpacity: .58,
     markers: [],
     windCircleLabelMarkers: [],
+    userLocation: null,
+    userLocationPromise: null,
     userLocationMarker: null,
     currentMarker: null,
     playbackPoints: [],
     playbackIndex: 0,
     playbackCurrentIndex: 0,
+    playbackStartAt: 0,
+    playbackEndAt: 0,
+    playbackCurrentAt: 0,
+    playbackCursorAt: 0,
+    playbackAnimationStartedAt: 0,
+    playbackAnimationFromAt: 0,
+    playbackAnimationDuration: 0,
+    playbackLastPanAt: 0,
     playbackTimer: null,
     playbackPlaying: false,
     playbackActive: false,
@@ -122,16 +133,66 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     return ['北','东北','东','东南','南','西南','西','西北'][Math.round(bearing / 45) % 8];
   }
 
-  function storedWeatherLocation({ allowDefault = true } = {}) {
-    const value = readCache('pulse.weather.location.v1', LOCATION_CACHE_MS);
-    if (!value) return allowDefault ? { lat: 31.123, lon: 121.405, label: '上海', cached: false } : null;
+  function normalizeWeatherLocation(value) {
+    if (!value) return null;
+    const displayName = String(value.displayName || value.city || '所在地');
     const locationData = {
       lat: Number(value.lat),
       lon: Number(value.lon),
-      label: String(value.city || value.displayName || '所在地').split('·')[0].trim().replace(/市$/, ''),
+      label: String(value.city || displayName).split(/[·・|]/)[0].trim().replace(/市$/, '') || '所在地',
+      displayName,
+      source: String(value.source || 'unknown'),
       cached: true
     };
     return [locationData.lat, locationData.lon].every(Number.isFinite) ? locationData : null;
+  }
+
+  function storedWeatherLocation({ allowDefault = true } = {}) {
+    const locationData = state.userLocation || normalizeWeatherLocation(readCache('pulse.weather.location.v1', LOCATION_CACHE_MS));
+    if (locationData) return locationData;
+    return allowDefault ? { lat: 31.123, lon: 121.405, label: '上海', displayName: '上海 · 闵行', source: 'default', cached: false } : null;
+  }
+
+  function isDeviceLocation(locationData) {
+    return locationData && ['device', 'device-cache', 'unknown'].includes(locationData.source);
+  }
+
+  async function resolveUserLocation() {
+    if (state.userLocationPromise) return state.userLocationPromise;
+    const cached = storedWeatherLocation({ allowDefault: false });
+    if (isDeviceLocation(cached)) state.userLocation = cached;
+    if (!navigator.geolocation) return state.userLocation;
+
+    state.userLocationPromise = new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5 * 60 * 1000
+      });
+    }).then(async position => {
+      const lat = Number(position.coords.latitude);
+      const lon = Number(position.coords.longitude);
+      if (![lat, lon].every(Number.isFinite)) return state.userLocation;
+      const reverse = await fetchJson(`/api/reverse-geocode?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`, 8000).catch(() => null);
+      const displayName = reverse?.displayName || '当前位置';
+      const locationData = normalizeWeatherLocation({ lat, lon, displayName, source: 'device' });
+      if (!locationData) return state.userLocation;
+      state.userLocation = locationData;
+      writeCache('pulse.weather.location.v1', {
+        lat,
+        lon,
+        displayName,
+        source: 'device'
+      });
+      return locationData;
+    }).catch(error => {
+      console.warn('Typhoon user location unavailable:', error);
+      return state.userLocation;
+    }).finally(() => {
+      state.userLocationPromise = null;
+    });
+
+    return state.userLocationPromise;
   }
 
   function referenceFor(position) {
@@ -556,13 +617,17 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   }
 
   function renderUserLocationMarker() {
-    const locationData = storedWeatherLocation({ allowDefault: false });
+    state.userLocationMarker?.remove();
+    state.userLocationMarker = null;
+    const cachedLocation = storedWeatherLocation({ allowDefault: false });
+    const locationData = isDeviceLocation(cachedLocation) ? cachedLocation : null;
     const button = el('userLocationButton');
     if (!state.map || !locationData) { button.hidden = true; return; }
     const markerElement = document.createElement('button');
     markerElement.type = 'button';
     markerElement.className = 'user-location-marker';
-    markerElement.setAttribute('aria-label', `${locationData.label}天气位置`);
+    markerElement.setAttribute('aria-label', `我的位置：${locationData.displayName || locationData.label}`);
+    markerElement.title = locationData.displayName || locationData.label;
     markerElement.innerHTML = '<i aria-hidden="true"></i>';
     markerElement.addEventListener('click', () => focusUserLocation());
     state.userLocationMarker = new maplibregl.Marker({ element: markerElement, anchor: 'center' }).setLngLat([locationData.lon, locationData.lat]).addTo(state.map);
@@ -599,22 +664,29 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   }
 
   function buildPlaybackPoints() {
-    const observed = [...(state.detail?.tracks?.observed || [])]
-      .filter(point => hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon))
+    const allObserved = [...(state.detail?.tracks?.observed || [])]
+      .filter(point => hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon) && Number.isFinite(Date.parse(point.validAt)))
       .sort((a, b) => Date.parse(a.validAt) - Date.parse(b.validAt));
-    const current = observed.at(-1);
+    const current = allObserved.at(-1);
     const currentAt = Date.parse(current?.validAt);
+    const observed = Number.isFinite(currentAt)
+      ? allObserved.filter(point => Date.parse(point.validAt) >= currentAt - PLAYBACK_HISTORY_WINDOW_MS)
+      : allObserved;
     const forecastTrack = playbackForecastTrack();
     const forecast = [...(forecastTrack?.points || [])]
-      .filter(point => point.kind === 'forecast' && hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon))
+      .filter(point => point.kind === 'forecast' && hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon) && Number.isFinite(Date.parse(point.validAt)))
       .filter(point => !Number.isFinite(currentAt) || Date.parse(point.validAt) > currentAt)
       .sort((a, b) => Date.parse(a.validAt) - Date.parse(b.validAt));
+    const points = [
+      ...observed.map(point => ({ point, phase: point === current ? 'current' : 'history', track: null, at: Date.parse(point.validAt) })),
+      ...forecast.map(point => ({ point, phase: 'forecast', track: forecastTrack, at: Date.parse(point.validAt) }))
+    ];
     return {
-      points: [
-        ...observed.map(point => ({ point, phase: point === current ? 'current' : 'history', track: null })),
-        ...forecast.map(point => ({ point, phase: 'forecast', track: forecastTrack }))
-      ],
+      points,
       currentIndex: Math.max(0, observed.length - 1),
+      startAt: points[0]?.at || 0,
+      endAt: points.at(-1)?.at || 0,
+      currentAt: Number.isFinite(currentAt) ? currentAt : (points[0]?.at || 0),
       forecastTrack
     };
   }
@@ -626,14 +698,67 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       : { type: 'FeatureCollection', features: [] };
   }
 
-  function playbackSegments(index = state.playbackIndex) {
+  function interpolatePlaybackPosition(from, to, ratio) {
+    const fromLon = Number(from?.lon), toLon = Number(to?.lon);
+    const fromLat = Number(from?.lat), toLat = Number(to?.lat);
+    let lonDelta = toLon - fromLon;
+    if (Math.abs(lonDelta) > 180) lonDelta -= Math.sign(lonDelta) * 360;
+    const lon = ((fromLon + lonDelta * ratio + 540) % 360) - 180;
+    return { lon, lat: fromLat + (toLat - fromLat) * ratio };
+  }
+
+  function interpolatedPlaybackEntry(previous, next, time) {
+    const span = Math.max(1, next.at - previous.at);
+    const ratio = Math.max(0, Math.min(1, (time - previous.at) / span));
+    const nearest = ratio < .5 ? previous : next;
+    const phase = time < state.playbackCurrentAt ? 'history' : (time > state.playbackCurrentAt ? 'forecast' : 'current');
+    return {
+      point: {
+        ...nearest.point,
+        validAt: new Date(time).toISOString(),
+        position: interpolatePlaybackPosition(previous.point.position, next.point.position, ratio)
+      },
+      phase,
+      track: phase === 'forecast' ? (next.track || previous.track || playbackForecastTrack()) : null,
+      at: time,
+      dataEntry: nearest
+    };
+  }
+
+  function playbackFrameAt(time) {
+    const points = state.playbackPoints;
+    if (!points.length) return null;
+    const boundedTime = Math.max(state.playbackStartAt, Math.min(Number(time) || state.playbackStartAt, state.playbackEndAt));
+    if (boundedTime <= points[0].at) return { ...points[0], dataEntry: points[0], index: 0 };
+    if (boundedTime >= points.at(-1).at) return { ...points.at(-1), dataEntry: points.at(-1), index: points.length - 1 };
+    const nextIndex = points.findIndex(entry => entry.at >= boundedTime);
+    if (points[nextIndex].at === boundedTime) return { ...points[nextIndex], dataEntry: points[nextIndex], index: nextIndex };
+    const previous = points[nextIndex - 1];
+    const next = points[nextIndex];
+    const frame = interpolatedPlaybackEntry(previous, next, boundedTime);
+    return { ...frame, index: frame.dataEntry === previous ? nextIndex - 1 : nextIndex };
+  }
+
+  function playbackLineUntil(entries, cutoffAt) {
+    if (!entries.length || cutoffAt < entries[0].at) return playbackLine([]);
+    const visible = entries.filter(entry => entry.at <= cutoffAt);
+    const next = entries.find(entry => entry.at > cutoffAt);
+    if (visible.length && next && visible.at(-1).at < cutoffAt) {
+      visible.push(interpolatedPlaybackEntry(visible.at(-1), next, cutoffAt));
+    }
+    return playbackLine(visible);
+  }
+
+  function playbackSegments(time = state.playbackCursorAt) {
     if (!state.playbackActive || !state.playbackPoints.length) {
       return { history: playbackLine([]), forecast: playbackLine([]) };
     }
     const currentIndex = state.playbackCurrentIndex;
+    const history = state.playbackPoints.slice(0, currentIndex + 1);
+    const forecast = state.playbackPoints.slice(currentIndex);
     return {
-      history: playbackLine(state.playbackPoints.slice(0, Math.min(index, currentIndex) + 1)),
-      forecast: playbackLine(index > currentIndex ? state.playbackPoints.slice(currentIndex, index + 1) : [])
+      history: playbackLineUntil(history, Math.min(time, state.playbackCurrentAt)),
+      forecast: time > state.playbackCurrentAt ? playbackLineUntil(forecast, time) : playbackLine([])
     };
   }
 
@@ -672,15 +797,15 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   }
 
   function syncPlaybackMap() {
-    const entry = state.playbackPoints[state.playbackIndex];
-    if (!entry) return;
+    const frame = playbackFrameAt(state.playbackCursorAt);
+    if (!frame) return;
     const segments = playbackSegments();
     state.map?.getSource('playback-history')?.setData(segments.history);
     state.map?.getSource('playback-forecast')?.setData(segments.forecast);
     if (state.map?.getLayer('playback-forecast-line')) {
       state.map.setPaintProperty('playback-forecast-line', 'line-color', playbackForecastTrack()?.color || '#ff7a45');
     }
-    state.currentMarker?.setLngLat([entry.point.position.lon, entry.point.position.lat]);
+    state.currentMarker?.setLngLat([frame.point.position.lon, frame.point.position.lat]);
   }
 
   function pausePlayback() {
@@ -698,18 +823,23 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     if (!state.map || !point?.position) return;
     const location = [point.position.lon, point.position.lat];
     if (state.map.getBounds().contains(location)) return;
+    if (Date.now() - state.playbackLastPanAt < 900) return;
+    state.playbackLastPanAt = Date.now();
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     state.map.easeTo({ center: location, padding: mapPadding(), duration: reducedMotion ? 0 : 380 });
   }
 
-  function updatePlayback(index, { activate = false, keepVisible = false } = {}) {
+  function updatePlaybackTime(time, { activate = false, keepVisible = false } = {}) {
     if (!state.playbackPoints.length) return;
     if (activate) state.playbackActive = true;
-    state.playbackIndex = Math.max(0, Math.min(Number(index) || 0, state.playbackPoints.length - 1));
-    const entry = state.playbackPoints[state.playbackIndex];
+    state.playbackCursorAt = Math.max(state.playbackStartAt, Math.min(Number(time) || state.playbackStartAt, state.playbackEndAt));
+    const entry = playbackFrameAt(state.playbackCursorAt);
+    if (!entry) return;
+    state.playbackIndex = entry.index;
     const slider = el('playbackSlider');
-    slider.value = String(state.playbackIndex);
-    const progress = state.playbackPoints.length > 1 ? state.playbackIndex / (state.playbackPoints.length - 1) * 100 : 0;
+    slider.value = String(Math.round((state.playbackCursorAt - state.playbackStartAt) / 60000));
+    const timelineSpan = Math.max(1, state.playbackEndAt - state.playbackStartAt);
+    const progress = (state.playbackCursorAt - state.playbackStartAt) / timelineSpan * 100;
     el('trackPlayback').style.setProperty('--playback-progress', `${progress}%`);
     const stage = entry.phase === 'history' ? '历史实况' : (entry.phase === 'current' ? '当前位置' : `${entry.track?.label || '机构'}预报`);
     el('playbackStage').textContent = stage;
@@ -719,28 +849,38 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     el('playbackTime').textContent = formatDate(entry.point.validAt);
     slider.setAttribute('aria-valuetext', `${stage}，${formatDate(entry.point.validAt)}`);
     syncPlaybackMap();
-    setWindCirclePoint(entry.point, { historical: entry.phase === 'history' });
+    setWindCirclePoint(entry.dataEntry?.point || entry.point, { historical: entry.phase === 'history' });
     if (keepVisible) keepPlaybackPointVisible(entry.point);
   }
 
   function schedulePlaybackStep() {
     if (!state.playbackPlaying) return;
-    const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 980 : 720;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const delay = reducedMotion ? 900 : 180;
     state.playbackTimer = setTimeout(() => {
-      if (state.playbackIndex >= state.playbackPoints.length - 1) {
+      const elapsed = performance.now() - state.playbackAnimationStartedAt;
+      const progress = Math.max(0, Math.min(1, elapsed / Math.max(1, state.playbackAnimationDuration)));
+      const nextTime = state.playbackAnimationFromAt + (state.playbackEndAt - state.playbackAnimationFromAt) * progress;
+      updatePlaybackTime(nextTime, { activate: true, keepVisible: true });
+      if (progress >= 1) {
         pausePlayback();
         return;
       }
-      updatePlayback(state.playbackIndex + 1, { activate: true, keepVisible: true });
       schedulePlaybackStep();
     }, delay);
   }
 
   function togglePlayback() {
     if (state.playbackPlaying) { pausePlayback(); return; }
-    if (state.playbackIndex >= state.playbackPoints.length - 1) updatePlayback(0, { activate: true, keepVisible: true });
+    if (state.playbackCursorAt >= state.playbackEndAt - 60000) {
+      updatePlaybackTime(state.playbackStartAt, { activate: true, keepVisible: true });
+    }
     state.playbackActive = true;
     state.playbackPlaying = true;
+    state.playbackAnimationFromAt = state.playbackCursorAt;
+    state.playbackAnimationStartedAt = performance.now();
+    const remainingDays = Math.max(0, state.playbackEndAt - state.playbackCursorAt) / 86400000;
+    state.playbackAnimationDuration = Math.max(14000, Math.min(36000, remainingDays * 2600));
     const button = el('playbackToggle');
     button.setAttribute('aria-pressed', 'true');
     button.setAttribute('aria-label', '暂停台风路径');
@@ -749,20 +889,41 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     schedulePlaybackStep();
   }
 
+  function renderPlaybackDateTicks() {
+    const container = el('playbackDateTicks');
+    const span = state.playbackEndAt - state.playbackStartAt;
+    if (!container || span <= 0) { if (container) container.innerHTML = ''; return; }
+    const daySpan = span / 86400000;
+    const count = Math.max(3, Math.min(5, Math.ceil(daySpan) + 1));
+    const formatter = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric' });
+    container.innerHTML = Array.from({ length: count }, (_, index) => {
+      const ratio = count === 1 ? 0 : index / (count - 1);
+      const time = state.playbackStartAt + span * ratio;
+      const edgeClass = index === 0 ? ' is-start' : (index === count - 1 ? ' is-end' : '');
+      return `<span class="${edgeClass.trim()}" style="--tick-position:${(ratio * 100).toFixed(2)}%">${formatter.format(time)}</span>`;
+    }).join('');
+  }
+
   function preparePlayback() {
     pausePlayback();
     const playback = buildPlaybackPoints();
     state.playbackPoints = playback.points;
     state.playbackCurrentIndex = playback.currentIndex;
+    state.playbackStartAt = playback.startAt;
+    state.playbackEndAt = playback.endAt;
+    state.playbackCurrentAt = playback.currentAt;
+    state.playbackCursorAt = playback.currentAt;
     state.playbackIndex = playback.currentIndex;
     state.playbackActive = false;
     const slider = el('playbackSlider');
-    slider.max = String(Math.max(0, state.playbackPoints.length - 1));
-    slider.value = String(state.playbackIndex);
-    const nowPercent = state.playbackPoints.length > 1 ? state.playbackCurrentIndex / (state.playbackPoints.length - 1) * 100 : 50;
+    slider.max = String(Math.max(0, Math.round((state.playbackEndAt - state.playbackStartAt) / 60000)));
+    slider.value = String(Math.max(0, Math.round((state.playbackCurrentAt - state.playbackStartAt) / 60000)));
+    const timelineSpan = state.playbackEndAt - state.playbackStartAt;
+    const nowPercent = timelineSpan > 0 ? (state.playbackCurrentAt - state.playbackStartAt) / timelineSpan * 100 : 50;
     el('trackPlayback').style.setProperty('--playback-now', `${nowPercent}%`);
     el('trackPlayback').hidden = state.playbackPoints.length < 2;
-    updatePlayback(state.playbackIndex);
+    renderPlaybackDateTicks();
+    updatePlaybackTime(state.playbackCursorAt);
   }
 
   function bindPointInteractions() {
@@ -1125,7 +1286,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const current = state.detail?.tracks?.observed?.at(-1) || state.detail?.storm;
     pausePlayback();
     state.playbackActive = false;
-    updatePlayback(state.playbackCurrentIndex);
+    updatePlaybackTime(state.playbackCurrentAt);
     setWindCirclePoint(current);
     if (state.map && position) state.map.flyTo({ center: [position.lon, position.lat], zoom: 6.3, padding: mapPadding(), retainPadding: false, duration: 650 });
   }
@@ -1152,7 +1313,8 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     el('playbackToggle').addEventListener('click', togglePlayback);
     el('playbackSlider').addEventListener('input', event => {
       pausePlayback();
-      updatePlayback(event.target.value, { activate: true, keepVisible: true });
+      const time = state.playbackStartAt + Number(event.target.value) * 60000;
+      updatePlaybackTime(time, { activate: true, keepVisible: true });
     });
     el('weatherOpacity').addEventListener('input', event => {
       state.weatherOpacity = Number(event.target.value) / 100;
@@ -1175,6 +1337,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     state.theme = resolveTheme();
     document.documentElement.dataset.theme = state.theme;
     setupInteractions();
+    const userLocationRequest = resolveUserLocation();
     state.stormId = currentIdFromPath();
     if (!state.stormId) {
       el('pageState').querySelector('strong').textContent = '台风地址无效';
@@ -1197,6 +1360,11 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       renderAgencyList();
       preparePlayback();
       initializeMap();
+      userLocationRequest.then(locationData => {
+        if (!locationData) return;
+        renderOverview();
+        renderUserLocationMarker();
+      });
       el('pageState').hidden = true;
     } catch (error) {
       el('topbarStatusDot').className = 'status-dot error';

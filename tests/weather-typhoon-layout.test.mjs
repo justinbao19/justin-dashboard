@@ -18,7 +18,7 @@ test('weather prioritizes precipitation, then exposes a calm typhoon entry befor
   assert.match(html, /id="rainChance">--%<\/strong>/);
   assert.match(html, /id="typhoonEntryCard" href="\/typhoon"/);
   assert.match(html, /id="typhoonCardTitle">台风动态<\/span>/);
-  assert.match(html, /Promise\.all\(\[loadWeather\(\), loadTyphoons\(\{ force \}\)\]\)/);
+  assert.match(html, /Promise\.all\(\[loadWeather\(\{ forceRelocate \}\), loadTyphoons\(\{ force \}\)\]\)/);
   assert.match(html, /fetch\('\/api\/typhoons'/);
 });
 
@@ -99,12 +99,18 @@ test('mobile typhoon layout keeps map controls edge-aligned, removes duplicate s
   assert.match(css, /@media \(max-width: 900px\) and \(orientation: portrait\)[\s\S]*?\.radar-intensity-legend,[\s\S]*?width: 144px;/);
   assert.match(html, /class="track-playback" id="trackPlayback"/);
   assert.match(html, /id="playbackSlider"/);
+  assert.match(html, /id="playbackDateTicks"/);
   assert.match(css, /\.wind-circle-map-label \{/);
   assert.match(css, /\.track-playback \{/);
+  assert.match(css, /\.playback-date-ticks span \{/);
   assert.match(js, /windCircleLabelMarkers/);
   assert.match(js, /markerElement\.textContent = `\$\{level\}级风圈`/);
   assert.match(js, /const labelBearings = \{ 7: 214, 10: 308, 12: 42 \};/);
   assert.match(js, /function buildPlaybackPoints\(\)/);
+  assert.match(js, /PLAYBACK_HISTORY_WINDOW_MS = 5 \* 24 \* 60 \* 60 \* 1000/);
+  assert.match(js, /function playbackFrameAt\(time\)/);
+  assert.match(js, /state\.playbackCurrentAt - state\.playbackStartAt/);
+  assert.match(js, /remainingDays \* 2600/);
   assert.match(js, /tracks\.find\(track => track\.id === 'cma'\)/);
   assert.match(js, /function schedulePlaybackStep\(\)/);
 });

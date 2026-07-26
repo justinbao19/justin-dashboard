@@ -62,7 +62,7 @@ test('dashboard refreshes serverless data only on page entry or manual action', 
   assert.match(html, /id="weatherPullRefresh"/);
   assert.match(html, /function initializeWeatherPullRefresh\(\)/);
   assert.match(html, /touchmove[\s\S]*?\{ passive: false \}/);
-  assert.match(html, /manualRefreshPage\('weather'\)/);
+  assert.match(html, /refreshPageData\('weather', \{ force: true, forceRelocate: true \}\)/);
   assert.match(html, /id="marketRefreshBtn" onclick="manualRefreshPage\('market'\)"/);
   assert.match(html, /refreshPageOnEntry\(normalizedPage\)/);
   assert.match(html, /function manualRefreshPage\(page\)/);

@@ -32,6 +32,14 @@ test('weather shares its resolved device coordinates with the typhoon map', () =
   assert.match(html, /shareWeatherLocationWithTyphoon\(location\);/);
 });
 
+test('device sync status is transient while the resolved location remains visible', () => {
+  assert.match(html, /let weatherLocationStatusTimer = null;/);
+  assert.match(html, /function clearWeatherLocationStatusTimer\(\)/);
+  assert.match(html, /function renderWeatherLocation\(location, \{ detail = '', transientDetailMs = 0 \} = \{\}\)/);
+  assert.match(html, /if \(secondary && secondary\.textContent === detail\) secondary\.remove\(\);/);
+  assert.match(html, /location\.source === 'device' && locationDetail === '已同步最新设备位置' \? 1000 : 0/);
+});
+
 test('mobile pull refresh synchronizes location and weather without a separate header button', () => {
   assert.match(html, /refreshPageData\('weather', \{ force: true, forceRelocate: true \}\)/);
   assert.match(html, /正在定位并更新/);

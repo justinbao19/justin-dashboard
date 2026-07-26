@@ -8682,6 +8682,7 @@
         const WEATHER_DEVICE_LOCATION_PRECISE_TIMEOUT = 12000;
         let weatherLocationPromise = null;
         let weatherLocationCache = null;
+        let weatherLocationStatusTimer = null;
         let lastResolvedWeatherLocation = null;
         let automaticDeviceLocationAttempted = false;
         let geolocationPermissionState = 'unknown';
@@ -9447,6 +9448,12 @@
             weatherLocationCache = null;
         }
 
+        function clearWeatherLocationStatusTimer() {
+            if (weatherLocationStatusTimer === null) return;
+            clearTimeout(weatherLocationStatusTimer);
+            weatherLocationStatusTimer = null;
+        }
+
         function escapeHtml(value = '') {
             return String(value)
                 .replaceAll('&', '&amp;')
@@ -9456,15 +9463,22 @@
                 .replaceAll("'", '&#39;');
         }
 
-        function renderWeatherLocation(location, { detail = '' } = {}) {
+        function renderWeatherLocation(location, { detail = '', transientDetailMs = 0 } = {}) {
             const locationEl = document.getElementById('location');
             if (!locationEl) return;
+            clearWeatherLocationStatusTimer();
             const displayName = location.displayName || DEFAULT_WEATHER_LOCATION.displayName;
             const detailLine = detail ? `<span class="weather-location-secondary">${escapeHtml(detail)}</span>` : '';
             locationEl.innerHTML = `
                 <span class="weather-location-primary">${escapeHtml(displayName)}</span>
                 ${detailLine}
             `;
+            if (!detail || transientDetailMs <= 0) return;
+            weatherLocationStatusTimer = setTimeout(() => {
+                const secondary = locationEl.querySelector('.weather-location-secondary');
+                if (secondary && secondary.textContent === detail) secondary.remove();
+                weatherLocationStatusTimer = null;
+            }, transientDetailMs);
         }
 
         function shareWeatherLocationWithTyphoon(location = {}) {
@@ -10060,7 +10074,11 @@
                 shareWeatherLocationWithTyphoon(location);
                 const cachedTyphoons = readTyphoonCache();
                 if (cachedTyphoons) renderTyphoonSummary(cachedTyphoons);
-                renderWeatherLocation(location, { detail: getWeatherLocationDetail(location) });
+                const locationDetail = getWeatherLocationDetail(location);
+                renderWeatherLocation(location, {
+                    detail: locationDetail,
+                    transientDetailMs: location.source === 'device' && locationDetail === '已同步最新设备位置' ? 1000 : 0
+                });
 
                 // 使用设备定位优先解析的经纬度，获取对应城市的实时天气
                 const queryLon = Number(location.lon).toFixed(2);

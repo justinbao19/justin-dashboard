@@ -1372,8 +1372,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const map = state.map;
     if (!map || !map.getStyle()) return;
     const others = state.stormsSummary.filter(storm => storm?.active && storm.id && storm.id !== state.stormId);
-    const loaded = [];
-    for (const storm of others.slice(0, 4)) {
+    const loaded = (await Promise.all(others.map(async storm => {
       try {
         const zj = storm.providerIds?.zhejiang || '';
         const cacheKey = `pulse.typhoon.detail.${storm.id}.${zj || 'fallback'}.v6`;
@@ -1389,11 +1388,12 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
           const points = track.points?.filter(point => hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon));
           if (points?.length > 1) lines.push({ points, sourceId: track.id, color: track.color || '#9ab7c8' });
         }
-        if (lines.length) loaded.push({ id: storm.id, name: stormDisplayName(storm), lines, points: lines.flatMap(line => line.points) });
+        if (lines.length) return { id: storm.id, name: stormDisplayName(storm), lines, points: lines.flatMap(line => line.points) };
       } catch (error) {
         console.warn(`Other storm track unavailable for ${storm.id}:`, error);
       }
-    }
+      return null;
+    }))).filter(Boolean);
     state.otherStormTracks.forEach(item => {
       [`other-track-${item.id}`, `other-points-${item.id}`].forEach(id => {
         if (map.getLayer(id)) map.removeLayer(id);

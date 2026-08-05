@@ -1075,13 +1075,32 @@
         .typhoon-card-eyebrow {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 7px;
+            margin-bottom: 6px;
             color: rgba(255,255,255,0.66);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            letter-spacing: -0.08px;
+        }
+        .typhoon-card-status {
+            display: inline-flex;
+            align-items: center;
+            min-height: 20px;
+            padding: 0 7px;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.76);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: -0.08px;
+            white-space: nowrap;
+        }
+        .typhoon-card-status.is-multi {
+            border-color: rgba(157,215,238,0.28);
+            background: rgba(83,177,224,0.16);
+            color: rgba(214,243,255,0.9);
         }
         .typhoon-status-dot {
             width: 7px;
@@ -1119,8 +1138,8 @@
             margin-top: 7px;
             max-width: 720px;
             color: rgba(255,255,255,0.68);
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.4;
         }
         .typhoon-card-action {
             display: inline-flex;
@@ -4008,6 +4027,7 @@
                 margin-bottom: 5px;
                 font-size: 10px;
             }
+            .typhoon-card-status { min-height: 19px; padding-inline: 6px; font-size: 9px; }
 
             .typhoon-card-title {
                 font-size: 17px;
@@ -9943,7 +9963,7 @@
                 card.href = '/typhoon';
                 card.setAttribute('aria-label', '查看台风动态，当前无活跃台风');
                 card.classList.remove('is-active-typhoon', 'is-data-delayed');
-                eyebrow.innerHTML = '<span class="typhoon-status-dot"></span>热带气旋监测';
+                eyebrow.innerHTML = '<span class="typhoon-status-dot"></span><span>热带气旋监测</span>';
                 title.textContent = '当前无活跃台风';
                 description.textContent = '西北太平洋与南海目前没有需要持续跟踪的系统。';
                 action.textContent = '查看动态';
@@ -9983,11 +10003,13 @@
             const updated = storm.updatedAt
                 ? new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(storm.updatedAt))
                 : '时间待确认';
-            const more = storms.length > 1 ? ` · 共 ${storms.length} 个活跃中，已优先显示影响最大的` : '';
+            const activeBadge = storms.length > 1
+                ? `<span class="typhoon-card-status is-multi">${storms.length} 个活跃台风</span>`
+                : '<span class="typhoon-card-status">活跃中</span>';
             card.setAttribute('aria-label', `查看${name}路径详情`);
             card.classList.toggle('is-data-delayed', Boolean(storm.stale));
             card.classList.add('is-active-typhoon');
-            eyebrow.innerHTML = `<span class="typhoon-status-dot"></span>活跃中 · ${escapeHtml(labels[storm.classification] || labels.unknown)}${escapeHtml(more)}`;
+            eyebrow.innerHTML = `<span class="typhoon-status-dot"></span><span>活跃中 · ${escapeHtml(labels[storm.classification] || labels.unknown)}</span>${activeBadge}`;
             title.textContent = name;
             description.textContent = `${locationText} · 最大风速 ${windText} · 更新 ${updated}${storm.stale ? '（延迟）' : ''}`;
             action.textContent = '追踪路径';

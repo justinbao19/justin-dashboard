@@ -18,6 +18,8 @@ test('weather prioritizes precipitation, then exposes a calm typhoon entry befor
   assert.match(html, /id="rainChance">--%<\/strong>/);
   assert.match(html, /id="typhoonEntryCard" href="\/typhoon"/);
   assert.match(html, /id="typhoonCardTitle">台风动态<\/span>/);
+  assert.match(html, /typhoon-card-status/);
+  assert.doesNotMatch(html, /优先显示影响最大的/);
   assert.match(html, /Promise\.all\(\[loadWeather\(\{ forceRelocate \}\), loadTyphoons\(\{ force \}\)\]\)/);
   assert.match(html, /fetch\('\/api\/typhoons'/);
 });

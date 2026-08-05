@@ -7707,8 +7707,17 @@
             letter-spacing: -1.4px;
         }
         .weather-metric-reading span {
-            margin-left: 3px;
-            color: rgba(240, 247, 254, 0.68);
+            margin-left: 2px;
+            align-self: flex-start;
+            margin-top: 5px;
+            color: rgba(240, 247, 254, 0.72);
+            font: 300 24px/1 "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: 0;
+        }
+        .metric-primary .metric-unit-km,
+        .metric-primary .metric-unit-percent {
+            align-self: baseline;
+            margin-top: 0;
             font: 400 14px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
             letter-spacing: -0.2px;
         }
@@ -9728,10 +9737,11 @@
         }
 
         function renderMetricPlain(metric) {
+            const unitClass = metric.displayUnit === '°' ? '' : (metric.displayUnit === 'km' ? ' metric-unit-km' : (metric.displayUnit === '%' ? ' metric-unit-percent' : ''));
             return `
                 <div class="weather-metric-visual weather-metric-plain">
                     <div class="weather-metric-reading">
-                        <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong><span>${escapeHtml(metric.displayUnit || '')}</span></div>
+                        <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong><span class="${unitClass.trim()}">${escapeHtml(metric.displayUnit || '')}</span></div>
                         <small>${escapeHtml(metric.status || '')}</small>
                     </div>
                 </div>`;
@@ -9743,11 +9753,11 @@
             const minorTicks = Array.from({ length: 60 }, (_, index) => {
                 const angle = index * 6;
                 const long = angle % 90 === 0;
-                const outer = 54, inner = long ? 45.5 : 48.5;
+                const outer = 55, inner = long ? 47 : 49.5;
                 const rad = (angle - 90) * Math.PI / 180;
                 const x1 = 58 + inner * Math.cos(rad), y1 = 58 + inner * Math.sin(rad);
                 const x2 = 58 + outer * Math.cos(rad), y2 = 58 + outer * Math.sin(rad);
-                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.52 : 0.3})" stroke-width="${long ? 1.7 : 0.9}" stroke-linecap="round"/>`;
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.5 : 0.3})" stroke-width="${long ? 1.6 : 0.9}" stroke-linecap="round"/>`;
             }).join('');
             const value = escapeHtml(String(metric.displayValue));
             const unit = escapeHtml(metric.displayUnit || '');
@@ -9755,17 +9765,17 @@
                 <div class="weather-metric-visual">
                     <svg class="metric-svg weather-metric-compass" viewBox="0 0 116 116" role="img" aria-label="风向 ${Math.round(bearing)} 度">
                         ${minorTicks}
-                        <text x="58" y="13.5" class="metric-svg-cardinal" text-anchor="middle">北</text>
-                        <text x="106" y="61.5" class="metric-svg-cardinal" text-anchor="middle">东</text>
-                        <text x="58" y="111" class="metric-svg-cardinal" text-anchor="middle">南</text>
-                        <text x="10" y="61.5" class="metric-svg-cardinal" text-anchor="middle">西</text>
+                        <text x="58" y="12.5" class="metric-svg-cardinal" text-anchor="middle">北</text>
+                        <text x="107" y="61.5" class="metric-svg-cardinal" text-anchor="middle">东</text>
+                        <text x="58" y="112" class="metric-svg-cardinal" text-anchor="middle">南</text>
+                        <text x="9" y="61.5" class="metric-svg-cardinal" text-anchor="middle">西</text>
                         <g class="metric-svg-needle" style="transform: rotate(${needleAngle.toFixed(1)}deg)">
-                            <line x1="58" y1="70" x2="58" y2="58" stroke="rgba(190,210,228,0.45)" stroke-width="2.4" stroke-linecap="round"/>
-                            <polygon points="58,14 61.4,37.5 54.6,37.5" fill="rgba(252,254,255,0.96)"/>
+                            <polygon points="58,13 62.5,36 53.5,36" fill="rgba(252,254,255,0.96)"/>
+                            <polygon points="58,103 61,82 55,82" fill="rgba(252,254,255,0.55)"/>
                         </g>
-                        <circle cx="58" cy="58" r="2.6" fill="rgba(240,248,255,0.9)"/>
-                        <text x="58" y="66" class="metric-svg-value metric-svg-value-compass" text-anchor="middle">${value}</text>
-                        <text x="58" y="80" class="metric-svg-unit" text-anchor="middle">${unit}</text>
+                        <circle cx="58" cy="58" r="24" fill="rgba(16,29,46,0.52)" stroke="rgba(255,255,255,0.05)"/>
+                        <text x="58" y="56" class="metric-svg-value metric-svg-value-compass" text-anchor="middle">${value}</text>
+                        <text x="58" y="72" class="metric-svg-unit" text-anchor="middle">${unit}</text>
                     </svg>
                 </div>`;
         }
@@ -9775,7 +9785,7 @@
                 <div class="weather-metric-visual">
                     <div class="weather-metric-horizon" aria-hidden="true">
                         <div class="weather-metric-reading">
-                            <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong><span>${escapeHtml(metric.displayUnit || '')}</span></div>
+                            <div class="metric-primary"><strong>${escapeHtml(String(metric.displayValue))}</strong><span class="metric-unit-km">${escapeHtml(metric.displayUnit || '')}</span></div>
                             <small>${escapeHtml(metric.status || '')}</small>
                         </div>
                         <span class="metric-horizon-line metric-horizon-line-far"></span>
@@ -9789,27 +9799,30 @@
             const minorTicks = Array.from({ length: 41 }, (_, index) => {
                 const angle = 225 + index * 6.75;
                 const long = index % 5 === 0;
-                const outer = 56, inner = long ? 45 : 48.5;
+                const outer = 56, inner = long ? 45.5 : 49;
                 const rad = (angle - 90) * Math.PI / 180;
                 const x1 = 58 + inner * Math.cos(rad), y1 = 58 + inner * Math.sin(rad);
                 const x2 = 58 + outer * Math.cos(rad), y2 = 58 + outer * Math.sin(rad);
-                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.52 : 0.28})" stroke-width="${long ? 1.8 : 0.9}" stroke-linecap="round"/>`;
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.5 : 0.28})" stroke-width="${long ? 1.7 : 0.9}" stroke-linecap="round"/>`;
             }).join('');
             const markerAngle = -135 + progress * 2.7;
+            const trendAngle = progress >= 52 ? 0 : (progress <= 48 ? 180 : 90);
             const value = escapeHtml(String(metric.displayValue));
             const unit = escapeHtml(metric.displayUnit || '');
             return `
                 <div class="weather-metric-visual">
                     <svg class="metric-svg weather-metric-pressure" viewBox="0 0 116 116" role="img" aria-label="气压 ${value} ${unit}">
-                        <circle cx="58" cy="58" r="31" fill="rgba(17,30,48,0.68)" stroke="rgba(255,255,255,0.05)"/>
                         ${minorTicks}
                         <g class="metric-svg-needle" style="transform: rotate(${markerAngle.toFixed(1)}deg)">
-                            <rect x="54.6" y="0.4" width="6.8" height="16" rx="3.4" fill="rgba(252,254,255,0.98)"/>
+                            <rect x="55" y="1" width="6" height="15" rx="3" fill="rgba(252,254,255,0.97)"/>
                         </g>
-                        <text x="58" y="57" class="metric-svg-value" text-anchor="middle">${value}</text>
-                        <text x="58" y="71" class="metric-svg-unit" text-anchor="middle">${unit}</text>
-                        <text x="26" y="105" class="metric-svg-cardinal" text-anchor="middle">低</text>
-                        <text x="90" y="105" class="metric-svg-cardinal" text-anchor="middle">高</text>
+                        <g style="transform: rotate(${trendAngle}deg); transform-origin: 58px 36px">
+                            <path d="M58 28 L58 44 M52 38 L58 44 L64 38" fill="none" stroke="rgba(250,253,255,0.92)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                        <text x="58" y="66" class="metric-svg-value" text-anchor="middle">${value}</text>
+                        <text x="58" y="81" class="metric-svg-unit" text-anchor="middle">${unit}</text>
+                        <text x="25" y="107" class="metric-svg-cardinal" text-anchor="middle">低</text>
+                        <text x="91" y="107" class="metric-svg-cardinal" text-anchor="middle">高</text>
                     </svg>
                 </div>`;
         }

@@ -7645,48 +7645,48 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
-            min-height: 206px;
+            min-height: 196px;
             padding: 15px 16px 14px;
             aspect-ratio: auto;
             overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.09);
-            border-radius: 21px;
-            background: linear-gradient(155deg, rgba(30, 48, 75, 0.68), rgba(20, 36, 57, 0.56));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 38px rgba(4,15,30,0.08);
-            backdrop-filter: saturate(135%) blur(20px);
-            -webkit-backdrop-filter: saturate(135%) blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            background: linear-gradient(168deg, rgba(37, 56, 82, 0.46), rgba(24, 40, 61, 0.38) 52%, rgba(22, 37, 56, 0.44));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+            backdrop-filter: saturate(160%) blur(22px);
+            -webkit-backdrop-filter: saturate(160%) blur(22px);
         }
         .weather-detail-card::after { display: none; }
         .weather-detail-card .weather-detail-head {
             position: relative;
             z-index: 4;
-            min-height: 20px;
+            min-height: 18px;
         }
         .weather-detail-card .label {
             display: flex;
             align-items: center;
             gap: 6px;
             margin: 0;
-            color: rgba(226,237,250,0.55);
+            color: rgba(233, 243, 253, 0.52);
             font: 600 11px/1.2 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            letter-spacing: -0.18px;
+            letter-spacing: 0.02px;
         }
         .weather-detail-card .weather-detail-icon {
             display: inline-grid;
             place-items: center;
-            width: 14px;
-            height: 14px;
-            color: rgba(221,234,249,0.48);
+            width: 13px;
+            height: 13px;
+            color: rgba(230, 241, 252, 0.46);
             border: 0;
             background: none;
-            font-size: 11px;
+            font-size: 10px;
         }
         .weather-metric-visual {
             position: relative;
             display: grid;
             place-items: center;
             flex: 1 1 auto;
-            min-height: 116px;
+            min-height: 112px;
             margin: 2px 0 0;
         }
         .weather-metric-reading {
@@ -7702,220 +7702,124 @@
             min-width: 0;
         }
         .weather-metric-reading strong {
-            color: rgba(249,252,255,0.98);
-            font: 400 clamp(34px, 4.4vw, 43px)/0.98 "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            letter-spacing: -1.5px;
+            color: rgba(250, 253, 255, 0.98);
+            font: 300 clamp(36px, 4.6vw, 44px)/0.96 "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -1.4px;
         }
         .weather-metric-reading span {
             margin-left: 3px;
-            color: rgba(235,243,252,0.72);
-            font: 500 13px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            letter-spacing: -0.18px;
+            color: rgba(240, 247, 254, 0.68);
+            font: 400 14px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.2px;
         }
         .weather-metric-reading small {
-            margin-top: 7px;
-            color: rgba(244,249,255,0.9);
-            font: 600 13px/1.15 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            letter-spacing: -0.22px;
+            margin-top: 6px;
+            color: rgba(247, 251, 255, 0.94);
+            font: 600 14px/1.15 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.24px;
         }
         .weather-detail-card .desc {
             position: relative;
             z-index: 4;
             display: block;
-            min-height: 31px;
+            min-height: 30px;
             margin: 0;
             overflow: hidden;
-            color: rgba(234,243,252,0.7);
-            font: 400 11px/1.42 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-            letter-spacing: -0.16px;
+            color: rgba(236, 245, 253, 0.66);
+            font: 400 11px/1.4 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.12px;
             -webkit-line-clamp: 2;
         }
 
         .weather-metric-plain {
             place-items: start;
             align-content: start;
-            padding-top: 20px;
+            padding-top: 16px;
         }
         .weather-metric-plain .weather-metric-reading { align-items: flex-start; }
-        .weather-metric-plain .weather-metric-reading small { color: rgba(244,249,255,0.88); }
+        .weather-metric-plain .weather-metric-reading small { color: rgba(247, 251, 255, 0.9); }
 
-        .weather-metric-compass,
-        .weather-metric-pressure {
-            position: relative;
-            width: 118px;
-            height: 118px;
-            border-radius: 50%;
+        /* SVG gauges: Apple-style tick instruments shared by wind and pressure. */
+        .metric-svg {
+            display: block;
+            width: 116px;
+            height: 116px;
+            overflow: visible;
         }
-        .weather-metric-compass {
-            background:
-                radial-gradient(circle, rgba(21,38,59,.96) 0 54%, transparent 55%),
-                repeating-conic-gradient(from -1deg, rgba(224,238,250,.28) 0 1deg, transparent 1deg 6deg);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+        .metric-svg-cardinal {
+            fill: rgba(238, 246, 253, 0.62);
+            font: 600 9px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: 0.4px;
         }
-        .metric-cardinal {
-            position: absolute;
-            z-index: 4;
-            color: rgba(235,244,252,.62);
-            font: 700 9px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        .metric-svg-value {
+            fill: rgba(250, 253, 255, 0.97);
+            font: 500 21px/1 "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+            letter-spacing: -0.5px;
         }
-        .metric-cardinal.north { top: 6px; left: 50%; transform: translateX(-50%); }
-        .metric-cardinal.east { right: 7px; top: 50%; transform: translateY(-50%); }
-        .metric-cardinal.south { bottom: 6px; left: 50%; transform: translateX(-50%); }
-        .metric-cardinal.west { left: 7px; top: 50%; transform: translateY(-50%); }
-        .metric-wind-needle {
-            position: absolute;
-            z-index: 3;
-            left: calc(50% - 1px);
-            top: 15px;
-            width: 2px;
-            height: 88px;
-            border-radius: 999px;
-            background: linear-gradient(180deg, rgba(255,255,255,.96) 0 39%, transparent 40% 61%, rgba(224,236,247,.72) 62% 100%);
-            filter: drop-shadow(0 0 5px rgba(211,232,255,.28));
-            transform: rotate(var(--metric-angle, 0deg));
-            transition: transform 650ms cubic-bezier(.22,1,.36,1);
+        .metric-svg-unit {
+            fill: rgba(238, 246, 253, 0.58);
+            font: 400 10px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
         }
-        .metric-wind-needle::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: -4px;
-            border-right: 4px solid transparent;
-            border-bottom: 9px solid rgba(255,255,255,.98);
-            border-left: 4px solid transparent;
-            transform: translateX(-50%);
-        }
-        .metric-wind-needle::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: -4px;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(242,248,255,.96);
-            box-shadow: 0 0 0 1px rgba(16,30,48,.3);
-            transform: translateX(-50%);
-        }
-        .weather-metric-compass .weather-metric-reading {
-            position: absolute;
-            z-index: 5;
-            inset: 31px;
-            border-radius: 50%;
-            background: rgba(20,37,58,.94);
-        }
-        .weather-metric-compass .weather-metric-reading strong {
-            font-size: 30px;
-            font-weight: 600;
-            letter-spacing: -1px;
-        }
-        .weather-metric-compass .weather-metric-reading span {
-            margin: 1px 0 0;
-            font-size: 11px;
+        .metric-svg-value-compass { font-size: 19px; }
+        .metric-svg-needle {
+            transform-box: view-box;
+            transform-origin: 50% 50%;
+            transition: transform 650ms cubic-bezier(.22, 1, .36, 1);
         }
 
-        .weather-metric-pressure {
-            background:
-                radial-gradient(circle, rgba(21,38,59,.97) 0 58%, transparent 59%),
-                repeating-conic-gradient(from -2deg, rgba(224,238,250,.27) 0 1.5deg, transparent 1.5deg 7deg);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
-        }
-        .metric-pressure-marker {
-            position: absolute;
-            z-index: 3;
-            inset: 0;
-            border-radius: 50%;
-            transform: rotate(var(--metric-angle, 0deg));
-            transition: transform 650ms cubic-bezier(.22,1,.36,1);
-        }
-        .metric-pressure-marker::before {
-            content: '';
-            position: absolute;
-            left: calc(50% - 2px);
-            top: 2px;
-            width: 4px;
-            height: 17px;
-            border-radius: 999px;
-            background: rgba(255,255,255,.98);
-            box-shadow: 0 0 8px rgba(211,231,255,.28);
-        }
-        .weather-metric-pressure .weather-metric-reading {
-            position: absolute;
-            z-index: 4;
-            inset: 29px 21px 28px;
-        }
-        .weather-metric-pressure .weather-metric-reading strong {
-            font-size: 26px;
-            font-weight: 600;
-            letter-spacing: -1.1px;
-        }
-        .weather-metric-pressure .weather-metric-reading span {
-            margin: 3px 0 0;
-            font-size: 10px;
-        }
-        .metric-pressure-low,
-        .metric-pressure-high {
-            position: absolute;
-            z-index: 4;
-            bottom: 8px;
-            color: rgba(234,243,252,.72);
-            font: 500 9px/1 "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-        }
-        .metric-pressure-low { left: 21px; }
-        .metric-pressure-high { right: 21px; }
-
+        /* Visibility: quiet text block with a soft horizon arc underneath. */
         .weather-metric-horizon {
             position: relative;
             width: 100%;
-            height: 116px;
+            height: 112px;
             overflow: hidden;
         }
         .weather-metric-horizon .weather-metric-reading {
             position: absolute;
             z-index: 3;
             left: 0;
-            top: 17px;
+            top: 14px;
             align-items: flex-start;
         }
-        .weather-metric-horizon .weather-metric-reading small { color: rgba(244,249,255,.88); }
+        .weather-metric-horizon .weather-metric-reading small { color: rgba(247, 251, 255, 0.9); }
         .metric-horizon-line {
             position: absolute;
             left: 50%;
-            border: 1px solid rgba(204,227,247,.17);
+            border: 1.5px solid rgba(214, 234, 250, 0.16);
             border-bottom: 0;
             border-radius: 50% 50% 0 0;
             transform: translateX(-50%);
         }
-        .metric-horizon-line-far { bottom: 1px; width: 142%; height: 42px; }
-        .metric-horizon-line-near { bottom: 1px; width: 86%; height: 25px; }
+        .metric-horizon-line-far { bottom: 2px; width: 128%; height: 38px; opacity: 0.7; }
+        .metric-horizon-line-near { bottom: 2px; width: 78%; height: 22px; border-color: rgba(214, 234, 250, 0.24); }
 
+        /* UV: Apple-style segmented gradient bar with a luminous marker dot. */
         .weather-metric-uv {
             place-items: stretch;
             align-content: start;
-            padding-top: 17px;
+            padding-top: 14px;
         }
         .weather-metric-uv .weather-metric-reading { align-items: flex-start; }
         .metric-uv-scale {
             position: relative;
             width: 100%;
-            height: 6px;
-            margin-top: 18px;
+            height: 5px;
+            margin-top: 20px;
             border-radius: 999px;
-            background: linear-gradient(90deg, #61d66e 0%, #c9e83b 19%, #ffd43b 38%, #ff9d32 58%, #ff5f57 76%, #d357e8 100%);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,.2);
+            background: linear-gradient(90deg, #5fce6f 0%, #cde93e 18%, #ffd83d 36%, #ffa033 54%, #ff6b52 72%, #e05fd0 88%, #b268e6 100%);
         }
         .metric-uv-marker {
             position: absolute;
-            left: clamp(3px, var(--metric-progress, 0%), calc(100% - 3px));
+            left: clamp(4px, var(--metric-progress, 0%), calc(100% - 4px));
             top: 50%;
-            width: 8px;
-            height: 8px;
-            border: 1px solid rgba(20,35,55,.25);
+            width: 9px;
+            height: 9px;
+            border: 1.5px solid rgba(255, 255, 255, 0.92);
             border-radius: 50%;
-            background: #f7fbff;
-            box-shadow: 0 0 0 2px rgba(255,255,255,.12);
+            background: rgba(252, 254, 255, 0.98);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14), 0 1px 4px rgba(5, 14, 26, 0.4);
             transform: translate(-50%, -50%);
-            transition: left 650ms cubic-bezier(.22,1,.36,1);
+            transition: left 650ms cubic-bezier(.22, 1, .36, 1);
         }
 
         @media (max-width: 760px) {
@@ -7924,30 +7828,21 @@
                 gap: 10px;
             }
             .weather-detail-card {
-                min-height: 194px;
+                min-height: 186px;
                 padding: 13px 14px 12px;
-                border-radius: 20px;
+                border-radius: 18px;
             }
-            .weather-metric-visual { min-height: 108px; }
-            .weather-metric-reading strong { font-size: clamp(34px, 10vw, 40px); }
-            .weather-metric-compass,
-            .weather-metric-pressure { width: 108px; height: 108px; }
-            .metric-wind-needle { top: 14px; height: 80px; }
-            .weather-metric-compass .weather-metric-reading { inset: 29px; }
-            .weather-metric-compass .weather-metric-reading strong { font-size: 28px; }
-            .weather-metric-pressure .weather-metric-reading { inset: 28px 18px 27px; }
-            .weather-metric-pressure .weather-metric-reading strong { font-size: 24px; }
-            .metric-pressure-low { left: 18px; }
-            .metric-pressure-high { right: 18px; }
-            .weather-detail-card .desc { min-height: 30px; font-size: 10px; }
+            .weather-metric-visual { min-height: 104px; }
+            .weather-metric-reading strong { font-size: clamp(32px, 9.6vw, 38px); }
+            .metric-svg { width: 106px; height: 106px; }
+            .weather-detail-card .desc { min-height: 28px; font-size: 10px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
             .weather-precip-glyph,
             .hourly-swipe-hint i,
             .weather-detail-icon i,
-            .metric-wind-needle,
-            .metric-pressure-marker,
+            .metric-svg-needle,
             .metric-uv-marker,
             .weather-typhoon-card.is-active-typhoon .typhoon-status-dot {
                 animation: none !important;
@@ -9843,18 +9738,35 @@
         }
 
         function renderMetricCompass(metric) {
-            const needleAngle = Number(metric.angle || 0) - 180;
+            const bearing = Number(metric.angle || 0);
+            const needleAngle = bearing - 180;
+            const minorTicks = Array.from({ length: 60 }, (_, index) => {
+                const angle = index * 6;
+                const long = angle % 90 === 0;
+                const outer = 54, inner = long ? 45.5 : 48.5;
+                const rad = (angle - 90) * Math.PI / 180;
+                const x1 = 58 + inner * Math.cos(rad), y1 = 58 + inner * Math.sin(rad);
+                const x2 = 58 + outer * Math.cos(rad), y2 = 58 + outer * Math.sin(rad);
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.52 : 0.3})" stroke-width="${long ? 1.7 : 0.9}" stroke-linecap="round"/>`;
+            }).join('');
+            const value = escapeHtml(String(metric.displayValue));
+            const unit = escapeHtml(metric.displayUnit || '');
             return `
                 <div class="weather-metric-visual">
-                    <div class="weather-metric-compass" style="--metric-angle:${needleAngle}deg" aria-hidden="true">
-                        <span class="metric-cardinal north">北</span><span class="metric-cardinal east">东</span>
-                        <span class="metric-cardinal south">南</span><span class="metric-cardinal west">西</span>
-                        <span class="metric-wind-needle"></span>
-                        <div class="weather-metric-reading">
-                            <strong>${escapeHtml(String(metric.displayValue))}</strong>
-                            <span>${escapeHtml(metric.displayUnit || '')}</span>
-                        </div>
-                    </div>
+                    <svg class="metric-svg weather-metric-compass" viewBox="0 0 116 116" role="img" aria-label="风向 ${Math.round(bearing)} 度">
+                        ${minorTicks}
+                        <text x="58" y="13.5" class="metric-svg-cardinal" text-anchor="middle">北</text>
+                        <text x="106" y="61.5" class="metric-svg-cardinal" text-anchor="middle">东</text>
+                        <text x="58" y="111" class="metric-svg-cardinal" text-anchor="middle">南</text>
+                        <text x="10" y="61.5" class="metric-svg-cardinal" text-anchor="middle">西</text>
+                        <g class="metric-svg-needle" style="transform: rotate(${needleAngle.toFixed(1)}deg)">
+                            <line x1="58" y1="70" x2="58" y2="58" stroke="rgba(190,210,228,0.45)" stroke-width="2.4" stroke-linecap="round"/>
+                            <polygon points="58,14 61.4,37.5 54.6,37.5" fill="rgba(252,254,255,0.96)"/>
+                        </g>
+                        <circle cx="58" cy="58" r="2.6" fill="rgba(240,248,255,0.9)"/>
+                        <text x="58" y="66" class="metric-svg-value metric-svg-value-compass" text-anchor="middle">${value}</text>
+                        <text x="58" y="80" class="metric-svg-unit" text-anchor="middle">${unit}</text>
+                    </svg>
                 </div>`;
         }
 
@@ -9874,18 +9786,31 @@
 
         function renderMetricPressure(metric) {
             const progress = Math.max(0, Math.min(100, Number(metric.progress || 0)));
+            const minorTicks = Array.from({ length: 41 }, (_, index) => {
+                const angle = 225 + index * 6.75;
+                const long = index % 5 === 0;
+                const outer = 56, inner = long ? 45 : 48.5;
+                const rad = (angle - 90) * Math.PI / 180;
+                const x1 = 58 + inner * Math.cos(rad), y1 = 58 + inner * Math.sin(rad);
+                const x2 = 58 + outer * Math.cos(rad), y2 = 58 + outer * Math.sin(rad);
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.52 : 0.28})" stroke-width="${long ? 1.8 : 0.9}" stroke-linecap="round"/>`;
+            }).join('');
             const markerAngle = -135 + progress * 2.7;
+            const value = escapeHtml(String(metric.displayValue));
+            const unit = escapeHtml(metric.displayUnit || '');
             return `
                 <div class="weather-metric-visual">
-                    <div class="weather-metric-pressure" style="--metric-angle:${markerAngle.toFixed(1)}deg" aria-hidden="true">
-                        <span class="metric-pressure-marker"></span>
-                        <div class="weather-metric-reading">
-                            <strong>${escapeHtml(String(metric.displayValue))}</strong>
-                            <span>${escapeHtml(metric.displayUnit || '')}</span>
-                        </div>
-                        <span class="metric-pressure-low">低</span>
-                        <span class="metric-pressure-high">高</span>
-                    </div>
+                    <svg class="metric-svg weather-metric-pressure" viewBox="0 0 116 116" role="img" aria-label="气压 ${value} ${unit}">
+                        <circle cx="58" cy="58" r="31" fill="rgba(17,30,48,0.68)" stroke="rgba(255,255,255,0.05)"/>
+                        ${minorTicks}
+                        <g class="metric-svg-needle" style="transform: rotate(${markerAngle.toFixed(1)}deg)">
+                            <rect x="54.6" y="0.4" width="6.8" height="16" rx="3.4" fill="rgba(252,254,255,0.98)"/>
+                        </g>
+                        <text x="58" y="57" class="metric-svg-value" text-anchor="middle">${value}</text>
+                        <text x="58" y="71" class="metric-svg-unit" text-anchor="middle">${unit}</text>
+                        <text x="26" y="105" class="metric-svg-cardinal" text-anchor="middle">低</text>
+                        <text x="90" y="105" class="metric-svg-cardinal" text-anchor="middle">高</text>
+                    </svg>
                 </div>`;
         }
 

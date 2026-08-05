@@ -9947,7 +9947,7 @@
             const updated = storm.updatedAt
                 ? new Intl.DateTimeFormat('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(storm.updatedAt))
                 : '时间待确认';
-            const more = storms.length > 1 ? ` · 另有 ${storms.length - 1} 个系统` : '';
+            const more = storms.length > 1 ? ` · 共 ${storms.length} 个活跃中，已优先显示影响最大的` : '';
             card.setAttribute('aria-label', `查看${name}路径详情`);
             card.classList.toggle('is-data-delayed', Boolean(storm.stale));
             card.classList.add('is-active-typhoon');

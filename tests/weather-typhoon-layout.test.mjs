@@ -114,3 +114,19 @@ test('mobile typhoon layout keeps map controls edge-aligned, removes duplicate s
   assert.match(js, /tracks\.find\(track => track\.id === 'cma'\)/);
   assert.match(js, /function schedulePlaybackStep\(\)/);
 });
+
+test('typhoon detail supports switching between multiple active storms on one map', async () => {
+  const [html, jsSource] = await Promise.all([
+    readFile(new URL('typhoon.html', root), 'utf8'),
+    readFile(new URL('typhoon.js', root), 'utf8')
+  ]);
+
+  assert.match(html, /id="stormSwitcher"[^>]*aria-label="切换台风"/);
+  assert.match(jsSource, /function renderStormSwitcher\(\)/);
+  assert.match(jsSource, /function selectStorm\(stormId, zhejiangId = ''\)/);
+  assert.match(jsSource, /history\.replaceState\(null, '', `\/typhoon\/\$\{encodeURIComponent\(stormId\)\}\$\{query\}`\)/);
+  assert.match(jsSource, /function renderOtherStormTracks\(\)/);
+  assert.match(jsSource, /other-track-\$\{item\.id\}/);
+  assert.match(jsSource, /storm\.id !== state\.stormId/);
+  assert.match(jsSource, /distanceKm\(locationData, a\.position\)/);
+});

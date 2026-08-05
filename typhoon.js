@@ -15,6 +15,8 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     map: null,
     detail: null,
     stormId: null,
+    stormsSummary: [],
+    otherStormTracks: [],
     theme: 'dark',
     basemap: 'standard',
     activeWeather: new Set(['radar']),
@@ -987,6 +989,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     bindPointInteractions();
     await addWeatherLayers(generation);
     addModelFieldLayers();
+    renderOtherStormTracks();
   }
 
   async function resolveAndLoadWeatherLayers() {
@@ -1244,6 +1247,144 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       : '<p>气象部门当前未提供有效风圈半径，不使用历史数值替代。</p>';
   }
 
+  function stormDisplayName(storm) {
+    const zh = storm?.name?.zh;
+    return zh || storm?.name?.display || '未命名系统';
+  }
+
+  function renderStormSwitcher() {
+    const switcher = el('stormSwitcher');
+    if (!switcher) return;
+    const storms = state.stormsSummary.filter(storm => storm?.active && storm?.id);
+    if (storms.length < 2) { switcher.hidden = true; switcher.innerHTML = ''; return; }
+    const locationData = state.userLocation;
+    const ranked = [...storms].sort((a, b) => {
+      const distanceA = locationData ? (distanceKm(locationData, a.position) ?? Infinity) : 0;
+      const distanceB = locationData ? (distanceKm(locationData, b.position) ?? Infinity) : 0;
+      return distanceA - distanceB;
+    });
+    switcher.innerHTML = ranked.map(storm => {
+      const selected = storm.id === state.stormId;
+      const classification = classLabels[storm.classification] || classLabels.unknown;
+      return `<button class="storm-switch${selected ? ' active' : ''}" type="button" data-storm-id="${escapeHtml(storm.id)}" data-storm-zj="${escapeHtml(storm.providerIds?.zhejiang || '')}" aria-pressed="${selected}">
+        <span class="storm-switch-dot" aria-hidden="true"></span>
+        <span>${escapeHtml(stormDisplayName(storm))}</span>
+        <small>${escapeHtml(classification)}</small>
+      </button>`;
+    }).join('');
+    switcher.hidden = false;
+    switcher.querySelectorAll('[data-storm-id]').forEach(button => {
+      button.addEventListener('click', () => {
+        if (button.dataset.stormId !== state.stormId) selectStorm(button.dataset.stormId, button.dataset.stormZj || '');
+      });
+    });
+  }
+
+  async function loadStormsSummary() {
+    try {
+      const cached = readCache('pulse.typhoons.summary.detail.v1');
+      const payload = cached || await fetchJson('/api/typhoons');
+      if (!cached) writeCache('pulse.typhoons.summary.detail.v1', payload);
+      state.stormsSummary = (payload?.storms || []).filter(storm => storm?.active);
+    } catch (error) {
+      state.stormsSummary = [];
+      console.warn('Typhoon summary for switcher unavailable:', error);
+    }
+  }
+
+  async function selectStorm(stormId, zhejiangId = '') {
+    state.stormId = stormId;
+    const query = zhejiangId ? `?zj=${encodeURIComponent(zhejiangId)}` : '';
+    history.replaceState(null, '', `/typhoon/${encodeURIComponent(stormId)}${query}`);
+    el('topbarStormName').textContent = '正在切换';
+    renderStormSwitcher();
+    await loadStormDetail(stormId, zhejiangId);
+  }
+
+  async function loadStormDetail(stormId, zhejiangId = '') {
+    const cacheKey = `pulse.typhoon.detail.${stormId}.${zhejiangId || 'fallback'}.v6`;
+    let detail = readCache(cacheKey);
+    if (!detail || detail.schemaVersion !== '3') {
+      detail = await fetchJson(`/api/typhoon?id=${encodeURIComponent(stormId)}${zhejiangId ? `&zj=${encodeURIComponent(zhejiangId)}` : ''}`);
+      writeCache(cacheKey, detail);
+    }
+    state.detail = detail;
+    state.windCirclePoint = detail.tracks?.observed?.at(-1) || detail.storm;
+    renderOverview();
+    renderLayerControls();
+    renderSourceControls();
+    renderAgencyList();
+    preparePlayback();
+    if (!state.map) initializeMap();
+    else refreshMapForStorm();
+    renderOtherStormTracks();
+  }
+
+  function refreshMapForStorm() {
+    const position = state.detail?.storm?.position;
+    if (!state.map || !position) return;
+    state.map.flyTo({ center: [position.lon, position.lat], zoom: Math.max(state.map.getZoom(), 5.4), padding: mapPadding(), retainPadding: false, duration: 700 });
+    if (state.map.isStyleLoaded()) rebuildStormLayers();
+    else state.map.once('load', rebuildStormLayers);
+  }
+
+  function rebuildStormLayers() {
+    const map = state.map;
+    if (!map || !map.getStyle()) return;
+    removeMarkers();
+    state.windCircleLabelMarkers.forEach(marker => marker.remove());
+    state.windCircleLabelMarkers = [];
+    const layerIds = map.getStyle().layers.map(layer => layer.id);
+    const removable = layerIds.filter(id => /^(track-|points-|wind-circle-|playback-)/.test(id));
+    removable.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
+    ['track-observed', 'points-observed', 'wind-circles', 'playback-history', 'playback-forecast', 'playback-cursor',
+      ...(state.detail?.tracks?.forecasts || []).flatMap(track => [`track-${track.id}`, `points-${track.id}`]),
+      ...state.otherStormTracks.flatMap(item => [`other-track-${item.id}`, `other-points-${item.id}`])
+    ].forEach(sourceId => { if (map.getSource(sourceId)) map.removeSource(sourceId); });
+    hydrateMapStyle().catch(error => console.warn('Storm layer rebuild failed:', error));
+  }
+
+  async function renderOtherStormTracks() {
+    const map = state.map;
+    if (!map || !map.getStyle()) return;
+    const others = state.stormsSummary.filter(storm => storm?.active && storm.id && storm.id !== state.stormId);
+    const loaded = [];
+    for (const storm of others.slice(0, 4)) {
+      try {
+        const zj = storm.providerIds?.zhejiang || '';
+        const cacheKey = `pulse.typhoon.detail.${storm.id}.${zj || 'fallback'}.v6`;
+        let detail = readCache(cacheKey);
+        if (!detail || detail.schemaVersion !== '3') {
+          detail = await fetchJson(`/api/typhoon?id=${encodeURIComponent(storm.id)}${zj ? `&zj=${encodeURIComponent(zj)}` : ''}`);
+          writeCache(cacheKey, detail);
+        }
+        const observed = detail?.tracks?.observed || [];
+        if (observed.length > 1) loaded.push({ id: storm.id, name: stormDisplayName(storm), points: observed });
+      } catch (error) {
+        console.warn(`Other storm track unavailable for ${storm.id}:`, error);
+      }
+    }
+    state.otherStormTracks.forEach(item => {
+      [`other-track-${item.id}`, `other-points-${item.id}`].forEach(id => {
+        if (map.getLayer(id)) map.removeLayer(id);
+        if (map.getSource(id)) map.removeSource(id);
+      });
+    });
+    state.otherStormTracks = loaded;
+    loaded.forEach(item => {
+      if (state.stormId === item.id || map.getSource(`other-track-${item.id}`)) return;
+      map.addSource(`other-track-${item.id}`, { type: 'geojson', data: lineFeature(item.points, { sourceId: `other-${item.id}` }) });
+      map.addLayer({ id: `other-track-${item.id}`, type: 'line', source: `other-track-${item.id}`, paint: { 'line-color': '#8fb6c9', 'line-width': 1.6, 'line-opacity': .5, 'line-dasharray': [1.5, 1.8] } });
+      const lastPoint = item.points[item.points.length - 1];
+      const currentPointFeature = {
+        type: 'FeatureCollection',
+        features: [{ type: 'Feature', properties: { stormName: item.name }, geometry: { type: 'Point', coordinates: [lastPoint.position.lon, lastPoint.position.lat] } }]
+      };
+      if (!map.getSource(`other-points-${item.id}`)) map.addSource(`other-points-${item.id}`, { type: 'geojson', data: currentPointFeature });
+      map.addLayer({ id: `other-points-${item.id}`, type: 'circle', source: `other-points-${item.id}`, paint: { 'circle-radius': 4.5, 'circle-color': '#a8ccdd', 'circle-stroke-color': '#16334a', 'circle-stroke-width': 1.4, 'circle-opacity': .85 } });
+    });
+  }
+
   function renderOverview() {
     const detail = state.detail;
     const storm = detail.storm;
@@ -1345,25 +1486,15 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       return;
     }
     const zhejiangId = new URLSearchParams(location.search).get('zj') || '';
-    const cacheKey = `pulse.typhoon.detail.${state.stormId}.${zhejiangId || 'fallback'}.v6`;
     try {
-      let detail = readCache(cacheKey);
-      if (!detail || detail.schemaVersion !== '3') {
-        detail = await fetchJson(`/api/typhoon?id=${encodeURIComponent(state.stormId)}${zhejiangId ? `&zj=${encodeURIComponent(zhejiangId)}` : ''}`);
-        writeCache(cacheKey, detail);
-      }
-      state.detail = detail;
-      state.windCirclePoint = detail.tracks?.observed?.at(-1) || detail.storm;
-      renderOverview();
-      renderLayerControls();
-      renderSourceControls();
-      renderAgencyList();
-      preparePlayback();
-      initializeMap();
+      await loadStormsSummary();
+      renderStormSwitcher();
+      await loadStormDetail(state.stormId, zhejiangId);
       userLocationRequest.then(locationData => {
         if (!locationData) return;
         renderOverview();
         renderUserLocationMarker();
+        renderStormSwitcher();
       });
       el('pageState').hidden = true;
     } catch (error) {

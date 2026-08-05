@@ -147,10 +147,10 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  width: min(280px, 78vw);
+  width: min(232px, 70vw);
   max-height: min(52dvh, 360px);
   overflow: hidden;
-  padding: 8px;
+  padding: 7px;
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--glass-solid);
@@ -158,7 +158,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
 }
-.storm-switcher-menu-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 3px 5px 8px; }
+.storm-switcher-menu-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 3px 4px 7px; }
 .storm-switcher-menu-heading strong { font-size: 11px; font-weight: 650; }
 .storm-switcher-menu-heading small { color: var(--faint); font-size: 9px; }
 .storm-switcher-list { display: grid; gap: 4px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
@@ -168,7 +168,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 8px 9px;
+  padding: 7px 8px;
   border: 1px solid transparent;
   border-radius: 11px;
   background: transparent;
@@ -744,7 +744,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   .storm-switcher { top: calc(max(8px, env(safe-area-inset-top)) + 103px); left: 8px; width: 136px; }
   .storm-switcher-trigger { min-height: 34px; padding: 5px 7px; border-radius: 11px; }
   .storm-switch { padding: 8px; font-size: 11px; gap: 7px; }
-  .storm-switcher-menu { left: 0; right: auto; width: min(280px, calc(100vw - 24px)); max-height: min(48dvh, 330px); }
+  .storm-switcher-menu { left: 0; right: auto; width: min(232px, calc(100vw - 24px)); max-height: min(48dvh, 330px); }
   .topbar-status { display: none; }
   .icon-button { width: 42px; height: 42px; }
   .map-toolbar {

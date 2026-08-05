@@ -26,7 +26,6 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     windCirclePoint: null,
     weatherOpacity: .58,
     markers: [],
-    windCircleLabelMarkers: [],
     userLocation: null,
     userLocationPromise: null,
     userLocationMarker: null,
@@ -487,6 +486,66 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     return { type: 'FeatureCollection', features };
   }
 
+  function windCircleLabelCollection(point) {
+    const position = point?.position;
+    if (![Number(position?.lat), Number(position?.lon)].every(Number.isFinite)) return { type: 'FeatureCollection', features: [] };
+    const labelBearings = { 7: 214, 10: 308, 12: 42 };
+    const features = (point.windCircles || []).flatMap(circle => {
+      const level = Number(circle.level);
+      const bearing = labelBearings[level];
+      const radius = windRadiusForBearing(circle, bearing);
+      if (!hasNumber(bearing) || !hasNumber(radius) || Number(radius) <= 0) return [];
+      return [{
+        type: 'Feature',
+        properties: { level, icon: `wind-circle-label-${level}` },
+        geometry: { type: 'Point', coordinates: destinationCoordinate(position, bearing, Number(radius)) }
+      }];
+    });
+    return { type: 'FeatureCollection', features };
+  }
+
+  function windCircleLabelImage(style, label) {
+    const pixelRatio = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+    const width = 72;
+    const height = 22;
+    const canvas = document.createElement('canvas');
+    canvas.width = width * pixelRatio;
+    canvas.height = height * pixelRatio;
+    const context = canvas.getContext('2d');
+    context.scale(pixelRatio, pixelRatio);
+    const inset = 1;
+    const radius = height / 2;
+    context.beginPath();
+    context.moveTo(radius, inset);
+    context.lineTo(width - radius, inset);
+    context.arc(width - radius, radius, radius - inset, -Math.PI / 2, Math.PI / 2);
+    context.lineTo(radius, height - inset);
+    context.arc(radius, radius, radius - inset, Math.PI / 2, Math.PI * 1.5);
+    context.closePath();
+    context.fillStyle = 'rgba(8, 24, 35, .82)';
+    context.fill();
+    context.strokeStyle = style.color;
+    context.globalAlpha = .82;
+    context.lineWidth = 1;
+    context.stroke();
+    context.globalAlpha = 1;
+    context.fillStyle = style.color;
+    context.font = '700 10px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(label, width / 2, height / 2 + .25);
+    return { width: canvas.width, height: canvas.height, data: context.getImageData(0, 0, canvas.width, canvas.height).data, pixelRatio };
+  }
+
+  function ensureWindCircleLabelImages(map) {
+    Object.entries(windCircleStyles).forEach(([level, style]) => {
+      const imageId = `wind-circle-label-${level}`;
+      if (map.hasImage(imageId)) return;
+      const image = windCircleLabelImage(style, `${level}级风圈`);
+      map.addImage(imageId, { width: image.width, height: image.height, data: image.data }, { pixelRatio: image.pixelRatio });
+    });
+  }
+
   function windCircleRange(circle) {
     if (!circle) return '未提供';
     return circle.minRadiusKm === circle.maxRadiusKm ? `${circle.maxRadiusKm} km` : `${circle.minRadiusKm}–${circle.maxRadiusKm} km`;
@@ -509,18 +568,32 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     el('typhoonMap').dataset.windCircleCount = String(collection.features.length);
     const source = state.map?.getSource('wind-circles');
     if (source) source.setData(collection);
-    renderWindCircleLabels(point);
+    const labelSource = state.map?.getSource('wind-circle-labels');
+    if (labelSource) labelSource.setData(windCircleLabelCollection(point));
     renderWindCircleLegend(point, { historical });
   }
 
   function addWindCircleLayers() {
     const map = state.map;
-    if (!map || map.getSource('wind-circles')) return;
-    map.addSource('wind-circles', { type: 'geojson', data: windCircleCollection(state.windCirclePoint) });
+    if (!map) return;
+    ensureWindCircleLabelImages(map);
+    if (!map.getSource('wind-circles')) map.addSource('wind-circles', { type: 'geojson', data: windCircleCollection(state.windCirclePoint) });
+    if (!map.getSource('wind-circle-labels')) map.addSource('wind-circle-labels', { type: 'geojson', data: windCircleLabelCollection(state.windCirclePoint) });
     [7, 10, 12].forEach(level => {
       const style = windCircleStyles[level];
-      map.addLayer({ id: `wind-circle-${level}-fill`, type: 'fill', source: 'wind-circles', filter: ['==', ['get', 'level'], level], paint: { 'fill-color': style.color, 'fill-opacity': style.fillOpacity } });
-      map.addLayer({ id: `wind-circle-${level}-line`, type: 'line', source: 'wind-circles', filter: ['==', ['get', 'level'], level], paint: { 'line-color': style.color, 'line-width': 1.35, 'line-opacity': .88 } });
+      if (!map.getLayer(`wind-circle-${level}-fill`)) map.addLayer({ id: `wind-circle-${level}-fill`, type: 'fill', source: 'wind-circles', filter: ['==', ['get', 'level'], level], paint: { 'fill-color': style.color, 'fill-opacity': style.fillOpacity } });
+      if (!map.getLayer(`wind-circle-${level}-line`)) map.addLayer({ id: `wind-circle-${level}-line`, type: 'line', source: 'wind-circles', filter: ['==', ['get', 'level'], level], paint: { 'line-color': style.color, 'line-width': 1.35, 'line-opacity': .88 } });
+    });
+    if (!map.getLayer('wind-circle-label-symbols')) map.addLayer({
+      id: 'wind-circle-label-symbols',
+      type: 'symbol',
+      source: 'wind-circle-labels',
+      layout: {
+        'icon-image': ['get', 'icon'],
+        'icon-anchor': 'center',
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true
+      }
     });
   }
 
@@ -562,34 +635,9 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   function removeMarkers() {
     state.markers.forEach(marker => marker.remove());
     state.markers = [];
-    state.windCircleLabelMarkers.forEach(marker => marker.remove());
-    state.windCircleLabelMarkers = [];
     state.userLocationMarker?.remove();
     state.userLocationMarker = null;
     state.currentMarker = null;
-  }
-
-  function renderWindCircleLabels(point) {
-    state.windCircleLabelMarkers.forEach(marker => marker.remove());
-    state.windCircleLabelMarkers = [];
-    if (!state.map || !point?.position || !point.windCircles?.length) return;
-    const labelBearings = { 7: 214, 10: 308, 12: 42 };
-    point.windCircles.forEach(circle => {
-      const level = Number(circle.level);
-      const style = windCircleStyles[level] || windCircleStyles[7];
-      const bearing = labelBearings[level] ?? 315;
-      const radius = windRadiusForBearing(circle, bearing);
-      if (!hasNumber(radius) || Number(radius) <= 0) return;
-      const markerElement = document.createElement('div');
-      markerElement.className = 'wind-circle-map-label';
-      markerElement.style.setProperty('--wind-circle-color', style.color);
-      markerElement.textContent = `${level}级风圈`;
-      markerElement.setAttribute('aria-hidden', 'true');
-      const marker = new maplibregl.Marker({ element: markerElement, anchor: 'center' })
-        .setLngLat(destinationCoordinate(point.position, bearing, Number(radius)))
-        .addTo(state.map);
-      state.windCircleLabelMarkers.push(marker);
-    });
   }
 
   function markerLabel(point) { return formatDate(point.validAt, true).replace('日', '日 '); }
@@ -654,7 +702,6 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       });
     }
     renderUserLocationMarker();
-    renderWindCircleLabels(state.windCirclePoint);
     syncPlaybackMap();
   }
 
@@ -1355,12 +1402,10 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const map = state.map;
     if (!map || !map.getStyle()) return;
     removeMarkers();
-    state.windCircleLabelMarkers.forEach(marker => marker.remove());
-    state.windCircleLabelMarkers = [];
     const layerIds = map.getStyle().layers.map(layer => layer.id);
     const removable = layerIds.filter(id => /^(track-|points-|wind-circle-|playback-)/.test(id));
     removable.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-    ['track-observed', 'points-observed', 'wind-circles', 'playback-history', 'playback-forecast', 'playback-cursor',
+    ['track-observed', 'points-observed', 'wind-circles', 'wind-circle-labels', 'playback-history', 'playback-forecast', 'playback-cursor',
       ...(state.detail?.tracks?.forecasts || []).flatMap(track => [`track-${track.id}`, `points-${track.id}`]),
       ...state.otherStormTracks.flatMap(item => [`other-track-${item.id}`, `other-points-${item.id}`])
     ].forEach(sourceId => { if (map.getSource(sourceId)) map.removeSource(sourceId); });

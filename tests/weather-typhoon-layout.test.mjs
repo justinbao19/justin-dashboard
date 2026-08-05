@@ -102,11 +102,13 @@ test('mobile typhoon layout keeps map controls edge-aligned, removes duplicate s
   assert.match(html, /class="track-playback" id="trackPlayback"/);
   assert.match(html, /id="playbackSlider"/);
   assert.match(html, /id="playbackDateTicks"/);
-  assert.match(css, /\.wind-circle-map-label \{/);
+  assert.doesNotMatch(css, /\.wind-circle-map-label \{/);
   assert.match(css, /\.track-playback \{/);
   assert.match(css, /\.playback-date-ticks span \{/);
-  assert.match(js, /windCircleLabelMarkers/);
-  assert.match(js, /markerElement\.textContent = `\$\{level\}级风圈`/);
+  assert.doesNotMatch(js, /windCircleLabelMarkers/);
+  assert.match(js, /map\.addSource\('wind-circle-labels'/);
+  assert.match(js, /id: 'wind-circle-label-symbols'/);
+  assert.match(js, /'icon-image': \['get', 'icon'\]/);
   assert.match(js, /const labelBearings = \{ 7: 214, 10: 308, 12: 42 \};/);
   assert.match(js, /function buildPlaybackPoints\(\)/);
   assert.match(js, /PLAYBACK_HISTORY_WINDOW_MS = 5 \* 24 \* 60 \* 60 \* 1000/);

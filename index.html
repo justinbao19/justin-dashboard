@@ -2583,7 +2583,7 @@
         }
         .f1-session-date-day { font-size: 18px; font-weight: 700; color: var(--text-primary); }
         .f1-session-date-weekday { font-size: 9px; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; }
-        .f1-session-info { flex: 1; }
+        .f1-session-info { flex: 1; min-width: 0; }
         .f1-session-name { font-size: 15px; font-weight: 600; color: var(--text-primary); }
         .f1-session-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
         .f1-session.race .f1-session-name { color: var(--f1-accent); }
@@ -2591,8 +2591,31 @@
         .f1-session.is-clickable { cursor: pointer; min-height: 72px; }
         .f1-session.is-clickable:hover { border-color: var(--f1-accent-border); transform: translateY(-1px); }
         .f1-session.is-clickable:focus-visible { outline: 2px solid var(--f1-accent); outline-offset: 2px; }
+        .f1-session-meta { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-left: 14px; }
         .f1-session-action { display: flex; align-items: center; gap: 8px; color: var(--f1-accent); font-size: 12px; font-weight: 700; }
-        .f1-session-state { color: var(--text-tertiary); font-size: 11px; font-weight: 600; }
+        .f1-session-state,
+        .f1-race-day-label {
+            width: fit-content;
+            padding: 4px 9px;
+            border-radius: 999px;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        .f1-session-state {
+            color: var(--text-tertiary);
+            font-size: 11px;
+            font-weight: 600;
+            background: color-mix(in oklab, var(--bg-tertiary) 82%, transparent);
+            border: 1px solid var(--border);
+        }
+        .f1-race-day-label {
+            color: var(--f1-accent);
+            font-size: 10px;
+            font-weight: 750;
+            letter-spacing: 0.12em;
+            background: var(--f1-accent-soft);
+            border: 1px solid var(--f1-accent-border);
+        }
         .f1-session-results[hidden] { display: none; }
         .f1-session-results { margin-top: 24px; }
         .f1-session-results-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
@@ -2802,8 +2825,10 @@
             margin-bottom: 16px;
         }
         .f1-chart-svg {
+            display: block;
             width: 100%;
             height: 120px;
+            overflow: visible;
         }
         .f1-chart-line {
             fill: none;
@@ -2820,12 +2845,13 @@
             stroke-width: 2;
         }
         .f1-chart-labels {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            align-items: center;
             margin-top: 8px;
             font-size: 11px;
             color: var(--text-tertiary);
         }
+        .f1-chart-labels span { min-width: 0; text-align: center; white-space: nowrap; }
 
         /* Race Results Table */
         .f1-results-card {
@@ -5447,23 +5473,22 @@
                 overflow-wrap: anywhere;
             }
 
-            .f1-session-state,
-            .f1-session-action {
+            .f1-session-meta {
                 grid-column: 2;
                 grid-row: 2;
                 justify-self: start;
-                width: fit-content;
+                justify-content: flex-start;
+                width: 100%;
                 max-width: 100%;
+                margin-left: 0;
                 margin-top: 7px;
-                white-space: nowrap;
+                gap: 7px;
             }
 
-            .f1-session-state {
-                padding: 4px 9px;
-                border-radius: 999px;
-                background: color-mix(in oklab, var(--bg-tertiary) 82%, transparent);
-                border: 1px solid var(--border);
-                line-height: 1.2;
+            .f1-session-state,
+            .f1-session-action,
+            .f1-race-day-label {
+                margin-top: 0;
             }
 
             .f1-next-location {
@@ -6737,23 +6762,6 @@
             color: var(--f1-accent) !important;
             font-weight: 700;
         }
-        /* 轻量描边标签,替代填充渐变徽章 */
-        #page-f1 .f1-session.race::after {
-            content: '比赛日';
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            padding: 4px 11px;
-            border-radius: 999px;
-            background: var(--f1-accent-soft);
-            color: var(--f1-accent) !important;
-            border: 1px solid var(--f1-accent-border);
-        }
-
         /* 比赛时间排版强化 */
         #page-f1 .f1-session-time {
             font-size: 13px;
@@ -8501,7 +8509,7 @@
                     <!-- 积分走势图 -->
                     <div class="f1-points-chart">
                         <div class="f1-chart-title">📈 2026 赛季积分走势</div>
-                        <svg class="f1-chart-svg" id="driverPointsChart" viewBox="0 0 300 120"></svg>
+                        <svg class="f1-chart-svg" id="driverPointsChart" role="img" aria-label="车手本赛季累计积分走势"></svg>
                         <div class="f1-chart-labels" id="driverChartLabels"></div>
                     </div>
 
@@ -11613,6 +11621,7 @@
                     const action = hasStarted
                         ? `<div class="f1-session-action"><span>${stateLabel === '进行中' ? '实时排名' : '查看成绩'}</span><i class="fas fa-chevron-right"></i></div>`
                         : `<div class="f1-session-state">${stateLabel}</div>`;
+                    const raceDayLabel = isRace ? '<span class="f1-race-day-label">比赛日</span>' : '';
                     return `<div class="f1-session ${sessionClass} ${hasStarted ? 'is-clickable' : ''}" ${hasStarted ? `role="button" tabindex="0" onclick="showF1SessionResults(${s.session_key})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showF1SessionResults(${s.session_key})}"` : ''}>
                         <div class="f1-session-date">
                             <div class="f1-session-date-day">${String(d.getDate()).padStart(2,'0')}</div>
@@ -11622,7 +11631,7 @@
                             <div class="f1-session-name">${icon} ${s.name}</div>
                             <div class="f1-session-time">${timeStr}</div>
                         </div>
-                        ${action}
+                        <div class="f1-session-meta">${raceDayLabel}${action}</div>
                     </div>`;
                 }).join('');
                 document.getElementById('f1Sessions').innerHTML = sessionsHtml;
@@ -11808,12 +11817,23 @@
             document.getElementById('f1-list-view').style.display = 'block';
         }
 
+        let _f1PointsChartState = null;
+        let _f1PointsChartWidth = 0;
+        let _f1PointsChartResizeFrame = 0;
+
         function renderPointsChart(results, color) {
             const svg = document.getElementById('driverPointsChart');
             const labels = document.getElementById('driverChartLabels');
+            const w = Math.max(300, Math.round(svg.getBoundingClientRect().width || svg.parentElement?.clientWidth || 300));
+            const h = 120;
+            const padX = Math.min(48, Math.max(20, w * 0.025));
+
+            _f1PointsChartState = { results, color };
+            _f1PointsChartWidth = w;
+            svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
 
             if (!results.length) {
-                svg.innerHTML = '<text x="150" y="60" text-anchor="middle" fill="var(--text-tertiary)">暂无数据</text>';
+                svg.innerHTML = `<text x="${w / 2}" y="60" text-anchor="middle" fill="var(--text-tertiary)">暂无数据</text>`;
                 labels.innerHTML = '';
                 return;
             }
@@ -11826,7 +11846,7 @@
             });
 
             const maxPts = Math.max(...points, 1);
-            const w = 300, h = 100, padX = 40, padY = 20;
+            const padY = 22;
             const chartH = h - padY * 2;
 
             // 固定间距，确保点不重叠
@@ -11886,9 +11906,23 @@
                 `).join('')}
             `;
 
-            // 标签
+            // 标签与折线使用同一组水平内边距，确保宽屏下逐站精确对齐。
+            labels.style.gridTemplateColumns = `repeat(${results.length}, minmax(0, 1fr))`;
+            labels.style.paddingInline = `${padX}px`;
             labels.innerHTML = results.map(r => `<span>${r.flag} R${r.round}</span>`).join('');
         }
+
+        const _f1PointsChartObserver = typeof ResizeObserver === 'function'
+            ? new ResizeObserver(entries => {
+                const nextWidth = Math.round(entries[0]?.contentRect.width || 0);
+                if (!_f1PointsChartState || nextWidth < 280 || Math.abs(nextWidth - _f1PointsChartWidth) < 2) return;
+                cancelAnimationFrame(_f1PointsChartResizeFrame);
+                _f1PointsChartResizeFrame = requestAnimationFrame(() => {
+                    renderPointsChart(_f1PointsChartState.results, _f1PointsChartState.color);
+                });
+            })
+            : null;
+        _f1PointsChartObserver?.observe(document.getElementById('driverPointsChart'));
 
         function renderRaceResults(results) {
             const tbody = document.getElementById('driverResultsBody');

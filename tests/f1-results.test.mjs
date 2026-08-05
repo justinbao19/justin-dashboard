@@ -41,8 +41,23 @@ test('live badge stays in the card corner while round leads the content', async 
 test('mobile race session state sits below the session title without overlap', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /\.f1-session\s*\{[\s\S]*?display:\s*grid;[\s\S]*?grid-template-columns:\s*48px minmax\(0, 1fr\)/);
-  assert.match(html, /\.f1-session-state,[\s\S]*?\.f1-session-action\s*\{[\s\S]*?grid-column:\s*2;[\s\S]*?grid-row:\s*2;[\s\S]*?margin-top:\s*7px;/);
+  assert.match(html, /\.f1-session-meta\s*\{[\s\S]*?grid-column:\s*2;[\s\S]*?grid-row:\s*2;[\s\S]*?flex-wrap:\s*wrap;[\s\S]*?margin-top:\s*7px;/);
   assert.match(html, /\.f1-session-state\s*\{[\s\S]*?border-radius:\s*999px;/);
+});
+
+test('race day and session state share a responsive metadata group', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /class="f1-session-meta">\$\{raceDayLabel\}\$\{action\}/);
+  assert.match(html, /const raceDayLabel = isRace \? '<span class="f1-race-day-label">比赛日<\/span>' : '';/);
+  assert.doesNotMatch(html, /\.f1-session\.race::after\s*\{[\s\S]*?content:\s*'比赛日'/);
+});
+
+test('driver points chart follows its rendered container width', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /const w = Math\.max\(300, Math\.round\(svg\.getBoundingClientRect\(\)\.width/);
+  assert.match(html, /svg\.setAttribute\('viewBox', `0 0 \$\{w\} \$\{h\}`\)/);
+  assert.match(html, /labels\.style\.gridTemplateColumns = `repeat\(\$\{results\.length\}, minmax\(0, 1fr\)\)`/);
+  assert.match(html, /new ResizeObserver\(entries =>/);
 });
 
 test('live badge keeps still while only its red dot breathes', async () => {

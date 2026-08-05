@@ -1267,8 +1267,8 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     });
     const selectedStorm = ranked.find(storm => storm.id === state.stormId) || ranked[0];
     switcher.innerHTML = `<button class="storm-switcher-trigger" type="button" aria-expanded="false" aria-controls="stormSwitcherMenu">
-      <span class="storm-switch-dot" aria-hidden="true"></span>
-      <span class="storm-switcher-copy"><strong>${escapeHtml(stormDisplayName(selectedStorm))}</strong><small>活跃台风 ${storms.length} 个</small></span>
+      <i class="ph ph-hurricane storm-switcher-icon" aria-hidden="true"></i>
+      <span class="storm-switcher-copy"><strong>${escapeHtml(stormDisplayName(selectedStorm))}</strong><small>${storms.length} 个活跃台风</small></span>
       <i class="ph ph-caret-down" aria-hidden="true"></i>
     </button>
     <div class="storm-switcher-menu" id="stormSwitcherMenu" hidden>

@@ -146,6 +146,8 @@ test('typhoon switching stays compact and homepage ranking accounts for approach
   ]);
 
   assert.match(css, /storm-switcher-trigger/);
+  assert.match(css, /storm-switcher-icon/);
+  assert.match(css, /rotate\(-360deg\)/);
   assert.match(css, /storm-switcher-menu/);
   assert.match(css, /max-height: min\(/);
   assert.doesNotMatch(css, /\.storm-switcher::-webkit-scrollbar/);

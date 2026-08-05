@@ -9752,12 +9752,13 @@
             const needleAngle = bearing - 180;
             const minorTicks = Array.from({ length: 60 }, (_, index) => {
                 const angle = index * 6;
-                const long = angle % 90 === 0;
-                const outer = 55, inner = long ? 47 : 49.5;
+                const nearestCardinal = Math.min(...[0, 90, 180, 270, 360].map(cardinal => Math.abs(angle - cardinal)));
+                if (nearestCardinal < 13) return '';
+                const outer = 55, inner = 49.5;
                 const rad = (angle - 90) * Math.PI / 180;
                 const x1 = 58 + inner * Math.cos(rad), y1 = 58 + inner * Math.sin(rad);
                 const x2 = 58 + outer * Math.cos(rad), y2 = 58 + outer * Math.sin(rad);
-                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,${long ? 0.5 : 0.3})" stroke-width="${long ? 1.6 : 0.9}" stroke-linecap="round"/>`;
+                return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="rgba(233,244,253,0.3)" stroke-width="0.9" stroke-linecap="round"/>`;
             }).join('');
             const value = escapeHtml(String(metric.displayValue));
             const unit = escapeHtml(metric.displayUnit || '');

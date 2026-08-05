@@ -29,6 +29,10 @@ test('desktop weather cards use dense paired spans so optional alerts do not cre
 
   assert.match(html, /grid-auto-flow: row dense;/);
   assert.match(html, /\.weather-typhoon-card \{[\s\S]*?grid-column: span 5;/);
+  assert.match(html, /\.weather-typhoon-card \.typhoon-card-metrics \{[\s\S]*?grid-template-columns: minmax\(0, 1\.35fr\) minmax\(0, \.9fr\) minmax\(0, \.9fr\);/);
+  assert.match(html, /id="typhoonCardMetricLocation"/);
+  assert.match(html, /id="typhoonCardMetricIntensity"/);
+  assert.match(html, /id="typhoonCardMetricUpdated"/);
   assert.match(html, /\.weather-nowcast-card \{[\s\S]*?grid-column: span 7;/);
   assert.match(html, /\.weather-daily-card,[\s\S]*?\.weather-aqi-card \{[\s\S]*?grid-column: span 5;/);
   assert.match(html, /\.weather-commute-card,[\s\S]*?\.weather-life-card \{[\s\S]*?grid-column: span 7;/);

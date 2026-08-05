@@ -16,9 +16,26 @@ test('scene motion responds to real wind, precipitation and astronomy values', (
   assert.match(html, /realtime\?\.precipitation\?\.local\?\.intensity/);
   assert.match(html, /const windSpeed = Number\(realtime\?\.wind\?\.speed \|\| 0\)/);
   assert.match(html, /const windDirection = Number\(realtime\?\.wind\?\.direction \|\| 0\)/);
-  assert.match(html, /updateCelestialPosition\(scene, astro, isNight, weather\.celestialProgress\)/);
+  assert.match(html, /updateCelestialPosition\(scene, astro, sceneIsNight, weather\.celestialProgress\)/);
   assert.match(html, /const isNight = typeof weather\.forceNight === 'boolean'[\s\S]*\? \(now < sunrise \|\| now > sunset\)/);
   assert.match(html, /updateScene\(scenePreview\?\.skycon \|\| rt\.skycon \|\| 'CLEAR_DAY', scenePreview\?\.weather \|\| \{\s*realtime: rt,\s*hourly: d\.hourly \|\| \{\},\s*astro: d\.daily\?\.astro\?\.\[0\] \|\| \{\}/);
+});
+
+test('scene engine uses observed cloud cover and a continuous solar phase', () => {
+  assert.match(html, /realtime\?\.cloudrate \?\? realtime\?\.cloud/);
+  assert.match(html, /function resolveSolarPhase\(astro = \{\}, forcedProgress = null, forceNight = null\)/);
+  assert.match(html, /scene\.style\.setProperty\('--cloud-density', normalizedCloudCover\.toFixed\(2\)\)/);
+  assert.match(html, /clearDawn:/);
+  assert.match(html, /clearDusk:/);
+  assert.match(html, /clearTwilight:/);
+});
+
+test('rain combines atmospheric particles, ground splashes and sparse glass drops', () => {
+  assert.match(html, /<canvas class="weather-glass" id="weatherGlass"/);
+  assert.match(html, /function drawWeatherGlass\(deltaSeconds\)/);
+  assert.match(html, /function drawRainSplashes\(ctx, deltaSeconds\)/);
+  assert.match(html, /glassCanvas\.dataset\.raining = glassEnabled \? 'true' : 'false'/);
+  assert.match(html, /\.weather-glass\.is-active/);
 });
 
 test('weather animation has mobile performance and reduced-motion safeguards', () => {

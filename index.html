@@ -9899,6 +9899,39 @@
             return ['北','东北','东','东南','南','西南','西','西北'][Math.round(bearing / 45) % 8];
         }
 
+        function typhoonBearing(from, to) {
+            const lat1 = Number(from?.lat), lon1 = Number(from?.lon), lat2 = Number(to?.lat), lon2 = Number(to?.lon);
+            if (![lat1, lon1, lat2, lon2].every(Number.isFinite)) return null;
+            const rad = value => value * Math.PI / 180;
+            const y = Math.sin(rad(lon2 - lon1)) * Math.cos(rad(lat2));
+            const x = Math.cos(rad(lat1)) * Math.sin(rad(lat2)) - Math.sin(rad(lat1)) * Math.cos(rad(lat2)) * Math.cos(rad(lon2 - lon1));
+            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+        }
+
+        function typhoonMovementBearing(storm) {
+            const direction = String(storm?.movement?.directionText || '').trim();
+            const bearings = { '北': 0, '东北': 45, '东': 90, '东南': 135, '南': 180, '西南': 225, '西': 270, '西北': 315 };
+            return Object.prototype.hasOwnProperty.call(bearings, direction) ? bearings[direction] : null;
+        }
+
+        function typhoonImpactScore(location, storm) {
+            const distance = typhoonDistanceKm(location, storm?.position);
+            if (distance === null) return 0;
+            const proximity = Math.max(0, 1 - Math.min(distance, 2400) / 2400);
+            const towardLocation = typhoonBearing(storm.position, location);
+            const movement = typhoonMovementBearing(storm);
+            let approach = 0;
+            if (towardLocation !== null && movement !== null) {
+                const delta = Math.abs(((movement - towardLocation + 540) % 360) - 180);
+                approach = Math.max(0, 1 - delta / 90);
+            }
+            const speed = Number(storm?.movement?.speedKmh);
+            const moving = Number.isFinite(speed) && speed > 0 ? Math.min(1, speed / 35) : 0;
+            const intensity = Number(storm?.intensity?.value);
+            const severity = Number.isFinite(intensity) ? Math.min(1, intensity / 45) : 0;
+            return proximity * .52 + approach * (.33 + moving * .08) + severity * .07;
+        }
+
         function renderTyphoonSummary(payload) {
             const card = document.getElementById('typhoonEntryCard');
             const eyebrow = document.getElementById('typhoonCardEyebrow');
@@ -9919,6 +9952,9 @@
 
             const location = lastResolvedWeatherLocation || DEFAULT_WEATHER_LOCATION;
             const storm = [...storms].sort((a, b) => {
+                const scoreA = typhoonImpactScore(location, a);
+                const scoreB = typhoonImpactScore(location, b);
+                if (scoreA !== scoreB) return scoreB - scoreA;
                 const distanceA = typhoonDistanceKm(location, a.position);
                 const distanceB = typhoonDistanceKm(location, b.position);
                 if (distanceA !== null && distanceB !== null) return distanceA - distanceB;

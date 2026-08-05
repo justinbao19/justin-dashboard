@@ -127,6 +127,24 @@ test('typhoon detail supports switching between multiple active storms on one ma
   assert.match(jsSource, /history\.replaceState\(null, '', `\/typhoon\/\$\{encodeURIComponent\(stormId\)\}\$\{query\}`\)/);
   assert.match(jsSource, /function renderOtherStormTracks\(\)/);
   assert.match(jsSource, /other-track-\$\{item\.id\}/);
+  assert.match(jsSource, /detail\?\.tracks\?\.forecasts/);
+  assert.match(jsSource, /FeatureCollection', features/);
+  assert.match(jsSource, /state\.otherStormTracks\.forEach/);
   assert.match(jsSource, /storm\.id !== state\.stormId/);
   assert.match(jsSource, /distanceKm\(locationData, a\.position\)/);
+});
+
+test('typhoon switching stays compact and homepage ranking accounts for approach direction', async () => {
+  const [css, index] = await Promise.all([
+    readFile(new URL('typhoon.css', root), 'utf8'),
+    readFile(new URL('index.html', root), 'utf8')
+  ]);
+
+  assert.match(css, /storm-switcher-trigger/);
+  assert.match(css, /storm-switcher-menu/);
+  assert.match(css, /max-height: min\(/);
+  assert.doesNotMatch(css, /\.storm-switcher::-webkit-scrollbar/);
+  assert.match(index, /function typhoonImpactScore\(location, storm\)/);
+  assert.match(index, /typhoonMovementBearing\(storm\)/);
+  assert.match(index, /scoreB - scoreA/);
 });

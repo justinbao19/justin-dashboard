@@ -101,33 +101,62 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .icon-button:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
 .icon-button:active { transform: scale(.94); }
 .icon-button i { font-size: 20px; }
-/* Multi-storm switcher strip: sits below the topbar, horizontal scroll on small screens. */
+/* Multi-storm switcher: compact trigger with an internal scrollable menu. */
 .storm-switcher {
   position: fixed;
   z-index: 19;
-  top: calc(max(12px, env(safe-area-inset-top)) + 58px);
-  left: 12px;
-  right: 12px;
+  top: 76px;
+  right: 650px;
+  width: min(178px, calc(100vw - 440px));
+}
+.storm-switcher-trigger {
+  width: 100%;
+  min-height: 42px;
   display: flex;
-  gap: 8px;
-  padding: 6px;
-  overflow-x: auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
   border: 1px solid var(--line);
-  border-radius: 15px;
+  border-radius: 14px;
   background: var(--glass);
   box-shadow: var(--glass-shadow), var(--glass-inset);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  scrollbar-width: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
 }
-.storm-switcher::-webkit-scrollbar { display: none; }
+.storm-switcher-trigger:hover { background: var(--glass-raised); }
+.storm-switcher-trigger > i { margin-left: auto; color: var(--muted); font-size: 14px; }
+.storm-switcher-copy { min-width: 0; display: grid; gap: 2px; }
+.storm-switcher-copy strong { overflow: hidden; color: var(--text); font-size: 12px; font-weight: 650; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.storm-switcher-copy small { overflow: hidden; color: var(--muted); font-size: 10px; font-weight: 500; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.storm-switcher-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(300px, 78vw);
+  max-height: min(52dvh, 360px);
+  overflow: hidden;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--glass-solid);
+  box-shadow: var(--glass-shadow), var(--glass-inset);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+}
+.storm-switcher-menu-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 3px 5px 8px; }
+.storm-switcher-menu-heading strong { font-size: 11px; font-weight: 650; }
+.storm-switcher-menu-heading small { color: var(--faint); font-size: 9px; }
+.storm-switcher-list { display: grid; gap: 4px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
 .storm-switch {
-  flex: 1 0 auto;
-  display: inline-flex;
+  width: 100%;
+  display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 7px 12px;
+  padding: 8px 9px;
   border: 1px solid transparent;
   border-radius: 11px;
   background: transparent;
@@ -146,8 +175,8 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 }
 .storm-switch .storm-switch-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--warning); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 16%, transparent); }
 .storm-switch.active .storm-switch-dot { background: var(--accent, #4fb3ff); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #4fb3ff) 18%, transparent); }
-.storm-switch small { color: var(--faint); font-size: 10px; font-weight: 500; }
-.storm-switch.active small { color: var(--muted); }
+.storm-switch .storm-switch-copy { flex: 1; }
+.storm-switch > i { color: var(--accent); font-size: 15px; }
 .storm-switch:focus-visible { outline: 2px solid var(--accent, #4fb3ff); outline-offset: 1px; }
 
 .topbar-title { min-width: 0; display: grid; gap: 1px; }
@@ -608,6 +637,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 @media (max-width: 1180px) {
   .insight-panel { width: 340px; }
   .map-toolbar, .layer-panel { right: 368px; }
+  .storm-switcher { right: 610px; width: min(178px, calc(100vw - 400px)); }
   .source-strip { max-width: calc(100% - 382px); }
   .node-card { width: min(500px, calc(100% - 396px)); }
   .track-playback { width: min(520px, calc(100% - 396px)); }
@@ -627,6 +657,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
     padding: 4px;
     border-radius: 17px;
   }
+  .storm-switcher { top: 76px; right: 76px; width: min(178px, calc(100vw - 250px)); }
   .basemap-switch { width: 100%; flex-direction: column; gap: 2px; padding: 0 0 4px; border-radius: 0; background: transparent; border-bottom: 1px solid var(--line); }
   .basemap-switch button { width: 44px; min-width: 44px; height: 44px; flex-direction: column; gap: 1px; padding: 0; font-size: 8px; }
   .basemap-switch button i { display: block; font-size: 17px; }
@@ -673,8 +704,10 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 
 @media (max-width: 640px) {
   .topbar { top: max(8px, env(safe-area-inset-top)); left: 8px; right: 8px; height: 50px; grid-template-columns: 42px minmax(0,1fr) 42px; gap: 6px; border-radius: 16px; }
-  .storm-switcher { top: calc(max(8px, env(safe-area-inset-top)) + 56px); left: 8px; right: 8px; padding: 5px; gap: 6px; border-radius: 13px; }
-  .storm-switch { padding: 6px 10px; font-size: 11px; gap: 6px; }
+  .storm-switcher { top: calc(max(8px, env(safe-area-inset-top)) + 60px); right: 68px; width: min(174px, calc(100vw - 250px)); }
+  .storm-switcher-trigger { min-height: 40px; padding: 6px 8px; border-radius: 13px; }
+  .storm-switch { padding: 8px; font-size: 11px; gap: 7px; }
+  .storm-switcher-menu { width: min(280px, calc(100vw - 24px)); max-height: min(48dvh, 330px); }
   .topbar-status { display: none; }
   .icon-button { width: 42px; height: 42px; }
   .map-toolbar {

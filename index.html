@@ -211,6 +211,38 @@
             background: radial-gradient(circle, rgba(255, 229, 155, 0.2), transparent 66%);
             animation: solarBreathe 8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
         }
+        /* 体积感光芒：极淡的锥形光束缓慢旋转，仅晴天可见 */
+        .sun-rays {
+            position: absolute;
+            z-index: 1;
+            left: var(--sun-x, 78%);
+            top: var(--sun-y, 14%);
+            width: clamp(280px, 42vw, 520px);
+            aspect-ratio: 1;
+            transform: translate3d(-50%, -50%, 0);
+            opacity: 0;
+            pointer-events: none;
+            background: conic-gradient(from 0deg,
+                rgba(255,240,196,0) 0deg, rgba(255,240,196,0.16) 6deg, rgba(255,240,196,0) 16deg,
+                rgba(255,240,196,0) 40deg, rgba(255,240,196,0.12) 46deg, rgba(255,240,196,0) 58deg,
+                rgba(255,240,196,0) 92deg, rgba(255,240,196,0.16) 98deg, rgba(255,240,196,0) 112deg,
+                rgba(255,240,196,0) 150deg, rgba(255,240,196,0.1) 156deg, rgba(255,240,196,0) 168deg,
+                rgba(255,240,196,0) 210deg, rgba(255,240,196,0.14) 216deg, rgba(255,240,196,0) 230deg,
+                rgba(255,240,196,0) 270deg, rgba(255,240,196,0.12) 276deg, rgba(255,240,196,0) 292deg,
+                rgba(255,240,196,0) 330deg, rgba(255,240,196,0.14) 336deg, rgba(255,240,196,0) 352deg);
+            -webkit-mask: radial-gradient(circle, rgba(0,0,0,0.9) 8%, rgba(0,0,0,0.5) 34%, transparent 66%);
+            mask: radial-gradient(circle, rgba(0,0,0,0.9) 8%, rgba(0,0,0,0.5) 34%, transparent 66%);
+            filter: blur(3px);
+            transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1), left 700ms cubic-bezier(0.16, 1, 0.3, 1), top 700ms cubic-bezier(0.16, 1, 0.3, 1);
+            animation: sunRaysRotate 68s linear infinite;
+        }
+        .weather-scene.scene-sun .sun-rays { opacity: 0.55; }
+        .weather-scene.scene-sun.scene-dawn .sun-rays,
+        .weather-scene.scene-sun.scene-dusk .sun-rays { opacity: 0.72; }
+        @keyframes sunRaysRotate {
+            from { transform: translate3d(-50%, -50%, 0) rotate(0deg); }
+            to { transform: translate3d(-50%, -50%, 0) rotate(360deg); }
+        }
         .weather-scene.scene-sun .sun { opacity: 0.94; }
         .weather-scene.scene-diffused-sun .sun {
             opacity: 0.24;
@@ -642,14 +674,14 @@
             pointer-events: none;
             background: radial-gradient(circle at 68% 16%, rgba(236, 245, 255, 0.86), rgba(189, 216, 239, 0.18) 28%, transparent 58%);
         }
+        /* 闪电主体由 canvas 绘制的分叉电弧 + 同步闪光负责；此处仅保留极轻的环境余辉打底 */
         .weather-scene.scene-thunder .lightning-flash {
-            animation: lightningFlash 8.6s steps(1, end) infinite;
+            animation: lightningFlash 9.4s steps(1, end) infinite;
         }
         @keyframes lightningFlash {
             0%, 78%, 81%, 83%, 100% { opacity: 0; }
-            79% { opacity: 0.74; }
-            80% { opacity: 0.16; }
-            82% { opacity: 0.46; }
+            79% { opacity: 0.14; }
+            82% { opacity: 0.08; }
         }
 
         /* 其他页面背景 */
@@ -6594,6 +6626,7 @@
                 transition: none !important;
             }
             .sun::after,
+            .sun-rays,
             .atmospheric-light::after,
             .star,
             .cloud-layer,
@@ -8117,6 +8150,7 @@
         <div class="weather-sky is-active" id="weatherSkyA" style="background:linear-gradient(180deg,#183d63 0%,#4279aa 46%,#8ab8d7 100%)"></div>
         <div class="weather-sky" id="weatherSkyB"></div>
         <div class="atmospheric-light"></div>
+        <div class="sun-rays" aria-hidden="true"></div>
         <div class="sun"></div>
         <div class="moon"></div>
         <div class="stars" id="stars"></div>
@@ -8830,6 +8864,8 @@
     </nav>
 
     <script>
+        // 在路由重写 URL 之前捕获初始查询串，用于本地场景预览（?scene=…）。
+        const INITIAL_LOCATION_SEARCH = window.location.search;
         const ICON_BASE = 'https://cdn.jsdelivr.net/gh/basmilius/weather-icons@dev/production/fill/svg/';
         const ICONS = { 'CLEAR_DAY':'clear-day','CLEAR_NIGHT':'clear-night','PARTLY_CLOUDY_DAY':'partly-cloudy-day','PARTLY_CLOUDY_NIGHT':'partly-cloudy-night','CLOUDY':'cloudy','LIGHT_HAZE':'haze','MODERATE_HAZE':'haze','HEAVY_HAZE':'haze','LIGHT_RAIN':'drizzle','MODERATE_RAIN':'rain','HEAVY_RAIN':'extreme-rain','STORM_RAIN':'thunderstorms-extreme-rain','THUNDER_SHOWER':'thunderstorms-rain','DRIZZLE':'drizzle','FOG':'fog','SLEET':'sleet','HAIL':'hail','LIGHT_SNOW':'snow','MODERATE_SNOW':'snow','HEAVY_SNOW':'extreme-snow','STORM_SNOW':'extreme-snow','DUST':'dust','SAND':'dust-wind','WIND':'wind' };
         const SKYCON_LABELS = {
@@ -9203,7 +9239,9 @@
             cloudCover: 0,
             skyLayer: 'A',
             skyGradient: '',
-            lowPower: false
+            lowPower: false,
+            thunder: false,
+            lightning: { nextStrike: 1.4, flash: 0, bolt: null, boltLife: 0, aftershock: 0 }
         };
 
         const WEATHER_SKIES = {
@@ -9368,7 +9406,7 @@
         const LOCAL_WEATHER_SCENE_VALUES = new Set(Object.keys(SKYCON_LABELS));
         function getLocalWeatherScenePreview() {
             if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) return null;
-            const params = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams(INITIAL_LOCATION_SEARCH || window.location.search);
             const skycon = String(params.get('scene') || '').toUpperCase();
             if (!LOCAL_WEATHER_SCENE_VALUES.has(skycon)) return null;
             const nightParam = params.get('night');
@@ -9408,46 +9446,55 @@
         function buildWeatherParticles(type, intensity, windDrift) {
             resizeWeatherCanvas();
             const { width, height, lowPower } = weatherSceneState;
-            const baseCounts = { rain: 188, snow: 84, sleet: 148, hail: 92, wind: 42, haze: 48, dust: 68 };
+            const baseCounts = { rain: 236, snow: 92, sleet: 176, hail: 96, wind: 42, haze: 48, dust: 68 };
             const baseCount = baseCounts[type] || 68;
-            const count = Math.max(18, Math.round(baseCount * (0.34 + intensity * 0.72) * (lowPower ? 0.58 : 1)));
+            const count = Math.max(18, Math.round(baseCount * (0.42 + intensity * 0.78) * (lowPower ? 0.6 : 1)));
             weatherSceneState.particles = Array.from({ length: count }, (_, index) => {
-                const depth = 0.22 + Math.random() * 0.78;
+                // 三段景深：远景细密偏暗、中景主体、近景粗亮带轻微失焦，模拟苹果天气的层叠雨幕
+                const band = index % 7;
+                const depth = band < 3 ? 0.16 + Math.random() * 0.3
+                    : (band < 6 ? 0.46 + Math.random() * 0.34 : 0.82 + Math.random() * 0.18);
                 const kind = type === 'sleet' ? (index % 3 === 0 ? 'snow' : 'rain') : type;
                 return {
                     x: Math.random() * width,
                     y: Math.random() * height,
                     depth,
                     kind,
-                    length: kind === 'rain' ? 10 + depth * 22 + intensity * 10 : (kind === 'wind' ? 26 + depth * 52 : 0),
-                    size: kind === 'snow' ? 0.8 + depth * 2.5 : (kind === 'hail' ? 1.2 + depth * 2.6 : 0.7 + depth * 1.3),
+                    length: kind === 'rain' ? 14 + depth * 46 + intensity * 26 : (kind === 'wind' ? 26 + depth * 52 : 0),
+                    size: kind === 'snow' ? 0.8 + depth * 2.8 : (kind === 'hail' ? 1.2 + depth * 2.6 : 0.7 + depth * 1.3),
                     speed: kind === 'rain'
-                        ? 380 + depth * 520 + intensity * 260
+                        ? 620 + depth * 940 + intensity * 420
                         : (kind === 'snow' ? 26 + depth * 54
                             : (kind === 'hail' ? 440 + depth * 420
                                 : (kind === 'wind' ? 180 + depth * 260 : 24 + depth * 68))),
-                    alpha: 0.18 + depth * 0.48,
+                    alpha: kind === 'rain' ? (0.1 + depth * 0.5) : (0.18 + depth * 0.48),
                     phase: index * 0.63 + Math.random() * Math.PI,
                     wind: windDrift * (0.45 + depth * 0.8)
                 };
             });
             const supportsGlassDrops = type === 'rain' || type === 'sleet';
             const glassCount = supportsGlassDrops
-                ? Math.round((lowPower ? 6 : 11) + intensity * (lowPower ? 7 : 15))
+                ? Math.round((lowPower ? 8 : 16) + intensity * (lowPower ? 9 : 20))
                 : 0;
             weatherSceneState.glassDrops = Array.from({ length: glassCount }, (_, index) => {
-                const radius = 2.8 + Math.random() * (index % 4 === 0 ? 9.5 : 5.5);
-                const isRunner = index < Math.max(2, Math.round(glassCount * (0.32 + intensity * 0.18)));
+                // 少量“主角”水珠会拉长下滑并留下珠链拖尾，其余是凝结在玻璃上的静态水汽点
+                const isRunner = index < Math.max(3, Math.round(glassCount * (0.34 + intensity * 0.2)));
+                const radius = isRunner
+                    ? 4.5 + Math.random() * (7 + intensity * 6)
+                    : 1.6 + Math.random() * (index % 5 === 0 ? 5.5 : 2.8);
                 return {
-                    x: width * (0.04 + Math.random() * 0.92),
-                    y: height * (0.02 + Math.random() * 0.88),
+                    x: width * (0.03 + Math.random() * 0.94),
+                    y: height * (0.02 + Math.random() * 0.9),
                     radius,
-                    stretch: isRunner ? 1.2 + Math.random() * 1.8 : 0.72 + Math.random() * 0.5,
-                    speed: isRunner ? 22 + Math.random() * 54 + intensity * 46 : 0,
+                    baseRadius: radius,
+                    stretch: isRunner ? 1.15 + Math.random() * 1.1 : 0.82 + Math.random() * 0.32,
+                    speed: isRunner ? 26 + Math.random() * 70 + intensity * 64 : 0,
                     delay: isRunner ? Math.random() * 5.5 : 0,
-                    alpha: 0.17 + Math.random() * 0.22,
+                    alpha: isRunner ? 0.24 + Math.random() * 0.22 : 0.12 + Math.random() * 0.18,
                     wobble: Math.random() * Math.PI * 2,
-                    runner: isRunner
+                    runner: isRunner,
+                    trail: [],
+                    trailTimer: 0
                 };
             });
             weatherSceneState.splashes = [];
@@ -9456,28 +9503,50 @@
             weatherSceneState.windDrift = windDrift;
         }
 
-        function drawGlassDrop(ctx, drop) {
-            const horizontalRadius = drop.radius * (0.82 + Math.sin(drop.wobble) * 0.05);
-            const verticalRadius = drop.radius * drop.stretch;
-            ctx.save();
-            ctx.translate(drop.x, drop.y);
+        // 单颗玻璃水珠：底部暗影 + 珠体透光 + 左上高光 + 右下折射亮点，营造立体折射感
+        function drawBead(ctx, x, y, rx, ry, alpha) {
             ctx.beginPath();
-            ctx.ellipse(0, 0, horizontalRadius, verticalRadius, 0, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(192,221,237,${drop.alpha * 0.16})`;
-            ctx.shadowColor = `rgba(2,16,28,${drop.alpha * 0.9})`;
-            ctx.shadowBlur = drop.radius * 0.9;
-            ctx.shadowOffsetY = drop.radius * 0.38;
+            ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+            const body = ctx.createRadialGradient(x - rx * 0.3, y - ry * 0.4, rx * 0.1, x, y, Math.max(rx, ry));
+            body.addColorStop(0, `rgba(226,243,253,${alpha * 0.5})`);
+            body.addColorStop(0.55, `rgba(180,210,230,${alpha * 0.22})`);
+            body.addColorStop(1, `rgba(150,184,208,${alpha * 0.12})`);
+            ctx.fillStyle = body;
+            ctx.shadowColor = `rgba(4,17,30,${alpha * 0.85})`;
+            ctx.shadowBlur = Math.max(rx, ry) * 0.85;
+            ctx.shadowOffsetY = ry * 0.42;
             ctx.fill();
             ctx.shadowColor = 'transparent';
-            ctx.lineWidth = Math.max(0.7, drop.radius * 0.12);
-            ctx.strokeStyle = `rgba(235,249,255,${drop.alpha * 0.78})`;
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetY = 0;
+            // 珠体薄边高光
+            ctx.lineWidth = Math.max(0.5, rx * 0.1);
+            ctx.strokeStyle = `rgba(236,250,255,${alpha * 0.6})`;
             ctx.stroke();
+            // 左上主高光
             ctx.beginPath();
-            ctx.ellipse(-horizontalRadius * 0.28, -verticalRadius * 0.3, Math.max(0.7, horizontalRadius * 0.2), Math.max(1, verticalRadius * 0.24), -0.35, 0, Math.PI * 1.42);
-            ctx.lineWidth = Math.max(0.65, drop.radius * 0.09);
-            ctx.strokeStyle = `rgba(255,255,255,${drop.alpha * 1.4})`;
-            ctx.stroke();
-            ctx.restore();
+            ctx.ellipse(x - rx * 0.34, y - ry * 0.42, Math.max(0.6, rx * 0.24), Math.max(0.8, ry * 0.28), -0.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${Math.min(0.95, alpha * 1.7)})`;
+            ctx.fill();
+            // 右下折射反光点
+            ctx.beginPath();
+            ctx.arc(x + rx * 0.32, y + ry * 0.36, Math.max(0.5, rx * 0.14), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(214,238,252,${alpha * 0.7})`;
+            ctx.fill();
+        }
+
+        function drawGlassDrop(ctx, drop) {
+            // 拖尾珠链：主角水珠滑落时沿途留下逐渐缩小、淡出的小水珠
+            if (drop.runner && drop.trail && drop.trail.length) {
+                for (const bead of drop.trail) {
+                    const beadAlpha = drop.alpha * bead.life * 0.7;
+                    const beadRadius = Math.max(0.6, bead.r * (0.4 + bead.life * 0.6));
+                    drawBead(ctx, bead.x, bead.y, beadRadius, beadRadius, beadAlpha);
+                }
+            }
+            const horizontalRadius = drop.radius * (0.86 + Math.sin(drop.wobble) * 0.05);
+            const verticalRadius = drop.radius * drop.stretch;
+            drawBead(ctx, drop.x, drop.y, horizontalRadius, verticalRadius, drop.alpha);
         }
 
         function drawWeatherGlass(deltaSeconds) {
@@ -9495,14 +9564,30 @@
                     drop.wobble += deltaSeconds * 1.9;
                     drop.y += drop.speed * deltaSeconds;
                     drop.x += (Math.sin(drop.wobble) * 2.4 + state.windDrift * 5) * deltaSeconds;
-                    drop.stretch = Math.min(3.4, drop.stretch + deltaSeconds * 0.12);
+                    // 越滑越快、越拉长，模拟水珠汇聚后加速
+                    drop.speed = Math.min(drop.speed + deltaSeconds * 26, 260);
+                    drop.stretch = Math.min(3.6, drop.stretch + deltaSeconds * 0.16);
+                    // 周期性沿路留下拖尾珠
+                    drop.trailTimer -= deltaSeconds;
+                    if (drop.trailTimer <= 0 && drop.speed > 30) {
+                        drop.trail.push({ x: drop.x, y: drop.y - drop.radius * drop.stretch * 0.4, r: drop.radius * (0.3 + Math.random() * 0.24), life: 1 });
+                        drop.trailTimer = 0.05 + Math.random() * 0.06;
+                        if (drop.trail.length > 14) drop.trail.shift();
+                    }
+                }
+                if (drop.trail && drop.trail.length) {
+                    for (const bead of drop.trail) bead.life -= deltaSeconds * 0.55;
+                    drop.trail = drop.trail.filter(bead => bead.life > 0);
                 }
                 drawGlassDrop(ctx, drop);
                 if (drop.y - drop.radius > state.height) {
-                    drop.x = state.width * (0.04 + Math.random() * 0.92);
+                    drop.x = state.width * (0.03 + Math.random() * 0.94);
                     drop.y = -drop.radius * 3;
                     drop.delay = 0.8 + Math.random() * 4.5;
-                    drop.stretch = 1.2 + Math.random() * 1.5;
+                    drop.stretch = 1.15 + Math.random() * 1.1;
+                    drop.radius = drop.baseRadius;
+                    drop.speed = 26 + Math.random() * 70 + state.intensity * 64;
+                    drop.trail = [];
                 }
             }
         }
@@ -9532,6 +9617,103 @@
             });
         }
 
+        // 生成一条从云端向地面延伸的锯齿状闪电折线，带若干分叉
+        function buildLightningBolt(width, height) {
+            const startX = width * (0.24 + Math.random() * 0.52);
+            const endY = height * (0.52 + Math.random() * 0.28);
+            const segments = 9 + Math.round(Math.random() * 5);
+            const main = [{ x: startX, y: -height * 0.04 }];
+            let x = startX;
+            const stepY = (endY + height * 0.04) / segments;
+            for (let i = 1; i <= segments; i++) {
+                x += (Math.random() - 0.5) * width * 0.16;
+                main.push({ x, y: -height * 0.04 + stepY * i });
+            }
+            const branches = [];
+            const branchCount = 2 + Math.round(Math.random() * 2);
+            for (let b = 0; b < branchCount; b++) {
+                const from = main[2 + Math.round(Math.random() * (main.length - 4))];
+                if (!from) continue;
+                const dir = Math.random() < 0.5 ? -1 : 1;
+                const pts = [from];
+                let bx = from.x;
+                let by = from.y;
+                const legs = 2 + Math.round(Math.random() * 3);
+                for (let l = 0; l < legs; l++) {
+                    bx += dir * Math.random() * width * 0.1 + (Math.random() - 0.5) * width * 0.04;
+                    by += Math.random() * height * 0.08;
+                    pts.push({ x: bx, y: by });
+                }
+                branches.push(pts);
+            }
+            return { main, branches };
+        }
+
+        function strokePolyline(ctx, pts, lineWidth) {
+            if (!pts || pts.length < 2) return;
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+        }
+
+        function advanceLightning(state, deltaSeconds) {
+            const L = state.lightning;
+            // 闪光余辉衰减（带一次余震式二次闪）
+            if (L.flash > 0) {
+                L.flash = Math.max(0, L.flash - deltaSeconds * (L.flash > 0.5 ? 7.5 : 3.6));
+                if (L.flash < 0.28 && L.aftershock > 0) {
+                    L.flash = 0.6 + Math.random() * 0.3;
+                    L.aftershock -= 1;
+                }
+            }
+            if (L.boltLife > 0) L.boltLife = Math.max(0, L.boltLife - deltaSeconds * 6.5);
+            L.nextStrike -= deltaSeconds;
+            if (L.nextStrike <= 0) {
+                L.bolt = buildLightningBolt(state.width, state.height);
+                L.boltLife = 1;
+                L.flash = 0.85 + Math.random() * 0.15;
+                L.aftershock = Math.random() < 0.55 ? 1 : 0;
+                // 强度越高，雷击越频繁
+                L.nextStrike = 2.4 + Math.random() * 5.5 - state.intensity * 1.6;
+            }
+        }
+
+        function drawLightningFlash(ctx, state) {
+            const flash = state.lightning.flash;
+            if (flash <= 0.01) return;
+            const bolt = state.lightning.bolt;
+            const cx = bolt?.main?.[0]?.x ?? state.width * 0.6;
+            const grad = ctx.createRadialGradient(cx, state.height * 0.08, 0, cx, state.height * 0.08, state.height * 0.95);
+            grad.addColorStop(0, `rgba(226,240,255,${flash * 0.5})`);
+            grad.addColorStop(0.4, `rgba(190,214,240,${flash * 0.22})`);
+            grad.addColorStop(1, 'rgba(150,180,214,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, state.width, state.height);
+        }
+
+        function drawLightningBolt(ctx, state) {
+            const L = state.lightning;
+            if (!L.bolt || L.boltLife <= 0.02) return;
+            const life = L.boltLife;
+            ctx.save();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.shadowColor = `rgba(180,214,255,${life * 0.9})`;
+            ctx.shadowBlur = state.lowPower ? 10 : 22;
+            // 外层辉光
+            ctx.strokeStyle = `rgba(158,196,244,${life * 0.55})`;
+            strokePolyline(ctx, L.bolt.main, 5.5);
+            for (const br of L.bolt.branches) strokePolyline(ctx, br, 2.4);
+            // 内层亮核
+            ctx.shadowBlur = state.lowPower ? 6 : 12;
+            ctx.strokeStyle = `rgba(245,251,255,${Math.min(1, life * 1.1)})`;
+            strokePolyline(ctx, L.bolt.main, 2);
+            for (const br of L.bolt.branches) strokePolyline(ctx, br, 1);
+            ctx.restore();
+        }
+
         function drawWeatherParticles(now) {
             const state = weatherSceneState;
             const ctx = state.context;
@@ -9549,33 +9731,54 @@
             ctx.clearRect(0, 0, state.width, state.height);
             drawWeatherGlass(deltaSeconds);
 
+            if (state.thunder) {
+                advanceLightning(state, deltaSeconds);
+                drawLightningFlash(ctx, state);
+            }
+
             for (const particle of state.particles) {
                 if (particle.kind === 'rain') {
                     particle.y += particle.speed * deltaSeconds;
                     particle.x += particle.wind * 150 * deltaSeconds;
                     const slant = particle.wind * particle.length * 0.7;
+                    const tailX = particle.x - slant;
+                    const tailY = particle.y - particle.length;
+                    // 沿雨丝方向的渐变：亮头淡尾，模拟运动拖影
+                    const streak = ctx.createLinearGradient(particle.x, particle.y, tailX, tailY);
+                    const headAlpha = particle.alpha * (0.85 + state.intensity * 0.55);
+                    streak.addColorStop(0, `rgba(233,246,255,${Math.min(0.95, headAlpha)})`);
+                    streak.addColorStop(0.35, `rgba(214,236,250,${headAlpha * 0.5})`);
+                    streak.addColorStop(1, 'rgba(206,230,248,0)');
                     ctx.beginPath();
                     ctx.moveTo(particle.x, particle.y);
-                    ctx.lineTo(particle.x - slant, particle.y - particle.length);
-                    ctx.lineWidth = 0.52 + particle.depth * 1.34;
-                    ctx.strokeStyle = `rgba(220,240,252,${particle.alpha * (0.76 + state.intensity * 0.6)})`;
+                    ctx.lineTo(tailX, tailY);
+                    ctx.lineWidth = 0.5 + particle.depth * 1.7;
+                    ctx.strokeStyle = streak;
                     ctx.stroke();
-                    if (particle.depth > 0.7) {
+                    if (particle.depth > 0.86) {
+                        // 近景雨丝顶端一点高光，强化景深
                         ctx.beginPath();
-                        ctx.moveTo(particle.x + 0.8, particle.y - 1);
-                        ctx.lineTo(particle.x - slant * 0.62, particle.y - particle.length * 0.62);
-                        ctx.lineWidth = 0.42;
-                        ctx.strokeStyle = `rgba(255,255,255,${particle.alpha * 0.38})`;
-                        ctx.stroke();
+                        ctx.arc(particle.x, particle.y, 0.7 + particle.depth * 0.7, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255,255,255,${particle.alpha * 0.5})`;
+                        ctx.fill();
                     }
                 } else if (particle.kind === 'snow') {
                     particle.phase += deltaSeconds * (0.65 + particle.depth);
                     particle.y += particle.speed * deltaSeconds;
                     particle.x += (particle.wind * 34 + Math.sin(particle.phase) * (8 + particle.depth * 14)) * deltaSeconds;
+                    const nearFlake = particle.depth > 0.82;
+                    if (nearFlake && !state.lowPower) {
+                        ctx.shadowColor = 'rgba(238,246,252,0.9)';
+                        ctx.shadowBlur = particle.size * 2.4;
+                    }
                     ctx.beginPath();
                     ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(241,247,250,${particle.alpha * 0.86})`;
+                    ctx.fillStyle = `rgba(244,249,252,${particle.alpha * (nearFlake ? 0.95 : 0.82)})`;
                     ctx.fill();
+                    if (nearFlake && !state.lowPower) {
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                    }
                 } else if (particle.kind === 'hail') {
                     particle.y += particle.speed * deltaSeconds;
                     particle.x += particle.wind * 90 * deltaSeconds;
@@ -9617,6 +9820,7 @@
                 }
             }
             drawRainSplashes(ctx, deltaSeconds);
+            if (state.thunder) drawLightningBolt(ctx, state);
             state.frame = requestAnimationFrame(drawWeatherParticles);
         }
 
@@ -9758,6 +9962,12 @@
                 : (sceneIsNight ? 'rgba(103, 144, 190, 0.13)' : 'rgba(197, 226, 244, 0.18)'));
             weatherSceneState.humidity = humidity;
             weatherSceneState.cloudCover = normalizedCloudCover;
+            weatherSceneState.thunder = isThunder;
+            if (isThunder && (!weatherSceneState.lightning || weatherSceneState.lightning.nextStrike === undefined)) {
+                weatherSceneState.lightning = { nextStrike: 1.2, flash: 0, bolt: null, boltLife: 0, aftershock: 0 };
+            } else if (isThunder) {
+                weatherSceneState.lightning.nextStrike = Math.min(weatherSceneState.lightning.nextStrike, 1.6);
+            }
 
             const skyPhaseSuffix = solarPhase.charAt(0).toUpperCase() + solarPhase.slice(1);
             const phaseAwareType = sceneType === 'rain' ? 'rain' : (sceneType === 'cloud' ? 'cloud' : 'clear');
@@ -10520,6 +10730,11 @@
 
         async function loadWeather({ forceRelocate = false } = {}) {
             let resolvedLocation = null;
+            // 本地视觉预览：仅在 localhost/127.0.0.1 且带 ?scene= 时生效，独立于网络，便于离线调试与视觉回归。
+            const devScenePreview = getLocalWeatherScenePreview();
+            if (devScenePreview) {
+                updateScene(devScenePreview.skycon, devScenePreview.weather);
+            }
             try {
                 renderWeatherLocation({ displayName: '正在定位', source: 'default' }, {
                     detail: forceRelocate ? '正在刷新当前位置天气' : '正在读取当前天气位置'

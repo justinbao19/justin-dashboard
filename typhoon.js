@@ -26,6 +26,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     windCirclePoint: null,
     weatherOpacity: .58,
     markers: [],
+    otherStormMarkers: [],
     userLocation: null,
     userLocationPromise: null,
     userLocationMarker: null,
@@ -640,6 +641,11 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     state.currentMarker = null;
   }
 
+  function removeOtherStormMarkers() {
+    state.otherStormMarkers.forEach(marker => marker.remove());
+    state.otherStormMarkers = [];
+  }
+
   function markerLabel(point) { return formatDate(point.validAt, true).replace('日', '日 '); }
 
   function addMarker(point, sourceId, color, current = false) {
@@ -665,6 +671,24 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const marker = new maplibregl.Marker({ element: button, anchor: 'center' }).setLngLat([point.position.lon, point.position.lat]).addTo(state.map);
     state.markers.push(marker);
     if (current) state.currentMarker = marker;
+  }
+
+  function addOtherStormMarker(item, point) {
+    if (!state.map || !point?.position) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'other-storm-marker';
+    button.setAttribute('aria-label', `${item.name}，点击查看完整台风详情`);
+    button.title = `${item.name}：点击查看详情`;
+    button.innerHTML = `<span class="typhoon-marker-core"><i class="ph ph-hurricane" aria-hidden="true"></i></span><small>${escapeHtml(item.name)}</small>`;
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      selectStorm(item.id, item.zhejiangId || '');
+    });
+    const marker = new maplibregl.Marker({ element: button, anchor: 'center' })
+      .setLngLat([point.position.lon, point.position.lat])
+      .addTo(state.map);
+    state.otherStormMarkers.push(marker);
   }
 
   function renderUserLocationMarker() {
@@ -1402,6 +1426,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const map = state.map;
     if (!map || !map.getStyle()) return;
     removeMarkers();
+    removeOtherStormMarkers();
     const layerIds = map.getStyle().layers.map(layer => layer.id);
     const removable = layerIds.filter(id => /^(track-|points-|wind-circle-|playback-)/.test(id));
     removable.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
@@ -1433,7 +1458,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
           const points = track.points?.filter(point => hasNumber(point?.position?.lat) && hasNumber(point?.position?.lon));
           if (points?.length > 1) lines.push({ points, sourceId: track.id, color: track.color || '#9ab7c8' });
         }
-        if (lines.length) return { id: storm.id, name: stormDisplayName(storm), lines, points: lines.flatMap(line => line.points) };
+        if (lines.length) return { id: storm.id, name: stormDisplayName(storm), zhejiangId: zj, lines, points: lines.flatMap(line => line.points) };
       } catch (error) {
         console.warn(`Other storm track unavailable for ${storm.id}:`, error);
       }
@@ -1446,6 +1471,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       });
     });
     state.otherStormTracks = loaded;
+    removeOtherStormMarkers();
     loaded.forEach(item => {
       if (state.stormId === item.id || map.getSource(`other-track-${item.id}`)) return;
       const features = item.lines.map(line => lineFeature(line.points, { sourceId: line.sourceId, color: line.color }));
@@ -1456,12 +1482,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       const observedLine = item.lines.find(line => line.sourceId === 'observed');
       const lastPoint = observedLine?.points.at(-1) || item.lines[0]?.points.at(0);
       if (!lastPoint?.position) return;
-      const currentPointFeature = {
-        type: 'FeatureCollection',
-        features: [{ type: 'Feature', properties: { stormName: item.name }, geometry: { type: 'Point', coordinates: [lastPoint.position.lon, lastPoint.position.lat] } }]
-      };
-      if (!map.getSource(`other-points-${item.id}`)) map.addSource(`other-points-${item.id}`, { type: 'geojson', data: currentPointFeature });
-      map.addLayer({ id: `other-points-${item.id}`, type: 'circle', source: `other-points-${item.id}`, paint: { 'circle-radius': 4.5, 'circle-color': '#a8ccdd', 'circle-stroke-color': '#16334a', 'circle-stroke-width': 1.4, 'circle-opacity': .85 } });
+      addOtherStormMarker(item, lastPoint);
     });
     return loaded;
   }

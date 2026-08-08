@@ -142,6 +142,11 @@ test('typhoon detail supports switching between multiple active storms on one ma
   assert.match(jsSource, /Promise\.all\(others\.map/);
   assert.match(jsSource, /storm\.id !== state\.stormId/);
   assert.match(jsSource, /distanceKm\(locationData, a\.position\)/);
+  assert.match(jsSource, /function addOtherStormMarker\(item, point\)/);
+  assert.match(jsSource, /function removeOtherStormMarkers\(\)/);
+  assert.match(jsSource, /state\.otherStormMarkers/);
+  assert.match(jsSource, /selectStorm\(item\.id, item\.zhejiangId \|\| ''\)/);
+  assert.match(jsSource, /state\.windCirclePoint = detail\.tracks\?\.observed\?\.at\(-1\) \|\| detail\.storm;/);
 });
 
 test('typhoon switching stays compact and homepage ranking accounts for approach direction', async () => {
@@ -157,6 +162,11 @@ test('typhoon switching stays compact and homepage ranking accounts for approach
   assert.match(css, /storm-switcher-menu/);
   assert.match(css, /width: min\(232px, 70vw\)/);
   assert.match(css, /max-height: min\(/);
+  assert.match(css, /\.storm-switcher-menu \{[\s\S]*?left: 0;[\s\S]*?right: auto;/);
+  assert.match(css, /\.storm-switch \{[\s\S]*?gap: 6px;/);
+  assert.match(css, /\.storm-switch-copy strong \{[\s\S]*?font-size: 12px;/);
+  assert.match(css, /\.storm-switch-copy small \{[\s\S]*?font-size: 10px;/);
+  assert.match(css, /\.other-storm-marker \{/);
   assert.doesNotMatch(css, /\.storm-switcher::-webkit-scrollbar/);
   assert.match(index, /function typhoonImpactScore\(location, storm\)/);
   assert.match(index, /typhoonMovementBearing\(storm\)/);

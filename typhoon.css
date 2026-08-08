@@ -146,7 +146,8 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .storm-switcher-menu {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  left: 0;
+  right: auto;
   width: min(232px, 70vw);
   max-height: min(52dvh, 360px);
   overflow: hidden;
@@ -166,7 +167,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
   padding: 7px 8px;
   border: 1px solid transparent;
@@ -187,9 +188,58 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 }
 .storm-switch .storm-switch-dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--warning); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 16%, transparent); }
 .storm-switch.active .storm-switch-dot { background: var(--accent, #4fb3ff); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, #4fb3ff) 18%, transparent); }
-.storm-switch .storm-switch-copy { flex: 1; }
-.storm-switch > i { color: var(--accent); font-size: 15px; }
+.storm-switch-copy { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.storm-switch-copy strong { display: block; overflow: hidden; font-size: 12px; font-weight: 640; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.storm-switch-copy small { display: block; overflow: hidden; color: var(--faint); font-size: 10px; font-weight: 500; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.storm-switch > i { flex: 0 0 auto; color: var(--accent); font-size: 15px; }
 .storm-switch:focus-visible { outline: 2px solid var(--accent, #4fb3ff); outline-offset: 1px; }
+
+/* 非选中活跃台风：保留轻量中心动效，选中后由完整中心标记接管。 */
+.other-storm-marker {
+  width: 42px;
+  min-height: 42px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #e7f5ff;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .85);
+}
+.other-storm-marker .typhoon-marker-core {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-color: rgba(255, 255, 255, .46);
+  background: rgba(8, 25, 37, .7);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+.other-storm-marker .typhoon-marker-core::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 1px solid rgba(98, 201, 255, .6);
+  border-radius: 50%;
+  animation: location-pulse 2.4s ease-out infinite;
+  pointer-events: none;
+}
+.other-storm-marker .typhoon-marker-core i { font-size: 16px; }
+.other-storm-marker small {
+  max-width: 116px;
+  overflow: hidden;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: rgba(14, 31, 41, .76);
+  font-size: 9px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(7px);
+}
+.other-storm-marker:focus-visible { outline: 2px solid #62c9ff; outline-offset: 2px; border-radius: 8px; }
 
 .topbar-title { min-width: 0; display: grid; gap: 1px; }
 .topbar-title span { color: var(--faint); font-size: 10px; letter-spacing: -.08px; }

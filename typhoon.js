@@ -648,18 +648,31 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
 
   function markerLabel(point) { return formatDate(point.validAt, true).replace('日', '日 '); }
 
-  function addMarker(point, sourceId, color, current = false) {
+  function dateKey(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+  }
+
+  function forecastDateLabel(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '日期待确认';
+    return new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric' }).format(date);
+  }
+
+  function addMarker(point, sourceId, color, current = false, options = {}) {
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.source = sourceId;
     button.setAttribute('aria-label', `${point.sourceLabel || '路径'} ${formatDate(point.validAt)} 节点`);
     if (current) {
       button.className = 'current-marker';
+      button.dataset.markerRole = 'typhoon-current';
       button.innerHTML = '<span class="typhoon-marker-core"><i class="ph ph-hurricane" aria-hidden="true"></i></span>';
     } else {
-      button.className = 'track-key-marker';
+      button.className = `track-key-marker${options.className ? ` ${options.className}` : ''}`;
       button.style.setProperty('--source-color', color);
-      button.innerHTML = `<span class="dot"></span><small>${escapeHtml(markerLabel(point))}</small>`;
+      button.innerHTML = `<span class="dot"></span><small>${escapeHtml(options.label || markerLabel(point))}</small>`;
     }
     button.classList.toggle('is-hidden', !current && !state.activeSources.has(sourceId));
     button.addEventListener('click', event => {
@@ -671,6 +684,17 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const marker = new maplibregl.Marker({ element: button, anchor: 'center' }).setLngLat([point.position.lon, point.position.lat]).addTo(state.map);
     state.markers.push(marker);
     if (current) state.currentMarker = marker;
+  }
+
+  function addForecastDateMarkers(track) {
+    const points = (track.points || []).filter(point => point.kind === 'forecast' && Number.isFinite(Date.parse(point.validAt)));
+    let previousDate = '';
+    points.forEach((point, index) => {
+      const currentDate = dateKey(point.validAt);
+      const isDateBoundary = index === 0 || index === points.length - 1 || currentDate !== previousDate;
+      if (isDateBoundary) addMarker(point, track.id, track.color, false, { label: forecastDateLabel(point.validAt), className: 'forecast-date-marker' });
+      previousDate = currentDate;
+    });
   }
 
   function addOtherStormMarker(item, point) {
@@ -720,11 +744,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       if (current) addMarker(point, 'observed', '#f2fbff', true);
       else if (index % interval === 0) addMarker(point, 'observed', '#f2fbff');
     });
-    for (const track of tracks.forecasts || []) {
-      track.points.slice(1).forEach((point, index, points) => {
-        if (track.id === 'cma' || index === points.length - 1) addMarker(point, track.id, track.color);
-      });
-    }
+    for (const track of tracks.forecasts || []) addForecastDateMarkers(track);
     renderUserLocationMarker();
     syncPlaybackMap();
   }
@@ -879,7 +899,10 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     if (state.map?.getLayer('playback-forecast-line')) {
       state.map.setPaintProperty('playback-forecast-line', 'line-color', playbackForecastTrack()?.color || '#ff7a45');
     }
-    state.currentMarker?.setLngLat([frame.point.position.lon, frame.point.position.lat]);
+    const marker = state.currentMarker;
+    if (!marker) return;
+    marker.setLngLat([frame.point.position.lon, frame.point.position.lat]);
+    marker.getElement()?.classList.toggle('is-playback-active', state.playbackActive);
   }
 
   function pausePlayback() {
@@ -891,6 +914,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     button.setAttribute('aria-pressed', 'false');
     button.setAttribute('aria-label', '播放台风路径');
     button.querySelector('i').className = 'ph ph-play';
+    state.currentMarker?.getElement()?.classList.remove('is-playback-active');
   }
 
   function keepPlaybackPointVisible(point) {

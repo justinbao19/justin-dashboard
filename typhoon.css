@@ -160,6 +160,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   -webkit-backdrop-filter: blur(28px) saturate(180%);
 }
 .storm-switcher-menu-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 3px 4px 7px; }
+.storm-switcher-menu-heading, .storm-switcher-list { text-align: left; }
 .storm-switcher-menu-heading strong { font-size: 11px; font-weight: 650; }
 .storm-switcher-menu-heading small { color: var(--faint); font-size: 9px; }
 .storm-switcher-list { display: grid; gap: 4px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
@@ -178,6 +179,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   letter-spacing: -.1px;
   white-space: nowrap;
   cursor: pointer;
+  text-align: left;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
 }
 .storm-switch:hover { background: color-mix(in srgb, var(--text) 6%, transparent); color: var(--text); }
@@ -674,7 +676,11 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 .track-key-marker { min-width: 34px; display: grid; justify-items: center; gap: 3px; border: 0; padding: 0; background: transparent; color: #ecf7fb; cursor: pointer; text-shadow: 0 1px 3px rgba(0,0,0,.85); }
 .track-key-marker .dot { width: 11px; height: 11px; border: 2px solid rgba(255,255,255,.9); border-radius: 50%; background: var(--source-color); box-shadow: 0 1px 5px rgba(0,0,0,.45); }
 .track-key-marker small { padding: 2px 5px; border-radius: 6px; background: rgba(14,31,41,.72); font-size: 9px; line-height: 1.2; white-space: nowrap; backdrop-filter: blur(7px); }
+.forecast-date-marker { min-width: 40px; gap: 2px; }
+.forecast-date-marker .dot { width: 8px; height: 8px; border-width: 1.5px; }
+.forecast-date-marker small { padding: 2px 4px; font-size: 8px; }
 .track-key-marker.is-hidden, .current-marker.is-hidden { display: none; }
+.current-marker.is-playback-active .typhoon-marker-core { border-color: rgba(100, 210, 255, .95); box-shadow: 0 8px 22px rgba(0,0,0,.28), 0 0 0 7px rgba(100, 210, 255, .12), inset 0 1px 0 rgba(255,255,255,.28); }
 .maplibregl-ctrl-bottom-right { right: 394px; bottom: 14px; }
 .maplibregl-ctrl-group { overflow: hidden; border: 1px solid rgba(255,255,255,.2); border-radius: 13px !important; background: rgba(15, 34, 47, .78) !important; box-shadow: 0 10px 28px rgba(0,0,0,.22) !important; backdrop-filter: blur(16px); }
 .maplibregl-ctrl button { width: 40px !important; height: 40px !important; filter: invert(1); }

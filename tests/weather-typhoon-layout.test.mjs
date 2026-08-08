@@ -121,6 +121,12 @@ test('mobile typhoon layout keeps map controls edge-aligned, removes duplicate s
   assert.match(js, /remainingDays \* 2600/);
   assert.match(js, /tracks\.find\(track => track\.id === 'cma'\)/);
   assert.match(js, /function schedulePlaybackStep\(\)/);
+  assert.match(js, /function addForecastDateMarkers\(track\)/);
+  assert.match(js, /className: 'forecast-date-marker'/);
+  assert.match(js, /const marker = state\.currentMarker;/);
+  assert.match(js, /marker\.setLngLat\(\[frame\.point\.position\.lon, frame\.point\.position\.lat\]\)/);
+  assert.match(css, /\.storm-switcher-menu-heading, \.storm-switcher-list \{ text-align: left; \}/);
+  assert.match(css, /\.storm-switch \{[\s\S]*?text-align: left;/);
 });
 
 test('typhoon detail supports switching between multiple active storms on one map', async () => {

@@ -11694,11 +11694,9 @@
         const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const WEEKDAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 
-        // 取消的比赛（meeting_key 列表）
-        const CANCELED_RACES = {
-            1282: '中东冲突',  // Bahrain GP
-            1283: '中东冲突'   // Saudi Arabian GP
-        };
+        // 取消的比赛（meeting_key 列表；Jolpica 兜底时 key=round）
+        // 2026 官方赛历已调整巴林/沙特，不再单独标取消
+        const CANCELED_RACES = {};
 
         // 2026 分站成绩 (匈牙利站后 R11) - 2026-08-08 更新
         const RACE_RESULTS_2026 = {
@@ -12171,11 +12169,16 @@
 
         async function loadF1Sessions(meetingKey) {
             try {
-                const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}`);
-                if (res.ok) {
-                    _f1Sessions = await res.json();
-                    _f1Sessions.sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
-                }
+                // 统一走自家 API（OpenF1 失败时由服务端 Jolpica 兜底）
+                const res = await fetch(`/api/f1?year=2026&meeting=${encodeURIComponent(meetingKey)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                _f1Sessions = (data.sessions || []).map(s => ({
+                    ...s,
+                    meeting_key: data.meeting_key,
+                    session_name: s.name,
+                    session_type: s.type,
+                })).sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
             } catch (e) {
                 console.error('Failed to load F1 sessions:', e);
             }
@@ -12359,15 +12362,15 @@
             const list = document.getElementById('f1SessionResultsList');
             weekend.style.display = 'none';
             panel.hidden = false;
-            status.textContent = '正在读取 OpenF1 成绩…';
+            status.textContent = '正在读取成绩…';
             list.innerHTML = '<div class="f1-results-empty">加载排名中…</div>';
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
             try {
-                const response = await fetch(`/api/f1?year=2026&session=${sessionKey}`);
+                const response = await fetch(`/api/f1?year=2026&session=${encodeURIComponent(sessionKey)}`);
                 if (!response.ok) throw new Error('成绩暂时不可用');
                 const data = await response.json();
                 document.getElementById('f1SessionResultsTitle').textContent = data.name || 'Session Results';
-                status.textContent = data.status === 'complete' ? `${data.results.length} 位车手 · 官方时序数据` : '比赛尚未产生完整成绩，以下为当前排名';
+                status.textContent = data.status === 'complete' ? `${data.results.length} 位车手 · ${data.source === 'jolpica' ? 'Jolpica 成绩' : '官方时序数据'}` : '比赛尚未产生完整成绩，以下为当前排名';
                 if (!data.results.length) {
                     list.innerHTML = '<div class="f1-results-empty">本节比赛尚未产生排名，稍后再来看看。</div>';
                     return;
@@ -12389,7 +12392,7 @@
                 }).join('');
             } catch (error) {
                 status.textContent = '暂时无法读取成绩';
-                list.innerHTML = `<div class="f1-results-empty">${escapeHtml(error.message || 'OpenF1 数据暂时不可用')}</div>`;
+                list.innerHTML = `<div class="f1-results-empty">${escapeHtml(error.message || 'F1 数据暂时不可用')}</div>`;
             }
         }
 

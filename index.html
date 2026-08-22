@@ -12374,11 +12374,12 @@
         }
 
         async function showF1SessionResults(sessionKey) {
-            const weekend = document.querySelector('.f1-weekend');
+            const weekend = document.querySelector('#f1-detail-view .f1-weekend') || document.querySelector('.f1-weekend');
             const panel = document.getElementById('f1SessionResults');
             const status = document.getElementById('f1SessionResultsStatus');
             const list = document.getElementById('f1SessionResultsList');
-            weekend.style.display = 'none';
+            if (!panel || !status || !list) return;
+            if (weekend) weekend.style.display = 'none';
             panel.hidden = false;
             status.textContent = '正在读取成绩…';
             list.innerHTML = '<div class="f1-results-empty">加载排名中…</div>';

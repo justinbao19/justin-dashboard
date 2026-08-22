@@ -449,6 +449,66 @@ async function fetchJolpicaSessionResults(year, round, kind) {
   return sessionPayload;
 }
 
+const JOLPICA_KIND_TO_OPENF1_NAME = {
+  fp1: 'Practice 1',
+  fp2: 'Practice 2',
+  fp3: 'Practice 3',
+  sq: 'Sprint Qualifying',
+  sprint: 'Sprint',
+  q: 'Qualifying',
+  race: 'Race',
+};
+
+async function fillResultsFromOpenF1(year, raceMeta, kind, payload) {
+  if (payload?.results?.length) return payload;
+  const sessions = await fetchOpenF1Sessions(year);
+  if (!sessions?.length) return payload;
+
+  const targetName = JOLPICA_KIND_TO_OPENF1_NAME[kind];
+  if (!targetName) return payload;
+
+  const locality = raceMeta?.Circuit?.Location?.locality || '';
+  const country = raceMeta?.Circuit?.Location?.country || '';
+  const circuitId = raceMeta?.Circuit?.circuitId || '';
+  const raceDateMs = raceMeta?.date ? new Date(`${raceMeta.date}T12:00:00Z`).getTime() : null;
+
+  const candidates = sessions.filter(s => s.session_name === targetName);
+  let match = candidates.find(s => {
+    const loc = `${s.location || ''} ${s.circuit_short_name || ''}`.toLowerCase();
+    return (
+      (locality && loc.includes(String(locality).toLowerCase())) ||
+      (circuitId && loc.includes(String(circuitId).replace(/_/g, ' ').toLowerCase())) ||
+      (country && String(s.country_name || '').toLowerCase() === String(country).toLowerCase())
+    );
+  });
+
+  if (!match && raceDateMs != null) {
+    match = candidates
+      .map(s => ({ s, dist: Math.abs(new Date(s.date_start).getTime() - raceDateMs) }))
+      .filter(item => item.dist < 6 * 24 * 3600 * 1000)
+      .sort((a, b) => a.dist - b.dist)[0]?.s;
+  }
+
+  if (!match) return payload;
+
+  try {
+    const results = await fetchSessionResults(match.session_key);
+    if (!results.length) return payload;
+    return {
+      ...payload,
+      openf1_session_key: match.session_key,
+      date_start: match.date_start || payload.date_start,
+      date_end: match.date_end || payload.date_end,
+      status: 'complete',
+      results,
+      source: 'openf1',
+    };
+  } catch (error) {
+    console.error('OpenF1 result fallback failed:', error?.message || error);
+    return payload;
+  }
+}
+
 async function buildJolpicaCalendar(year) {
   const races = await fetchJolpicaSeason(year);
   const calendar = races.map(race => {
@@ -477,16 +537,23 @@ async function buildJolpicaCalendar(year) {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800');
 
   const { year = 2026, meeting, session } = req.query;
+  const setCache = (seconds = 300) => {
+    res.setHeader('Cache-Control', `s-maxage=${seconds}, stale-while-revalidate=${Math.max(seconds * 2, 60)}`);
+  };
 
   try {
     if (session) {
       const jolpicaKey = parseJolpicaSessionKey(session);
       if (jolpicaKey) {
-        const payload = await fetchJolpicaSessionResults(jolpicaKey.year, jolpicaKey.round, jolpicaKey.kind);
+        let payload = await fetchJolpicaSessionResults(jolpicaKey.year, jolpicaKey.round, jolpicaKey.kind);
         if (!payload) return res.status(404).json({ error: 'Session not found' });
+        if (!payload.results?.length) {
+          const raceMeta = await fetchJolpicaRace(jolpicaKey.year, jolpicaKey.round);
+          payload = await fillResultsFromOpenF1(jolpicaKey.year, raceMeta, jolpicaKey.kind, payload);
+        }
+        setCache(payload.results?.length ? 300 : 30);
         return res.status(200).json(payload);
       }
 
@@ -497,6 +564,7 @@ export default async function handler(req, res) {
           const sessionMeta = sessions.find(item => item.session_key === sessionKey);
           if (sessionMeta) {
             const results = await fetchSessionResults(sessionKey);
+            setCache(results.length ? 120 : 30);
             return res.status(200).json({
               session_key: sessionKey,
               meeting_key: sessionMeta.meeting_key,
@@ -515,7 +583,7 @@ export default async function handler(req, res) {
       }
 
       // Numeric session keys from OpenF1 become unavailable during live lockouts.
-      // Fall back by treating meeting as round only if session was already jolpica-shaped.
+      setCache(30);
       return res.status(503).json({ error: 'Session results temporarily unavailable' });
     }
 
@@ -524,6 +592,7 @@ export default async function handler(req, res) {
       try {
         const race = await fetchJolpicaRace(year, meeting);
         if (race) {
+          setCache(300);
           return res.status(200).json(mapJolpicaRaceToMeeting(race, year));
         }
       } catch (error) {
@@ -533,7 +602,10 @@ export default async function handler(req, res) {
       const openf1Sessions = await fetchOpenF1Sessions(year);
       if (openf1Sessions) {
         const detail = buildOpenF1Meeting(openf1Sessions, meeting);
-        if (detail) return res.status(200).json(detail);
+        if (detail) {
+          setCache(300);
+          return res.status(200).json(detail);
+        }
       }
       return res.status(404).json({ error: 'Meeting not found' });
     }
@@ -542,6 +614,7 @@ export default async function handler(req, res) {
     try {
       const calendar = await buildJolpicaCalendar(year);
       if (calendar.total_races > 0) {
+        setCache(600);
         return res.status(200).json(calendar);
       }
     } catch (error) {
@@ -550,6 +623,7 @@ export default async function handler(req, res) {
 
     const openf1Sessions = await fetchOpenF1Sessions(year);
     if (openf1Sessions && openf1Sessions.length) {
+      setCache(300);
       return res.status(200).json(buildOpenF1Calendar(openf1Sessions, year));
     }
 

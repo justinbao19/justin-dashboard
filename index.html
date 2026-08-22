@@ -12315,7 +12315,8 @@
                         ? `<div class="f1-session-action"><span>${stateLabel === '进行中' ? '实时排名' : '查看成绩'}</span><i class="fas fa-chevron-right"></i></div>`
                         : `<div class="f1-session-state">${stateLabel}</div>`;
                     const raceDayLabel = isRace ? '<span class="f1-race-day-label">比赛日</span>' : '';
-                    return `<div class="f1-session ${sessionClass} ${hasStarted ? 'is-clickable' : ''}" ${hasStarted ? `role="button" tabindex="0" onclick="showF1SessionResults(${s.session_key})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showF1SessionResults(${s.session_key})}"` : ''}>
+                    const sessionKeyLiteral = JSON.stringify(String(s.session_key));
+                    return `<div class="f1-session ${sessionClass} ${hasStarted ? 'is-clickable' : ''}" ${hasStarted ? `role="button" tabindex="0" onclick="showF1SessionResults(${sessionKeyLiteral})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showF1SessionResults(${sessionKeyLiteral})}"` : ''}>
                         <div class="f1-session-date">
                             <div class="f1-session-date-day">${String(d.getDate()).padStart(2,'0')}</div>
                             <div class="f1-session-date-weekday">${WEEKDAYS[d.getDay()]}</div>

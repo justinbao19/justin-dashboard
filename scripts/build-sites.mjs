@@ -153,7 +153,13 @@ async function getF1FromJolpica(year, meeting, session) {
 }
 async function getF1(url) {
   const year = url.searchParams.get('year') || '2026'; const meeting = url.searchParams.get('meeting'); const session = url.searchParams.get('session');
-  if (session && parseJSession(session)) return getF1FromJolpica(year, meeting, session);
+  // Calendar/meeting prefer Jolpica; OpenF1 remains available for numeric live session keys.
+  if (!session || parseJSession(session)) {
+    try {
+      const jolpica = await getF1FromJolpica(year, meeting, session);
+      if (jolpica && (!jolpica.total_races || jolpica.total_races > 0) && (session || meeting || jolpica.calendar)) return jolpica;
+    } catch {}
+  }
   const sessions = await fetchOpenF1Sessions(year);
   if (sessions && sessions.length) {
     if (session) {
@@ -168,7 +174,7 @@ async function getF1(url) {
       const driversByNumber = new Map(drivers.map(driver => [driver.driver_number, driver]));
       return { session_key:Number(session), meeting_key:meta.meeting_key, name:meta.session_name, type:meta.session_type, date_start:meta.date_start, date_end:meta.date_end, status:results.length?'complete':'pending', source:'openf1', results:results.map(result => { const driver=driversByNumber.get(result.driver_number)||{}; return {position:result.position,driver_number:result.driver_number,driver_name:driver.full_name||driver.broadcast_name||('#'+result.driver_number),driver_code:driver.name_acronym||'',team_name:driver.team_name||'',team_colour:driver.team_colour||'',headshot_url:f1HeadshotOverrides[result.driver_number]||driver.headshot_url||'',laps:result.number_of_laps,duration:result.duration,gap_to_leader:result.gap_to_leader,dnf:result.dnf,dns:result.dns,dsq:result.dsq}; }) };
     }
-    if (meeting) { const list = sessions.filter(s => String(s.meeting_key) === String(meeting)).sort((a,b) => new Date(a.date_start)-new Date(b.date_start)); if (!list.length) return getF1FromJolpica(year, meeting, session); const first=list[0]; return { meeting_key:first.meeting_key, circuit:first.circuit_short_name, circuit_full:first.circuit_short_name, country:first.country_name, country_flag:f1Flags[first.country_name]||'', location:first.location, gp_name:gpName(first.country_name,first.location), gmt_offset:first.gmt_offset, source:'openf1', sessions:list.map(s=>({session_key:s.session_key,type:s.session_type,name:s.session_name,date_start:s.date_start,date_end:s.date_end})) }; }
+    if (meeting) { const list = sessions.filter(s => String(s.meeting_key) === String(meeting)).sort((a,b) => new Date(a.date_start)-new Date(b.date_start)); if (!list.length) return null; const first=list[0]; return { meeting_key:first.meeting_key, circuit:first.circuit_short_name, circuit_full:first.circuit_short_name, country:first.country_name, country_flag:f1Flags[first.country_name]||'', location:first.location, gp_name:gpName(first.country_name,first.location), gmt_offset:first.gmt_offset, source:'openf1', sessions:list.map(s=>({session_key:s.session_key,type:s.session_type,name:s.session_name,date_start:s.date_start,date_end:s.date_end})) }; }
     const meetings = new Map();
     for (const s of sessions) { if (s.session_name?.includes('Day')) continue; if (!meetings.has(s.meeting_key)) meetings.set(s.meeting_key,{meeting_key:s.meeting_key,circuit:s.circuit_short_name,country:s.country_name,country_flag:f1Flags[s.country_name]||'',location:s.location,gp_name:gpName(s.country_name,s.location),date_start:s.date_start,date_end:s.date_end||s.date_start,has_sprint:false,source:'openf1'}); const m=meetings.get(s.meeting_key); if(new Date(s.date_start)<new Date(m.date_start))m.date_start=s.date_start;if(new Date(s.date_end||s.date_start)>new Date(m.date_end))m.date_end=s.date_end||s.date_start;if(s.session_name==='Sprint')m.has_sprint=true; }
     const calendar=[...meetings.values()].sort((a,b)=>new Date(a.date_start)-new Date(b.date_start)).map((m,i)=>({...m,round:i+1})); return {year:Number(year),total_races:calendar.length,calendar,source:'openf1'};

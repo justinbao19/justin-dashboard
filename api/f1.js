@@ -520,16 +520,32 @@ export default async function handler(req, res) {
     }
 
     if (meeting) {
+      // 赛历/周末详情优先 Jolpica：OpenF1 在直播锁流时 401，且 2026 仍含已调整场次
+      try {
+        const race = await fetchJolpicaRace(year, meeting);
+        if (race) {
+          return res.status(200).json(mapJolpicaRaceToMeeting(race, year));
+        }
+      } catch (error) {
+        console.error('Jolpica meeting path failed:', error?.message || error);
+      }
+
       const openf1Sessions = await fetchOpenF1Sessions(year);
       if (openf1Sessions) {
         const detail = buildOpenF1Meeting(openf1Sessions, meeting);
         if (detail) return res.status(200).json(detail);
       }
+      return res.status(404).json({ error: 'Meeting not found' });
+    }
 
-      const race = await fetchJolpicaRace(year, meeting);
-      if (!race) return res.status(404).json({ error: 'Meeting not found' });
-      const detail = mapJolpicaRaceToMeeting(race, year);
-      return res.status(200).json(detail);
+    // 赛历优先 Jolpica，保证直播锁流期间仍有完整官方赛程
+    try {
+      const calendar = await buildJolpicaCalendar(year);
+      if (calendar.total_races > 0) {
+        return res.status(200).json(calendar);
+      }
+    } catch (error) {
+      console.error('Jolpica calendar path failed:', error?.message || error);
     }
 
     const openf1Sessions = await fetchOpenF1Sessions(year);
@@ -537,8 +553,7 @@ export default async function handler(req, res) {
       return res.status(200).json(buildOpenF1Calendar(openf1Sessions, year));
     }
 
-    const calendar = await buildJolpicaCalendar(year);
-    return res.status(200).json(calendar);
+    return res.status(502).json({ error: 'Failed to fetch F1 data' });
   } catch (error) {
     console.error('F1 API error:', error);
     res.status(500).json({ error: 'Failed to fetch F1 data' });

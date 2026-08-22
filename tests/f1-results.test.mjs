@@ -6,7 +6,7 @@ test('F1 session cards expose drill-down results UI', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /id="f1SessionResults"/);
   assert.match(html, /showF1SessionResults\(\$\{s\.session_key\}\)/);
-  assert.match(html, /\/api\/f1\?year=2026&session=\$\{sessionKey\}/);
+  assert.match(html, /\/api\/f1\?year=2026&session=\$\{encodeURIComponent\(sessionKey\)\}/);
 });
 
 test('both runtime API paths support session result lookup', async () => {
@@ -17,7 +17,14 @@ test('both runtime API paths support session result lookup', async () => {
     assert.match(source, /drivers\?session_key=/);
     assert.match(source, /driver_name/);
     assert.match(source, /gap_to_leader/);
+    assert.match(source, /api\.jolpi\.ca\/ergast\/f1/);
   }
+});
+
+test('frontend no longer calls OpenF1 directly for weekend sessions', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /\/api\/f1\?year=2026&meeting=\$\{encodeURIComponent\(meetingKey\)\}/);
+  assert.doesNotMatch(html, /fetch\(`https:\/\/api\.openf1\.org\/v1\/sessions\?meeting_key=/);
 });
 
 test('missing 2026 driver photos use verified official headshots', async () => {

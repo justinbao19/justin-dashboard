@@ -5,9 +5,10 @@ import { readFile } from 'node:fs/promises';
 test('F1 session cards expose drill-down results UI', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /id="f1SessionResults"/);
-  assert.match(html, /showF1SessionResults\(\$\{sessionKeyLiteral\}\)/);
-  assert.match(html, /const sessionKeyLiteral = JSON\.stringify\(String\(s\.session_key\)\)/);
+  assert.match(html, /data-session-key="\$\{sessionKeyAttr\}"/);
+  assert.match(html, /showF1SessionResults\(card\.dataset\.sessionKey\)/);
   assert.match(html, /\/api\/f1\?year=2026&session=\$\{encodeURIComponent\(sessionKey\)\}/);
+  assert.doesNotMatch(html, /onclick=\"showF1SessionResults\(/);
 });
 
 test('both runtime API paths support session result lookup', async () => {

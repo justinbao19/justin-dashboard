@@ -2,6 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
+test('F1 detail back button steps through previous view', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /onclick=\"goF1Back\(\)\"/);
+  assert.match(html, /function goF1Back\(\)/);
+  assert.match(html, /isF1SessionResultsOpen\(\)/);
+  assert.match(html, /hideF1SessionResults\(\)/);
+  assert.match(html, /hideF1Detail\(\)/);
+  assert.doesNotMatch(html, /onclick=\"hideF1Detail\(\)\"><i class=\"fas fa-arrow-left\"><\/i> 返回比赛列表/);
+});
+
 test('F1 session cards expose drill-down results UI', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.match(html, /id="f1SessionResults"/);

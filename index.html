@@ -8823,7 +8823,7 @@
 
                 <!-- 赛事详情视图 -->
                 <div id="f1-detail-view" style="display:none;">
-                    <button class="f1-back-btn" onclick="hideF1Detail()"><i class="fas fa-arrow-left"></i> 返回比赛列表</button>
+                    <button class="f1-back-btn" id="f1DetailBackBtn" type="button" onclick="goF1Back()"><i class="fas fa-arrow-left"></i> <span id="f1DetailBackLabel">返回</span></button>
 
                     <div class="f1-detail-header">
                         <div class="f1-detail-top">
@@ -12350,6 +12350,7 @@
                 // 切换视图
                 document.getElementById('f1-list-view').style.display = 'none';
                 document.getElementById('f1-detail-view').style.display = 'block';
+                updateF1BackButton();
             } catch (e) {
                 console.error('F1 detail error:', e);
             }
@@ -12381,6 +12382,7 @@
             if (!panel || !status || !list) return;
             if (weekend) weekend.style.display = 'none';
             panel.hidden = false;
+            updateF1BackButton();
             status.textContent = '正在读取成绩…';
             list.innerHTML = '<div class="f1-results-empty">加载排名中…</div>';
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -12389,7 +12391,7 @@
                 if (!response.ok) throw new Error('成绩暂时不可用');
                 const data = await response.json();
                 document.getElementById('f1SessionResultsTitle').textContent = data.name || 'Session Results';
-                status.textContent = data.status === 'complete' ? `${data.results.length} 位车手 · ${data.source === 'jolpica' ? 'Jolpica 成绩' : '官方时序数据'}` : '比赛尚未产生完整成绩，以下为当前排名';
+                status.textContent = data.status === 'complete' ? `${data.results.length} 位车手 · ${data.source === 'jolpica' ? '官方成绩' : '时序数据'}` : '比赛尚未产生完整成绩，以下为当前排名';
                 if (!data.results.length) {
                     list.innerHTML = '<div class="f1-results-empty">本节比赛尚未产生排名，稍后再来看看。</div>';
                     return;
@@ -12398,7 +12400,7 @@
                     const teamColor = /^[0-9A-Fa-f]{6}$/.test(result.team_colour || '') ? `#${result.team_colour}` : 'var(--f1-accent)';
                     const photo = result.headshot_url
                         ? `<img class="f1-result-driver-photo" src="${escapeHtml(result.headshot_url)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`
-                        : '<div></div>';
+                        : '<div class="f1-result-driver-photo f1-result-driver-photo--empty" aria-hidden="true"></div>';
                     return `<div class="f1-result-row" style="box-shadow:inset 3px 0 0 ${teamColor}">
                         <div class="f1-result-position">${String(result.position).padStart(2, '0')}</div>
                         ${photo}
@@ -12415,17 +12417,39 @@
             }
         }
 
+        function isF1SessionResultsOpen() {
+            const panel = document.getElementById('f1SessionResults');
+            return Boolean(panel && !panel.hidden);
+        }
+
+        function updateF1BackButton() {
+            const label = document.getElementById('f1DetailBackLabel');
+            if (!label) return;
+            // 成绩详情 → 回周末日程；周末详情 → 回比赛列表
+            label.textContent = isF1SessionResultsOpen() ? '返回' : '返回';
+        }
+
+        function goF1Back() {
+            if (isF1SessionResultsOpen()) {
+                hideF1SessionResults();
+                return;
+            }
+            hideF1Detail();
+        }
+
         function hideF1SessionResults() {
-            const weekend = document.querySelector('.f1-weekend');
+            const weekend = document.querySelector('#f1-detail-view .f1-weekend') || document.querySelector('.f1-weekend');
             const panel = document.getElementById('f1SessionResults');
             if (weekend) weekend.style.display = '';
             if (panel) panel.hidden = true;
+            updateF1BackButton();
         }
 
         function hideF1Detail() {
             hideF1SessionResults();
             document.getElementById('f1-list-view').style.display = 'block';
             document.getElementById('f1-detail-view').style.display = 'none';
+            updateF1BackButton();
         }
 
         function renderF1Standings() {

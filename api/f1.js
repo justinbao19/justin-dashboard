@@ -459,13 +459,10 @@ const JOLPICA_KIND_TO_OPENF1_NAME = {
   race: 'Race',
 };
 
-async function fillResultsFromOpenF1(year, raceMeta, kind, payload) {
-  if (payload?.results?.length) return payload;
-  const sessions = await fetchOpenF1Sessions(year);
-  if (!sessions?.length) return payload;
-
+function matchOpenF1Session(sessions, raceMeta, kind) {
+  if (!sessions?.length) return null;
   const targetName = JOLPICA_KIND_TO_OPENF1_NAME[kind];
-  if (!targetName) return payload;
+  if (!targetName) return null;
 
   const locality = raceMeta?.Circuit?.Location?.locality || '';
   const country = raceMeta?.Circuit?.Location?.country || '';
@@ -488,7 +485,12 @@ async function fillResultsFromOpenF1(year, raceMeta, kind, payload) {
       .filter(item => item.dist < 6 * 24 * 3600 * 1000)
       .sort((a, b) => a.dist - b.dist)[0]?.s;
   }
+  return match || null;
+}
 
+async function fillResultsFromOpenF1(year, raceMeta, kind, payload) {
+  const sessions = await fetchOpenF1Sessions(year);
+  const match = matchOpenF1Session(sessions, raceMeta, kind);
   if (!match) return payload;
 
   try {
@@ -505,6 +507,68 @@ async function fillResultsFromOpenF1(year, raceMeta, kind, payload) {
     };
   } catch (error) {
     console.error('OpenF1 result fallback failed:', error?.message || error);
+    return payload;
+  }
+}
+
+async function attachOpenF1DriverMeta(year, raceMeta, kind, payload) {
+  if (!payload?.results?.length) return payload;
+  const needsMeta = payload.results.some(r => !r.headshot_url || !r.team_colour);
+  if (!needsMeta) return payload;
+
+  const sessions = await fetchOpenF1Sessions(year);
+  if (!sessions?.length) return payload;
+
+  let match = matchOpenF1Session(sessions, raceMeta, kind);
+  if (!match) {
+    // any session from same weekend is enough for driver headshots
+    const locality = raceMeta?.Circuit?.Location?.locality || '';
+    const country = raceMeta?.Circuit?.Location?.country || '';
+    match = sessions.find(s => {
+      const loc = `${s.location || ''} ${s.circuit_short_name || ''}`.toLowerCase();
+      return (
+        (locality && loc.includes(String(locality).toLowerCase())) ||
+        (country && String(s.country_name || '').toLowerCase() === String(country).toLowerCase())
+      );
+    });
+  }
+  if (!match) return payload;
+
+  try {
+    const driversResponse = await fetch(
+      `https://api.openf1.org/v1/drivers?session_key=${encodeURIComponent(match.session_key)}`
+    );
+    if (!driversResponse.ok) return payload;
+    const drivers = await driversResponse.json();
+    const byNumber = new Map(drivers.map(d => [Number(d.driver_number), d]));
+    const byCode = new Map(
+      drivers
+        .filter(d => d.name_acronym)
+        .map(d => [String(d.name_acronym).toUpperCase(), d])
+    );
+
+    return {
+      ...payload,
+      results: payload.results.map(result => {
+        const driver =
+          byNumber.get(Number(result.driver_number)) ||
+          byCode.get(String(result.driver_code || '').toUpperCase()) ||
+          {};
+        return {
+          ...result,
+          headshot_url:
+            result.headshot_url ||
+            DRIVER_HEADSHOT_OVERRIDES[result.driver_number] ||
+            driver.headshot_url ||
+            '',
+          team_colour: result.team_colour || driver.team_colour || '',
+          team_name: result.team_name || driver.team_name || result.team_name || '',
+          driver_code: result.driver_code || driver.name_acronym || '',
+        };
+      }),
+    };
+  } catch (error) {
+    console.error('OpenF1 driver meta attach failed:', error?.message || error);
     return payload;
   }
 }
@@ -549,9 +613,15 @@ export default async function handler(req, res) {
       if (jolpicaKey) {
         let payload = await fetchJolpicaSessionResults(jolpicaKey.year, jolpicaKey.round, jolpicaKey.kind);
         if (!payload) return res.status(404).json({ error: 'Session not found' });
+        const raceMeta = await fetchJolpicaRace(jolpicaKey.year, jolpicaKey.round);
         if (!payload.results?.length) {
-          const raceMeta = await fetchJolpicaRace(jolpicaKey.year, jolpicaKey.round);
           payload = await fillResultsFromOpenF1(jolpicaKey.year, raceMeta, jolpicaKey.kind, payload);
+        } else if (payload.results.some(r => !r.headshot_url)) {
+          // Jolpica 有成绩但无头像：优先整表替换为 OpenF1；失败则只补头像/车队色
+          const openf1Payload = await fillResultsFromOpenF1(jolpicaKey.year, raceMeta, jolpicaKey.kind, payload);
+          payload = openf1Payload.source === 'openf1' && openf1Payload.results?.length
+            ? openf1Payload
+            : await attachOpenF1DriverMeta(jolpicaKey.year, raceMeta, jolpicaKey.kind, payload);
         }
         setCache(payload.results?.length ? 300 : 30);
         return res.status(200).json(payload);

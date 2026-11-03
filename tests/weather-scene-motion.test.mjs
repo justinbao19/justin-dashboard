@@ -84,3 +84,14 @@ test('local-only scene preview supports visual regression checks without affecti
   assert.match(html, /const scenePreview = getLocalWeatherScenePreview\(\)/);
   assert.match(html, /scenePreview\?\.skycon \|\| rt\.skycon/);
 });
+
+test('dev preview accepts friendly weather query aliases, time of day and moon illumination', () => {
+  assert.match(html, /params\.get\('weather'\)/);
+  assert.match(html, /sunny: 'CLEAR_DAY'/);
+  assert.match(html, /overcast: 'CLOUDY'/);
+  assert.match(html, /'heavy-rain': 'HEAVY_RAIN'/);
+  assert.match(html, /thunder: 'THUNDER_SHOWER'/);
+  assert.match(html, /params\.get\('moon'\)/);
+  assert.match(html, /params\.get\('time'\)/);
+  assert.match(html, /applyMoonPhaseToScene\(scene, weather\)/);
+});

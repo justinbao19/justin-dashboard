@@ -6,7 +6,8 @@
   <meta name="theme-color" content="#182734">
   <title>台风追踪 · Pulse</title>
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
-  <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+  <link rel="preconnect" href="https://services.arcgisonline.com" crossorigin>
+  <link rel="preconnect" href="https://server.arcgisonline.com" crossorigin>
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css">
   <link rel="stylesheet" href="/typhoon.css">
@@ -31,6 +32,10 @@
     <main class="workspace">
       <section class="map-panel" aria-label="台风路径地图">
         <div id="typhoonMap"></div>
+        <div class="basemap-notice" id="basemapNotice" role="status" aria-live="polite" hidden>底图加载失败，已切换简化底图</div>
+        <div class="empty-map-state" id="emptyMapState" role="status" hidden>
+          <strong>当前无活跃台风</strong><span>有新的台风活动时，可从天气页查看最新路径。</span>
+        </div>
         <div class="map-fallback" id="mapFallback" hidden>
           <i class="ph ph-map-trifold"></i>
           <strong>地图暂时无法加载</strong>
@@ -131,7 +136,7 @@
           </div>
         </section>
 
-        <div class="map-attribution">CARTO · OpenStreetMap · Esri · RainViewer · NASA GIBS · Open-Meteo</div>
+        <div class="map-attribution">Esri, HERE, Garmin, © OpenStreetMap contributors · RainViewer · NASA GIBS · Open-Meteo</div>
       </section>
 
       <aside class="insight-panel" id="insightPanel" aria-label="台风实时信息">

@@ -51,7 +51,26 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 
 .typhoon-app { position: relative; width: 100%; height: 100dvh; overflow: hidden; }
 .workspace, .map-panel, #typhoonMap { position: absolute; inset: 0; }
-.map-panel { min-width: 0; background: #173247; }
+.map-panel { min-width: 0; background: var(--page); }
+
+.basemap-notice {
+  position: absolute;
+  z-index: 9;
+  top: 106px;
+  left: 14px;
+  max-width: calc(100% - 90px);
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--glass-solid);
+  color: var(--muted);
+  font-size: 11px;
+  pointer-events: none;
+}
+.empty-map-state { position: absolute; left: 50%; bottom: 32px; z-index: 5; width: min(340px, calc(100% - 32px)); display: grid; gap: 6px; padding: 18px; border-radius: 16px; background: var(--glass-solid); text-align: center; transform: translateX(-50%); pointer-events: none; }
+.empty-map-state span { color: var(--muted); font-size: 12px; }
+.is-empty .map-toolbar { right: 14px; }
+.is-empty .map-toolbar > button { display: none; }
 
 .glass,
 .topbar,
@@ -667,7 +686,7 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .current-marker, .user-location-marker { position: absolute; width: 48px; height: 48px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; cursor: pointer; will-change: transform; }
-.typhoon-marker-core { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.6); border-radius: 50%; background: rgba(8, 25, 37, .76); color: #f7fbff; box-shadow: 0 8px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.28); backdrop-filter: blur(12px); }
+.typhoon-marker-core { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--storm-color, #f7fbff); border-radius: 50%; background: rgba(8, 25, 37, .76); color: var(--storm-color, #f7fbff); box-shadow: 0 8px 22px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.28); backdrop-filter: blur(12px); }
 .typhoon-marker-core i { font-size: 23px; animation: typhoon-rotate 7s linear infinite; }
 @keyframes typhoon-rotate { to { transform: rotate(360deg); } }
 .user-location-marker::before { content: ''; position: absolute; width: 34px; height: 34px; border: 1px solid rgba(88, 190, 255, .72); border-radius: 50%; animation: location-pulse 2.2s ease-out infinite; }
@@ -756,7 +775,8 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   .track-playback { left: 10px; right: 10px; bottom: calc(var(--tablet-sheet-height) + 20px); width: auto; }
   .node-card { left: 10px; right: 10px; bottom: 10px; width: auto; height: var(--tablet-sheet-height); overflow-y: auto; border-radius: 23px; }
   .maplibregl-ctrl-bottom-right { right: 10px; bottom: calc(var(--tablet-sheet-height) + 98px); }
-  .map-attribution { display: none; }
+  .map-attribution { display: block; top: 60px; left: 10px; max-width: calc(100% - 20px); padding: 2px 4px; font-size: 7px; }
+  .basemap-notice { top: 164px; left: 10px; }
 }
 
 @media (max-width: 640px) {
@@ -880,7 +900,8 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
   .agency-line { width: 10px; }
   .source-section { padding-top: 10px; }
   .maplibregl-ctrl-bottom-right { display: none; }
-  .map-attribution { display: none; }
+  .map-attribution { top: calc(max(8px, env(safe-area-inset-top)) + 50px); left: 8px; max-width: calc(100% - 16px); font-size: 6px; }
+  .basemap-notice { top: calc(max(8px, env(safe-area-inset-top)) + 146px); left: 8px; font-size: 10px; }
 }
 
 @media (max-width: 360px) {

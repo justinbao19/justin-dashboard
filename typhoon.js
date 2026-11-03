@@ -5,6 +5,7 @@ import {
   chooseSynchronizedFrame
 } from '/typhoon-layer-clock.mjs';
 import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
+import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } from '/typhoon-basemap.mjs';
 
 (() => {
   const CACHE_MS = 5 * 60 * 1000;
@@ -51,6 +52,10 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     fieldLoading: null,
     fieldRenderer: null,
     styleGeneration: 0,
+    styleReady: false,
+    basemapFailed: false,
+    basemapFailureMonitor: createBasemapFailureMonitor(),
+    needsTrackFit: true,
     boundLayerIds: new Set(),
     controlsInitialized: false
   };
@@ -61,6 +66,10 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     super_typhoon: '超强台风', severe_typhoon: '强台风', typhoon: '台风',
     severe_tropical_storm: '强热带风暴', tropical_storm: '热带风暴',
     tropical_depression: '热带低压', tropical_disturbance: '热带扰动', unknown: '热带气旋'
+  };
+  const intensityColors = {
+    tropical_disturbance: '#94a3b8', tropical_depression: '#38bdf8', tropical_storm: '#34d399',
+    severe_tropical_storm: '#facc15', typhoon: '#fb923c', severe_typhoon: '#f472b6', super_typhoon: '#c084fc'
   };
   const layerIcons = { 'himawari-ir': 'ph-cloud', 'himawari-visible': 'ph-sun-horizon', precipitation: 'ph-drop-half-bottom', 'wind-field': 'ph-wind', 'wave-height': 'ph-waves' };
   const exclusiveFieldLayers = new Set(['radar', 'wind-field', 'wave-height']);
@@ -228,36 +237,11 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     } finally { clearTimeout(timer); }
   }
 
-  function standardStyle() {
-    const tileTheme = state.theme === 'light' ? 'light_all' : 'dark_all';
-    return {
-      version: 8,
-      sources: {
-        carto: {
-          type: 'raster', tileSize: 256,
-          tiles: [`https://a.basemaps.cartocdn.com/${tileTheme}/{z}/{x}/{y}@2x.png`, `https://b.basemaps.cartocdn.com/${tileTheme}/{z}/{x}/{y}@2x.png`],
-          attribution: 'CARTO · OpenStreetMap contributors'
-        }
-      },
-      layers: [{ id: 'basemap-standard', type: 'raster', source: 'carto' }]
-    };
-  }
+  function mapStyle() { return createBasemapStyle(state.theme, state.basemap); }
 
-  function satelliteStyle() {
-    return {
-      version: 8,
-      sources: {
-        imagery: { type: 'raster', tileSize: 256, tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], attribution: 'Esri World Imagery' },
-        reference: { type: 'raster', tileSize: 256, tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'] }
-      },
-      layers: [
-        { id: 'basemap-satellite', type: 'raster', source: 'imagery' },
-        { id: 'basemap-reference', type: 'raster', source: 'reference', paint: { 'raster-opacity': .88 } }
-      ]
-    };
+  function firstStormLayer() {
+    return state.map?.getStyle()?.layers.find(layer => /^(track-|points-|forecast-cone|wind-circle-|playback-|other-track-)/.test(layer.id))?.id;
   }
-
-  function mapStyle() { return state.basemap === 'satellite' ? satelliteStyle() : standardStyle(); }
 
   function layerConfig(id) {
     return (state.detail?.mapConfig?.weatherLayers || []).find(layer => layer.id === id);
@@ -353,7 +337,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
 
   async function addWeatherLayers(generation) {
     const map = state.map;
-    if (!map || !map.getStyle() || !state.layerClock) return;
+    if (!map || !state.styleReady || !state.layerClock) return;
     const config = state.detail?.mapConfig?.weatherLayers || [];
     for (const layer of config) {
       if (layer.type === 'model-grid') continue;
@@ -373,7 +357,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
           source: `weather-${layer.id}`,
           layout: { visibility: state.activeWeather.has(layer.id) ? 'visible' : 'none' },
           paint: { 'raster-opacity': layerOpacity(layer), 'raster-fade-duration': 180, 'raster-resampling': 'linear' }
-        }, map.getLayer('track-observed-glow') ? 'track-observed-glow' : undefined);
+        }, firstStormLayer());
       } catch (error) {
         console.warn(`${layer.label} unavailable:`, error);
       }
@@ -392,7 +376,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
 
   function addModelFieldLayers() {
     const map = state.map;
-    if (!map?.getStyle() || !state.fieldData?.fields) return;
+    if (!map?.getStyle() || !state.styleReady || !state.fieldData?.fields) return;
     const id = [...modelFieldLayers].find(layerId => state.activeWeather.has(layerId));
     if (!id) { destroyModelFieldRenderer(); return; }
     if (state.fieldRenderer?.id === id && fieldLayerIds(id).every(layerId => map.getLayer(layerId))) {
@@ -403,7 +387,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const style = modelFieldStyles[id];
     const field = state.fieldData.fields[style.payload];
     if (!field?.geojson?.features?.length) return;
-    const before = map.getLayer('track-observed-glow') ? 'track-observed-glow' : undefined;
+    const before = firstStormLayer();
     state.fieldRenderer = createFieldRenderer({ map, id, field, style, opacity: fieldOpacity(), beforeLayer: before });
   }
 
@@ -447,7 +431,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       features: points.map((point, index) => {
         const key = `${sourceId}:${index}`;
         state.pointsByKey.set(key, point);
-        return { type: 'Feature', properties: { key, sourceId, color, kind: point.kind }, geometry: { type: 'Point', coordinates: [point.position.lon, point.position.lat] } };
+        return { type: 'Feature', properties: { key, sourceId, color: intensityColors[point.classification] || color, kind: point.kind }, geometry: { type: 'Point', coordinates: [point.position.lon, point.position.lat] } };
       })
     };
   }
@@ -603,21 +587,22 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const tracks = state.detail?.tracks;
     if (!map || !map.getStyle() || !tracks) return;
     state.pointsByKey.clear();
+    addForecastConeLayers();
     addWindCircleLayers();
     setWindCirclePoint(state.windCirclePoint);
     const observed = tracks.observed || [];
-    if (observed.length > 1) {
-      map.addSource('track-observed', { type: 'geojson', data: lineFeature(observed, { sourceId: 'observed' }) });
+    if (observed.length) {
+      map.addSource('track-observed', { type: 'geojson', data: observed.length > 1 ? lineFeature(observed, { sourceId: 'observed' }) : { type: 'FeatureCollection', features: [] } });
       map.addLayer({ id: 'track-observed-glow', type: 'line', source: 'track-observed', layout: { visibility: state.activeSources.has('observed') ? 'visible' : 'none' }, paint: { 'line-color': '#c9efff', 'line-width': 8, 'line-opacity': .2, 'line-blur': 3 } });
-      map.addLayer({ id: 'track-observed-line', type: 'line', source: 'track-observed', layout: { visibility: state.activeSources.has('observed') ? 'visible' : 'none' }, paint: { 'line-color': '#f2fbff', 'line-width': 2.6, 'line-opacity': .95 } });
+      map.addLayer({ id: 'track-observed-line', type: 'line', source: 'track-observed', layout: { visibility: state.activeSources.has('observed') ? 'visible' : 'none' }, paint: { 'line-color': state.theme === 'light' && state.basemap === 'standard' ? '#245573' : '#f2fbff', 'line-width': 2.6, 'line-opacity': .95 } });
       map.addSource('points-observed', { type: 'geojson', data: pointCollection(observed, 'observed', '#f2fbff') });
       map.addLayer({
         id: 'points-observed', type: 'circle', source: 'points-observed',
         layout: { visibility: state.activeSources.has('observed') ? 'visible' : 'none' },
         paint: {
           'circle-radius': ['case', ['==', ['get','kind'], 'current'], 1, 3],
-          'circle-color': '#f2fbff',
-          'circle-stroke-color': '#2d9edb',
+          'circle-color': ['get', 'color'],
+          'circle-stroke-color': state.theme === 'light' ? '#24475c' : '#f7fbfd',
           'circle-stroke-width': ['case', ['==', ['get','kind'], 'current'], 0, 1],
           'circle-opacity': ['case', ['==', ['get','kind'], 'current'], 0, .9]
         }
@@ -628,9 +613,21 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       map.addSource(`track-${track.id}`, { type: 'geojson', data: lineFeature(track.points, { sourceId: track.id }) });
       map.addLayer({ id: `track-${track.id}`, type: 'line', source: `track-${track.id}`, layout: { visibility: state.activeSources.has(track.id) ? 'visible' : 'none' }, paint: { 'line-color': track.color, 'line-width': 2.2, 'line-opacity': .9, 'line-dasharray': [2, 1.6] } });
       map.addSource(`points-${track.id}`, { type: 'geojson', data: pointCollection(track.points, track.id, track.color) });
-      map.addLayer({ id: `points-${track.id}`, type: 'circle', source: `points-${track.id}`, layout: { visibility: state.activeSources.has(track.id) ? 'visible' : 'none' }, paint: { 'circle-radius': 4, 'circle-color': track.color, 'circle-stroke-color': '#f7fbfd', 'circle-stroke-width': 1.2 } });
+      map.addLayer({ id: `points-${track.id}`, type: 'circle', source: `points-${track.id}`, layout: { visibility: state.activeSources.has(track.id) ? 'visible' : 'none' }, paint: { 'circle-radius': 4, 'circle-color': ['get', 'color'], 'circle-stroke-color': state.theme === 'light' ? '#24475c' : '#f7fbfd', 'circle-stroke-width': 1.2 } });
     }
     addPlaybackLayers();
+  }
+
+  function addForecastConeLayers() {
+    // Only render uncertainty geometry supplied by the provider; do not infer a cone from agency spread.
+    const features = (state.detail?.eventGeometry?.features || []).filter(feature =>
+      ['Polygon', 'MultiPolygon'].includes(feature.geometry?.type)
+      && /cone|forecast.*(area|uncertainty)/i.test(feature.properties?.featureType || '')
+    );
+    if (!features.length) return;
+    state.map.addSource('forecast-cone', { type: 'geojson', data: { type: 'FeatureCollection', features } });
+    state.map.addLayer({ id: 'forecast-cone-fill', type: 'fill', source: 'forecast-cone', paint: { 'fill-color': '#5bb6df', 'fill-opacity': .16 } });
+    state.map.addLayer({ id: 'forecast-cone-line', type: 'line', source: 'forecast-cone', paint: { 'line-color': '#5bb6df', 'line-width': 1.4, 'line-dasharray': [3, 2] } });
   }
 
   function removeMarkers() {
@@ -664,6 +661,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const button = document.createElement('button');
     button.type = 'button';
     button.dataset.source = sourceId;
+    button.style.setProperty('--storm-color', intensityColors[point.classification] || color);
     button.setAttribute('aria-label', `${point.sourceLabel || '路径'} ${formatDate(point.validAt)} 节点`);
     if (current) {
       button.className = 'current-marker';
@@ -671,7 +669,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       button.innerHTML = '<span class="typhoon-marker-core"><i class="ph ph-hurricane" aria-hidden="true"></i></span>';
     } else {
       button.className = `track-key-marker${options.className ? ` ${options.className}` : ''}`;
-      button.style.setProperty('--source-color', color);
+      button.style.setProperty('--source-color', intensityColors[point.classification] || color);
       button.innerHTML = `<span class="dot"></span><small>${escapeHtml(options.label || markerLabel(point))}</small>`;
     }
     button.classList.toggle('is-hidden', !current && !state.activeSources.has(sourceId));
@@ -738,6 +736,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const tracks = state.detail?.tracks;
     if (!state.map || !tracks) return;
     const observed = tracks.observed || [];
+    if (!observed.length && state.detail?.storm?.position) addMarker(state.detail.storm, 'observed', '#f2fbff', true);
     const interval = Math.max(6, Math.ceil(observed.length / 10));
     observed.forEach((point, index) => {
       const current = index === observed.length - 1;
@@ -1046,6 +1045,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const panelRect = el('insightPanel')?.getBoundingClientRect();
     const stripRect = el('sourceStrip')?.getBoundingClientRect();
     const playbackRect = el('trackPlayback')?.getBoundingClientRect();
+    const toolbarRect = document.querySelector('.map-toolbar')?.getBoundingClientRect();
     const padding = {
       top: Math.max(24, Math.round((topbarRect?.bottom || mapRect.top + 64) - mapRect.top + 12)),
       right: 38,
@@ -1060,31 +1060,49 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
         playbackRect?.height ? playbackRect.top : panelRect.top
       ) - 12;
       padding.bottom = Math.max(38, Math.round(mapRect.bottom - visibleBottom));
+      if (toolbarRect?.width) padding.right = Math.max(padding.right, mapRect.right - toolbarRect.left + 12);
+      for (const id of ['stormSwitcher', 'radarIntensityLegend', 'fieldIntensityLegend']) {
+        const rect = el(id)?.getBoundingClientRect();
+        if (rect?.height) padding.top = Math.max(padding.top, rect.bottom - mapRect.top + 12);
+      }
     } else if (panelRect?.width && panelRect.left > mapRect.left + mapRect.width * .45) {
       padding.right = Math.max(70, Math.round(mapRect.right - panelRect.left + 14));
       padding.bottom = 76;
       padding.left = 70;
+      if (toolbarRect?.height) padding.top = Math.max(padding.top, toolbarRect.bottom - mapRect.top + 14);
+    }
+    // Very short viewports must still leave room for MapLibre's camera fit.
+    for (const [start, end, size] of [['left', 'right', mapRect.width], ['top', 'bottom', mapRect.height]]) {
+      const total = padding[start] + padding[end];
+      const available = Math.max(0, size - 140);
+      if (total > available) {
+        padding[start] *= available / total;
+        padding[end] *= available / total;
+      }
     }
     return padding;
   }
 
   function fitTracks() {
     const tracks = state.detail?.tracks;
-    if (!state.map || !tracks?.observed?.length) return;
+    if (!state.map || !state.detail) return;
     const bounds = new maplibregl.LngLatBounds();
-    tracks.observed.slice(-30).forEach(point => bounds.extend([point.position.lon, point.position.lat]));
-    tracks.forecasts.forEach(track => track.points.forEach(point => bounds.extend([point.position.lon, point.position.lat])));
-    state.otherStormTracks.forEach(item => item.lines.forEach(line => line.points.forEach(point => bounds.extend([point.position.lon, point.position.lat]))));
-    if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), maxZoom: 7, duration: 700 });
+    const points = [state.detail.storm, ...(tracks?.observed || []), ...(tracks?.forecasts || []).flatMap(track => track.points)];
+    points.forEach(point => {
+      if (hasNumber(point?.position?.lon) && hasNumber(point?.position?.lat)) bounds.extend([Number(point.position.lon), Number(point.position.lat)]);
+    });
+    if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), retainPadding: false, maxZoom: 7, duration: 700 });
   }
 
   async function hydrateMapStyle() {
-    const generation = ++state.styleGeneration;
-    state.boundLayerIds.clear();
+    if (!state.styleReady || !state.detail) return;
+    const generation = state.styleGeneration;
     addTrackLayers();
     renderMarkers();
+    // Delegated MapLibre listeners survive setStyle; bind each layer id only once.
     bindPointInteractions();
     await addWeatherLayers(generation);
+    if (generation !== state.styleGeneration || !state.styleReady) return;
     addModelFieldLayers();
     await renderOtherStormTracks();
   }
@@ -1105,29 +1123,67 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
 
   function initializeMap() {
     if (!window.maplibregl) { el('mapFallback').hidden = false; return; }
-    const position = state.detail.storm.position;
-    state.map = new maplibregl.Map({ container: 'typhoonMap', style: mapStyle(), center: [position.lon, position.lat], zoom: 5.2, attributionControl: false, maxZoom: 10 });
+    const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
+    state.map = new maplibregl.Map({ container: 'typhoonMap', style: mapStyle(), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2, attributionControl: false, maxZoom: 10 });
     state.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-    state.map.on('load', async () => {
-      await hydrateMapStyle();
-      if (!state.map.__pulseFitted) { state.map.__pulseFitted = true; fitTracks(); }
-      resolveAndLoadWeatherLayers();
+    state.map.on('style.load', () => {
+      state.styleReady = true;
+      hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error));
+      if (state.basemapFailed) showSimplifiedBasemap();
+      if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+      if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
     });
     state.map.on('error', event => {
+      if (state.basemapFailureMonitor(event)) {
+        state.basemapFailed = true;
+        if (state.styleReady) showSimplifiedBasemap();
+      }
       const message = String(event?.error?.message || '');
       if (!/Failed to fetch|AJAXError/.test(message)) console.warn('Map error:', event?.error || event);
     });
-    addEventListener('resize', () => state.map?.resize(), { passive: true });
+    let resizeFrame;
+    addEventListener('resize', () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        state.map?.resize();
+        fitAgencyTrack(state.selectedAgencyId);
+      });
+    }, { passive: true });
+  }
+
+  function showSimplifiedBasemap() {
+    BASEMAP_SOURCE_IDS.forEach(id => {
+      if (state.map.getLayer(id)) state.map.setLayoutProperty(id, 'visibility', 'none');
+    });
+    el('basemapNotice').hidden = false;
+  }
+
+  function reloadMapStyle() {
+    if (!state.map) return;
+    ++state.styleGeneration;
+    state.styleReady = false;
+    state.basemapFailed = false;
+    state.basemapFailureMonitor = createBasemapFailureMonitor();
+    el('basemapNotice').hidden = true;
+    destroyModelFieldRenderer();
+    // A complete style replacement reliably emits style.load even for rapid toggles.
+    state.map.setStyle(mapStyle(), { diff: false });
   }
 
   function setBasemap(id) {
     if (!state.map || id === state.basemap) return;
     state.basemap = id;
     document.querySelectorAll('[data-basemap]').forEach(button => button.classList.toggle('active', button.dataset.basemap === id));
-    removeMarkers();
-    destroyModelFieldRenderer();
-    state.map.once('styledata', () => setTimeout(() => hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error)), 0));
-    state.map.setStyle(mapStyle());
+    reloadMapStyle();
+  }
+
+  function syncTheme() {
+    const theme = resolveTheme();
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#dfe8ef' : '#07131d';
+    if (theme === state.theme) return;
+    state.theme = theme;
+    reloadMapStyle();
   }
 
   function setSourceVisible(id, visible) {
@@ -1162,7 +1218,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const bounds = new maplibregl.LngLatBounds();
     if (current) bounds.extend([current.position.lon, current.position.lat]);
     track.points.forEach(point => bounds.extend([point.position.lon, point.position.lat]));
-    if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), maxZoom: 7.5, duration: 520 });
+    if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), retainPadding: false, maxZoom: 7.5, duration: 520 });
   }
 
   function selectAgencyTrack(trackId = null) {
@@ -1403,9 +1459,11 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       const payload = cached || await fetchJson('/api/typhoons');
       if (!cached) writeCache('pulse.typhoons.summary.detail.v1', payload);
       state.stormsSummary = (payload?.storms || []).filter(storm => storm?.active);
+      return true;
     } catch (error) {
       state.stormsSummary = [];
       console.warn('Typhoon summary for switcher unavailable:', error);
+      return false;
     }
   }
 
@@ -1442,22 +1500,21 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
     const position = state.detail?.storm?.position;
     if (!state.map || !position) return;
     state.map.flyTo({ center: [position.lon, position.lat], zoom: Math.max(state.map.getZoom(), 5.4), padding: mapPadding(), retainPadding: false, duration: 700 });
-    if (state.map.isStyleLoaded()) rebuildStormLayers().catch(error => console.warn('Storm layer rebuild failed:', error));
-    else state.map.once('load', rebuildStormLayers);
+    if (state.styleReady) rebuildStormLayers().catch(error => console.warn('Storm layer rebuild failed:', error));
+    else state.needsTrackFit = true;
   }
 
   async function rebuildStormLayers() {
     const map = state.map;
-    if (!map || !map.getStyle()) return;
+    if (!map || !state.styleReady) return;
+    ++state.styleGeneration;
     removeMarkers();
     removeOtherStormMarkers();
     const layerIds = map.getStyle().layers.map(layer => layer.id);
-    const removable = layerIds.filter(id => /^(track-|points-|wind-circle-|playback-)/.test(id));
+    const stormLayer = /^(track-|points-|forecast-cone|wind-circle|playback-|other-track-|other-points-)/;
+    const removable = layerIds.filter(id => stormLayer.test(id));
     removable.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
-    ['track-observed', 'points-observed', 'wind-circles', 'wind-circle-labels', 'playback-history', 'playback-forecast', 'playback-cursor',
-      ...(state.detail?.tracks?.forecasts || []).flatMap(track => [`track-${track.id}`, `points-${track.id}`]),
-      ...state.otherStormTracks.flatMap(item => [`other-track-${item.id}`, `other-points-${item.id}`])
-    ].forEach(sourceId => { if (map.getSource(sourceId)) map.removeSource(sourceId); });
+    Object.keys(map.getStyle().sources).filter(id => stormLayer.test(id)).forEach(sourceId => map.removeSource(sourceId));
     await hydrateMapStyle();
     fitTracks();
   }
@@ -1465,6 +1522,8 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   async function renderOtherStormTracks() {
     const map = state.map;
     if (!map || !map.getStyle()) return;
+    const generation = state.styleGeneration;
+    const stormId = state.stormId;
     const others = state.stormsSummary.filter(storm => storm?.active && storm.id && storm.id !== state.stormId);
     const loaded = (await Promise.all(others.map(async storm => {
       try {
@@ -1488,6 +1547,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       }
       return null;
     }))).filter(Boolean);
+    if (generation !== state.styleGeneration || stormId !== state.stormId || !state.styleReady) return;
     state.otherStormTracks.forEach(item => {
       [`other-track-${item.id}`, `other-points-${item.id}`].forEach(id => {
         if (map.getLayer(id)) map.removeLayer(id);
@@ -1502,7 +1562,7 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
       map.addSource(`other-track-${item.id}`, { type: 'geojson', data: { type: 'FeatureCollection', features } });
       map.addLayer({ id: `other-track-${item.id}`, type: 'line', source: `other-track-${item.id}`, paint: {
         'line-color': ['coalesce', ['get', 'color'], '#8fb6c9'], 'line-width': 1.8, 'line-opacity': .56, 'line-dasharray': [1.5, 1.8]
-      } });
+      } }, firstStormLayer());
       const observedLine = item.lines.find(line => line.sourceId === 'observed');
       const lastPoint = observedLine?.points.at(-1) || item.lines[0]?.points.at(0);
       if (!lastPoint?.position) return;
@@ -1564,6 +1624,11 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   }
 
   function setupInteractions() {
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+    addEventListener('storage', event => {
+      if (!event.key || ['themeMode', 'theme'].includes(event.key)) syncTheme();
+    });
+    addEventListener('pageshow', syncTheme);
     document.querySelectorAll('[data-basemap]').forEach(button => button.addEventListener('click', () => setBasemap(button.dataset.basemap)));
     el('layerButton').addEventListener('click', () => {
       const opening = el('layerPanel').hidden;
@@ -1622,19 +1687,31 @@ import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
   }
 
   async function init() {
-    state.theme = resolveTheme();
-    document.documentElement.dataset.theme = state.theme;
+    syncTheme();
     setupInteractions();
     const userLocationRequest = resolveUserLocation();
     state.stormId = currentIdFromPath();
-    if (!state.stormId) {
-      el('pageState').querySelector('strong').textContent = '台风地址无效';
-      el('pageState').querySelector('span').textContent = '请返回天气页重新进入';
-      return;
-    }
     const zhejiangId = new URLSearchParams(location.search).get('zj') || '';
     try {
-      await loadStormsSummary();
+      const summaryAvailable = await loadStormsSummary();
+      if (!state.stormId) {
+        if (!summaryAvailable) throw new Error('台风活动数据暂时不可用，请稍后重试');
+        const storm = state.stormsSummary[0];
+        if (storm) {
+          state.stormId = storm.id;
+        } else {
+          el('topbarStormName').textContent = '当前无活跃台风';
+          el('topbarUpdated').textContent = '暂无路径可显示';
+          el('insightPanel').hidden = true;
+          el('trackPlayback').hidden = true;
+          el('sourceStrip').hidden = true;
+          el('emptyMapState').hidden = false;
+          el('typhoonApp').classList.add('is-empty');
+          initializeMap();
+          el('pageState').hidden = true;
+          return;
+        }
+      }
       renderStormSwitcher();
       await loadStormDetail(state.stormId, zhejiangId);
       userLocationRequest.then(locationData => {

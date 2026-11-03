@@ -5,7 +5,8 @@ import {
   chooseSynchronizedFrame
 } from '/typhoon-layer-clock.mjs';
 import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
-import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } from '/typhoon-basemap.mjs';
+import { BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, nextBasemapProvider, loadMapLibre } from '/typhoon-basemap.mjs';
+import { createOutlineProjection } from '/typhoon-land.mjs';
 
 (() => {
   const CACHE_MS = 5 * 60 * 1000;
@@ -53,8 +54,16 @@ import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } f
     fieldRenderer: null,
     styleGeneration: 0,
     styleReady: false,
-    basemapFailed: false,
-    basemapFailureMonitor: createBasemapFailureMonitor(),
+    basemapProvider: 'land',
+    basemapRequest: 0,
+    basemapGeneration: 0,
+    basemapTimer: null,
+    basemapSourceIds: [],
+    basemapLoadedSources: new Set(),
+    basemapFailureMonitor: createBasemapFailureMonitor([]),
+    vectorStyles: new Map(),
+    rendererLoading: false,
+    rendererUnavailable: false,
     needsTrackFit: true,
     boundLayerIds: new Set(),
     controlsInitialized: false
@@ -236,8 +245,6 @@ import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } f
       return response.text();
     } finally { clearTimeout(timer); }
   }
-
-  function mapStyle() { return createBasemapStyle(state.theme, state.basemap); }
 
   function firstStormLayer() {
     return state.map?.getStyle()?.layers.find(layer => /^(track-|points-|forecast-cone|wind-circle-|playback-|other-track-)/.test(layer.id))?.id;
@@ -1121,64 +1128,202 @@ import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } f
     await addWeatherLayers(state.styleGeneration);
   }
 
-  function initializeMap() {
-    if (!window.maplibregl) { el('mapFallback').hidden = false; return; }
-    const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
-    state.map = new maplibregl.Map({ container: 'typhoonMap', style: mapStyle(), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2, attributionControl: false, maxZoom: 10 });
-    state.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-    state.map.on('style.load', () => {
-      state.styleReady = true;
-      hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error));
-      if (state.basemapFailed) showSimplifiedBasemap();
-      if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
-      if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
-    });
-    state.map.on('error', event => {
-      if (state.basemapFailureMonitor(event)) {
-        state.basemapFailed = true;
-        if (state.styleReady) showSimplifiedBasemap();
-      }
-      const message = String(event?.error?.message || '');
-      if (!/Failed to fetch|AJAXError/.test(message)) console.warn('Map error:', event?.error || event);
-    });
-    let resizeFrame;
-    addEventListener('resize', () => {
-      cancelAnimationFrame(resizeFrame);
-      resizeFrame = requestAnimationFrame(() => {
-        state.map?.resize();
-        fitAgencyTrack(state.selectedAgencyId);
+  function updateBasemapAttribution() {
+    const provider = state.basemapProvider;
+    el('basemapAttribution').innerHTML = provider === 'openfreemap'
+      ? `${BASEMAP_ATTRIBUTION}${state.basemap === 'satellite' ? ' · NASA GIBS Blue Marble' : ''}`
+      : provider === 'esri'
+        ? `${state.basemap === 'satellite' ? 'Esri World Imagery · ' : ''}${ESRI_ATTRIBUTION}`
+        : '简化地理轮廓';
+  }
+
+  function basemapNotice(message = '') {
+    el('basemapNotice').textContent = message;
+    el('basemapNotice').hidden = !message;
+    updateBasemapAttribution();
+  }
+
+  function renderOutlineMap() {
+    const container = el('mapFallback');
+    const rect = el('typhoonMap').getBoundingClientRect();
+    const width = rect.width || 1200, height = rect.height || 800;
+    const tracks = [{ id: 'observed', color: state.theme === 'light' ? '#245573' : '#f2fbff', points: state.detail?.tracks?.observed || [] }, ...(state.detail?.tracks?.forecasts || [])];
+    const points = tracks.flatMap(track => track.points);
+    if (state.detail?.storm?.position) points.push(state.detail.storm);
+    const { project, path, landPaths } = createOutlineProjection({ width, height, padding: mapPadding(), positions: points.filter(point => point.position).map(point => [point.position.lon, point.position.lat]) });
+    const palette = BASEMAP_PALETTES[state.theme];
+    const shapes = landPaths.map(d => `<path d="${d}" fill="${palette.land}" stroke="${palette.border}" stroke-width=".8"/>`);
+    for (const feature of state.detail?.eventGeometry?.features || []) {
+      if (!/cone|forecast.*(area|uncertainty)/i.test(feature.properties?.featureType || '')) continue;
+      const polygons = feature.geometry?.type === 'Polygon' ? [feature.geometry.coordinates] : feature.geometry?.type === 'MultiPolygon' ? feature.geometry.coordinates : [];
+      for (const polygon of polygons) shapes.push(`<path d="${polygon.map(ring => path(ring) + 'Z').join(' ')}" fill="#5bb6df" fill-opacity=".16" stroke="#5bb6df"/>`);
+    }
+    state.pointsByKey.clear();
+    for (const track of tracks.filter(track => state.activeSources.has(track.id))) {
+      const valid = track.points.filter(point => hasNumber(point.position?.lon) && hasNumber(point.position?.lat));
+      shapes.push(`<path d="${path(valid.map(point => [point.position.lon, point.position.lat]))}" fill="none" stroke="${escapeHtml(track.color)}" stroke-width="2.5" ${track.id === 'observed' ? '' : 'stroke-dasharray="6 4"'}/>`);
+      valid.forEach((point, index) => {
+        const key = `${track.id}:${index}`, [x, y] = project([point.position.lon, point.position.lat]);
+        state.pointsByKey.set(key, point);
+        shapes.push(`<circle cx="${x}" cy="${y}" r="${point.kind === 'current' ? 7 : 4}" fill="${intensityColors[point.classification] || '#94a3b8'}" stroke="${palette.label}" tabindex="0" role="button" data-point-key="${escapeHtml(key)}" aria-label="${escapeHtml(formatDate(point.validAt))}"><title>${escapeHtml(formatDate(point.validAt))}</title></circle>`);
       });
-    }, { passive: true });
+    }
+    container.innerHTML = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" aria-label="台风路径与简化陆地轮廓"><rect width="${width}" height="${height}" fill="${palette.water}"/>${shapes.join('')}</svg>`;
+    container.hidden = false;
   }
 
-  function showSimplifiedBasemap() {
-    BASEMAP_SOURCE_IDS.forEach(id => {
-      if (state.map.getLayer(id)) state.map.setLayoutProperty(id, 'visibility', 'none');
-    });
-    el('basemapNotice').hidden = false;
+  function showOutlineFallback() {
+    ++state.basemapRequest;
+    clearTimeout(state.basemapTimer);
+    state.basemapTimer = null;
+    destroyModelFieldRenderer();
+    removeMarkers();
+    removeOtherStormMarkers();
+    state.map?.remove();
+    state.map = null;
+    state.styleReady = false;
+    state.rendererUnavailable = true;
+    state.basemapProvider = nextBasemapProvider(state.basemapProvider, false);
+    renderOutlineMap();
+    basemapNotice('交互地图暂不可用，已显示简化路径地图');
   }
 
-  function reloadMapStyle() {
-    if (!state.map) return;
+  function hasWebGLContext() {
+    try {
+      const canvas = document.createElement('canvas');
+      return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+    } catch {
+      return false;
+    }
+  }
+
+  function armBasemapTimeout() {
+    if (state.basemapTimer || !state.basemapSourceIds.length) return;
+    const request = state.basemapRequest, generation = state.basemapGeneration;
+    state.basemapTimer = setTimeout(() => {
+      state.basemapTimer = null;
+      if (request === state.basemapRequest && generation === state.basemapGeneration) fallbackBasemap();
+    }, BASEMAP_TIMEOUT_MS);
+  }
+
+  function fallbackBasemap() {
+    if (!state.map || !['openfreemap', 'esri'].includes(state.basemapProvider)) return;
+    const provider = nextBasemapProvider(state.basemapProvider);
+    applyBasemapStyle(createFallbackStyle(state.theme, provider, state.basemap), provider);
+    basemapNotice(provider === 'esri' ? '高清底图暂不可用，已切换备用底图' : '底图加载失败，已切换简化底图');
+  }
+
+  function applyBasemapStyle(style, provider) {
+    clearTimeout(state.basemapTimer);
+    state.basemapTimer = null;
+    // Keep the bundled outline visible while MapLibre replaces or fetches a remote style.
+    renderOutlineMap();
     ++state.styleGeneration;
     state.styleReady = false;
-    state.basemapFailed = false;
-    state.basemapFailureMonitor = createBasemapFailureMonitor();
-    el('basemapNotice').hidden = true;
+    state.basemapProvider = provider;
+    state.basemapSourceIds = Object.keys(style.sources).filter(id => style.sources[id].type !== 'geojson');
+    state.basemapLoadedSources.clear();
+    state.basemapFailureMonitor = createBasemapFailureMonitor(state.basemapSourceIds);
+    style.metadata = { ...style.metadata, 'pulse:generation': ++state.basemapGeneration };
     destroyModelFieldRenderer();
-    // A complete style replacement reliably emits style.load even for rapid toggles.
-    state.map.setStyle(mapStyle(), { diff: false });
+    updateBasemapAttribution();
+    try {
+      // A complete replacement reliably emits style.load, including rapid toggles.
+      state.map.setStyle(style, { diff: false });
+      armBasemapTimeout();
+    } catch (error) {
+      console.warn('Basemap style unavailable:', error);
+      if (provider === 'land') showOutlineFallback();
+      else fallbackBasemap();
+    }
+  }
+
+  async function initializeMap() {
+    if (state.map || state.rendererLoading) return;
+    renderOutlineMap();
+    if (state.rendererUnavailable) return;
+    state.rendererLoading = true;
+    try {
+      const renderer = await loadMapLibre();
+      if (!hasWebGLContext()) throw new Error('WebGL unavailable');
+      globalThis.maplibregl = renderer;
+      const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
+      state.map = new renderer.Map({ container: 'typhoonMap', style: createFallbackStyle(state.theme), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2, attributionControl: false, maxZoom: 10, dragRotate: false, touchPitch: false });
+      state.map.touchZoomRotate.disableRotation();
+      state.map.addControl(new renderer.NavigationControl({ showCompass: false }), 'bottom-right');
+      state.map.on('style.load', () => {
+        if (state.map.getStyle().metadata?.['pulse:generation'] !== state.basemapGeneration) return;
+        state.styleReady = true;
+        el('mapFallback').hidden = true;
+        hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error));
+        if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+        if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
+      });
+      state.map.on('sourcedataloading', event => {
+        if (!state.basemapSourceIds.includes(event.sourceId)) return;
+        state.basemapLoadedSources.delete(event.sourceId);
+        armBasemapTimeout();
+      });
+      state.map.on('sourcedata', event => {
+        if (!state.basemapSourceIds.includes(event.sourceId) || !event.tile || (event.sourceDataType && event.sourceDataType !== 'content')) return;
+        state.basemapLoadedSources.add(event.sourceId);
+        if (state.basemapSourceIds.every(id => state.basemapLoadedSources.has(id))) {
+          clearTimeout(state.basemapTimer);
+          state.basemapTimer = null;
+        }
+      });
+      state.map.on('error', event => {
+        const message = String(event?.error?.message || '');
+        const styleError = !event.sourceId && !event.source && (!state.styleReady || /tiles\.openfreemap\.org/.test(event?.error?.url || message));
+        if (state.basemapFailureMonitor(event) || styleError) {
+          // Avoid replacing a style in the middle of its own event dispatch.
+          const generation = state.basemapGeneration;
+          queueMicrotask(() => { if (generation === state.basemapGeneration) fallbackBasemap(); });
+        }
+        if (!/Failed to fetch|AJAXError/.test(message)) console.warn('Map error:', event?.error || event);
+      });
+      state.map.on('webglcontextlost', showOutlineFallback);
+      await reloadMapStyle();
+    } catch (error) {
+      console.warn('Map renderer unavailable:', error);
+      showOutlineFallback();
+    } finally { state.rendererLoading = false; }
+  }
+
+  async function reloadMapStyle() {
+    if (!state.map) {
+      if (state.rendererUnavailable) renderOutlineMap();
+      return;
+    }
+    const request = ++state.basemapRequest;
+    const theme = state.theme, mode = state.basemap;
+    // Immediate local map while styles/CDNs are slow; never wait on remote tiles.
+    applyBasemapStyle(createFallbackStyle(theme), 'land');
+    basemapNotice();
+    try {
+      let upstream = state.vectorStyles.get(theme);
+      if (!upstream) upstream = await fetchJson(OPENFREEMAP_STYLES[theme], 8000);
+      if (request !== state.basemapRequest || !state.map) return;
+      const style = createBasemapStyle(theme, mode, upstream);
+      state.vectorStyles.set(theme, upstream);
+      applyBasemapStyle(style, 'openfreemap');
+    } catch (error) {
+      if (request !== state.basemapRequest || !state.map) return;
+      applyBasemapStyle(createFallbackStyle(theme, 'esri', mode), 'esri');
+      basemapNotice('高清底图暂不可用，已切换备用底图');
+      console.warn('OpenFreeMap unavailable:', error);
+    }
   }
 
   function setBasemap(id) {
-    if (!state.map || id === state.basemap) return;
+    if (!['standard', 'satellite'].includes(id) || id === state.basemap) return;
     state.basemap = id;
     document.querySelectorAll('[data-basemap]').forEach(button => button.classList.toggle('active', button.dataset.basemap === id));
     reloadMapStyle();
   }
 
-  function syncTheme() {
-    const theme = resolveTheme();
+  function syncTheme(theme = resolveTheme()) {
+    if (!['light', 'dark'].includes(theme)) theme = resolveTheme();
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#dfe8ef' : '#07131d';
     if (theme === state.theme) return;
@@ -1188,6 +1333,7 @@ import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } f
 
   function setSourceVisible(id, visible) {
     visible ? state.activeSources.add(id) : state.activeSources.delete(id);
+    if (state.rendererUnavailable) renderOutlineMap();
     const layerIds = id === 'observed' ? ['track-observed-glow','track-observed-line','points-observed'] : [`track-${id}`,`points-${id}`];
     layerIds.forEach(layerId => { if (state.map?.getLayer(layerId)) state.map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none'); });
     document.querySelectorAll(`.track-key-marker[data-source="${id}"]`).forEach(marker => marker.classList.toggle('is-hidden', !visible));
@@ -1625,6 +1771,27 @@ import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } f
 
   function setupInteractions() {
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+    new MutationObserver(() => {
+      const theme = document.documentElement.dataset.theme;
+      if (theme !== state.theme && ['light', 'dark'].includes(theme)) syncTheme(theme);
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    let resizeFrame;
+    addEventListener('resize', () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(() => {
+        state.map?.resize();
+        if (state.rendererUnavailable) renderOutlineMap();
+        else fitAgencyTrack(state.selectedAgencyId);
+      });
+    }, { passive: true });
+    const selectOutlinePoint = event => {
+      if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+      const key = event.target.closest('[data-point-key]')?.dataset.pointKey;
+      const point = state.pointsByKey.get(key);
+      if (point) { event.preventDefault(); showNode(point, point.kind === 'current'); }
+    };
+    el('mapFallback').addEventListener('click', selectOutlinePoint);
+    el('mapFallback').addEventListener('keydown', selectOutlinePoint);
     addEventListener('storage', event => {
       if (!event.key || ['themeMode', 'theme'].includes(event.key)) syncTheme();
     });
@@ -1689,6 +1856,7 @@ import { BASEMAP_SOURCE_IDS, createBasemapStyle, createBasemapFailureMonitor } f
   async function init() {
     syncTheme();
     setupInteractions();
+    initializeMap();
     const userLocationRequest = resolveUserLocation();
     state.stormId = currentIdFromPath();
     const zhejiangId = new URLSearchParams(location.search).get('zj') || '';

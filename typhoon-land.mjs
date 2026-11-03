@@ -33,3 +33,22 @@ export const simplifiedLand = {
     type: 'Feature', properties: { name }, geometry: { type: 'Polygon', coordinates: [ring] }
   }))
 };
+
+// Also usable without MapLibre/WebGL: fit the bundled outlines and storm points
+// in the same unobscured viewport as the interactive map (Mercator projection).
+export function createOutlineProjection({ width = 1200, height = 800, padding = {}, positions = [] } = {}) {
+  const mercator = ([lon, lat]) => [Number(lon), -180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + Math.max(-84, Math.min(84, Number(lat))) * Math.PI / 360))];
+  const points = positions.filter(point => point.every(value => value !== null && value !== '' && Number.isFinite(Number(value)))).map(mercator);
+  if (!points.length) points.push(mercator([115, 10]), mercator([140, 35]));
+  const xs = points.map(point => point[0]), ys = points.map(point => point[1]);
+  const center = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
+  const { top = 0, right = 0, bottom = 0, left = 0 } = padding;
+  const availableWidth = Math.max(100, width - left - right), availableHeight = Math.max(100, height - top - bottom);
+  const scale = Math.min(availableWidth / Math.max(12, Math.max(...xs) - Math.min(...xs) + 4), availableHeight / Math.max(12, Math.max(...ys) - Math.min(...ys) + 4));
+  const project = coordinate => {
+    const [x, y] = mercator(coordinate);
+    return [left + availableWidth / 2 + (x - center[0]) * scale, top + availableHeight / 2 + (y - center[1]) * scale];
+  };
+  const path = coordinates => coordinates.map((coordinate, index) => `${index ? 'L' : 'M'}${project(coordinate).map(value => value.toFixed(2)).join(',')}`).join(' ');
+  return { project, path, landPaths: simplifiedLand.features.map(feature => `${path(feature.geometry.coordinates[0])}Z`) };
+}

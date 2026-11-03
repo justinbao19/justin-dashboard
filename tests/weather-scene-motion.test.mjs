@@ -64,7 +64,7 @@ test('cloud motion remains visible and overcast weather obscures the moon', () =
   assert.match(html, /scene-overcast\.scene-night \.moon/);
   assert.match(html, /scene-overcast \.clouds::before/);
   assert.match(html, /const isPartlyCloudy = isCloud && normalized\.includes\('PARTLY'\)/);
-  assert.match(html, /isCloud \? \(isPartlyCloudy \? 'scene-partly-cloudy' : 'scene-overcast'\) : ''/);
+  assert.match(html, /isMostlyCloudy \? 'scene-mostly-cloudy' : 'scene-overcast'/);
   assert.match(html, /&& \(!isCloud \|\| isPartlyCloudy\)\) \? 'scene-sun' : ''/);
 });
 
@@ -117,7 +117,7 @@ function sceneHarness(names, globals = {}, constants = []) {
     ...constants.map(sceneConstant),
     ...names.map(sceneFunction),
     `({${names.join(',')}})`
-  ].join('\n'), globals);
+  ].join('\n'), { resolveWeatherCloudPreset() {}, updateWeatherClouds() {}, ...globals });
 }
 
 const previewAliases = ['sunny', 'cloudy', 'overcast', 'rain', 'heavy-rain', 'thunder', 'snow', 'heavy-snow', 'windy', 'windy-rain', 'fog', 'haze'];

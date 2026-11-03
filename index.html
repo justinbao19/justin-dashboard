@@ -433,6 +433,34 @@
             50% { opacity: 1; }
         }
 
+        /* WebGL renders a low-resolution volumetric field; the CSS stack below
+           remains the fallback for browsers without a usable WebGL context. */
+        .weather-clouds {
+            position: absolute;
+            z-index: 3;
+            inset: -8% -4% -8%;
+            width: 108%;
+            height: 116%;
+            display: none;
+            pointer-events: none;
+            opacity: 0.96;
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.18) 8%, #000 23%, #000 76%, rgba(0,0,0,.5) 92%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,.18) 8%, #000 23%, #000 76%, rgba(0,0,0,.5) 92%, transparent 100%);
+        }
+        .weather-scene.shader-clouds-active .weather-clouds { display: block; }
+        .weather-scene.shader-clouds-active .clouds,
+        .weather-scene.shader-clouds-active .clouds > * {
+            display: none;
+            opacity: 0 !important;
+            animation: none !important;
+        }
+        .weather-scene.scene-night .weather-clouds { opacity: 0.72; }
+        .weather-scene.scene-dawn .weather-clouds,
+        .weather-scene.scene-dusk .weather-clouds { opacity: 0.98; }
+        .weather-scene.scene-mostly-cloudy.scene-night .moon { opacity: 0.72; }
+        .weather-scene.scene-mostly-cloudy.scene-night .stars { opacity: calc(var(--starlight, 1) * 0.32); }
+        .weather-scene.shader-clouds-active.scene-partly-cloudy.scene-night .moon { opacity: 1; }
+
         /* 三层体积云：不同速度形成远近景深 */
         .clouds {
             position: absolute;
@@ -8430,6 +8458,7 @@
         <div class="sun"></div>
         <div class="moon"><canvas class="moon-surface" id="moonSurface" width="256" height="256" aria-hidden="true"></canvas></div>
         <div class="stars" id="stars"></div>
+        <canvas class="weather-clouds" id="weatherClouds" aria-hidden="true"></canvas>
         <div class="clouds">
             <div class="cloud-ceiling"></div>
             <div class="cloud-layer cloud-layer-back"></div>
@@ -9640,9 +9669,182 @@
         setActivePage(getPageFromPathname(), { replaceHistory: true });
 
         const weatherMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const WEATHER_CLOUD_RENDER_SCALE = 0.45;
+        const WEATHER_CLOUD_VERTEX_SHADER = `
+            attribute vec2 a_position;
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }
+        `;
+        const WEATHER_CLOUD_FRAGMENT_SHADER = `
+            precision highp float;
+            uniform vec2 u_resolution;
+            uniform float u_time;
+            uniform float u_condition;
+            uniform float u_coverage;
+            uniform float u_softness;
+            uniform float u_opacity;
+            uniform float u_density;
+            uniform float u_warp;
+            uniform vec2 u_anisotropy;
+            uniform vec2 u_layerScale;
+            uniform float u_farWeight;
+            uniform float u_extinction;
+            uniform float u_phase;
+            uniform float u_flash;
+            uniform vec2 u_flashPosition;
+            uniform vec2 u_light;
+            uniform float u_drift;
+
+            const mat2 octaveRotation = mat2(0.67, -0.74, 0.74, 0.67);
+            float hash(vec2 p) {
+                p = fract(p * vec2(123.34, 345.45));
+                p += dot(p, p + 34.345);
+                return fract(p.x * p.y);
+            }
+            float valueNoise(vec2 p) {
+                vec2 i = floor(p), f = fract(p);
+                f = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+                return mix(mix(hash(i), hash(i + vec2(1., 0.)), f.x),
+                    mix(hash(i + vec2(0., 1.)), hash(i + 1.), f.x), f.y);
+            }
+            float fbm(vec2 p) {
+                float value = 0.0, amplitude = 0.5;
+                for (int octave = 0; octave < 6; octave++) {
+                    value += amplitude * valueNoise(p);
+                    p = octaveRotation * p * 2.03 + vec2(17.1, 9.2);
+                    amplitude *= 0.5;
+                }
+                return value;
+            }
+            float lowFbm(vec2 p) {
+                float value = 0.0, amplitude = 0.5;
+                for (int octave = 0; octave < 3; octave++) {
+                    value += amplitude * valueNoise(p);
+                    p = octaveRotation * p * 2.03 + vec2(17.1, 9.2);
+                    amplitude *= 0.5;
+                }
+                return value;
+            }
+            float billowNoise(vec2 p) {
+                // Irregular cellular lobes add volume to the continuous noise field.
+                vec2 cell = floor(p), local = fract(p);
+                float distanceToCore = 2.0;
+                for (int y = -1; y <= 1; y++) {
+                    for (int x = -1; x <= 1; x++) {
+                        vec2 neighbor = vec2(float(x), float(y));
+                        vec2 seed = cell + neighbor;
+                        vec2 core = vec2(hash(seed + 19.1), hash(seed + 73.7));
+                        vec2 delta = neighbor + 0.2 + core * 0.6 - local;
+                        distanceToCore = min(distanceToCore, dot(delta, delta));
+                    }
+                }
+                return 1.0 - smoothstep(0.0, 0.85, distanceToCore);
+            }
+            float cloudField(vec2 p) {
+                // Evolving domain warp gives slow internal curl as well as drift.
+                float q = lowFbm(p * 0.42 + vec2(0., u_time * 0.012));
+                vec2 warp = vec2(q, lowFbm(p * 0.48 + q + vec2(8.4, -u_time * 0.009)));
+                vec2 w = p * u_anisotropy + (warp - 0.45) * u_warp;
+                if (u_condition < 0.5) {
+                    // Stretch before every octave; ridges split the veil into fibres.
+                    vec2 streak = p * u_anisotropy + vec2(q * 0.12, warp.y * u_warp);
+                    float fibre = pow(1.0 - abs(fbm(streak * 2.1) * 2.0 - 1.0), 4.0);
+                    return smoothstep(u_coverage, u_coverage + u_softness,
+                        fbm(streak) * 0.62 + fibre * 0.38) * smoothstep(0.18, 0.65, q);
+                }
+                float n = fbm(w);
+                if (u_condition < 1.5) {
+                    // A broad body contains smaller billows, with smoke at its edge.
+                    // The threshold leaves real holes instead of a translucent wash.
+                    float lobes = billowNoise(w * 2.4 + vec2(n, q) * 1.6);
+                    float body = n * 0.86 + lobes * 0.14 + (u_density - 0.5) * 0.035;
+                    float puff = max(0.0, body - u_coverage) / u_softness;
+                    return puff * puff / (0.5 + puff);
+                }
+                // A continuous stratus sheet: optical depth undulates, never cuts out.
+                if (u_condition < 2.5) return 0.64 + n * 0.7 + (q - 0.45) * 0.2;
+                if (u_condition < 3.5) return 0.52 + n * 0.43;
+                if (u_condition < 4.5) {
+                    float turbulent = billowNoise(w * 2.6 + vec2(n, q) * 2.0);
+                    float depth = max(0.0, n * 0.84 + turbulent * 0.16 - u_coverage) / u_softness;
+                    return 0.5 + 1.4 * depth * depth / (0.5 + depth);
+                }
+                return 0.28 + n * 0.38;
+            }
+            vec4 cloudLayer(vec2 uv, vec2 p, float weight) {
+                float field = cloudField(p);
+                vec2 towardSun = normalize(u_light - uv + vec2(0.001));
+                float towardLight = cloudField(p + towardSun * 0.12);
+                float relief = field - towardLight;
+                float exposed = clamp(relief * 1.8, 0.0, 1.0);
+                float shadow = clamp(-relief * 1.4, 0.0, 1.0);
+                float transmission = exp(-field * u_extinction);
+                float sheet = step(1.5, u_condition) * (1.0 - step(3.5, u_condition));
+                float storm = step(3.5, u_condition) * (1.0 - step(4.5, u_condition));
+                float warm = (1.0 - step(0.5, u_phase)) + step(3.5, u_phase) * (1.0 - step(4.5, u_phase));
+                float night = step(4.5, u_phase);
+                vec3 top = mix(vec3(0.98, 0.99, 1.0), vec3(1.0, 0.73, 0.62), warm);
+                vec3 base = mix(vec3(0.44, 0.53, 0.64), vec3(0.42, 0.36, 0.48), warm);
+                top = mix(top, vec3(0.38, 0.46, 0.58), night);
+                base = mix(base, vec3(0.07, 0.12, 0.20), night);
+                top = mix(top, mix(vec3(0.48, 0.53, 0.60), vec3(0.19, 0.25, 0.34), night), storm);
+                base = mix(base, mix(vec3(0.07, 0.10, 0.16), vec3(0.025, 0.05, 0.10), night), storm);
+                float lighting = clamp(0.6 + transmission * 0.26 + exposed * 0.36 - shadow * 0.2 + (uv.y - 0.5) * 0.18, 0.0, 1.0);
+                // Mottling is visible within the sheet, without distinct puff rims.
+                lighting = mix(lighting, clamp(0.64 + (field - 0.96) * 0.7 + relief * 0.2, 0.42, 0.8), sheet);
+                // Broad billow crowns scatter light; Beer absorption weighs down
+                // their bases instead of leaving only thin, illuminated outlines.
+                float stormLight = 0.16 + field * 0.3 + exposed * 0.28 - shadow * 0.18 + uv.y * 0.1;
+                stormLight -= (1.0 - transmission) * (1.0 - uv.y) * 0.24;
+                lighting = mix(lighting, clamp(stormLight, 0.06, 0.92), storm);
+                vec3 color = mix(base, top, lighting);
+                color *= mix(1.0, 0.82 + uv.y * 0.12, storm);
+                color *= mix(1.0, 0.82, step(2.5, u_condition) * (1.0 - step(3.5, u_condition)));
+                float rim = exposed * transmission * (0.14 + warm * 0.5) * (1.0 - sheet);
+                color += top * rim;
+                // The same stroke envelope/position as the existing lightning engine.
+                vec2 flashDelta = (uv - u_flashPosition) * vec2(1.3, 1.0);
+                float glow = exp(-dot(flashDelta, flashDelta) * 6.0);
+                color += vec3(0.48, 0.57, 0.76) * u_flash * storm * glow * (0.35 + field * 0.65);
+                float alpha = (1.0 - exp(-field * u_extinction)) * u_opacity * weight;
+                if (u_condition < 0.5) alpha = field * u_opacity * weight;
+                return vec4(color * alpha, alpha);
+            }
+            void main() {
+                if (u_condition > 6.5) { gl_FragColor = vec4(0.0); return; }
+                vec2 uv = gl_FragCoord.xy / u_resolution;
+                vec2 p = (uv - 0.5) * vec2(u_resolution.x / u_resolution.y, 1.0) * 4.0;
+                float speed = 0.018 + abs(u_drift) * 0.045;
+                float direction = u_drift < 0.0 ? -1.0 : 1.0;
+                vec2 drift = vec2(u_time * speed * direction, 0.0);
+                // Two continuous fields, with independent scale, drift and altitude.
+                vec4 farCloud = cloudLayer(uv, p * u_layerScale.y - drift * 0.48 + vec2(7.2, 2.8), u_farWeight);
+                vec4 nearCloud = cloudLayer(uv, p * u_layerScale.x - drift + vec2(2.4, 7.1), 1.0);
+                vec4 cloud = nearCloud + farCloud * (1.0 - nearCloud.a);
+                float lowerFade = smoothstep(0.02, 0.44, uv.y);
+                float highCloud = 1.0 - smoothstep(0.3, 0.8, 1.0 - uv.y);
+                float altitude = u_condition < 0.5 ? highCloud : lowerFade;
+                // Every canvas edge dissolves; no rectangular top-of-hero boundary.
+                float edgeFade = smoothstep(0.0, 0.09, uv.y) * (1.0 - smoothstep(0.91, 1.0, uv.y));
+                edgeFade *= smoothstep(0.0, 0.04, uv.x) * (1.0 - smoothstep(0.96, 1.0, uv.x));
+                gl_FragColor = cloud * edgeFade * altitude;
+            }
+        `;
         const weatherSceneState = {
             canvas: document.getElementById('weatherParticles'),
             glassCanvas: document.getElementById('weatherGlass'),
+            cloudCanvas: document.getElementById('weatherClouds'),
+            cloudGL: null,
+            cloudProgram: null,
+            cloudUniforms: null,
+            cloudShaderActive: false,
+            cloudFallback: false,
+            cloudDpr: 1,
+            cloudRenderScale: WEATHER_CLOUD_RENDER_SCALE,
+            cloudPreset: null,
+            cloudLight: { x: 0.72, y: 0.15 },
+            sceneInView: true,
             context: null,
             glassContext: null,
             glassRefraction: null,
@@ -9673,6 +9875,180 @@
             lightning: { nextStrike: 1.4, flash: 0, bolt: null, boltLife: 0, aftershock: 0, active: false, afterglow: 0, flickersTotal: 0, flickersRemaining: 0, flickerTimer: 0 }
         };
         if (['localhost', '127.0.0.1'].includes(window.location.hostname)) window.__pulseWeatherScene = weatherSceneState;
+
+        // Coverage is a density threshold (lower fills more sky); softness sets
+        // the optical-depth ramp. Anisotropy and near/far scales define morphology.
+        const WEATHER_CLOUD_PRESETS = {
+            clear: { condition: 7, coverage: 0.92, softness: 0.2, opacity: 0.04, night: { opacity: 0.02 } },
+            thin: { condition: 0, coverage: 0.44, softness: 0.36, opacity: 0.42, warp: 1.4, anisotropy: [0.14, 3.8], layerScale: [1.0, 1.65], farWeight: 0.24, extinction: 1.0, night: { opacity: 0.25 } },
+            partly: { condition: 1, coverage: 0.49, softness: 0.14, opacity: 0.94, warp: 1.2, anisotropy: [1.0, 1.08], layerScale: [1.4, 2.15], farWeight: 0.12, extinction: 3.2, night: { opacity: 0.74 } },
+            mostly: { condition: 1, coverage: 0.37, softness: 0.16, opacity: 0.96, warp: 1.45, anisotropy: [0.95, 1.12], layerScale: [1.45, 2.05], farWeight: 0.22, extinction: 3.5, night: { opacity: 0.78 } },
+            overcast: { condition: 2, coverage: 0.24, softness: 0.52, opacity: 0.96, warp: 1.0, anisotropy: [0.8, 1.45], layerScale: [1.2, 1.8], farWeight: 0.24, extinction: 3.4, night: { opacity: 0.68 } },
+            rain: { condition: 3, coverage: 0.3, softness: 0.34, opacity: 0.82, night: { opacity: 0.58 } },
+            snow: { condition: 3, coverage: 0.3, softness: 0.38, opacity: 0.72, night: { opacity: 0.54 } },
+            thunderstorm: { condition: 4, coverage: 0.33, softness: 0.34, opacity: 0.99, warp: 2.1, anisotropy: [0.95, 1.0], layerScale: [1.1, 1.7], farWeight: 0.4, extinction: 4.6, night: { opacity: 0.86 } },
+            fog: { condition: 5, coverage: 0.3, softness: 0.5, opacity: 0.54, night: { opacity: 0.36 } },
+            haze: { condition: 6, coverage: 0.42, softness: 0.42, opacity: 0.3, night: { opacity: 0.2 } }
+        };
+
+        function getWeatherCloudPhase(phase = 'day') {
+            return { dawn: 0, morning: 1, noon: 2, day: 2, afternoon: 3, dusk: 4, twilight: 5, night: 5 }[phase] ?? 2;
+        }
+
+        function resolveWeatherCloudPreset(normalized = '', weather = {}) {
+            const style = weather.cloudStyle;
+            if (style && WEATHER_CLOUD_PRESETS[style]) return WEATHER_CLOUD_PRESETS[style];
+            if (normalized.includes('THUNDER') || normalized === 'STORM_RAIN') return WEATHER_CLOUD_PRESETS.thunderstorm;
+            if (normalized.includes('RAIN') || normalized.includes('SHOWER') || normalized.includes('DRIZZLE')) return WEATHER_CLOUD_PRESETS.rain;
+            if (normalized.includes('SNOW') || normalized.includes('SLEET') || normalized.includes('HAIL')) return WEATHER_CLOUD_PRESETS.snow;
+            if (normalized.includes('FOG')) return WEATHER_CLOUD_PRESETS.fog;
+            if (normalized.includes('HAZE')) return WEATHER_CLOUD_PRESETS.haze;
+            if (normalized.includes('PARTLY')) return WEATHER_CLOUD_PRESETS.partly;
+            const rawCover = Number((weather.realtime || weather).cloudrate ?? (weather.realtime || weather).cloud);
+            const cover = rawCover > 1 ? rawCover / 100 : rawCover;
+            if (normalized.includes('CLOUDY')) return cover >= 0.9 ? WEATHER_CLOUD_PRESETS.overcast : WEATHER_CLOUD_PRESETS.mostly;
+            if (normalized === 'WIND') return cover >= 0.9 ? WEATHER_CLOUD_PRESETS.overcast
+                : (cover > 0.65 ? WEATHER_CLOUD_PRESETS.mostly : (cover > 0.3 ? WEATHER_CLOUD_PRESETS.partly : WEATHER_CLOUD_PRESETS.clear));
+            return WEATHER_CLOUD_PRESETS.clear;
+        }
+
+        function compileWeatherCloudShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            if (!shader) return null;
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        function weatherCloudDimensions(width, height, deviceDpr = 1, lowPower = false) {
+            const dpr = Math.min(Math.max(1, deviceDpr || 1), lowPower ? 1 : 1.5);
+            const scale = lowPower ? 0.35 : WEATHER_CLOUD_RENDER_SCALE;
+            // Bound large/retina desktops as well as mobile GPU work.
+            const factor = Math.min(dpr * scale, Math.sqrt(280000 / Math.max(1, width * height)));
+            return { dpr, scale, width: Math.max(1, Math.floor(width * factor)), height: Math.max(1, Math.floor(height * factor)) };
+        }
+
+        function initializeWeatherClouds() {
+            const canvas = weatherSceneState.cloudCanvas;
+            const scene = document.getElementById('weatherScene');
+            if (!canvas || weatherSceneState.cloudFallback || weatherSceneState.cloudShaderActive) return weatherSceneState.cloudShaderActive;
+            let gl, vertex, fragment, program, buffer;
+            try {
+                gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false })
+                    || canvas.getContext('experimental-webgl', { alpha: true, premultipliedAlpha: true, antialias: false });
+                if (!gl) {
+                    weatherSceneState.cloudFallback = true;
+                    scene?.classList.remove('shader-clouds-active');
+                    return false;
+                }
+                vertex = compileWeatherCloudShader(gl, gl.VERTEX_SHADER, WEATHER_CLOUD_VERTEX_SHADER);
+                fragment = compileWeatherCloudShader(gl, gl.FRAGMENT_SHADER, WEATHER_CLOUD_FRAGMENT_SHADER);
+                if (!vertex || !fragment) {
+                    weatherSceneState.cloudFallback = true;
+                    scene?.classList.remove('shader-clouds-active');
+                    return false;
+                }
+                program = gl.createProgram();
+                gl.attachShader(program, vertex);
+                gl.attachShader(program, fragment);
+                gl.linkProgram(program);
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    weatherSceneState.cloudFallback = true;
+                    scene?.classList.remove('shader-clouds-active');
+                    return false;
+                }
+                buffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+                const position = gl.getAttribLocation(program, 'a_position');
+                gl.enableVertexAttribArray(position);
+                gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+                weatherSceneState.cloudGL = gl;
+                weatherSceneState.cloudProgram = program;
+                weatherSceneState.cloudUniforms = {
+                    resolution: gl.getUniformLocation(program, 'u_resolution'),
+                    time: gl.getUniformLocation(program, 'u_time'),
+                    condition: gl.getUniformLocation(program, 'u_condition'),
+                    coverage: gl.getUniformLocation(program, 'u_coverage'),
+                    softness: gl.getUniformLocation(program, 'u_softness'),
+                    opacity: gl.getUniformLocation(program, 'u_opacity'),
+                    density: gl.getUniformLocation(program, 'u_density'),
+                    warp: gl.getUniformLocation(program, 'u_warp'),
+                    anisotropy: gl.getUniformLocation(program, 'u_anisotropy'),
+                    layerScale: gl.getUniformLocation(program, 'u_layerScale'),
+                    farWeight: gl.getUniformLocation(program, 'u_farWeight'),
+                    extinction: gl.getUniformLocation(program, 'u_extinction'),
+                    phase: gl.getUniformLocation(program, 'u_phase'),
+                    flash: gl.getUniformLocation(program, 'u_flash'),
+                    flashPosition: gl.getUniformLocation(program, 'u_flashPosition'),
+                    light: gl.getUniformLocation(program, 'u_light'),
+                    drift: gl.getUniformLocation(program, 'u_drift')
+                };
+                weatherSceneState.cloudShaderActive = true;
+                weatherSceneState.cloudFallback = false;
+                scene?.classList.add('shader-clouds-active');
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+                return true;
+            } catch {
+                weatherSceneState.cloudFallback = true;
+                weatherSceneState.cloudShaderActive = false;
+                scene?.classList.remove('shader-clouds-active');
+                return false;
+            } finally {
+                if (vertex) gl.deleteShader(vertex);
+                if (fragment) gl.deleteShader(fragment);
+                if (!weatherSceneState.cloudShaderActive) {
+                    if (program) gl.deleteProgram(program);
+                    if (buffer) gl.deleteBuffer(buffer);
+                }
+            }
+        }
+
+        function renderWeatherCloudFrame(now = 0, staticFrame = false) {
+            const state = weatherSceneState;
+            const gl = state.cloudGL;
+            if (!state.cloudShaderActive || !gl || !state.cloudProgram || !state.cloudUniforms) return false;
+            const preset = state.cloudPreset || WEATHER_CLOUD_PRESETS.clear;
+            const nightOpacity = ['night', 'twilight'].includes(state.solarPhase) ? (preset.night?.opacity ?? preset.opacity) : preset.opacity;
+            const uniforms = state.cloudUniforms;
+            const time = staticFrame ? 0 : now / 1000;
+            gl.viewport(0, 0, state.cloudCanvas.width, state.cloudCanvas.height);
+            gl.useProgram(state.cloudProgram);
+            gl.uniform2f(uniforms.resolution, state.cloudCanvas.width, state.cloudCanvas.height);
+            gl.uniform1f(uniforms.time, time);
+            gl.uniform1f(uniforms.condition, preset.condition);
+            gl.uniform1f(uniforms.coverage, preset.coverage);
+            gl.uniform1f(uniforms.softness, preset.softness);
+            gl.uniform1f(uniforms.opacity, nightOpacity);
+            gl.uniform1f(uniforms.density, state.cloudCover || 0);
+            gl.uniform1f(uniforms.warp, preset.warp ?? 1.0);
+            gl.uniform2f(uniforms.anisotropy, ...(preset.anisotropy || [1.0, 1.0]));
+            gl.uniform2f(uniforms.layerScale, ...(preset.layerScale || [1.0, 1.46]));
+            gl.uniform1f(uniforms.farWeight, preset.farWeight ?? 0.44);
+            gl.uniform1f(uniforms.extinction, preset.extinction ?? 2.5);
+            gl.uniform1f(uniforms.phase, getWeatherCloudPhase(state.solarPhase));
+            gl.uniform1f(uniforms.flash, staticFrame ? 0 : (state.lightning.flash || 0));
+            const sheet = state.lightning.bolt?.sheet;
+            gl.uniform2f(uniforms.flashPosition, sheet ? sheet.x / state.width : 0.5, sheet ? 1 - sheet.y / state.height : 0.72);
+            gl.uniform2f(uniforms.light, state.cloudLight.x, state.cloudLight.y);
+            gl.uniform1f(uniforms.drift, state.windDrift || 0);
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+            return true;
+        }
+
+        function updateWeatherClouds(preset, solarPhase, lightX, lightY) {
+            weatherSceneState.cloudPreset = preset || WEATHER_CLOUD_PRESETS.clear;
+            weatherSceneState.solarPhase = solarPhase || 'day';
+            const x = Number.parseFloat(lightX), y = Number.parseFloat(lightY);
+            weatherSceneState.cloudLight = { x: Number.isFinite(x) ? x / 100 : 0.72, y: 1 - (Number.isFinite(y) ? y / 100 : 0.15) };
+        }
 
         const WEATHER_SKIES = {
             clearDay: 'linear-gradient(180deg,#12406c 0%,#3a7bb8 42%,#7eb7e0 72%,#c5e4f6 100%)',
@@ -9786,7 +10162,7 @@
         }
 
         function resizeWeatherCanvas() {
-            const { canvas, glassCanvas } = weatherSceneState;
+            const { canvas, glassCanvas, cloudCanvas } = weatherSceneState;
             const scene = document.getElementById('weatherScene');
             if (!canvas || !scene) return;
             const rect = scene.getBoundingClientRect();
@@ -9800,6 +10176,14 @@
             canvas.height = Math.round(weatherSceneState.height * weatherSceneState.dpr);
             weatherSceneState.context = canvas.getContext('2d', { alpha: true });
             weatherSceneState.context?.setTransform(weatherSceneState.dpr, 0, 0, weatherSceneState.dpr, 0, 0);
+            if (cloudCanvas) {
+                const size = weatherCloudDimensions(weatherSceneState.width, weatherSceneState.height, window.devicePixelRatio, weatherSceneState.lowPower);
+                weatherSceneState.cloudDpr = size.dpr;
+                weatherSceneState.cloudRenderScale = size.scale;
+                cloudCanvas.width = size.width;
+                cloudCanvas.height = size.height;
+                initializeWeatherClouds();
+            }
             if (glassCanvas) {
                 glassCanvas.width = Math.round(weatherSceneState.width * weatherSceneState.dpr);
                 glassCanvas.height = Math.round(weatherSceneState.height * weatherSceneState.dpr);
@@ -9872,6 +10256,10 @@
             sunny: 'CLEAR_DAY',
             clear: 'CLEAR_DAY',
             cloudy: 'PARTLY_CLOUDY_DAY',
+            'partly-cloudy': 'PARTLY_CLOUDY_DAY',
+            thin: 'PARTLY_CLOUDY_DAY',
+            'thin-clouds': 'PARTLY_CLOUDY_DAY',
+            'mostly-cloudy': 'CLOUDY',
             overcast: 'CLOUDY',
             rain: 'MODERATE_RAIN',
             'light-rain': 'LIGHT_RAIN',
@@ -9918,6 +10306,9 @@
                     : (timeParam === 'twilight' ? 0.99
                 : (timeParam === 'day' ? 0.52 : (forceNight ? 0.34 : 0.62))));
             const previewSky = String(params.get('sky') || '').toLowerCase();
+            const cloudStyle = LOCAL_WEATHER_SCENE_VALUES.has(sceneParam) ? undefined : (['thin', 'thin-clouds'].includes(weatherAlias) ? 'thin'
+                : (weatherAlias === 'mostly-cloudy' ? 'mostly'
+                    : (weatherAlias === 'overcast' ? 'overcast' : (['cloudy', 'partly-cloudy'].includes(weatherAlias) ? 'partly' : undefined))));
             const windParam = params.get('wind');
             const hasWindOverride = windParam !== null && windParam.trim() !== '' && Number.isFinite(Number(windParam));
             const previewWindStrength = hasWindOverride ? clampWeatherValue(Number(windParam)) : null;
@@ -9934,10 +10325,11 @@
                 skycon,
                 weather: {
                     preview: true,
+                    cloudStyle,
                     realtime: {
                         wind: { speed: hasWindOverride ? Math.round(previewWindStrength * 45) : speed, scale: hasWindOverride ? Math.round(previewWindStrength * 12) : (weatherAlias.startsWith('windy') ? 9 : 3), direction: 108 },
                         humidity: skycon.includes('RAIN') || skycon.includes('FOG') ? 0.92 : (skycon.includes('HAZE') ? 0.7 : 0.58),
-                        cloudrate,
+                        cloudrate: cloudStyle === 'thin' ? 0.22 : (cloudStyle === 'mostly' ? 0.78 : cloudrate),
                         precipitation: { local: { intensity } }
                     },
                     hourly: { precipitation: [{ value: intensity }] },
@@ -10744,7 +11136,7 @@
         function drawWeatherParticles(now) {
             const state = weatherSceneState;
             const ctx = state.context;
-            if (!ctx || !state.particleType || document.hidden || weatherMotionQuery.matches || !isWeatherSceneVisible()) {
+            if ((!state.cloudShaderActive && (!ctx || !state.particleType)) || document.hidden || weatherMotionQuery.matches || !isWeatherSceneVisible() || state.sceneInView === false) {
                 state.frame = null;
                 return;
             }
@@ -10763,13 +11155,22 @@
             state.lastFrameAt = now;
             state.motionTime = (state.motionTime || 0) + deltaSeconds;
             state.windGust = weatherWindGust(state.motionTime);
-            ctx.clearRect(0, 0, state.width, state.height);
+            ctx?.clearRect(0, 0, state.width, state.height);
             if (state.thunder) {
                 advanceLightning(state, elapsedSeconds);
                 drawLightningFlash(ctx, state);
                 drawLightningBolt(ctx, state);
             }
+            if (state.cloudShaderActive && (state.thunder || !state.lastCloudFrameAt || now - state.lastCloudFrameAt >= 1000 / 30)) {
+                state.cloudTime = (state.cloudTime || 0) + Math.min((now - (state.lastCloudFrameAt || now)) / 1000, 0.1);
+                renderWeatherCloudFrame(state.cloudTime * 1000);
+                state.lastCloudFrameAt = now;
+            }
 
+            if (!ctx || !state.particleType) {
+                state.frame = requestAnimationFrame(drawWeatherParticles);
+                return;
+            }
             for (const particle of state.particles) {
                 if (particle.kind === 'rain') {
                     particle.y += particle.speed * deltaSeconds;
@@ -10900,6 +11301,7 @@
             if (weatherSceneState.frame) cancelAnimationFrame(weatherSceneState.frame);
             weatherSceneState.frame = null;
             weatherSceneState.lastFrameAt = 0;
+            weatherSceneState.lastCloudFrameAt = 0;
             weatherSceneState.glassRefraction?.clear?.();
             if (clear && weatherSceneState.context) {
                 weatherSceneState.context.clearRect(0, 0, weatherSceneState.width, weatherSceneState.height);
@@ -10911,10 +11313,12 @@
 
         function startWeatherSceneAnimation() {
             stopWeatherSceneAnimation();
-            const paused = weatherMotionQuery.matches || document.hidden || !isWeatherSceneVisible();
+            if (weatherSceneState.cloudCanvas && !weatherSceneState.width) resizeWeatherCanvas();
+            const paused = weatherMotionQuery.matches || document.hidden || !isWeatherSceneVisible() || weatherSceneState.sceneInView === false;
             document.getElementById('weatherScene')?.classList.toggle('is-paused', paused);
             weatherSceneState.glassLayoutDirty = true;
-            if (!weatherSceneState.particleType || weatherMotionQuery.matches || document.hidden || !isWeatherSceneVisible()) return;
+            if (weatherMotionQuery.matches && weatherSceneState.cloudShaderActive && !document.hidden && isWeatherSceneVisible() && weatherSceneState.sceneInView !== false) renderWeatherCloudFrame(0, true);
+            if ((!weatherSceneState.particleType && !weatherSceneState.cloudShaderActive) || paused) return;
             weatherSceneState.frame = requestAnimationFrame(drawWeatherParticles);
         }
 
@@ -11174,13 +11578,15 @@
             const horizontalWind = Math.abs(directionVector) < 0.12 ? Math.cos(windDirection * Math.PI / 180) : directionVector;
             const windDrift = horizontalWind * windStrength;
             const solarVisual = SOLAR_PHASE_CONFIG[solarPhase] || SOLAR_PHASE_CONFIG.day;
+            const cloudPreset = resolveWeatherCloudPreset(normalized, weather);
+            const isMostlyCloudy = isCloud && !isPartlyCloudy && (weather.cloudStyle === 'mostly' || (normalizedCloudCover < 0.9 && weather.cloudStyle !== 'overcast'));
             const classes = [
                 'weather-scene',
                 `scene-${sceneType}`,
                 sceneIsNight ? 'scene-night' : 'scene-day',
                 (solarPhase !== 'day' && solarPhase !== 'night') ? `scene-${solarPhase}` : '',
                 severity ? `scene-${severity}` : '',
-                isCloud ? (isPartlyCloudy ? 'scene-partly-cloudy' : 'scene-overcast') : '',
+                isCloud ? (isPartlyCloudy ? 'scene-partly-cloudy' : (isMostlyCloudy ? 'scene-mostly-cloudy' : 'scene-overcast')) : '',
                 isBlizzard ? 'scene-blizzard' : '',
                 isWind && windStrength > 0 ? 'scene-windy' : '',
                 isWindRain ? 'scene-wind-driven' : '',
@@ -11188,7 +11594,9 @@
                 (!sceneIsNight && !isRain && !isFog && !isHaze && !isSnow && !isSleet && !isHail && !isDust && (!isCloud || isPartlyCloudy)) ? 'scene-sun' : '',
                 (!sceneIsNight && (isFog || isHaze || isDust)) ? 'scene-diffused-sun' : '',
                 isThunder ? 'scene-thunder' : '',
-                particleType ? 'has-particles' : ''
+                particleType ? 'has-particles' : '',
+                weatherSceneState.cloudShaderActive ? 'shader-clouds-active' : '',
+                weather.cloudStyle === 'thin' ? 'scene-thin-clouds' : ''
             ].filter(Boolean);
             scene.className = classes.join(' ');
             scene.dataset.weatherState = normalized;
@@ -11214,6 +11622,7 @@
             weatherSceneState.humidity = humidity;
             weatherSceneState.cloudCover = normalizedCloudCover;
             weatherSceneState.windStrength = windStrength;
+            weatherSceneState.windDrift = windDrift;
             const enteringThunder = isThunder && !weatherSceneState.thunder;
             weatherSceneState.thunder = isThunder;
             if (enteringThunder) {
@@ -11230,6 +11639,9 @@
             setWeatherSky(`radial-gradient(circle at ${solarVisual.lightX} ${solarVisual.lightY}, ${solarVisual.skyTint}, transparent 64%), linear-gradient(0deg, ${solarVisual.tint}, transparent 78%), ${skyGradient}`);
             weatherSceneState.celestial = { astro, isNight: sceneIsNight, progress: weather.celestialProgress };
             updateCelestialPosition(scene, astro, sceneIsNight, weather.celestialProgress);
+            updateWeatherClouds(cloudPreset, solarPhase,
+                scene.style.getPropertyValue?.(sceneIsNight ? '--moon-x' : '--sun-x') || solarVisual.lightX,
+                scene.style.getPropertyValue?.(sceneIsNight ? '--moon-y' : '--sun-y') || solarVisual.lightY);
             applyMoonPhaseToScene(scene, weather);
             ensureWeatherStars();
 
@@ -11280,16 +11692,40 @@
             invalidateWeatherGlassLayout();
             const celestial = weatherSceneState.celestial;
             if (celestial) updateCelestialPosition(document.getElementById('weatherScene'), celestial.astro, celestial.isNight, celestial.progress);
-            if (!weatherSceneState.particleType) return;
+            if (!weatherSceneState.particleType) {
+                resizeWeatherCanvas();
+                startWeatherSceneAnimation();
+                return;
+            }
             buildWeatherParticles(weatherSceneState.particleType, weatherSceneState.intensity, weatherSceneState.windDrift);
             startWeatherSceneAnimation();
         }, { passive: true });
         const handleWeatherMotionPreference = () => {
             if (weatherMotionQuery.matches) stopWeatherSceneAnimation({ clear: true });
-            else startWeatherSceneAnimation();
+            startWeatherSceneAnimation();
         };
         if (weatherMotionQuery.addEventListener) weatherMotionQuery.addEventListener('change', handleWeatherMotionPreference);
         else weatherMotionQuery.addListener?.(handleWeatherMotionPreference);
+
+        // Observe the fixed sky, not the scrolling content header. Scrolling the
+        // forecast must never stop the background's cloud/precipitation motion.
+        const weatherSceneObserver = typeof IntersectionObserver === 'function' ? new IntersectionObserver(entries => {
+            weatherSceneState.sceneInView = entries.some(entry => entry.isIntersecting);
+            startWeatherSceneAnimation();
+        }) : null;
+        weatherSceneObserver?.observe(document.getElementById('weatherScene'));
+        weatherSceneState.cloudCanvas?.addEventListener('webglcontextlost', event => {
+            event.preventDefault();
+            weatherSceneState.cloudShaderActive = false;
+            weatherSceneState.cloudFallback = true;
+            document.getElementById('weatherScene').classList.remove('shader-clouds-active');
+            startWeatherSceneAnimation();
+        });
+        weatherSceneState.cloudCanvas?.addEventListener('webglcontextrestored', () => {
+            weatherSceneState.cloudFallback = false;
+            initializeWeatherClouds();
+            startWeatherSceneAnimation();
+        });
 
         function updateRelocateBadge(isLocating = false) {
             const badge = document.getElementById('weatherHeaderBadge');

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import * as basemap from '../typhoon-basemap.mjs';
 import { createOutlineProjection } from '../typhoon-land.mjs';
-const { AMAP_TIMEOUT_MS, ESRI_ATTRIBUTION, BASEMAP_PALETTES, CHINESE_LABEL, OPENFREEMAP_STYLES, amapStyleForTheme, basemapProviderOrder, basemapSources, buildAmapProxyUrl, clampAmapWorldView, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, nextBasemapProvider, loadMapLibre, parseAmapConfig, wgs84ToGcj02 } = basemap;
+const { AMAP_TIMEOUT_MS, ESRI_ATTRIBUTION, BASEMAP_PALETTES, CHINESE_LABEL, OPENFREEMAP_STYLES, amapStyleForTheme, basemapProviderOrder, basemapSources, buildAmapProxyUrl, amapPaddingOffset, normalizeMapPadding, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, nextBasemapProvider, loadMapLibre, parseAmapConfig, wgs84ToGcj02 } = basemap;
 
 const vectorStyle = { version: 8, glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf', sources: { openmaptiles: { type: 'vector', url: 'https://tiles.openfreemap.org/planet' }, unused: { type: 'raster', tiles: ['https://example.test/unused'] } }, layers: [
   { id: 'background', type: 'background' },
@@ -28,14 +28,13 @@ test('AMap config, theme and fallback helpers keep the primary chain explicit', 
   assert.equal(isAmapAuthError('network timeout'), false);
 });
 
-test('AMap world view raises the minimum zoom and clamps both antimeridian edges', () => {
-  const east = clampAmapWorldView(165.7, 4, 1440);
-  assert.equal(east.zoom, 4);
-  assert.ok(Math.abs(east.center - 116.71875) < 1e-9);
-  const west = clampAmapWorldView(-165.7, 4, 1440);
-  assert.ok(Math.abs(west.center + 116.71875) < 1e-9);
-  assert.equal(clampAmapWorldView(125, 2, 1440).zoom, 3);
-  assert.equal(clampAmapWorldView(125, 2, 1440).center, 53.4375);
+test('AMap padding offsets use screen coordinates for desktop, mobile and symmetric insets', () => {
+  assert.deepEqual(amapPaddingOffset({ left: 70, right: 408, top: 142, bottom: 76 }), { dx: -169, dy: 33 });
+  assert.deepEqual(amapPaddingOffset({ left: 38, right: 72, top: 150, bottom: 320 }), { dx: -17, dy: -85 });
+  assert.deepEqual(amapPaddingOffset({ left: 100, top: 60 }), { dx: 50, dy: 30 });
+  for (const padding of [undefined, null, 0, 40]) assert.deepEqual(amapPaddingOffset(padding), { dx: 0, dy: 0 });
+  assert.deepEqual(normalizeMapPadding(24), { top: 24, bottom: 24, left: 24, right: 24 });
+  assert.deepEqual(normalizeMapPadding({ top: -10, right: Infinity, bottom: NaN }), { top: 0, bottom: 0, left: 0, right: 0 });
 });
 
 test('WGS-84 coordinates convert to GCJ-02 only inside mainland China bounds', () => {
@@ -142,7 +141,7 @@ function harness(overrides = {}) {
     ensureWindCircleLabelImages = map => { if (map.isAmap) nativeWindCircleLabelImages(map); };
     renderMarkers = () => {};
     resolveAndLoadWeatherLayers = () => {};
-    globalThis.api = { state, init, initializeMap, initializeAmapMap, setBasemap, syncTheme, mapPadding, fitTracks, rebuildStormLayers, reloadMapStyle, showOutlineFallback, AmapMapAdapter, AmapMarker, addTrackLayers, document };
+    globalThis.api = { state, init, initializeMap, initializeAmapMap, setBasemap, syncTheme, mapPadding, fitTracks, hydrateMapStyle, refreshMapForStorm, rebuildStormLayers, reloadMapStyle, showOutlineFallback, AmapMapAdapter, AmapMarker, addTrackLayers, document };
   `);
   return runInNewContext(`${instrumented}\napi;`, {
     console, ...basemap, createOutlineProjection,
@@ -158,6 +157,7 @@ class FakeMap {
   reset(style) { this.style = structuredClone(style); this.sources = structuredClone(style.sources); }
   addControl() {}
   fitBounds() {}
+  flyTo(options) { (this.flights ||= []).push(options); }
   remove() { this.removed = true; }
   on(...args) { this.events.push(args); }
   fire(name, event = {}) { for (const [id, callback] of this.events) if (id === name && typeof callback === 'function') callback(event); }
@@ -458,9 +458,11 @@ test('AMap adapter fits with padding, converts overlays, applies theme and repla
   assert.equal(adapter.standardLayer.constructor, FakeDefaultLayer);
 });
 
-test('AMap raster fallback CSS filters only dark standard base tiles', async () => {
+test('AMap dark raster filter composites the base layer and overlaps tile edges without filtering overlays', async () => {
   const css = await readFile(new URL('../typhoon.css', import.meta.url), 'utf8');
-  assert.match(css, /#typhoonMap\.amap-theme-dark \.amap-layers img\[src\*="appmaptile"\]\[src\*="style=8"\]/);
+  assert.match(css, /#typhoonMap\.amap-theme-dark \.amap-layer:has\(img\[src\*="appmaptile"\]\[src\*="style=8"\]\)\s*\{\s*filter:/);
+  assert.doesNotMatch(css, /img\[src\*="appmaptile"\]\[src\*="style=8"\]\s*\{[^}]*filter:/);
+  assert.match(css, /img\[src\*="appmaptile"\]\[src\*="style=8"\]\s*\{[^}]*scale: 1\.004;/);
   assert.match(css, /filter:\s*invert\(1\) hue-rotate\(180deg\) brightness\(\.85\) contrast\(\.9\) saturate\(\.6\)/);
   assert.doesNotMatch(css, /#typhoonMap\.amap-theme-dark[^{}]*\.amap-(?:markers|overlays|canvas)/);
 });
@@ -525,26 +527,34 @@ test('AMap adapter observes container size, debounces resize in RAF and keeps na
   adapter.remove();
 });
 
-test('AMap adapter keeps a wide 2D viewport on one world copy at both edges', () => {
+test('AMap moveend, zoomend, complete and resize never clamp longitude or raise the fixed minimum zoom', async () => {
   class NativeMap {
-    constructor(container, options) { this.container = container; this.options = options; this.center = options.center; this.zoom = options.zoom; this.events = new Map(); }
+    constructor(container, options) { this.options = options; this.center = options.center; this.zoom = options.zoom; this.events = new Map(); this.cameraWrites = 0; }
     on(name, callback) { this.events.set(name, callback); }
     fire(name) { this.events.get(name)?.(); }
-    getSize() { return this.container; }
+    getSize() { return { width: 4096, height: 900 }; }
     getZoom() { return this.zoom; }
     getCenter() { return { lng: this.center[0], lat: this.center[1] }; }
-    setZoom(zoom) { this.zoom = zoom; }
-    setCenter(center) { this.center = center; }
+    setZoom(zoom) { this.cameraWrites++; this.zoom = zoom; }
+    setCenter(center) { this.cameraWrites++; this.center = center; }
+    resize() {}
   }
-  const AMap = { Map: NativeMap };
-  const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width: 1440, height: 900 }) } });
-  const adapter = new AmapMapAdapter(AMap, { container: 'map', center: [165.7, 22], zoom: 4 });
-  assert.equal(JSON.stringify(adapter.native.options.zooms), JSON.stringify([3, 18]));
-  adapter.constrainWorldView();
-  assert.ok(Math.abs(adapter.native.center[0] - 116.71875) < 1e-9);
-  adapter.native.center = [-165.7, 22];
-  adapter.native.fire('moveend');
-  assert.ok(Math.abs(adapter.native.center[0] + 116.71875) < 1e-9);
+  const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width: 4096, height: 900 }) } });
+  const adapter = new AmapMapAdapter({ Map: NativeMap }, { container: 'map', center: [165.7, 22], zoom: 3 });
+  assert.equal(JSON.stringify(adapter.native.options.zooms), '[3,18]');
+  assert.equal(adapter.native.zoom, 3, 'minimum zoom is independent of viewport width');
+  for (const option of ['dragEnable', 'zoomEnable', 'scrollWheel', 'touchZoom', 'doubleClickZoom']) assert.equal(adapter.native.options[option], true);
+  assert.equal(adapter.native.events.has('moveend'), false);
+  assert.equal(adapter.native.events.has('zoomend'), false);
+  for (const longitude of [165.7, -165.7, 190, -190]) {
+    adapter.native.center = [longitude, 22];
+    for (const event of ['moveend', 'zoomend', 'complete']) adapter.native.fire(event);
+    adapter.resize();
+    assert.deepEqual(adapter.native.center, [longitude, 22]);
+    assert.equal(adapter.native.zoom, 3);
+  }
+  await adapter.ready;
+  assert.equal(adapter.native.cameraWrites, 0);
 });
 
 test('AMap startup replays theme and satellite choices made before complete', async () => {
@@ -589,16 +599,22 @@ test('AMap startup replays theme and satellite choices made before complete', as
   assert.equal(nativeMap.layers.length, 1);
 });
 
-test('AMap raster zoom rounding still fits the bounds inside asymmetric padding', () => {
+function projectedAmap() {
   const project = ([lon, lat]) => [lon / 360, -Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / (2 * Math.PI)];
   const unproject = ([x, y]) => [x * 360, (2 * Math.atan(Math.exp(-y * 2 * Math.PI)) - Math.PI / 2) * 180 / Math.PI];
   class NativeMap {
-    constructor(container, options) { this.center = options.center; this.zoom = options.zoom; this.size = container; }
+    constructor(container, options) { this.center = options.center; this.zoom = options.zoom; this.size = container; this.calls = []; }
     on() {}
     getSize() { return this.size; }
     getZoom() { return this.zoom; }
     setZoom(zoom) { this.zoom = Math.ceil(zoom); }
     setCenter(center) { this.center = center; }
+    getCenter() { return [...this.center]; }
+    setZoomAndCenter(zoom, center, immediately, duration) {
+      this.calls.push({ zoom, center, immediately, duration });
+      this.setZoom(zoom);
+      this.setCenter(center);
+    }
     setBounds() { this.setZoom(5.2); }
     lngLatToContainer(position) {
       const [x, y] = project(position), [cx, cy] = project(this.center), scale = 256 * 2 ** this.zoom;
@@ -609,7 +625,11 @@ test('AMap raster zoom rounding still fits the bounds inside asymmetric padding'
       return unproject([cx + (x - this.size.width / 2) / scale, cy + (y - this.size.height / 2) / scale]);
     }
   }
-  const AMap = { Map: NativeMap, Bounds: class {}, Pixel: class { constructor(x, y) { this.x = x; this.y = y; } } };
+  return { Map: NativeMap, Bounds: class {}, Pixel: class { constructor(x, y) { this.x = x; this.y = y; } } };
+}
+
+test('AMap raster zoom rounding still fits the bounds inside asymmetric padding', () => {
+  const AMap = projectedAmap();
   for (const [width, height, padding] of [[1440, 900, { top: 142, bottom: 76, left: 70, right: 408 }], [390, 844, { top: 130, bottom: 320, left: 38, right: 72 }]]) {
     const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width, height }) } });
     const adapter = new AmapMapAdapter(AMap, { container: 'map', center: [138.5, 24.8], zoom: 5 });
@@ -625,6 +645,76 @@ test('AMap raster zoom rounding still fits the bounds inside asymmetric padding'
   }
 });
 
+test('AMap flyTo and easeTo put the target at the padded center at the committed zoom', () => {
+  for (const [width, height, padding] of [
+    [1440, 900, { top: 142, bottom: 76, left: 70, right: 408 }],
+    [390, 844, { top: 150, bottom: 320, left: 38, right: 72 }],
+    [1440, 900, 40],
+    [390, 844, { left: 60, top: 100 }],
+    [1440, 900, undefined]
+  ]) for (const center of [[138.5, 25], [116.397, 39.908], [179, 25], [-179, 25]]) {
+    const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width, height }) } });
+    const adapter = new AmapMapAdapter(projectedAmap(), { container: 'map', center: [125, 20], zoom: 3 });
+    const { dx, dy } = amapPaddingOffset(padding);
+    for (const duration of [0, 650]) {
+      adapter.flyTo({ center, zoom: 5.4, padding, duration });
+      const assertTarget = () => {
+        const pixel = adapter.project(center);
+        assert.ok(Math.abs(pixel.x - (width / 2 + dx)) < 1e-6, `target x: ${pixel.x}`);
+        assert.ok(Math.abs(pixel.y - (height / 2 + dy)) < 1e-6, `target y: ${pixel.y}`);
+      };
+      assertTarget();
+      if (duration > 0) {
+        assert.equal(adapter.native.calls.at(-1).immediately, false);
+        assert.equal(adapter.native.calls.at(-1).duration, duration);
+      }
+      // A second flight must not accumulate padding or GCJ-02 conversion drift.
+      adapter.easeTo({ center: { lng: center[0], lat: center[1] }, padding, duration });
+      assertTarget();
+      adapter.flyTo({ center, zoom: 3 });
+      const pixel = adapter.project(center);
+      assert.ok(Math.abs(pixel.x - width / 2) < 1e-6);
+      assert.ok(Math.abs(pixel.y - height / 2) < 1e-6);
+      assert.equal(adapter.getZoom(), 3);
+    }
+  }
+});
+
+test('initial hydration and storm switches focus the current storm, not distant history or cones', async () => {
+  const { state, hydrateMapStyle, rebuildStormLayers, refreshMapForStorm } = harness();
+  state.map = new FakeMap({ style: createFallbackStyle() });
+  state.styleReady = true;
+  state.detail = {
+    storm: { position: { lon: 138.5, lat: 25 } },
+    tracks: { observed: [{ position: { lon: 165, lat: 10 } }], forecasts: [] },
+    mapConfig: { weatherLayers: [] }
+  };
+  state.map.fitBounds = () => assert.fail('startup must not fit the whole track');
+  await hydrateMapStyle();
+  const flight = state.map.flights[0];
+  assert.equal(JSON.stringify(flight.center), '[138.5,25]');
+  assert.equal(flight.zoom, 5.4);
+  assert.equal(flight.duration, 0);
+  assert.equal(flight.retainPadding, false);
+  assert.ok(flight.padding);
+  assert.equal(state.needsTrackFit, false);
+  state.map.reset(createFallbackStyle());
+  await hydrateMapStyle();
+  assert.equal(state.map.flights.length, 1, 'ordinary style hydration preserves the user camera');
+  state.detail.storm.position = { lon: 140, lat: 26 };
+  await rebuildStormLayers();
+  assert.equal(JSON.stringify(state.map.flights.at(-1).center), '[140,26]');
+  state.styleReady = false;
+  state.detail.storm.position = { lon: 142, lat: 27 };
+  refreshMapForStorm();
+  assert.equal(JSON.stringify(state.map.flights.at(-1).center), '[142,27]');
+  assert.equal(state.map.flights.at(-1).zoom, 5.4);
+  state.styleReady = true;
+  state.map.reset(createFallbackStyle());
+  await hydrateMapStyle();
+  assert.equal(JSON.stringify(state.map.flights.at(-1).center), '[142,27]');
+});
+
 test('fitting reserves the desktop panel and the 390px mobile sheet and toolbar', () => {
   const rect = (left, top, width, height) => ({ left, top, width, height, right: left + width, bottom: top + height });
   for (const mobile of [false, true]) {
@@ -634,7 +724,7 @@ test('fitting reserves the desktop panel and the 390px mobile sheet and toolbar'
       insightPanel: mobile ? rect(8, 625, 374, 211) : rect(1046, 76, 380, 810),
       trackPlayback: mobile ? rect(8, 549, 374, 64) : rect(14, 800, 520, 76)
     };
-    const { mapPadding } = harness({ document: {
+    const { mapPadding, AmapMapAdapter } = harness({ document: {
       getElementById: id => ({ getBoundingClientRect: () => rectangles[id] || rect(0, 0, 0, 0) }),
       querySelector: selector => ({ getBoundingClientRect: () => selector === '.topbar'
         ? rect(8, 8, mapRect.width - 16, 50)
@@ -649,6 +739,17 @@ test('fitting reserves the desktop panel and the 390px mobile sheet and toolbar'
     }
     assert.ok(mapRect.width - padding.left - padding.right >= 140);
     assert.ok(mapRect.height - padding.top - padding.bottom >= 140);
+    const adapter = new AmapMapAdapter(projectedAmap(), { container: 'typhoonMap', center: [138.5, 25], zoom: 5 });
+    adapter.native.size = mapRect;
+    adapter.flyTo({ center: [138.5, 25], zoom: 5.4, padding });
+    const { x, y } = adapter.project([138.5, 25]);
+    assert.ok(Math.abs(x - (padding.left + mapRect.width - padding.right) / 2) < 1e-6);
+    assert.ok(Math.abs(y - (padding.top + mapRect.height - padding.bottom) / 2) < 1e-6);
+    if (mobile) {
+      assert.ok(y < rectangles.trackPlayback.top);
+      rectangles.nodeCard = rect(8, 520, 374, 316);
+      assert.ok(mapPadding().bottom >= mapRect.bottom - rectangles.nodeCard.top + 12);
+    } else assert.ok(x < rectangles.insightPanel.left);
   }
 });
 

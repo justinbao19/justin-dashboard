@@ -1,4 +1,17 @@
-import { buildAmapProxyUrl } from '../typhoon-basemap.mjs';
+// Inlined from typhoon-basemap.mjs so the function bundle has no browser-module deps.
+function buildAmapProxyUrl(path = '', query = '', securityCode = '') {
+  const normalizedPath = `/${String(path || '').replace(/^\/+/, '')}`;
+  const upstreamBase = normalizedPath.startsWith('/v4/map/styles')
+    ? 'https://webapi.amap.com'
+    : normalizedPath.startsWith('/v3/vectormap')
+      ? 'https://fmap01.amap.com'
+      : 'https://restapi.amap.com';
+  const upstream = new URL(normalizedPath, upstreamBase);
+  const search = query instanceof URLSearchParams ? query : new URLSearchParams(String(query || '').replace(/^\?/, ''));
+  search.forEach((value, name) => upstream.searchParams.append(name, value));
+  if (securityCode) upstream.searchParams.set('jscode', securityCode);
+  return upstream.toString();
+}
 
 const AMAP_PATH_PARAM = '__amap_path';
 

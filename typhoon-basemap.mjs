@@ -4,6 +4,8 @@ import { simplifiedLand } from './typhoon-land.mjs';
 export const MAPLIBRE_VERSION = '5.6.1';
 export const MAPLIBRE_CDNS = ['https://cdn.jsdelivr.net/npm', 'https://unpkg.com'];
 export const BASEMAP_TIMEOUT_MS = 10000;
+export const AMAP_TIMEOUT_MS = 8000;
+export const AMAP_SCRIPT_URL = 'https://webapi.amap.com/maps?v=2.0';
 export const OPENFREEMAP_STYLES = {
   dark: 'https://tiles.openfreemap.org/styles/dark',
   light: 'https://tiles.openfreemap.org/styles/positron'
@@ -16,6 +18,97 @@ export const BASEMAP_PALETTES = {
   dark: { water: '#07131d', land: '#182c3a', park: '#203b3e', urban: '#1d3342', border: '#536c7d', road: '#304957', label: '#c3d5df', mutedLabel: '#8da9b9', halo: '#10212e' },
   light: { water: '#dfe8ef', land: '#f1f5f7', park: '#e0ebe7', urban: '#e7edf0', border: '#9baeb9', road: '#d1dde4', label: '#3a5669', mutedLabel: '#698392', halo: '#f5f9fb' }
 };
+
+export function parseAmapConfig(payload) {
+  const key = typeof payload?.key === 'string' && payload.key.trim() ? payload.key.trim() : null;
+  const serviceHost = typeof payload?.serviceHost === 'string' && payload.serviceHost.trim()
+    ? payload.serviceHost.trim().replace(/\/$/, '')
+    : '/api/_AMapService';
+  return { key, serviceHost };
+}
+
+export function amapStyleForTheme(theme = 'dark') {
+  return theme === 'light' ? 'amap://styles/normal' : 'amap://styles/dark';
+}
+
+export function clampAmapWorldView(center, zoom, width, minimumZoom = 2) {
+  const viewportWidth = Number(width);
+  const requestedZoom = Number(zoom);
+  const baseMinimumZoom = Number.isFinite(Number(minimumZoom)) ? Number(minimumZoom) : 2;
+  const minZoom = Math.max(2, baseMinimumZoom, viewportWidth > 0 ? Math.ceil(Math.log2(viewportWidth / 256)) : 2);
+  const safeZoom = Math.max(Number.isFinite(requestedZoom) ? requestedZoom : minZoom, minZoom);
+  const worldWidth = 256 * 2 ** safeZoom;
+  const halfLongitudeSpan = viewportWidth > 0 ? 180 * viewportWidth / worldWidth : 0;
+  const maxCenter = Math.max(0, 180 - halfLongitudeSpan);
+  const requestedCenter = Number(center);
+  return {
+    center: Number.isFinite(requestedCenter) ? Math.max(-maxCenter, Math.min(maxCenter, requestedCenter)) : 0,
+    minZoom,
+    zoom: safeZoom
+  };
+}
+
+export function nextBasemapProvider(provider, rendererAvailable = true) {
+  if (!rendererAvailable) return 'outline';
+  if (provider === 'amap') return 'openfreemap';
+  return provider === 'openfreemap' ? 'esri' : 'land';
+}
+
+export function basemapProviderOrder() {
+  return ['amap', 'openfreemap', 'esri', 'land'];
+}
+
+export function isAmapAuthError(value) {
+  return /INVALID_USER_KEY|USERKEY_PLAT_NOMATCH|INVALID_USER_DOMAIN|USERKEY_EXPIRED/i.test(String(value?.message || value || ''));
+}
+
+export function outOfChina(lon, lat) {
+  return lon < 72.004 || lon > 137.8347 || lat < 0.8293 || lat > 55.8271;
+}
+
+export function wgs84ToGcj02(lonOrPosition, lat) {
+  const lon = typeof lonOrPosition === 'object' ? Number(lonOrPosition.lon ?? lonOrPosition.lng ?? lonOrPosition[0]) : Number(lonOrPosition);
+  const latitude = typeof lonOrPosition === 'object' ? Number(lonOrPosition.lat ?? lonOrPosition[1]) : Number(lat);
+  if (![lon, latitude].every(Number.isFinite) || outOfChina(lon, latitude)) return [lon, latitude];
+  const pi = Math.PI;
+  const axis = 6378245;
+  const eccentricity = 0.00669342162296594323;
+  const transformLat = (x, y) => -100 + 2 * x + 3 * y + .2 * y * y + .1 * x * y + .2 * Math.sqrt(Math.abs(x))
+    + (20 * Math.sin(6 * x * pi) + 20 * Math.sin(2 * x * pi)) * 2 / 3
+    + (20 * Math.sin(y * pi) + 40 * Math.sin(y / 3 * pi)) * 2 / 3
+    + (160 * Math.sin(y / 12 * pi) + 320 * Math.sin(y * pi / 30)) * 2 / 3;
+  const transformLon = (x, y) => 300 + x + 2 * y + .1 * x * x + .1 * x * y + .1 * Math.sqrt(Math.abs(x))
+    + (20 * Math.sin(6 * x * pi) + 20 * Math.sin(2 * x * pi)) * 2 / 3
+    + (20 * Math.sin(x * pi) + 40 * Math.sin(x / 3 * pi)) * 2 / 3
+    + (150 * Math.sin(x / 12 * pi) + 300 * Math.sin(x / 30 * pi)) * 2 / 3;
+  const dLat = transformLat(lon - 105, latitude - 35);
+  const dLon = transformLon(lon - 105, latitude - 35);
+  const radLat = latitude / 180 * pi;
+  let magic = Math.sin(radLat);
+  magic = 1 - eccentricity * magic * magic;
+  const sqrtMagic = Math.sqrt(magic);
+  return [lon + dLon * 180 / (axis / magic * sqrtMagic * pi), latitude + dLat * 180 / (axis * (1 - eccentricity) / (magic * sqrtMagic) * pi)];
+}
+
+export function buildAmapScriptUrl(key) {
+  const url = new URL(AMAP_SCRIPT_URL);
+  url.searchParams.set('key', key);
+  return url.toString();
+}
+
+export function buildAmapProxyUrl(path = '', query = '', securityCode = '') {
+  const normalizedPath = `/${String(path || '').replace(/^\/+/, '')}`;
+  const upstreamBase = normalizedPath.startsWith('/v4/map/styles')
+    ? 'https://webapi.amap.com'
+    : normalizedPath.startsWith('/v3/vectormap')
+      ? 'https://fmap01.amap.com'
+      : 'https://restapi.amap.com';
+  const upstream = new URL(normalizedPath, upstreamBase);
+  const search = query instanceof URLSearchParams ? query : new URLSearchParams(String(query || '').replace(/^\?/, ''));
+  search.forEach((value, name) => upstream.searchParams.append(name, value));
+  if (securityCode) upstream.searchParams.set('jscode', securityCode);
+  return upstream.toString();
+}
 
 // Original keyless Esri path remains available independently of OpenFreeMap.
 export function basemapSources(theme = 'dark', mode = 'standard') {
@@ -106,11 +199,6 @@ export function createBasemapStyle(theme = 'dark', mode = 'standard', upstream) 
   return style;
 }
 
-export function nextBasemapProvider(provider, rendererAvailable = true) {
-  if (!rendererAvailable) return 'outline';
-  return provider === 'openfreemap' ? 'esri' : 'land';
-}
-
 // One monitor per style; unrelated weather failures never disable the basemap.
 export function createBasemapFailureMonitor(sourceIds = BASEMAP_SOURCE_IDS, threshold = 3) {
   let failures = 0;
@@ -146,4 +234,28 @@ export async function loadMapLibre({ document = globalThis.document, window = gl
     if (result.every(item => item.status === 'fulfilled') && window.maplibregl) return window.maplibregl;
   }
   throw new Error('MapLibre unavailable');
+}
+
+export async function loadAmapScript({ document = globalThis.document, window = globalThis.window, key, timeoutMs = AMAP_TIMEOUT_MS } = {}) {
+  if (window?.AMap) return window.AMap;
+  if (!key) throw new Error('AMap key unavailable');
+  return new Promise((resolve, reject) => {
+    const node = document.createElement('script');
+    let finished = false;
+    const timer = setTimeout(() => finish(new Error('AMap script timed out')), timeoutMs);
+    function finish(error) {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      node.onload = node.onerror = null;
+      if (error) { node.remove?.(); reject(error); }
+      else if (window.AMap) resolve(window.AMap);
+      else reject(new Error('AMap unavailable'));
+    }
+    node.src = buildAmapScriptUrl(key);
+    node.async = true;
+    node.onload = () => finish();
+    node.onerror = () => finish(new Error('AMap script failed'));
+    document.head.append(node);
+  });
 }

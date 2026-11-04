@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 import * as basemap from '../typhoon-basemap.mjs';
 import { createOutlineProjection } from '../typhoon-land.mjs';
-const { ESRI_ATTRIBUTION, BASEMAP_PALETTES, CHINESE_LABEL, OPENFREEMAP_STYLES, basemapSources, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, nextBasemapProvider, loadMapLibre } = basemap;
+const { AMAP_TIMEOUT_MS, ESRI_ATTRIBUTION, BASEMAP_PALETTES, CHINESE_LABEL, OPENFREEMAP_STYLES, amapStyleForTheme, basemapProviderOrder, basemapSources, buildAmapProxyUrl, clampAmapWorldView, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, nextBasemapProvider, loadMapLibre, parseAmapConfig, wgs84ToGcj02 } = basemap;
 
 const vectorStyle = { version: 8, glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf', sources: { openmaptiles: { type: 'vector', url: 'https://tiles.openfreemap.org/planet' }, unused: { type: 'raster', tiles: ['https://example.test/unused'] } }, layers: [
   { id: 'background', type: 'background' },
@@ -15,6 +15,49 @@ const vectorStyle = { version: 8, glyphs: 'https://tiles.openfreemap.org/fonts/{
   { id: 'shield', type: 'symbol', source: 'openmaptiles', 'source-layer': 'transportation_name', layout: { 'text-field': ['to-string', ['get', 'ref']] } }
 ] };
 const flush = () => new Promise(resolve => setImmediate(resolve));
+
+test('AMap config, theme and fallback helpers keep the primary chain explicit', () => {
+  assert.deepEqual(parseAmapConfig({ key: ' public-key ', serviceHost: '/api/_AMapService/' }), { key: 'public-key', serviceHost: '/api/_AMapService' });
+  assert.deepEqual(parseAmapConfig({ key: '' }), { key: null, serviceHost: '/api/_AMapService' });
+  assert.equal(amapStyleForTheme('light'), 'amap://styles/normal');
+  assert.equal(amapStyleForTheme('dark'), 'amap://styles/dark');
+  assert.equal(AMAP_TIMEOUT_MS, 8000);
+  assert.deepEqual(basemapProviderOrder(), ['amap', 'openfreemap', 'esri', 'land']);
+  assert.equal(nextBasemapProvider('amap'), 'openfreemap');
+  assert.equal(isAmapAuthError('INVALID_USER_KEY'), true);
+  assert.equal(isAmapAuthError('network timeout'), false);
+});
+
+test('AMap world view raises the minimum zoom and clamps both antimeridian edges', () => {
+  const east = clampAmapWorldView(165.7, 4, 1440);
+  assert.equal(east.zoom, 4);
+  assert.ok(Math.abs(east.center - 116.71875) < 1e-9);
+  const west = clampAmapWorldView(-165.7, 4, 1440);
+  assert.ok(Math.abs(west.center + 116.71875) < 1e-9);
+  assert.equal(clampAmapWorldView(125, 2, 1440).zoom, 3);
+  assert.equal(clampAmapWorldView(125, 2, 1440).center, 53.4375);
+});
+
+test('WGS-84 coordinates convert to GCJ-02 only inside mainland China bounds', () => {
+  const outside = wgs84ToGcj02(10, 20);
+  assert.deepEqual(outside, [10, 20]);
+  const beijing = wgs84ToGcj02(116.397, 39.908);
+  assert.ok(beijing[0] > 116.4 && beijing[0] < 116.41);
+  assert.ok(beijing[1] > 39.909 && beijing[1] < 39.916);
+});
+
+test('AMap proxy URLs select the official upstream and append jscode server-side', () => {
+  const weather = new URL(buildAmapProxyUrl('/v3/weather/weatherInfo', 'city=310000&extensions=all', 'server-secret'));
+  assert.equal(weather.hostname, 'restapi.amap.com');
+  assert.equal(weather.searchParams.get('city'), '310000');
+  assert.equal(weather.searchParams.get('jscode'), 'server-secret');
+  const style = new URL(buildAmapProxyUrl('v4/map/styles', '', 'server-secret'));
+  assert.equal(style.hostname, 'webapi.amap.com');
+  assert.equal(style.pathname, '/v4/map/styles');
+  const vector = new URL(buildAmapProxyUrl('/v3/vectormap/tiles', '?z=3', 'server-secret'));
+  assert.equal(vector.hostname, 'fmap01.amap.com');
+  assert.equal(vector.searchParams.get('jscode'), 'server-secret');
+});
 
 const js = await readFile(new URL('../typhoon.js', import.meta.url), 'utf8');
 
@@ -95,10 +138,11 @@ function harness(overrides = {}) {
     addEventListener: overrides.document.addEventListener || document.addEventListener
   } : document;
   const instrumented = js.replace(/^import[\s\S]*?from '[^']+';\n/gm, '').replace('  init();', `
-    ensureWindCircleLabelImages = () => {};
+    const nativeWindCircleLabelImages = ensureWindCircleLabelImages;
+    ensureWindCircleLabelImages = map => { if (map.isAmap) nativeWindCircleLabelImages(map); };
     renderMarkers = () => {};
     resolveAndLoadWeatherLayers = () => {};
-    globalThis.api = { state, init, initializeMap, setBasemap, syncTheme, mapPadding, fitTracks, rebuildStormLayers, reloadMapStyle, showOutlineFallback, document };
+    globalThis.api = { state, init, initializeMap, initializeAmapMap, setBasemap, syncTheme, mapPadding, fitTracks, rebuildStormLayers, reloadMapStyle, showOutlineFallback, AmapMapAdapter, AmapMarker, addTrackLayers, document };
   `);
   return runInNewContext(`${instrumented}\napi;`, {
     console, ...basemap, createOutlineProjection,
@@ -242,6 +286,345 @@ test('camera fit includes a current position without history and excludes other 
   assert.equal(options.maxZoom, 7);
 });
 
+test('camera fit includes the supplied forecast cone geometry', () => {
+  const fitted = [];
+  const { state, fitTracks } = harness({ maplibregl: { LngLatBounds: class {
+    extend(point) { fitted.push(point); }
+    isEmpty() { return fitted.length === 0; }
+  } } });
+  state.map = { fitBounds() {} };
+  state.detail = {
+    storm: { position: { lon: 125, lat: 22 } },
+    tracks: { observed: [], forecasts: [] },
+    eventGeometry: { features: [{
+      properties: { featureType: 'forecast_cone' },
+      geometry: { type: 'Polygon', coordinates: [[[130, 20], [138, 25], [130, 30], [130, 20]]] }
+    }] }
+  };
+  fitTracks();
+  assert.ok(fitted.some(([lon, lat]) => lon === 138 && lat === 25));
+});
+
+test('AMap adapter fits with padding, converts overlays, applies theme and replaces its base layers', () => {
+  const overlays = [];
+  class FakeOverlay {
+    constructor(options) { Object.assign(this, options); overlays.push(this); }
+    setMap(map) { this.map = map; }
+    setPosition(position) { this.position = position; }
+    setOptions(options) { Object.assign(this, options); }
+    on() {}
+  }
+  class FakeTileLayer extends FakeOverlay {}
+  class FakeDefaultLayer extends FakeOverlay {}
+  class FakeSatellite extends FakeTileLayer {}
+  class FakeRoadNet extends FakeTileLayer {}
+  class FakeNativeMap {
+    constructor(container, options) { this.container = container; this.options = options; this.layers = []; this.zoom = options.zoom; }
+    on() {}
+    setBounds(...args) { this.boundsArgs = args; this.zoom = 9; }
+    getZoom() { return this.zoom; }
+    setZoom(zoom) { this.zoom = zoom; }
+    setLayers(layers) { this.layers = layers; }
+    setMapStyle(style) { this.mapStyle = style; }
+    add(items) { for (const item of Array.isArray(items) ? items : [items]) item.setMap(this); }
+  }
+  class FakeBounds {
+    constructor(southWest, northEast) { this.southWest = southWest; this.northEast = northEast; }
+  }
+  FakeTileLayer.Satellite = FakeSatellite;
+  FakeTileLayer.RoadNet = FakeRoadNet;
+  const AMap = {
+    Map: FakeNativeMap,
+    Bounds: FakeBounds,
+    TileLayer: FakeTileLayer,
+    createDefaultLayer: () => new FakeDefaultLayer({ zIndex: 0 }),
+    Polyline: FakeOverlay,
+    Polygon: FakeOverlay,
+    CircleMarker: FakeOverlay,
+    Text: FakeOverlay,
+    Marker: FakeOverlay
+  };
+  const classes = new Set();
+  const container = { append() {}, dataset: {}, classList: {
+    toggle(name, enabled) { enabled ? classes.add(name) : classes.delete(name); },
+    contains(name) { return classes.has(name); }
+  } };
+  const { AmapMapAdapter, AmapMarker, addTrackLayers, state } = harness({ document: { getElementById: () => container } });
+  const adapter = new AmapMapAdapter(AMap, { container: 'typhoonMap', center: [116.397, 39.908], zoom: 5, mapStyle: amapStyleForTheme('dark') });
+  assert.deepEqual(adapter.native.options.center, wgs84ToGcj02(116.397, 39.908));
+  const bounds = { isEmpty: () => false, getSouthWest: () => [116.397, 39.908], getNorthEast: () => [116.5, 40] };
+  adapter.fitBounds(bounds, { padding: { top: 92, right: 408, bottom: 76, left: 70 }, maxZoom: 7 });
+  assert.equal(adapter.native.boundsArgs[1], true);
+  assert.equal(JSON.stringify(adapter.native.boundsArgs[2]), JSON.stringify([92, 76, 70, 408]));
+  assert.equal(adapter.native.getZoom(), 7);
+  assert.notDeepEqual(adapter.native.boundsArgs[0].southWest, [116.397, 39.908]);
+
+  adapter.addSource('track', { type: 'geojson', data: { type: 'FeatureCollection', features: [{
+    type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [[116.397, 39.908], [116.5, 40]] }
+  }] } });
+  adapter.addLayer({ id: 'track', type: 'line', source: 'track', paint: { 'line-color': '#fff' } });
+  assert.deepEqual(overlays.at(-1).path[0], wgs84ToGcj02(116.397, 39.908));
+  assert.equal(overlays.at(-1).map, adapter.native);
+  assert.deepEqual(adapter.toAmap([138.5, 24.8]), [138.5, 24.8]);
+  assert.deepEqual(adapter.toAmap({ lng: 138.5, lat: 24.8 }), [138.5, 24.8]);
+  assert.throws(() => adapter.toAmap([[138.5, 24.8], [139, 25]]), /Invalid map coordinate/);
+
+  const ring = [[138.5, 24.8], [139, 25], [140, 24], [138.5, 24.8]];
+  const hole = [[138.8, 24.7], [139, 24.8], [139.1, 24.6], [138.8, 24.7]];
+  const polygon = { type: 'Feature', properties: { level: 7 }, geometry: { type: 'Polygon', coordinates: [ring, hole] } };
+  const multi = { ...polygon, geometry: { type: 'MultiPolygon', coordinates: [[ring, hole], [ring]] } };
+  adapter.addSource('cone', { type: 'geojson', data: polygon });
+  adapter.addLayer({ id: 'cone-fill', type: 'fill', source: 'cone', paint: { 'fill-color': '#5bb6df', 'fill-opacity': .16 } }, 'track');
+  adapter.addLayer({ id: 'cone-line', type: 'line', source: 'cone' });
+  assert.equal(adapter.layers[0].id, 'cone-fill');
+  assert.equal(JSON.stringify(adapter.getLayer('cone-fill').overlays[0].path), JSON.stringify([ring, hole]));
+  assert.equal(adapter.getLayer('cone-fill').overlays[0].fillOpacity, .16);
+  assert.equal(adapter.getLayer('cone-line').overlays.length, 2, 'each polygon ring becomes a line');
+  assert.equal(JSON.stringify(adapter.getLayer('cone-line').overlays[0].path), JSON.stringify(ring));
+  const oldLines = [...adapter.getLayer('cone-line').overlays];
+  adapter.setLayoutProperty('cone-line', 'visibility', 'none');
+  adapter.getSource('cone').setData(multi);
+  assert.ok(oldLines.every(overlay => overlay.map === null), 'source updates detach old overlays');
+  assert.equal(adapter.getLayer('cone-line').overlays.length, 3);
+  assert.ok(adapter.getLayer('cone-line').overlays.every(overlay => !overlay.map), 'setData preserves hidden layers');
+  adapter.setPaintProperty('cone-line', 'line-color', '#ff0000');
+  assert.ok(adapter.getLayer('cone-line').overlays.every(overlay => !overlay.map));
+  adapter.setLayoutProperty('cone-line', 'visibility', 'visible');
+  assert.ok(adapter.getLayer('cone-line').overlays.every(overlay => overlay.map === adapter.native));
+  adapter.getSource('cone').setData({ type: 'FeatureCollection', features: [] });
+  assert.equal(adapter.getLayer('cone-line').overlays.length, 0);
+
+  adapter.addSource('dots', { type: 'geojson', data: { type: 'FeatureCollection', features: [
+    { type: 'Feature', properties: { color: '#f472b6', kind: 'current' }, geometry: { type: 'Point', coordinates: ring[0] } },
+    { type: 'Feature', properties: { color: '#fb923c' }, geometry: { type: 'MultiPoint', coordinates: ring.slice(1, 3) } }
+  ] } });
+  adapter.addLayer({ id: 'dots', type: 'circle', source: 'dots', layout: { visibility: 'none' }, paint: {
+    'circle-color': ['get', 'color'], 'circle-radius': 4,
+    'circle-opacity': ['case', ['==', ['get', 'kind'], 'current'], 0, .9],
+    'circle-stroke-width': 1.2, 'circle-stroke-color': '#fff'
+  } });
+  const dots = adapter.getLayer('dots').overlays;
+  assert.equal(dots.length, 3);
+  assert.equal(dots[0].fillOpacity, 0);
+  assert.equal(dots[1].fillColor, '#fb923c');
+  assert.equal(dots[1].radius, 4);
+  assert.equal(dots[1].strokeWeight, 1.2);
+  assert.ok(dots.every(overlay => !overlay.map), 'initial visibility is respected');
+
+  const element = { style: { position: 'absolute' } };
+  const marker = new AmapMarker({ element }).setLngLat(ring[0]).addTo(adapter);
+  assert.equal(marker.native.map, adapter.native);
+  assert.equal(marker.native.content, element);
+  assert.equal(element.style.position, 'relative');
+  assert.deepEqual(marker.native.position, ring[0]);
+  marker.setLngLat(ring[1]);
+  assert.deepEqual(marker.native.position, ring[1]);
+  const removedMarker = marker.native;
+  marker.remove();
+  assert.equal(removedMarker.map, null);
+
+  // Exercise real storm hydration, including the native label path (no MapLibre sprites).
+  state.map = adapter;
+  state.detail = { tracks: { observed: [{ position: { lon: 138.5, lat: 24.8 }, kind: 'current' }], forecasts: [] },
+    eventGeometry: { features: [{ ...polygon, properties: { featureType: 'forecast_cone' } }] } };
+  state.windCirclePoint = { position: { lon: 138.5, lat: 24.8 }, windCircles: [{ level: 7, minRadiusKm: 220, maxRadiusKm: 360,
+    quadrants: { northeast: 360, southeast: 220, southwest: 220, northwest: 360 } }] };
+  addTrackLayers();
+  assert.equal(adapter.getLayer('forecast-cone-fill').overlays.length, 1);
+  assert.equal(adapter.getLayer('forecast-cone-line').overlays.length, 2);
+  assert.equal(adapter.getLayer('wind-circle-7-fill').overlays.length, 1);
+  assert.equal(adapter.getLayer('wind-circle-10-fill').overlays.length, 0, 'wind filters select their level');
+  assert.ok(adapter.getLayer('wind-circle-7-line').overlays[0].path.every(([lon, lat]) => lon > 130 && lon < 145 && lat > 20 && lat < 30));
+  assert.equal(adapter.getLayer('wind-circle-label-symbols').overlays[0].map, adapter.native);
+  assert.equal(adapter.getLayer('points-observed').overlays[0].fillOpacity, 0);
+
+  adapter.setMapStyle(amapStyleForTheme('dark'));
+  assert.equal(adapter.native.mapStyle, 'amap://styles/dark');
+  adapter.syncBasemap('dark', 'standard');
+  assert.equal(container.classList.contains('amap-theme-dark'), true);
+  adapter.syncBasemap('light', 'standard');
+  assert.equal(container.classList.contains('amap-theme-dark'), false);
+  adapter.syncBasemap('dark', 'standard');
+  assert.equal(container.classList.contains('amap-theme-dark'), true);
+  adapter.setSatellite(true);
+  assert.equal(container.classList.contains('amap-theme-dark'), false);
+  assert.equal(adapter.native.layers.length, 2);
+  assert.equal(adapter.native.layers[0].constructor, FakeSatellite);
+  assert.equal(adapter.native.layers[1].constructor, FakeRoadNet);
+  adapter.setSatellite(false);
+  assert.equal(container.classList.contains('amap-theme-dark'), true);
+  assert.equal(adapter.native.layers.length, 1);
+  assert.equal(adapter.native.layers[0], adapter.standardLayer);
+  assert.equal(adapter.standardLayer.constructor, FakeDefaultLayer);
+});
+
+test('AMap raster fallback CSS filters only dark standard base tiles', async () => {
+  const css = await readFile(new URL('../typhoon.css', import.meta.url), 'utf8');
+  assert.match(css, /#typhoonMap\.amap-theme-dark \.amap-layers img\[src\*="appmaptile"\]\[src\*="style=8"\]/);
+  assert.match(css, /filter:\s*invert\(1\) hue-rotate\(180deg\) brightness\(\.85\) contrast\(\.9\) saturate\(\.6\)/);
+  assert.doesNotMatch(css, /#typhoonMap\.amap-theme-dark[^{}]*\.amap-(?:markers|overlays|canvas)/);
+});
+
+test('AMap adapter observes container size, debounces resize in RAF and keeps native state idempotent', () => {
+  let observeCallback;
+  let observedContainer;
+  let resizeCalls = 0;
+  let styleCalls = 0;
+  let layerCalls = 0;
+  const frames = [];
+  class FakeResizeObserver {
+    constructor(callback) { observeCallback = callback; }
+    observe(container) { observedContainer = container; }
+    disconnect() {}
+  }
+  class FakeNativeMap {
+    constructor(container, options) { this.container = container; this.options = options; }
+    on() {}
+    resize() { resizeCalls++; }
+    setMapStyle(style) { styleCalls++; this.mapStyle = style; }
+    setLayers(layers) { layerCalls++; this.layers = layers; this.mapStyle = 'amap://styles/normal'; }
+  }
+  class FakeDefaultLayer {}
+  class FakeSatellite {}
+  class FakeRoadNet {}
+  const AMap = {
+    Map: FakeNativeMap,
+    createDefaultLayer: () => new FakeDefaultLayer(),
+    TileLayer: { Satellite: FakeSatellite, RoadNet: FakeRoadNet }
+  };
+  const container = { append() {}, dataset: {} };
+  const { AmapMapAdapter } = harness({
+    document: { getElementById: () => container },
+    ResizeObserver: FakeResizeObserver,
+    requestAnimationFrame: callback => { frames.push(callback); return frames.length; }
+  });
+  const adapter = new AmapMapAdapter(AMap, { container: 'typhoonMap', center: [125, 22], zoom: 4, mapStyle: amapStyleForTheme('dark') });
+  assert.equal(observedContainer, container);
+
+  observeCallback();
+  observeCallback();
+  assert.equal(frames.length, 1, 'ResizeObserver callbacks share one pending animation frame');
+  frames.shift()();
+  assert.equal(resizeCalls, 1);
+  adapter.syncBasemap('light', 'satellite');
+  adapter.syncBasemap('light', 'satellite');
+  assert.equal(styleCalls, 1, 'the current AMap style is applied once');
+  assert.equal(adapter.native.mapStyle, amapStyleForTheme('light'));
+  assert.equal(layerCalls, 1, 'the satellite layer set is applied once');
+  adapter.syncBasemap('dark', 'standard');
+  assert.equal(styleCalls, 2);
+  assert.equal(adapter.native.mapStyle, amapStyleForTheme('dark'));
+  assert.equal(layerCalls, 2);
+  adapter.syncBasemap('dark', 'standard');
+  assert.equal(styleCalls, 2);
+  assert.equal(layerCalls, 2);
+
+  adapter.scheduleResizeAfterLayout();
+  while (frames.length) frames.shift()();
+  assert.equal(resizeCalls, 4, 'complete and layout settling each reach native resize');
+  adapter.remove();
+});
+
+test('AMap adapter keeps a wide 2D viewport on one world copy at both edges', () => {
+  class NativeMap {
+    constructor(container, options) { this.container = container; this.options = options; this.center = options.center; this.zoom = options.zoom; this.events = new Map(); }
+    on(name, callback) { this.events.set(name, callback); }
+    fire(name) { this.events.get(name)?.(); }
+    getSize() { return this.container; }
+    getZoom() { return this.zoom; }
+    getCenter() { return { lng: this.center[0], lat: this.center[1] }; }
+    setZoom(zoom) { this.zoom = zoom; }
+    setCenter(center) { this.center = center; }
+  }
+  const AMap = { Map: NativeMap };
+  const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width: 1440, height: 900 }) } });
+  const adapter = new AmapMapAdapter(AMap, { container: 'map', center: [165.7, 22], zoom: 4 });
+  assert.equal(JSON.stringify(adapter.native.options.zooms), JSON.stringify([3, 18]));
+  adapter.constrainWorldView();
+  assert.ok(Math.abs(adapter.native.center[0] - 116.71875) < 1e-9);
+  adapter.native.center = [-165.7, 22];
+  adapter.native.fire('moveend');
+  assert.ok(Math.abs(adapter.native.center[0] + 116.71875) < 1e-9);
+});
+
+test('AMap startup replays theme and satellite choices made before complete', async () => {
+  let nativeMap;
+  class FakeNativeMap {
+    constructor() { nativeMap = this; this.events = []; }
+    on(name, callback) { this.events.push([name, callback]); }
+    fire(name) { this.events.filter(([event]) => event === name).forEach(([, callback]) => callback()); }
+    setMapStyle(style) { this.mapStyle = style; }
+    setLayers(layers) { this.layers = layers; }
+    resize() {}
+  }
+  class FakeDefaultLayer {}
+  class FakeSatellite {}
+  class FakeRoadNet {}
+  const AMap = {
+    Map: FakeNativeMap,
+    createDefaultLayer: () => new FakeDefaultLayer(),
+    TileLayer: { Satellite: FakeSatellite, RoadNet: FakeRoadNet }
+  };
+  const { state, initializeAmapMap, setBasemap, syncTheme } = harness({
+    fetch: async () => ({ ok: true, json: async () => ({ key: 'public-key' }) }),
+    loadAmapScript: async () => AMap,
+    location: { origin: 'https://example.test' }
+  });
+  const startup = initializeAmapMap();
+  await flush();
+  syncTheme('light');
+  setBasemap('satellite');
+  nativeMap.fire('complete');
+  await startup;
+  assert.equal(nativeMap.mapStyle, amapStyleForTheme('light'));
+  assert.equal(nativeMap.layers.length, 2);
+  assert.equal(nativeMap.layers[0].constructor, FakeSatellite);
+  assert.equal(nativeMap.layers[1].constructor, FakeRoadNet);
+  assert.equal(state.basemap, 'satellite');
+  assert.equal(state.theme, 'light');
+  syncTheme('dark');
+  assert.equal(nativeMap.mapStyle, amapStyleForTheme('dark'));
+  setBasemap('standard');
+  assert.equal(nativeMap.mapStyle, amapStyleForTheme('dark'));
+  assert.equal(nativeMap.layers.length, 1);
+});
+
+test('AMap raster zoom rounding still fits the bounds inside asymmetric padding', () => {
+  const project = ([lon, lat]) => [lon / 360, -Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) / (2 * Math.PI)];
+  const unproject = ([x, y]) => [x * 360, (2 * Math.atan(Math.exp(-y * 2 * Math.PI)) - Math.PI / 2) * 180 / Math.PI];
+  class NativeMap {
+    constructor(container, options) { this.center = options.center; this.zoom = options.zoom; this.size = container; }
+    on() {}
+    getSize() { return this.size; }
+    getZoom() { return this.zoom; }
+    setZoom(zoom) { this.zoom = Math.ceil(zoom); }
+    setCenter(center) { this.center = center; }
+    setBounds() { this.setZoom(5.2); }
+    lngLatToContainer(position) {
+      const [x, y] = project(position), [cx, cy] = project(this.center), scale = 256 * 2 ** this.zoom;
+      return { x: this.size.width / 2 + (x - cx) * scale, y: this.size.height / 2 + (y - cy) * scale };
+    }
+    containerToLngLat({ x, y }) {
+      const [cx, cy] = project(this.center), scale = 256 * 2 ** this.zoom;
+      return unproject([cx + (x - this.size.width / 2) / scale, cy + (y - this.size.height / 2) / scale]);
+    }
+  }
+  const AMap = { Map: NativeMap, Bounds: class {}, Pixel: class { constructor(x, y) { this.x = x; this.y = y; } } };
+  for (const [width, height, padding] of [[1440, 900, { top: 142, bottom: 76, left: 70, right: 408 }], [390, 844, { top: 130, bottom: 320, left: 38, right: 72 }]]) {
+    const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width, height }) } });
+    const adapter = new AmapMapAdapter(AMap, { container: 'map', center: [138.5, 24.8], zoom: 5 });
+    const corners = [[138.5, 10.2], [166.7, 48.6]];
+    adapter.fitBounds({ getSouthWest: () => corners[0], getNorthEast: () => corners[1] }, { padding, maxZoom: 7 });
+    const pixels = corners.map(point => adapter.project(point));
+    for (const { x, y } of pixels) {
+      assert.ok(x >= padding.left - .001 && x <= width - padding.right + .001);
+      assert.ok(y >= padding.top - .001 && y <= height - padding.bottom + .001);
+    }
+    assert.ok(Math.abs((pixels[0].x + pixels[1].x) / 2 - (width + padding.left - padding.right) / 2) < .001);
+    assert.ok(Math.abs((pixels[0].y + pixels[1].y) / 2 - (height + padding.top - padding.bottom) / 2) < .001);
+  }
+});
+
 test('fitting reserves the desktop panel and the 390px mobile sheet and toolbar', () => {
   const rect = (left, top, width, height) => ({ left, top, width, height, right: left + width, bottom: top + height });
   for (const mobile of [false, true]) {
@@ -371,7 +754,9 @@ test('late style responses cannot override a newer theme or satellite choice', a
   const requests = [];
   const { state, initializeMap, syncTheme, setBasemap } = harness({
     maplibregl: { supported: () => true, Map: FakeMap, NavigationControl: class {} },
-    fetch: url => new Promise(resolve => requests.push({ url, resolve }))
+    fetch: url => String(url) === '/api/amap-config'
+      ? Promise.resolve({ ok: true, json: async () => ({ key: null }) })
+      : new Promise(resolve => requests.push({ url, resolve }))
   });
   const initial = initializeMap();
   await flush();

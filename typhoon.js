@@ -5,7 +5,7 @@ import {
   chooseSynchronizedFrame
 } from '/typhoon-layer-clock.mjs';
 import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
-import { AMAP_TIMEOUT_MS, BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, amapStyleForTheme, amapPaddingOffset, normalizeMapPadding, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, loadAmapScript, loadMapLibre, nextBasemapProvider, parseAmapConfig, wgs84ToGcj02 } from '/typhoon-basemap.mjs';
+import { AMAP_TIMEOUT_MS, BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, AMAP_LABELED_TILE_URL, AMAP_SATELLITE_TILE_URL, AMAP_OVERVIEW_LABELS, createAmapDarkTile, createAmapLabelTile, amapPaddingOffset, normalizeMapPadding, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, loadAmapScript, loadMapLibre, nextBasemapProvider, parseAmapConfig, wgs84ToGcj02 } from '/typhoon-basemap.mjs';
 import { createOutlineProjection } from '/typhoon-land.mjs';
 
 (() => {
@@ -120,10 +120,15 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       this.AMap = AMap;
       this.isAmap = true;
       this.container = document.getElementById(options.container);
+      this.standardLayer = new AMap.TileLayer({ tileUrl: AMAP_LABELED_TILE_URL, tileSize: 256, zooms: [3, 18], zIndex: 1, opacity: 1 });
       this.native = new AMap.Map(this.container, {
         viewMode: '2D',
         lang: 'zh_cn',
-        mapStyle: options.mapStyle,
+        layers: [this.standardLayer],
+        features: [],
+        showLabel: false,
+        showIndoorMap: false,
+        buildingAnimation: false,
         center: this.toAmap(options.center),
         zoom: Math.max(Number(options.zoom) || 3, 3),
         zooms: [3, 18],
@@ -133,16 +138,18 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
         touchZoom: true,
         doubleClickZoom: true
       });
+      this.placeLabels = AMAP_OVERVIEW_LABELS.map(({ name, position, kind }) => new AMap.Marker({
+        map: this.native,
+        position: this.toAmap(position),
+        content: `<span class="typhoon-place-label typhoon-place-label--${kind}">${name}</span>`,
+        anchor: 'center', zooms: [3, 4], zIndex: 5, clickable: false, bubble: true
+      }));
       this.sources = {};
       this.layers = [];
       this.listeners = new Map();
       this.layerOverlays = new Map();
       this.canvasContainer = null;
-      this.standardLayer = typeof AMap.createDefaultLayer === 'function' ? AMap.createDefaultLayer() : null;
-      // The constructor option seeds AMap, while the first explicit sync must
-      // still replay the current theme through setMapStyle.
-      this.mapStyle = null;
-      this.satelliteEnabled = null;
+      this.satelliteEnabled = false;
       this.theme = null;
       this.resizePending = false;
       this.resizeObserver = null;
@@ -153,13 +160,20 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       }
       this.touchZoomRotate = { disableRotation() {} };
       this.ready = new Promise((resolve, reject) => {
-        this.native.on?.('complete', event => {
+        const complete = event => {
+          if (this.complete) return;
           this.complete = true;
           this.scheduleResizeAfterLayout();
           this.emit('load', event);
           resolve(event);
+        };
+        this.native.on?.('complete', complete);
+        // Raster completion is sufficient to start storm overlays without
+        // waiting for unrelated SDK services.
+        this.standardLayer.on?.('complete', complete);
+        this.native.on?.('error', error => {
+          if (isAmapAuthError(error)) reject(error);
         });
-        this.native.on?.('error', reject);
       });
     }
     toAmap(position) {
@@ -245,6 +259,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     remove() {
       this.resizeObserver?.disconnect?.();
       this.layers.forEach(layer => layer.overlays?.forEach(overlay => overlay.setMap?.(null)));
+      this.placeLabels.forEach(label => label.setMap(null));
       this.native?.destroy?.();
     }
     getZoom() { return this.native.getZoom?.() || 3; }
@@ -313,13 +328,22 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       if (!this.canvasContainer) { this.canvasContainer = document.createElement('div'); this.canvasContainer.className = 'amap-overlay-canvas-container'; this.container.append(this.canvasContainer); }
       return this.canvasContainer;
     }
-    setMapStyle(style) {
-      if (this.mapStyle === style) return;
-      this.mapStyle = style;
-      this.native.setMapStyle?.(style);
-    }
     syncRasterFallbackTheme(theme) {
-      this.container?.classList?.toggle('amap-theme-dark', theme === 'dark' && this.satelliteEnabled !== true);
+      const dark = theme === 'dark' && !this.satelliteEnabled;
+      this.container?.classList?.toggle('amap-theme-dark', dark);
+      // Mobile WebGL shares its canvas with storm overlays, so filter raster
+      // textures instead. The DOM renderer uses the layer-scoped CSS filter.
+      const darkTexture = dark && this.container?.querySelector?.('canvas.amap-layer');
+      if (darkTexture && !this.darkStandardLayer) {
+        this.darkStandardLayer = new this.AMap.TileLayer.Flexible({ createTile: createAmapDarkTile, tileSize: 256, zooms: [3, 18], zIndex: 1, opacity: 1 });
+        this.native.add(this.darkStandardLayer);
+      }
+      if (this.darkStandardLayer) {
+        if (darkTexture) this.darkStandardLayer.show();
+        else this.darkStandardLayer.hide();
+      }
+      if (darkTexture || this.satelliteEnabled) this.standardLayer.hide();
+      else this.standardLayer.show();
     }
     setSatellite(enabled) {
       enabled = Boolean(enabled);
@@ -329,22 +353,18 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       }
       this.satelliteEnabled = enabled;
       if (enabled) {
-        this.satelliteLayer ||= new this.AMap.TileLayer.Satellite({ zIndex: 10 });
-        this.roadLayer ||= new this.AMap.TileLayer.RoadNet({ zIndex: 11 });
-        this.native.setLayers?.([this.satelliteLayer, this.roadLayer]);
+        this.satelliteLayer ||= new this.AMap.TileLayer({ tileUrl: AMAP_SATELLITE_TILE_URL, tileSize: 256, zooms: [3, 18], zIndex: 1, opacity: 1 });
+        this.roadLayer ||= new this.AMap.TileLayer.Flexible({ createTile: createAmapLabelTile, tileSize: 256, zooms: [3, 18], zIndex: 2, opacity: 1 });
+        this.native.add([this.satelliteLayer, this.roadLayer]);
       } else {
-        this.native.setLayers?.(this.standardLayer ? [this.standardLayer] : []);
+        this.native.remove([this.satelliteLayer, this.roadLayer]);
       }
-      // AMap may rebuild its standard layer when the layer list changes. The
-      // cached style must be replayed after that operation.
-      this.mapStyle = null;
       this.syncRasterFallbackTheme(this.theme);
     }
     syncBasemap(theme, mode) {
       this.theme = theme;
+      this.container?.classList?.toggle('amap-reference-light', theme === 'light' && mode !== 'satellite');
       this.setSatellite(mode === 'satellite');
-      this.syncRasterFallbackTheme(theme);
-      this.setMapStyle(amapStyleForTheme(theme));
     }
     refreshSource(sourceId) { this.layers.filter(layer => layer.source === sourceId).forEach(layer => this.refreshLayer(layer.id)); }
     syncLayerVisibility(layer) {
@@ -1444,7 +1464,12 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     state.needsTrackFit = false;
     const position = state.detail.storm?.position;
     if (!hasNumber(position?.lon) || !hasNumber(position?.lat)) { fitTracks(); return; }
-    state.map.flyTo({ center: [Number(position.lon), Number(position.lat)], zoom: 5.4, padding: mapPadding(), retainPadding: false, duration: 0 });
+    const padding = mapPadding();
+    const size = el('typhoonMap').getBoundingClientRect();
+    const mobile = size.width > 0 && size.width <= 760;
+    // A regional phone view includes the coast around offshore storms without
+    // moving the current position out of the unobscured viewport's center.
+    state.map.flyTo({ center: [Number(position.lon), Number(position.lat)], zoom: mobile ? 3 : 5, padding, retainPadding: false, duration: 0 });
   }
 
   async function hydrateMapStyle() {
@@ -1615,7 +1640,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     browserWindow._AMapSecurityConfig = { serviceHost: `${origin}${config.serviceHost}` };
     const AMap = await loadAmapScript({ document, window: browserWindow, key: config.key, timeoutMs: AMAP_TIMEOUT_MS });
     const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
-    const adapter = new AmapMapAdapter(AMap, { container: 'typhoonMap', mapStyle: amapStyleForTheme(state.theme), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2 });
+    const adapter = new AmapMapAdapter(AMap, { container: 'typhoonMap', center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2 });
     let readyTimer;
     try {
       await new Promise((resolve, reject) => {
@@ -2080,8 +2105,8 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     if (!state.map || !position) return;
     if (state.styleReady) rebuildStormLayers().catch(error => console.warn('Storm layer rebuild failed:', error));
     else {
+      focusStormOnLoad();
       state.needsTrackFit = true;
-      state.map.flyTo({ center: [position.lon, position.lat], zoom: 5.4, padding: mapPadding(), retainPadding: false, duration: 0 });
     }
   }
 

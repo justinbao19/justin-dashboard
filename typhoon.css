@@ -60,17 +60,35 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 #typhoonMap .amap-markers { width: 100% !important; height: 100% !important; max-width: none; max-height: none; }
 #typhoonMap .amap-container { font-family: inherit; }
 #typhoonMap .amap-logo, #typhoonMap .amap-copyright { z-index: 4; }
-/* Composite the standard raster once: filtering individual tile textures leaves
-   light seams at fractional zooms. Keep weather rasters and SDK overlays out. */
-#typhoonMap.amap-theme-dark .amap-layer:has(img[src*="appmaptile"][src*="style=8"]) {
+/* Composite the standard raster (including its baked-in place labels) once:
+   filtering individual tiles leaves light seams at fractional zooms. Inversion
+   keeps the label contrast; satellite, RoadNet and SDK overlays stay unfiltered. */
+#typhoonMap.amap-theme-dark .amap-layer:has(img[src*="webrd"][src*="style=8"]) {
   filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6);
 }
-#typhoonMap.amap-theme-dark .amap-layer img[src*="appmaptile"][src*="style=8"] {
+#typhoonMap.amap-theme-dark .amap-layer img[src*="webrd"][src*="style=8"] {
   /* About one pixel of overlap per 256px tile, without replacing AMap's transform. */
   scale: 1.004;
 }
-.amap-overlay-canvas-container { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
-.amap-overlay-canvas-container canvas { position: absolute; inset: 0; pointer-events: none; }
+.amap-overlay-canvas-container { position: absolute; inset: 0; z-index: 5; background: transparent; pointer-events: none; }
+.amap-overlay-canvas-container canvas { position: absolute; inset: 0; background: transparent; pointer-events: none; }
+
+.typhoon-place-label {
+  display: block;
+  color: #f2f7fa;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: -1px -1px 1px #10212e, 1px -1px 1px #10212e, -1px 1px 1px #10212e, 1px 1px 1px #10212e;
+}
+.typhoon-place-label--country { font-size: 14px; font-weight: 700; letter-spacing: 2px; }
+.typhoon-place-label--province { font-size: 11px; }
+.amap-reference-light .typhoon-place-label {
+  color: #263e50;
+  text-shadow: -1px -1px 1px #fff, 1px -1px 1px #fff, -1px 1px 1px #fff, 1px 1px 1px #fff;
+}
 
 .basemap-notice {
   position: absolute;

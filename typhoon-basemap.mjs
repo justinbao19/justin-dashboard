@@ -31,6 +31,87 @@ export function amapStyleForTheme(theme = 'dark') {
   return theme === 'light' ? 'amap://styles/normal' : 'amap://styles/dark';
 }
 
+// Verified over Tokyo at z6. The lang=zh_cn variant and webst/wprd RoadNet
+// tiles omit overseas text. Keep the labels baked into this raster on all devices.
+export const AMAP_LABELED_TILE_URL = 'https://webrd02.is.autonavi.com/appmaptile?size=1&scale=1&style=8&x=[x]&y=[y]&z=[z]';
+export const AMAP_SATELLITE_TILE_URL = 'https://webst02.is.autonavi.com/appmaptile?style=6&x=[x]&y=[y]&z=[z]';
+
+// Regional reference labels supplement the raster's sparse z3–4 text. Country
+// and province positions are interior label points; city positions are centers.
+// At z5+ the raster supplies the more detailed place hierarchy.
+export const AMAP_OVERVIEW_LABELS = [
+  { name: '中国', position: [112, 35], kind: 'country' },
+  { name: '日本', position: [137, 38], kind: 'country' },
+  { name: '韩国', position: [128, 36.5], kind: 'country' },
+  { name: '浙江', position: [119.8, 28.7], kind: 'province' },
+  { name: '福建', position: [117.8, 26], kind: 'province' },
+  { name: '广东', position: [113.5, 23.5], kind: 'province' },
+  { name: '台湾', position: [121, 23.7], kind: 'province' },
+  { name: '上海', position: [121.47, 31.23], kind: 'city' },
+  { name: '东京', position: [139.69, 35.68], kind: 'city' }
+];
+
+// WebGL composites raster and storm layers into one canvas. Color only the
+// basemap texture there; a CSS filter on that canvas would recolor the storms.
+export function createAmapDarkTile(x, y, z, success, fail) {
+  const tile = new Image();
+  tile.crossOrigin = 'anonymous';
+  tile.onload = () => {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = tile.naturalWidth;
+      canvas.height = tile.naturalHeight;
+      const context = canvas.getContext('2d');
+      context.filter = 'invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)';
+      context.drawImage(tile, 0, 0);
+      success(canvas);
+    } catch (error) { fail(error); }
+  };
+  tile.onerror = fail;
+  tile.src = AMAP_LABELED_TILE_URL.replace('[x]', x).replace('[y]', y).replace('[z]', z);
+}
+
+// RoadNet has no overseas text even where the standard raster has Chinese
+// names. Extract its dark lettering into a transparent reference texture so
+// satellite mode uses exactly the same geographic labels, with a dark halo.
+export function amapLabelPixels(pixels) {
+  for (let i = 0; i < pixels.length; i += 4) {
+    const brightest = Math.max(pixels[i], pixels[i + 1], pixels[i + 2]);
+    const coverage = Math.max(0, Math.min(1, (205 - brightest) / 65));
+    pixels[i] = pixels[i + 1] = pixels[i + 2] = 255;
+    pixels[i + 3] = Math.round(pixels[i + 3] * coverage);
+  }
+  return pixels;
+}
+
+export function createAmapLabelTile(x, y, z, success, fail) {
+  const tile = new Image();
+  tile.crossOrigin = 'anonymous';
+  tile.onload = () => {
+    try {
+      const mask = document.createElement('canvas');
+      mask.width = tile.naturalWidth;
+      mask.height = tile.naturalHeight;
+      const context = mask.getContext('2d', { willReadFrequently: true });
+      context.drawImage(tile, 0, 0);
+      const pixels = context.getImageData(0, 0, mask.width, mask.height);
+      amapLabelPixels(pixels.data);
+      context.putImageData(pixels, 0, 0);
+      const canvas = document.createElement('canvas');
+      canvas.width = mask.width;
+      canvas.height = mask.height;
+      const output = canvas.getContext('2d');
+      output.shadowColor = '#10212e';
+      output.shadowBlur = 2;
+      output.drawImage(mask, 0, 0);
+      output.drawImage(mask, 0, 0);
+      success(canvas);
+    } catch (error) { fail(error); }
+  };
+  tile.onerror = fail;
+  tile.src = AMAP_LABELED_TILE_URL.replace('[x]', x).replace('[y]', y).replace('[z]', z);
+}
+
 export function normalizeMapPadding(padding = 0) {
   return Object.fromEntries(['top', 'bottom', 'left', 'right'].map(side => {
     const value = Number(typeof padding === 'number' ? padding : padding?.[side] ?? 0);
@@ -235,6 +316,11 @@ export async function loadMapLibre({ document = globalThis.document, window = gl
 export async function loadAmapScript({ document = globalThis.document, window = globalThis.window, key, timeoutMs = AMAP_TIMEOUT_MS } = {}) {
   if (window?.AMap) return window.AMap;
   if (!key) throw new Error('AMap key unavailable');
+  // AMap 2.0's WebGL renderer fetches its vector style even with explicit
+  // raster layers and features: []. Its bootstrap flag (SDK spelling) selects
+  // the 2D DOM renderer before initialization, including on iOS. This affects
+  // AMap only; weather canvases and the MapLibre fallback can still use WebGL.
+  window.forbidenWebGL = true;
   return new Promise((resolve, reject) => {
     const node = document.createElement('script');
     let finished = false;

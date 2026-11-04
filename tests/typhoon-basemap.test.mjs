@@ -16,6 +16,22 @@ const vectorStyle = { version: 8, glyphs: 'https://tiles.openfreemap.org/fonts/{
 ] };
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
+class FakeAmapPlaceMarker {
+  constructor(options) { Object.assign(this, options); }
+  setMap(map) { this.map = map; }
+}
+
+class FakeAmapTileLayer {
+  constructor(options) { Object.assign(this, options); this.visible = true; }
+  on(name, callback) { (this.events ||= new Map()).set(name, callback); }
+  fire(name, event) { this.events?.get(name)?.(event); }
+  show() { this.visible = true; }
+  hide() { this.visible = false; }
+  static Satellite = class extends FakeAmapTileLayer {};
+  static RoadNet = class extends FakeAmapTileLayer {};
+  static Flexible = class extends FakeAmapTileLayer {};
+}
+
 test('AMap config, theme and fallback helpers keep the primary chain explicit', () => {
   assert.deepEqual(parseAmapConfig({ key: ' public-key ', serviceHost: '/api/_AMapService/' }), { key: 'public-key', serviceHost: '/api/_AMapService' });
   assert.deepEqual(parseAmapConfig({ key: '' }), { key: null, serviceHost: '/api/_AMapService' });
@@ -26,6 +42,76 @@ test('AMap config, theme and fallback helpers keep the primary chain explicit', 
   assert.equal(nextBasemapProvider('amap'), 'openfreemap');
   assert.equal(isAmapAuthError('INVALID_USER_KEY'), true);
   assert.equal(isAmapAuthError('network timeout'), false);
+});
+
+test('AMap raster URL uses the Chinese labeled variant and SDK tile placeholders', () => {
+  const url = new URL(basemap.AMAP_LABELED_TILE_URL);
+  assert.equal(url.protocol, 'https:');
+  assert.equal(url.hostname, 'webrd02.is.autonavi.com');
+  assert.equal(url.pathname, '/appmaptile');
+  assert.deepEqual(Object.fromEntries(url.searchParams), { size: '1', scale: '1', style: '8', x: '[x]', y: '[y]', z: '[z]' });
+  assert.equal(url.searchParams.has('lang'), false, 'lang=zh_cn removes overseas labels on the raster service');
+});
+
+test('AMap selects its raster renderer before the SDK can bootstrap a vector style on any device', async () => {
+  for (const userAgent of ['desktop', 'iPhone', 'Android']) {
+    const window = { navigator: { userAgent } };
+    const sdk = {};
+    const document = {
+      createElement: () => ({}),
+      head: { append(script) {
+        assert.equal(window.forbidenWebGL, true, 'renderer choice must precede script execution');
+        window.AMap = sdk;
+        script.onload();
+      } }
+    };
+    assert.equal(await basemap.loadAmapScript({ document, window, key: 'test-key' }), sdk);
+  }
+});
+
+test('AMap dark WebGL tiles color the raster before upload and propagate image failures', () => {
+  let image, result, failure;
+  const draws = [];
+  const context = { drawImage(...args) { draws.push({ args, filter: this.filter }); } };
+  const canvas = { getContext: () => context };
+  const createTile = runInNewContext(`(${basemap.createAmapDarkTile.toString()})`, {
+    AMAP_LABELED_TILE_URL: basemap.AMAP_LABELED_TILE_URL,
+    Image: class { constructor() { image = this; this.naturalWidth = 256; this.naturalHeight = 256; } },
+    document: { createElement: () => canvas }
+  });
+  createTile(28, 12, 5, tile => { result = tile; }, error => { failure = error; });
+  assert.equal(image.crossOrigin, 'anonymous', 'the resulting canvas must be usable as a WebGL texture');
+  assert.match(image.src, /style=8&x=28&y=12&z=5$/);
+  image.onload();
+  assert.equal(result, canvas);
+  assert.equal(canvas.width, 256);
+  assert.equal(canvas.height, 256);
+  assert.deepEqual(draws[0].args, [image, 0, 0]);
+  assert.match(draws[0].filter, /^invert\(1\) hue-rotate\(180deg\)/);
+  const error = new Error('tile unavailable');
+  image.onerror(error);
+  assert.equal(failure, error);
+});
+
+test('satellite references retain text and boundaries while removing opaque land, water and roads', () => {
+  const pixels = new Uint8ClampedArray([
+    16, 16, 16, 255, // city text
+    130, 110, 70, 255, // region text
+    170, 170, 170, 255, // antialiasing / boundary
+    255, 251, 240, 255, // land
+    180, 214, 230, 255, // sea
+    255, 153, 0, 255, // road
+    16, 16, 16, 0 // transparent input
+  ]);
+  basemap.amapLabelPixels(pixels);
+  const alpha = [...pixels].filter((_, i) => i % 4 === 3);
+  assert.deepEqual(alpha.slice(0, 2), [255, 255]);
+  assert.ok(alpha[2] > 0 && alpha[2] < 255, 'keep antialiased edges');
+  assert.deepEqual(alpha.slice(3), [0, 0, 0, 0]);
+  assert.ok([...pixels].every((value, i) => i % 4 === 3 || value === 255), 'white text remains readable over imagery');
+  const seaLabel = new Uint8ClampedArray([44, 88, 175, 255]);
+  basemap.amapLabelPixels(seaLabel);
+  assert.ok(seaLabel[3] > 0, 'blue sea names must survive alongside gray city names');
 });
 
 test('AMap padding offsets use screen coordinates for desktop, mobile and symmetric insets', () => {
@@ -119,7 +205,7 @@ function harness(overrides = {}) {
         hidden: true, dataset: {}, style: {}, innerHTML: '',
         classList: { add() {}, remove() {}, toggle() {} },
         addEventListener() {}, setAttribute() {}, contains() { return false; },
-        querySelector: () => ({ addEventListener() {}, setAttribute() {} }),
+        querySelector: selector => selector === 'canvas.amap-layer' ? null : ({ addEventListener() {}, setAttribute() {} }),
         querySelectorAll: () => [],
         getBoundingClientRect: () => ({ width: 0, height: 0 })
       });
@@ -305,13 +391,15 @@ test('camera fit includes the supplied forecast cone geometry', () => {
   assert.ok(fitted.some(([lon, lat]) => lon === 138 && lat === 25));
 });
 
-test('AMap adapter fits with padding, converts overlays, applies theme and replaces its base layers', () => {
+test('AMap adapter fits with padding, converts overlays and preserves labeled base layers across themes and modes', () => {
   const overlays = [];
   class FakeOverlay {
     constructor(options) { Object.assign(this, options); overlays.push(this); }
     setMap(map) { this.map = map; }
     setPosition(position) { this.position = position; }
     setOptions(options) { Object.assign(this, options); }
+    show() { this.hidden = false; }
+    hide() { this.hidden = true; }
     on() {}
   }
   class FakeTileLayer extends FakeOverlay {}
@@ -319,25 +407,27 @@ test('AMap adapter fits with padding, converts overlays, applies theme and repla
   class FakeSatellite extends FakeTileLayer {}
   class FakeRoadNet extends FakeTileLayer {}
   class FakeNativeMap {
-    constructor(container, options) { this.container = container; this.options = options; this.layers = []; this.zoom = options.zoom; }
+    constructor(container, options) { this.container = container; this.options = options; this.defaultLayer = new FakeDefaultLayer(); this.layers = [...options.layers]; this.layers.forEach(layer => layer.setMap(this)); this.zoom = options.zoom; }
     on() {}
     setBounds(...args) { this.boundsArgs = args; this.zoom = 9; }
     getZoom() { return this.zoom; }
     setZoom(zoom) { this.zoom = zoom; }
-    setLayers(layers) { this.layers = layers; }
+    setLayers() { assert.fail('mode switches must preserve explicit rasters'); }
     setMapStyle(style) { this.mapStyle = style; }
-    add(items) { for (const item of Array.isArray(items) ? items : [items]) item.setMap(this); }
+    add(items) { for (const item of Array.isArray(items) ? items : [items]) { item.setMap(this); if (!this.layers.includes(item)) this.layers.push(item); } }
+    remove(items) { for (const item of items) { item.setMap(null); this.layers = this.layers.filter(layer => layer !== item); } }
   }
   class FakeBounds {
     constructor(southWest, northEast) { this.southWest = southWest; this.northEast = northEast; }
   }
   FakeTileLayer.Satellite = FakeSatellite;
   FakeTileLayer.RoadNet = FakeRoadNet;
+  FakeTileLayer.Flexible = class extends FakeTileLayer {};
   const AMap = {
     Map: FakeNativeMap,
     Bounds: FakeBounds,
     TileLayer: FakeTileLayer,
-    createDefaultLayer: () => new FakeDefaultLayer({ zIndex: 0 }),
+    createDefaultLayer: () => assert.fail('must never create a default vector layer'),
     Polyline: FakeOverlay,
     Polygon: FakeOverlay,
     CircleMarker: FakeOverlay,
@@ -352,6 +442,25 @@ test('AMap adapter fits with padding, converts overlays, applies theme and repla
   const { AmapMapAdapter, AmapMarker, addTrackLayers, state } = harness({ document: { getElementById: () => container } });
   const adapter = new AmapMapAdapter(AMap, { container: 'typhoonMap', center: [116.397, 39.908], zoom: 5, mapStyle: amapStyleForTheme('dark') });
   assert.deepEqual(adapter.native.options.center, wgs84ToGcj02(116.397, 39.908));
+  assert.equal(adapter.native.options.lang, 'zh_cn');
+  assert.equal(adapter.native.options.showLabel, false);
+  assert.equal(JSON.stringify(adapter.native.options.features), '[]');
+  assert.equal(adapter.native.options.mapStyle, undefined, 'raster themes must not request vector styles');
+  assert.equal(adapter.native.options.layers.length, 1);
+  assert.equal(adapter.native.options.layers[0], adapter.standardLayer, 'explicit raster replaces the default vector layer');
+  const labels = [...adapter.placeLabels];
+  for (const name of ['中国', '日本', '上海', '浙江', '台湾']) {
+    const index = basemap.AMAP_OVERVIEW_LABELS.findIndex(label => label.name === name);
+    assert.ok(index >= 0);
+    assert.match(labels[index].content, new RegExp(`>${name}</span>`));
+    assert.deepEqual(labels[index].position, wgs84ToGcj02(basemap.AMAP_OVERVIEW_LABELS[index].position));
+    assert.equal(labels[index].map, adapter.native);
+    assert.equal(JSON.stringify(labels[index].zooms), '[3,4]', 'detailed zooms use raster labels without duplicates');
+    assert.equal(labels[index].clickable, false, 'reference text must not intercept storm interactions');
+  }
+  assert.equal(adapter.standardLayer.tileUrl, basemap.AMAP_LABELED_TILE_URL);
+  assert.equal(adapter.standardLayer.zIndex, 1);
+  assert.equal(adapter.standardLayer.map, adapter.native, 'raster is available before vector loading completes');
   const bounds = { isEmpty: () => false, getSouthWest: () => [116.397, 39.908], getNorthEast: () => [116.5, 40] };
   adapter.fitBounds(bounds, { padding: { top: 92, right: 408, bottom: 76, left: 70 }, maxZoom: 7 });
   assert.equal(adapter.native.boundsArgs[1], true);
@@ -438,33 +547,106 @@ test('AMap adapter fits with padding, converts overlays, applies theme and repla
   assert.equal(adapter.getLayer('wind-circle-label-symbols').overlays[0].map, adapter.native);
   assert.equal(adapter.getLayer('points-observed').overlays[0].fillOpacity, 0);
 
-  adapter.setMapStyle(amapStyleForTheme('dark'));
-  assert.equal(adapter.native.mapStyle, 'amap://styles/dark');
   adapter.syncBasemap('dark', 'standard');
   assert.equal(container.classList.contains('amap-theme-dark'), true);
   adapter.syncBasemap('light', 'standard');
   assert.equal(container.classList.contains('amap-theme-dark'), false);
+  assert.equal(container.classList.contains('amap-reference-light'), true);
   adapter.syncBasemap('dark', 'standard');
   assert.equal(container.classList.contains('amap-theme-dark'), true);
   adapter.setSatellite(true);
   assert.equal(container.classList.contains('amap-theme-dark'), false);
-  assert.equal(adapter.native.layers.length, 2);
-  assert.equal(adapter.native.layers[0].constructor, FakeSatellite);
-  assert.equal(adapter.native.layers[1].constructor, FakeRoadNet);
+  assert.equal(adapter.standardLayer.hidden, true);
+  assert.equal(adapter.satelliteLayer.tileUrl, basemap.AMAP_SATELLITE_TILE_URL);
+  assert.equal(adapter.roadLayer.createTile, basemap.createAmapLabelTile);
+  assert.equal(adapter.satelliteLayer.map, adapter.native);
+  assert.equal(adapter.roadLayer.map, adapter.native);
+  assert.ok(adapter.roadLayer.zIndex > adapter.satelliteLayer.zIndex);
+  assert.equal(adapter.native.layers.includes(adapter.native.defaultLayer), false);
   adapter.setSatellite(false);
   assert.equal(container.classList.contains('amap-theme-dark'), true);
-  assert.equal(adapter.native.layers.length, 1);
-  assert.equal(adapter.native.layers[0], adapter.standardLayer);
-  assert.equal(adapter.standardLayer.constructor, FakeDefaultLayer);
+  assert.equal(adapter.standardLayer.hidden, false);
+  assert.equal(adapter.satelliteLayer.map, null);
+  assert.equal(adapter.roadLayer.map, null);
+  assert.ok(adapter.native.layers.includes(adapter.standardLayer));
+  assert.equal(adapter.native.layers.includes(adapter.native.defaultLayer), false);
+  assert.equal(adapter.getLayer('track').overlays[0].map, adapter.native, 'mode switches preserve storm overlays');
+  adapter.syncBasemap('light', 'satellite');
+  assert.equal(container.classList.contains('amap-reference-light'), false, 'satellite labels retain a dark halo in either theme');
+  assert.deepEqual(adapter.placeLabels, labels, 'theme and basemap switches reuse reference markers');
+  adapter.remove();
+  assert.ok(labels.every(label => label.map === null), 'removing a map detaches its reference labels');
 });
 
 test('AMap dark raster filter composites the base layer and overlaps tile edges without filtering overlays', async () => {
   const css = await readFile(new URL('../typhoon.css', import.meta.url), 'utf8');
-  assert.match(css, /#typhoonMap\.amap-theme-dark \.amap-layer:has\(img\[src\*="appmaptile"\]\[src\*="style=8"\]\)\s*\{\s*filter:/);
+  assert.match(css, /#typhoonMap\.amap-theme-dark \.amap-layer:has\(img\[src\*="webrd"\]\[src\*="style=8"\]\)\s*\{\s*filter:/);
   assert.doesNotMatch(css, /img\[src\*="appmaptile"\]\[src\*="style=8"\]\s*\{[^}]*filter:/);
-  assert.match(css, /img\[src\*="appmaptile"\]\[src\*="style=8"\]\s*\{[^}]*scale: 1\.004;/);
+  assert.match(css, /img\[src\*="webrd"\]\[src\*="style=8"\]\s*\{[^}]*scale: 1\.004;/);
   assert.match(css, /filter:\s*invert\(1\) hue-rotate\(180deg\) brightness\(\.85\) contrast\(\.9\) saturate\(\.6\)/);
   assert.doesNotMatch(css, /#typhoonMap\.amap-theme-dark[^{}]*\.amap-(?:markers|overlays|canvas)/);
+  assert.doesNotMatch(css, /[^{}]*\.amap-(?:labels|markers|overlays|canvas)[^{}]*\{[^}]*(?:display:\s*none|visibility:\s*hidden|opacity:\s*0(?:\s|;))/);
+  for (const selector of ['.amap-overlay-canvas-container', '.amap-overlay-canvas-container canvas']) {
+    const rule = css.slice(css.indexOf(`${selector} {`)).split('}')[0];
+    assert.match(rule, /background:\s*transparent/);
+    assert.match(rule, /pointer-events:\s*none/);
+  }
+});
+
+test('AMap WebGL uses dark raster textures only in standard dark mode and reuses them across switches', () => {
+  class NativeMap {
+    constructor(container, options) { this.layers = new Set(options.layers); }
+    on() {}
+    add(items) { for (const item of Array.isArray(items) ? items : [items]) this.layers.add(item); }
+    remove(items) { for (const item of items) this.layers.delete(item); }
+    setMapStyle() {}
+    setLayers() { assert.fail('explicit rasters must survive'); }
+  }
+  const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ querySelector: selector => selector === 'canvas.amap-layer' ? {} : null }) } });
+  const adapter = new AmapMapAdapter({ Map: NativeMap, Marker: FakeAmapPlaceMarker, TileLayer: FakeAmapTileLayer }, { container: 'map', center: [134, 33], zoom: 5 });
+  adapter.syncBasemap('light', 'standard');
+  assert.equal(adapter.darkStandardLayer, undefined);
+  adapter.syncBasemap('dark', 'standard');
+  const darkLayer = adapter.darkStandardLayer;
+  assert.equal(darkLayer.createTile, basemap.createAmapDarkTile);
+  assert.equal(darkLayer.visible, true);
+  assert.equal(adapter.standardLayer.visible, false);
+  adapter.syncBasemap('dark', 'satellite');
+  assert.equal(darkLayer.visible, false);
+  assert.equal(adapter.standardLayer.visible, false);
+  assert.ok(adapter.native.layers.has(adapter.roadLayer));
+  adapter.syncBasemap('light', 'standard');
+  assert.equal(darkLayer.visible, false);
+  assert.equal(adapter.standardLayer.visible, true);
+  assert.equal(adapter.native.layers.has(adapter.roadLayer), false);
+  adapter.syncBasemap('dark', 'standard');
+  assert.equal(adapter.darkStandardLayer, darkLayer);
+  assert.equal(darkLayer.visible, true);
+  assert.equal(adapter.native.layers.size, 2, 'only light and dark rasters are retained without duplication');
+  assert.ok(adapter.native.layers.has(adapter.standardLayer));
+});
+
+test('AMap raster completion starts overlays despite unrelated SDK failures, while auth errors still reject', async () => {
+  class NativeMap {
+    constructor() { this.events = new Map(); }
+    on(name, callback) { this.events.set(name, callback); }
+    fire(name, event) { this.events.get(name)?.(event); }
+  }
+  const { AmapMapAdapter } = harness();
+  const AMap = { Map: NativeMap, Marker: FakeAmapPlaceMarker, TileLayer: FakeAmapTileLayer };
+  const options = { container: 'typhoonMap', center: [138, 25], zoom: 5 };
+  const adapter = new AmapMapAdapter(AMap, options);
+  let loads = 0;
+  adapter.on('load', () => loads++);
+  adapter.native.fire('error', new Error('unused vector style CORS failure'));
+  adapter.standardLayer.fire('complete');
+  await adapter.ready;
+  adapter.native.fire('complete');
+  assert.equal(loads, 1, 'native and raster completion must hydrate overlays only once');
+  assert.equal(adapter.complete, true);
+  const denied = new AmapMapAdapter(AMap, options);
+  denied.native.fire('error', new Error('INVALID_USER_DOMAIN'));
+  await assert.rejects(denied.ready, /INVALID_USER_DOMAIN/);
 });
 
 test('AMap adapter observes container size, debounces resize in RAF and keeps native state idempotent', () => {
@@ -480,19 +662,17 @@ test('AMap adapter observes container size, debounces resize in RAF and keeps na
     disconnect() {}
   }
   class FakeNativeMap {
-    constructor(container, options) { this.container = container; this.options = options; }
+    constructor(container, options) { this.container = container; this.options = options; this.layers = new Set(options.layers); }
     on() {}
     resize() { resizeCalls++; }
     setMapStyle(style) { styleCalls++; this.mapStyle = style; }
-    setLayers(layers) { layerCalls++; this.layers = layers; this.mapStyle = 'amap://styles/normal'; }
+    setLayers() { assert.fail('setLayers would discard explicit rasters'); }
+    add(items) { layerCalls++; for (const item of Array.isArray(items) ? items : [items]) this.layers.add(item); }
+    remove(items) { layerCalls++; for (const item of items) this.layers.delete(item); }
   }
-  class FakeDefaultLayer {}
-  class FakeSatellite {}
-  class FakeRoadNet {}
   const AMap = {
     Map: FakeNativeMap,
-    createDefaultLayer: () => new FakeDefaultLayer(),
-    TileLayer: { Satellite: FakeSatellite, RoadNet: FakeRoadNet }
+    Marker: FakeAmapPlaceMarker, TileLayer: FakeAmapTileLayer
   };
   const container = { append() {}, dataset: {} };
   const { AmapMapAdapter } = harness({
@@ -510,16 +690,21 @@ test('AMap adapter observes container size, debounces resize in RAF and keeps na
   assert.equal(resizeCalls, 1);
   adapter.syncBasemap('light', 'satellite');
   adapter.syncBasemap('light', 'satellite');
-  assert.equal(styleCalls, 1, 'the current AMap style is applied once');
-  assert.equal(adapter.native.mapStyle, amapStyleForTheme('light'));
-  assert.equal(layerCalls, 1, 'the satellite layer set is applied once');
+  assert.equal(styleCalls, 0, 'raster theme changes never request vector styles');
+  assert.equal(adapter.theme, 'light');
+  assert.equal(layerCalls, 1, 'the constructor supplies the raster; satellite is added once');
   adapter.syncBasemap('dark', 'standard');
-  assert.equal(styleCalls, 2);
-  assert.equal(adapter.native.mapStyle, amapStyleForTheme('dark'));
+  assert.equal(styleCalls, 0);
+  assert.equal(adapter.theme, 'dark');
   assert.equal(layerCalls, 2);
   adapter.syncBasemap('dark', 'standard');
-  assert.equal(styleCalls, 2);
+  assert.equal(styleCalls, 0);
   assert.equal(layerCalls, 2);
+  adapter.syncBasemap('dark', 'satellite');
+  adapter.syncBasemap('dark', 'standard');
+  assert.equal(styleCalls, 0, 'mode changes do not reset the native map style');
+  assert.equal(layerCalls, 4);
+  assert.equal(adapter.native.layers.size, 1, 'repeated switches leave only the added standard raster');
 
   adapter.scheduleResizeAfterLayout();
   while (frames.length) frames.shift()();
@@ -538,9 +723,10 @@ test('AMap moveend, zoomend, complete and resize never clamp longitude or raise 
     setZoom(zoom) { this.cameraWrites++; this.zoom = zoom; }
     setCenter(center) { this.cameraWrites++; this.center = center; }
     resize() {}
+    add() {}
   }
   const { AmapMapAdapter } = harness({ document: { getElementById: () => ({ width: 4096, height: 900 }) } });
-  const adapter = new AmapMapAdapter({ Map: NativeMap }, { container: 'map', center: [165.7, 22], zoom: 3 });
+  const adapter = new AmapMapAdapter({ Map: NativeMap, Marker: FakeAmapPlaceMarker, TileLayer: FakeAmapTileLayer }, { container: 'map', center: [165.7, 22], zoom: 3 });
   assert.equal(JSON.stringify(adapter.native.options.zooms), '[3,18]');
   assert.equal(adapter.native.zoom, 3, 'minimum zoom is independent of viewport width');
   for (const option of ['dragEnable', 'zoomEnable', 'scrollWheel', 'touchZoom', 'doubleClickZoom']) assert.equal(adapter.native.options[option], true);
@@ -560,20 +746,18 @@ test('AMap moveend, zoomend, complete and resize never clamp longitude or raise 
 test('AMap startup replays theme and satellite choices made before complete', async () => {
   let nativeMap;
   class FakeNativeMap {
-    constructor() { nativeMap = this; this.events = []; }
+    constructor(container, options) { nativeMap = this; this.events = []; this.layers = [...options.layers]; }
     on(name, callback) { this.events.push([name, callback]); }
     fire(name) { this.events.filter(([event]) => event === name).forEach(([, callback]) => callback()); }
     setMapStyle(style) { this.mapStyle = style; }
-    setLayers(layers) { this.layers = layers; }
+    setLayers() { assert.fail('must preserve explicit rasters during startup'); }
+    add(items) { this.layers.push(...(Array.isArray(items) ? items : [items])); }
+    remove(items) { this.layers = this.layers.filter(layer => !items.includes(layer)); }
     resize() {}
   }
-  class FakeDefaultLayer {}
-  class FakeSatellite {}
-  class FakeRoadNet {}
   const AMap = {
     Map: FakeNativeMap,
-    createDefaultLayer: () => new FakeDefaultLayer(),
-    TileLayer: { Satellite: FakeSatellite, RoadNet: FakeRoadNet }
+    Marker: FakeAmapPlaceMarker, TileLayer: FakeAmapTileLayer
   };
   const { state, initializeAmapMap, setBasemap, syncTheme } = harness({
     fetch: async () => ({ ok: true, json: async () => ({ key: 'public-key' }) }),
@@ -586,17 +770,19 @@ test('AMap startup replays theme and satellite choices made before complete', as
   setBasemap('satellite');
   nativeMap.fire('complete');
   await startup;
-  assert.equal(nativeMap.mapStyle, amapStyleForTheme('light'));
-  assert.equal(nativeMap.layers.length, 2);
-  assert.equal(nativeMap.layers[0].constructor, FakeSatellite);
-  assert.equal(nativeMap.layers[1].constructor, FakeRoadNet);
+  assert.equal(state.map.theme, 'light');
+  assert.equal(nativeMap.layers.length, 3);
+  assert.equal(nativeMap.layers[0].visible, false);
+  assert.equal(nativeMap.layers[1].tileUrl, basemap.AMAP_SATELLITE_TILE_URL);
+  assert.equal(nativeMap.layers[2].createTile, basemap.createAmapLabelTile);
   assert.equal(state.basemap, 'satellite');
   assert.equal(state.theme, 'light');
   syncTheme('dark');
-  assert.equal(nativeMap.mapStyle, amapStyleForTheme('dark'));
+  assert.equal(state.map.theme, 'dark');
   setBasemap('standard');
-  assert.equal(nativeMap.mapStyle, amapStyleForTheme('dark'));
+  assert.equal(state.map.theme, 'dark');
   assert.equal(nativeMap.layers.length, 1);
+  assert.equal(nativeMap.layers[0].visible, true);
 });
 
 function projectedAmap() {
@@ -605,6 +791,7 @@ function projectedAmap() {
   class NativeMap {
     constructor(container, options) { this.center = options.center; this.zoom = options.zoom; this.size = container; this.calls = []; }
     on() {}
+    add() {}
     getSize() { return this.size; }
     getZoom() { return this.zoom; }
     setZoom(zoom) { this.zoom = Math.ceil(zoom); }
@@ -625,7 +812,7 @@ function projectedAmap() {
       return unproject([cx + (x - this.size.width / 2) / scale, cy + (y - this.size.height / 2) / scale]);
     }
   }
-  return { Map: NativeMap, Bounds: class {}, Pixel: class { constructor(x, y) { this.x = x; this.y = y; } } };
+  return { Map: NativeMap, Marker: FakeAmapPlaceMarker, TileLayer: FakeAmapTileLayer, Bounds: class {}, Pixel: class { constructor(x, y) { this.x = x; this.y = y; } } };
 }
 
 test('AMap raster zoom rounding still fits the bounds inside asymmetric padding', () => {
@@ -693,7 +880,7 @@ test('initial hydration and storm switches focus the current storm, not distant 
   await hydrateMapStyle();
   const flight = state.map.flights[0];
   assert.equal(JSON.stringify(flight.center), '[138.5,25]');
-  assert.equal(flight.zoom, 5.4);
+  assert.equal(flight.zoom, 5);
   assert.equal(flight.duration, 0);
   assert.equal(flight.retainPadding, false);
   assert.ok(flight.padding);
@@ -708,7 +895,7 @@ test('initial hydration and storm switches focus the current storm, not distant 
   state.detail.storm.position = { lon: 142, lat: 27 };
   refreshMapForStorm();
   assert.equal(JSON.stringify(state.map.flights.at(-1).center), '[142,27]');
-  assert.equal(state.map.flights.at(-1).zoom, 5.4);
+  assert.equal(state.map.flights.at(-1).zoom, 5);
   state.styleReady = true;
   state.map.reset(createFallbackStyle());
   await hydrateMapStyle();
@@ -751,6 +938,25 @@ test('fitting reserves the desktop panel and the 390px mobile sheet and toolbar'
       assert.ok(mapPadding().bottom >= mapRect.bottom - rectangles.nodeCard.top + 12);
     } else assert.ok(x < rectangles.insightPanel.left);
   }
+});
+
+test('the opening phone view includes geographic context with the storm at the unobscured center', async () => {
+  const { state, document, hydrateMapStyle, mapPadding } = harness();
+  document.querySelector = () => null;
+  document.getElementById('typhoonMap').getBoundingClientRect = () => ({ width: 390, height: 664, left: 0, top: 0, right: 390, bottom: 664 });
+  document.getElementById('insightPanel').getBoundingClientRect = () => ({ width: 374, height: 196, left: 8, top: 460, right: 382, bottom: 656 });
+  document.getElementById('trackPlayback').getBoundingClientRect = () => ({ width: 374, height: 64, left: 8, top: 383, right: 382, bottom: 447 });
+  state.map = new FakeMap({ style: createFallbackStyle() });
+  state.styleReady = true;
+  state.detail = { storm: { position: { lon: 138.5, lat: 25.7 } }, tracks: { observed: [], forecasts: [] }, mapConfig: { weatherLayers: [] } };
+  const padding = mapPadding();
+  await hydrateMapStyle();
+  const flight = state.map.flights[0];
+  assert.equal(flight.zoom, 3);
+  assert.equal(JSON.stringify(flight.center), '[138.5,25.7]');
+  const y = (flight.padding.top + 664 - flight.padding.bottom) / 2;
+  assert.equal(y, (padding.top + 664 - padding.bottom) / 2, 'keep the storm centered without a northward camera bias');
+  assert.ok(y + 55 < 383, 'the opening wind circle remains above playback');
 });
 
 test('OpenFreeMap dark and positron are independently themed, with Chinese names and intact shields', () => {

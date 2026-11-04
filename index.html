@@ -681,10 +681,10 @@
         }
         .weather-scene.has-particles .weather-particles { opacity: 1; }
 
-        /* Glass beads stay in the foreground; atmospheric veils belong to the sky. */
+        /* Glass beads sit between the scene and page content; atmospheric veils belong to the sky. */
         .weather-glass {
             position: fixed;
-            z-index: 40;
+            z-index: 1;
             inset: 0;
             width: 100%;
             height: 100%;
@@ -1046,7 +1046,7 @@
         .pages {
             position: fixed;
             inset: 0;
-            z-index: 1;
+            z-index: 2;
             overflow: hidden;
         }
         .page {
@@ -1279,6 +1279,7 @@
         .weather-content { position: relative; z-index: 2; padding: 0 16px 20px; }
 
         .weather-card {
+            position: relative;
             background: rgba(8, 18, 32, 0.4);
             backdrop-filter: blur(14px) saturate(1.35);
             -webkit-backdrop-filter: blur(14px) saturate(1.35);
@@ -1288,6 +1289,13 @@
             margin-bottom: 20px;
             color: white;
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+        }
+        .rain-splash-canvas {
+            position: fixed;
+            z-index: 20;
+            display: block;
+            pointer-events: none;
+            overflow: visible;
         }
         .weather-card .card-title { color: rgba(255,255,255,0.7); }
         .weather-card .card-title {
@@ -8437,6 +8445,143 @@
             }
         }
 
+        /* Weather glass: keep the scene visible through every card and layout. */
+        #page-weather,
+        #page-typhoon {
+            --weather-card-bg-rgb: 8, 18, 32;
+            --weather-card-bg-alpha: 0.24;
+            --weather-card-blur: 12px;
+            --weather-card-saturate: 1.18;
+            --weather-card-border-alpha: 0.2;
+            --weather-card-highlight-alpha: 0.12;
+            --weather-card-text: rgba(250, 253, 255, 0.98);
+            --weather-card-secondary: rgba(245, 251, 255, 0.76);
+            --weather-card-background-image: linear-gradient(180deg, rgba(255,255,255,var(--weather-card-highlight-alpha)), rgba(255,255,255,0.015));
+        }
+
+        /* Bright skies get a little more tint for contrast; dark skies can stay lighter. */
+        .weather-scene:is(.scene-sun, .scene-clear).scene-day ~ .pages :is(#page-weather, #page-typhoon) {
+            --weather-card-bg-alpha: 0.26;
+        }
+        .weather-scene.scene-night ~ .pages :is(#page-weather, #page-typhoon) {
+            --weather-card-bg-alpha: 0.22;
+        }
+        .weather-scene:is(.scene-rain, .scene-sleet, .scene-hail) ~ .pages :is(#page-weather, #page-typhoon) {
+            --weather-card-bg-alpha: 0.24;
+        }
+        .weather-scene:is(.scene-storm, .scene-thunder) ~ .pages :is(#page-weather, #page-typhoon) {
+            --weather-card-bg-alpha: 0.26;
+        }
+        .weather-scene:is(.scene-fog, .scene-haze, .scene-snow) ~ .pages :is(#page-weather, #page-typhoon) {
+            --weather-card-bg-alpha: 0.42;
+        }
+        .weather-scene.scene-snow:is(.scene-heavy, .scene-storm) ~ .pages :is(#page-weather, #page-typhoon) {
+            --weather-card-bg-alpha: 0.46;
+        }
+
+        #page-weather .weather-card,
+        #page-weather .weather-detail-card,
+        #page-weather .weather-header-stat,
+        #page-weather .weather-header-note,
+        #page-typhoon .typhoon-empty-card {
+            background: var(--weather-card-background-image), rgba(var(--weather-card-bg-rgb), var(--weather-card-bg-alpha));
+            backdrop-filter: blur(var(--weather-card-blur)) saturate(var(--weather-card-saturate));
+            -webkit-backdrop-filter: blur(var(--weather-card-blur)) saturate(var(--weather-card-saturate));
+            border-color: rgba(235, 247, 255, var(--weather-card-border-alpha));
+            color: var(--weather-card-text);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+        }
+
+        #page-weather .weather-alert-card {
+            --weather-card-bg-rgb: 55, 33, 12;
+            --weather-card-bg-alpha: 0.28;
+        }
+        #page-weather .weather-header-stat {
+            --weather-card-bg-alpha: 0.12;
+        }
+        #page-weather .weather-header-note {
+            --weather-card-bg-alpha: 0.09;
+        }
+        #page-weather .weather-precip-card {
+            --weather-card-bg-rgb: 20, 49, 70;
+            --weather-card-bg-alpha: 0.32;
+            background: var(--weather-card-background-image), rgba(var(--weather-card-bg-rgb), var(--weather-card-bg-alpha)) !important;
+        }
+        #page-weather .weather-typhoon-card:hover {
+            --weather-card-bg-alpha: 0.26;
+        }
+
+        #page-weather .weather-card .card-title {
+            color: rgba(250, 253, 255, 0.82);
+            font-weight: 650;
+        }
+        #page-weather :is(.weather-card, .weather-detail-card, .weather-header-stat, .weather-header-note) :is(
+            .weather-card-source,
+            .weather-card-kicker,
+            .weather-alert-kicker,
+            .weather-alert-time,
+            .weather-alert-details summary,
+            .weather-disclosure summary,
+            .weather-alert-description,
+            .nowcast-support,
+            .nowcast-meta,
+            .nowcast-risk span,
+            .nowcast-axis,
+            .typhoon-card-eyebrow,
+            .typhoon-card-description,
+            .typhoon-card-status,
+            .typhoon-card-action,
+            .hourly-swipe-hint,
+            .daily-low,
+            .weather-detail-card .label,
+            .weather-detail-card .desc,
+            .weather-detail-card .unit
+        ) {
+            color: var(--weather-card-secondary);
+            opacity: 1;
+            font-weight: 550;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+        }
+        #page-weather .weather-card-source { color: rgba(245, 251, 255, 0.74); }
+        #page-weather .weather-detail-card :is(.label, .desc, .unit) {
+            color: var(--weather-card-secondary);
+            opacity: 1;
+            font-weight: 550;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+        }
+
+        /* Preserve the snow accumulation layers while using the lighter glass surface. */
+        .weather-scene.scene-snow ~ .pages :is(#page-weather, #page-typhoon) :is(.weather-header, .weather-card, .weather-detail-card, .typhoon-empty-card) {
+            --weather-card-background-image:
+                radial-gradient(ellipse at 20% 0, rgba(248,253,255,.48), transparent 65%),
+                radial-gradient(ellipse at 73% 0, rgba(234,247,255,.38), transparent 65%),
+                linear-gradient(180deg, rgba(255,255,255,var(--weather-card-highlight-alpha)), rgba(255,255,255,0.015));
+            background-size: 62% 4px, 78% 3px, 100% 100%;
+            background-position: left top, right top, 0 0;
+            background-repeat: no-repeat;
+            border-top-color: rgba(231, 247, 255, 0.42);
+        }
+        .weather-scene.scene-snow:is(.scene-heavy, .scene-storm) ~ .pages :is(#page-weather, #page-typhoon) :is(.weather-header, .weather-card, .weather-detail-card, .typhoon-empty-card) {
+            --weather-card-background-image:
+                radial-gradient(ellipse at 20% 0, rgba(248,253,255,.48), transparent 65%),
+                radial-gradient(ellipse at 73% 0, rgba(234,247,255,.38), transparent 65%),
+                linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.015));
+            background-size: 62% 7px, 78% 6px, 100% 100%;
+            border-top-color: rgba(242, 251, 255, 0.62);
+        }
+
+        @media (max-width: 760px) {
+            #page-weather .weather-card,
+            #page-weather .weather-detail-card {
+                --weather-card-blur: 11px;
+                --weather-card-saturate: 1.16;
+            }
+            #page-weather .weather-header-stat,
+            #page-weather .weather-header-note {
+                --weather-card-blur: 12px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -9874,7 +10019,7 @@
             thunder: false,
             lightning: { nextStrike: 1.4, flash: 0, bolt: null, boltLife: 0, aftershock: 0, active: false, afterglow: 0, flickersTotal: 0, flickersRemaining: 0, flickerTimer: 0 }
         };
-        if (['localhost', '127.0.0.1'].includes(window.location.hostname)) window.__pulseWeatherScene = weatherSceneState;
+        window.__pulseWeatherScene = weatherSceneState;
 
         // Coverage is a density threshold (lower fills more sky); softness sets
         // the optical-depth ramp. Anisotropy and near/far scales define morphology.
@@ -14904,6 +15049,7 @@
             item.onclick = () => showSentimentInfo(item.dataset.info);
         });
     </script>
+    <script type="module" src="./rain-splash.mjs"></script>
 <!-- 事件详情弹窗 -->
 <div class="event-modal-overlay" id="eventModalOverlay" onclick="closeEventModal(event)">
   <div class="event-modal" id="eventModal">

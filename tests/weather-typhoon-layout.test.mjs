@@ -92,6 +92,19 @@ test('typhoon route renders a useful empty state in Vercel and Sites builds', as
   assert.match(sites, /pathname === '\/typhoon'/);
 });
 
+test('AMap proxy routes the captured path through the single Vercel function', async () => {
+  const [vercel, handler] = await Promise.all([
+    readFile(new URL('vercel.json', root), 'utf8'),
+    readFile(new URL('api/amap-service.js', root), 'utf8')
+  ]);
+
+  assert.match(vercel, /\{ "src": "\/api\/_AMapService\/\(\.\*\)", "dest": "\/api\/amap-service\?__amap_path=\$1" \}/);
+  assert.match(handler, /searchParams\.get\(AMAP_PATH_PARAM\)/);
+  assert.match(handler, /searchParams\.delete\(AMAP_PATH_PARAM\)/);
+  assert.match(handler, /buildAmapProxyUrl\(path, query, process\.env\.AMAP_SECURITY_CODE \|\| ''\)/);
+  assert.match(handler, /!\[\'GET\', \'HEAD\'\]\.includes\(req\.method\)/);
+});
+
 test('mobile typhoon layout keeps map controls edge-aligned, removes duplicate sources and labels wind circles', async () => {
   const [html, css, js] = await Promise.all([
     readFile(new URL('typhoon.html', root), 'utf8'),

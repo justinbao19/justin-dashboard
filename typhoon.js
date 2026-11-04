@@ -5,7 +5,7 @@ import {
   chooseSynchronizedFrame
 } from '/typhoon-layer-clock.mjs';
 import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
-import { BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, nextBasemapProvider, loadMapLibre } from '/typhoon-basemap.mjs';
+import { AMAP_TIMEOUT_MS, BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, amapStyleForTheme, clampAmapWorldView, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, loadAmapScript, loadMapLibre, nextBasemapProvider, parseAmapConfig, wgs84ToGcj02 } from '/typhoon-basemap.mjs';
 import { createOutlineProjection } from '/typhoon-land.mjs';
 
 (() => {
@@ -54,7 +54,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     fieldRenderer: null,
     styleGeneration: 0,
     styleReady: false,
-    basemapProvider: 'land',
+    basemapProvider: 'amap',
     basemapRequest: 0,
     basemapGeneration: 0,
     basemapTimer: null,
@@ -68,6 +68,347 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     boundLayerIds: new Set(),
     controlsInitialized: false
   };
+
+  function amapStyleValue(value, properties, fallback) {
+    if (!Array.isArray(value)) return value ?? fallback;
+    const evaluate = expression => amapStyleValue(expression, properties, undefined);
+    if (value[0] === 'get') return properties[value[1]] ?? fallback;
+    if (value[0] === '==') return evaluate(value[1]) === evaluate(value[2]);
+    if (value[0] === 'coalesce') return value.slice(1).map(evaluate).find(item => item != null) ?? fallback;
+    if (value[0] === 'case') {
+      for (let index = 1; index < value.length - 1; index += 2) if (evaluate(value[index])) return evaluate(value[index + 1]);
+      return evaluate(value.at(-1)) ?? fallback;
+    }
+    return fallback;
+  }
+
+  function amapFeatureCoordinates(feature) {
+    const geometry = feature?.geometry;
+    if (!geometry) return [];
+    const positions = [];
+    const collect = coordinates => {
+      if (!Array.isArray(coordinates)) return;
+      if (coordinates.length >= 2 && coordinates.slice(0, 2).every(value => Number.isFinite(Number(value)))) {
+        positions.push([Number(coordinates[0]), Number(coordinates[1])]);
+        return;
+      }
+      coordinates.forEach(collect);
+    };
+    collect(geometry.coordinates);
+    return positions;
+  }
+
+  class AmapMarker {
+    constructor(options = {}) { this.options = options; this.element = options.element; this.position = null; this.native = null; }
+    setLngLat(position) { this.position = position; if (this.native) this.native.setPosition(this.adapter.toAmap(position)); return this; }
+    addTo(map) {
+      this.remove();
+      this.adapter = map;
+      // AMap positions a wrapper; the content must contribute its size so
+      // anchor: 'center' centers the 48px storm/location button correctly.
+      if (this.element) this.element.style.position = 'relative';
+      this.native = new map.AMap.Marker({ map: map.native, position: map.toAmap(this.position), content: this.element, anchor: this.options.anchor || 'center', clickable: true, zIndex: 200 });
+      map.native.add(this.native);
+      return this;
+    }
+    remove() { this.native?.setMap(null); this.native = null; }
+    getElement() { return this.element; }
+  }
+
+  class AmapMapAdapter {
+    constructor(AMap, options) {
+      this.AMap = AMap;
+      this.isAmap = true;
+      this.container = document.getElementById(options.container);
+      const initialWidth = Number(this.container?.clientWidth || this.container?.width || 0);
+      const initialView = clampAmapWorldView(0, options.zoom, initialWidth);
+      this.native = new AMap.Map(this.container, {
+        viewMode: '2D',
+        lang: 'zh_cn',
+        mapStyle: options.mapStyle,
+        center: this.toAmap(options.center),
+        zoom: Math.max(Number(options.zoom) || initialView.minZoom, initialView.minZoom),
+        zooms: [initialView.minZoom, 18]
+      });
+      this.sources = {};
+      this.layers = [];
+      this.listeners = new Map();
+      this.layerOverlays = new Map();
+      this.canvasContainer = null;
+      this.standardLayer = typeof AMap.createDefaultLayer === 'function' ? AMap.createDefaultLayer() : null;
+      // The constructor option seeds AMap, while the first explicit sync must
+      // still replay the current theme through setMapStyle.
+      this.mapStyle = null;
+      this.satelliteEnabled = null;
+      this.theme = null;
+      this.resizePending = false;
+      this.resizeObserver = null;
+      const ResizeObserverCtor = globalThis.ResizeObserver;
+      if (typeof ResizeObserverCtor === 'function' && this.container) {
+        this.resizeObserver = new ResizeObserverCtor(() => this.scheduleResize());
+        this.resizeObserver.observe(this.container);
+      }
+      this.touchZoomRotate = { disableRotation() {} };
+      this.native.on?.('moveend', () => this.constrainWorldView());
+      this.native.on?.('zoomend', () => this.constrainWorldView());
+      this.ready = new Promise((resolve, reject) => {
+        this.native.on?.('complete', event => {
+          this.complete = true;
+          this.constrainWorldView();
+          this.scheduleResizeAfterLayout();
+          this.emit('load', event);
+          resolve(event);
+        });
+        this.native.on?.('error', reject);
+      });
+    }
+    toAmap(position) {
+      // GeoJSON and AMap both use longitude first. Convert only at the SDK boundary.
+      const [lon, lat] = Array.isArray(position) ? position : [position?.lon ?? position?.lng ?? position?.getLng?.(), position?.lat ?? position?.getLat?.()];
+      if (![lon, lat].every(value => value != null && value !== '' && !Array.isArray(value) && Number.isFinite(Number(value)))) throw new TypeError('Invalid map coordinate');
+      return wgs84ToGcj02(Number(lon), Number(lat));
+    }
+    fromAmap(position) { return [Number(position?.lng ?? position?.[0]), Number(position?.lat ?? position?.[1])]; }
+    on(name, layerOrHandler, maybeHandler) {
+      const layerId = typeof layerOrHandler === 'string' ? layerOrHandler : null;
+      const handler = layerId ? maybeHandler : layerOrHandler;
+      const entries = this.listeners.get(name) || [];
+      entries.push({ layerId, handler });
+      this.listeners.set(name, entries);
+      return this;
+    }
+    off(name, layerOrHandler, maybeHandler) {
+      const layerId = typeof layerOrHandler === 'string' ? layerOrHandler : null;
+      const handler = layerId ? maybeHandler : layerOrHandler;
+      this.listeners.set(name, (this.listeners.get(name) || []).filter(item => item.layerId !== layerId || item.handler !== handler));
+    }
+    emit(name, event = {}, layerId = null) {
+      for (const item of this.listeners.get(name) || []) if (!item.layerId || item.layerId === layerId) item.handler(event);
+    }
+    getStyle() { return { version: 8, metadata: this.metadata || {}, sources: this.sources, layers: this.layers }; }
+    getSource(id) { return this.sources[id]; }
+    getLayer(id) { return this.layers.find(layer => layer.id === id); }
+    addSource(id, source) {
+      const wrapped = { ...source, setData: data => { wrapped.data = data; this.refreshSource(id); } };
+      this.sources[id] = wrapped;
+    }
+    addLayer(layer, beforeId) {
+      if (this.getLayer(layer.id)) return;
+      const beforeIndex = this.layers.findIndex(item => item.id === beforeId);
+      this.layers.splice(beforeIndex < 0 ? this.layers.length : beforeIndex, 0, { ...layer, overlays: [] });
+      this.refreshLayer(layer.id);
+      this.layers.forEach((item, index) => item.overlays.forEach(overlay => overlay.setOptions?.({ zIndex: 20 + index })));
+    }
+    removeLayer(id) {
+      const layer = this.getLayer(id);
+      layer?.overlays?.forEach(overlay => overlay.setMap?.(null));
+      this.layers = this.layers.filter(item => item.id !== id);
+      this.layerOverlays.delete(id);
+    }
+    removeSource(id) { this.layers.filter(layer => layer.source === id).forEach(layer => this.removeLayer(layer.id)); delete this.sources[id]; }
+    setLayoutProperty(id, property, value) {
+      const layer = this.getLayer(id); if (!layer) return;
+      layer.layout = { ...layer.layout, [property]: value };
+      if (property === 'visibility') this.syncLayerVisibility(layer);
+      else this.refreshLayer(id);
+    }
+    setPaintProperty(id, property, value) {
+      const layer = this.getLayer(id); if (!layer) return;
+      layer.paint = { ...layer.paint, [property]: value };
+      this.refreshLayer(id);
+    }
+    addControl() {}
+    resize() { this.native?.resize?.(); this.constrainWorldView(); this.emit('resize'); }
+    scheduleResize() {
+      if (this.resizePending) return;
+      this.resizePending = true;
+      const run = () => {
+        this.resizePending = false;
+        this.resize();
+      };
+      if (typeof globalThis.requestAnimationFrame === 'function') globalThis.requestAnimationFrame(run);
+      else setTimeout(run, 0);
+    }
+    scheduleResizeAfterLayout() {
+      this.scheduleResize();
+      const raf = callback => {
+        if (typeof globalThis.requestAnimationFrame === 'function') globalThis.requestAnimationFrame(callback);
+        else setTimeout(callback, 0);
+      };
+      raf(() => {
+        this.scheduleResize();
+        raf(() => this.scheduleResize());
+      });
+      const fontsReady = document.fonts?.ready;
+      if (fontsReady?.then) fontsReady.then(() => this.scheduleResize(), () => {});
+    }
+    remove() {
+      this.resizeObserver?.disconnect?.();
+      this.layers.forEach(layer => layer.overlays?.forEach(overlay => overlay.setMap?.(null)));
+      this.native?.destroy?.();
+    }
+    getZoom() { return this.native.getZoom?.() || 3; }
+    viewportWidth() {
+      const size = this.native.getSize?.();
+      return Number(size?.width || this.container?.clientWidth || this.container?.width || 0);
+    }
+    currentCenter() {
+      const center = this.native.getCenter?.();
+      if (center) return { longitude: Number(center.lng ?? center.lon ?? center.getLng?.() ?? center[0]), latitude: Number(center.lat ?? center.getLat?.() ?? center[1]) };
+      const bounds = this.native.getBounds?.();
+      const southWest = bounds?.getSouthWest?.(), northEast = bounds?.getNorthEast?.();
+      if (!southWest || !northEast) return null;
+      return {
+        longitude: (Number(southWest.lng ?? southWest.getLng?.() ?? southWest[0]) + Number(northEast.lng ?? northEast.getLng?.() ?? northEast[0])) / 2,
+        latitude: (Number(southWest.lat ?? southWest.getLat?.() ?? southWest[1]) + Number(northEast.lat ?? northEast.getLat?.() ?? northEast[1])) / 2
+      };
+    }
+    constrainWorldView() {
+      const width = this.viewportWidth();
+      const center = this.currentCenter();
+      const zoom = Number(this.native.getZoom?.());
+      if (!(width > 0) || !center || !Number.isFinite(center.longitude) || !Number.isFinite(center.latitude) || !Number.isFinite(zoom)) return;
+      const view = clampAmapWorldView(center.longitude, zoom, width);
+      if (view.zoom > zoom + 1e-6) this.native.setZoom?.(view.zoom, true);
+      if (Math.abs(view.center - center.longitude) <= 1e-6) return;
+      // `center.longitude` came from AMap, so it is already in the SDK's
+      // coordinate system. Convert only application coordinates at the SDK
+      // boundary; converting this correction again would drift on every event.
+      this.native.setCenter?.([view.center, center.latitude], true);
+    }
+    getBounds() {
+      const bounds = this.native.getBounds?.();
+      return bounds ? { contains: position => bounds.contains?.(this.toAmap(position)) ?? false } : null;
+    }
+    flyTo({ center, zoom = this.getZoom(), duration = 0 }) {
+      const [longitude, latitude] = Array.isArray(center) ? center : [center?.lon ?? center?.lng, center?.lat];
+      const view = clampAmapWorldView(longitude, zoom, this.viewportWidth());
+      this.native.setZoomAndCenter?.(view.zoom, this.toAmap([view.center, latitude]), duration === 0, duration);
+      this.constrainWorldView();
+    }
+    easeTo(options) { this.flyTo(options); }
+    fitBounds(bounds, options = {}) {
+      if (bounds?.isEmpty?.()) return;
+      // AMap 2.0 uses [top, bottom, left, right], unlike CSS/MapLibre padding.
+      const padding = ['top', 'bottom', 'left', 'right'].map(side => typeof options.padding === 'number' ? options.padding : options.padding?.[side] || 0);
+      const southWest = this.toAmap(bounds.getSouthWest()), northEast = this.toAmap(bounds.getNorthEast());
+      this.native.setBounds?.(
+        new this.AMap.Bounds(southWest, northEast),
+        true,
+        padding
+      );
+      const maxZoom = Number(options.maxZoom);
+      // Raster 2D can round a fractional zoom up on its next render frame.
+      // Commit an integer zoom now so the fit remains valid after rendering.
+      this.native.setZoom(Math.max(2, Math.floor(Math.min(this.getZoom(), Number.isFinite(maxZoom) ? maxZoom : 18))), true);
+      // The SDK's projection may also change when that zoom is committed.
+      // Check its actual projected extent, zoom out if needed, then recenter at
+      // the middle of the unobscured viewport at that final zoom.
+      const size = this.native.getSize?.();
+      if (!size || !this.native.lngLatToContainer || !this.native.containerToLngLat) return;
+      const [top, bottom, left, right] = padding;
+      const width = Math.max(1, size.width - left - right), height = Math.max(1, size.height - top - bottom);
+      let sw = this.native.lngLatToContainer(southWest), ne = this.native.lngLatToContainer(northEast);
+      const overflow = Math.max(Math.abs(ne.x - sw.x) / width, Math.abs(ne.y - sw.y) / height);
+      if (overflow > 1) this.native.setZoom(Math.max(2, Math.floor(this.getZoom() - Math.log2(overflow))), true);
+      sw = this.native.lngLatToContainer(southWest);
+      ne = this.native.lngLatToContainer(northEast);
+      const centerPixel = new this.AMap.Pixel(
+        size.width / 2 + (sw.x + ne.x) / 2 - (left + width / 2),
+        size.height / 2 + (sw.y + ne.y) / 2 - (top + height / 2)
+      );
+      this.native.setCenter(this.native.containerToLngLat(centerPixel), true);
+      this.constrainWorldView();
+    }
+    project(position) { const point = this.native.lngLatToContainer?.(this.toAmap(position)); return { x: point?.x || 0, y: point?.y || 0 }; }
+    getCanvas() { return this.container; }
+    getCanvasContainer() {
+      if (!this.canvasContainer) { this.canvasContainer = document.createElement('div'); this.canvasContainer.className = 'amap-overlay-canvas-container'; this.container.append(this.canvasContainer); }
+      return this.canvasContainer;
+    }
+    setMapStyle(style) {
+      if (this.mapStyle === style) return;
+      this.mapStyle = style;
+      this.native.setMapStyle?.(style);
+    }
+    syncRasterFallbackTheme(theme) {
+      this.container?.classList?.toggle('amap-theme-dark', theme === 'dark' && this.satelliteEnabled !== true);
+    }
+    setSatellite(enabled) {
+      enabled = Boolean(enabled);
+      if (this.satelliteEnabled === enabled) {
+        this.syncRasterFallbackTheme(this.theme);
+        return;
+      }
+      this.satelliteEnabled = enabled;
+      if (enabled) {
+        this.satelliteLayer ||= new this.AMap.TileLayer.Satellite({ zIndex: 10 });
+        this.roadLayer ||= new this.AMap.TileLayer.RoadNet({ zIndex: 11 });
+        this.native.setLayers?.([this.satelliteLayer, this.roadLayer]);
+      } else {
+        this.native.setLayers?.(this.standardLayer ? [this.standardLayer] : []);
+      }
+      // AMap may rebuild its standard layer when the layer list changes. The
+      // cached style must be replayed after that operation.
+      this.mapStyle = null;
+      this.syncRasterFallbackTheme(this.theme);
+    }
+    syncBasemap(theme, mode) {
+      this.theme = theme;
+      this.setSatellite(mode === 'satellite');
+      this.syncRasterFallbackTheme(theme);
+      this.setMapStyle(amapStyleForTheme(theme));
+    }
+    refreshSource(sourceId) { this.layers.filter(layer => layer.source === sourceId).forEach(layer => this.refreshLayer(layer.id)); }
+    syncLayerVisibility(layer) {
+      if (layer.layout?.visibility === 'none') layer.overlays.forEach(overlay => overlay.setMap(null));
+      else if (layer.overlays.length) this.native.add(layer.overlays);
+    }
+    refreshLayer(layerId) {
+      const layer = this.getLayer(layerId), source = layer && this.sources[layer.source];
+      if (!layer || !source) return;
+      layer.overlays?.forEach(overlay => overlay.setMap?.(null));
+      layer.overlays = [];
+      if (layer.type === 'raster') {
+        const tileLayer = new this.AMap.TileLayer({ tileUrl: source.tiles?.[0], opacity: layer.paint?.['raster-opacity'] ?? 1, zIndex: 3 });
+        layer.overlays.push(tileLayer);
+        this.syncLayerVisibility(layer);
+        return;
+      }
+      const features = source.data?.type === 'FeatureCollection' ? source.data.features : source.data?.type === 'Feature' ? [source.data] : source.data?.type ? [{ type: 'Feature', geometry: source.data }] : [];
+      for (const feature of features) {
+        if (!this.matchesFilter(layer.filter, feature.properties || {})) continue;
+        const overlays = this.createFeatureOverlays(layer, feature);
+        overlays.forEach(overlay => {
+          overlay.setOptions?.({ zIndex: 20 + this.layers.indexOf(layer) });
+          for (const [nativeEvent, eventName] of [['click', 'click'], ['mouseover', 'mouseenter'], ['mouseout', 'mouseleave']]) {
+            overlay.on?.(nativeEvent, event => this.emit(eventName, { ...event, features: [feature] }, layer.id));
+          }
+        });
+        layer.overlays.push(...overlays);
+      }
+      this.syncLayerVisibility(layer);
+    }
+    matchesFilter(filter, properties) { return !filter || (filter[0] === '==' && properties[filter[1]?.[1]] === filter[2]); }
+    createFeatureOverlays(layer, feature) {
+      const geometry = feature.geometry, properties = feature.properties || {}, paint = layer.paint || {};
+      if (!geometry) return [];
+      if (geometry.type === 'GeometryCollection') return geometry.geometries.flatMap(child => this.createFeatureOverlays(layer, { ...feature, geometry: child }));
+      const value = (name, fallback) => amapStyleValue(paint[name], properties, fallback);
+      const path = coordinates => coordinates.map(point => this.toAmap(point));
+      const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.type === 'MultiPolygon' ? geometry.coordinates : [];
+      if (layer.type === 'line') {
+        // Polygon coordinates are rings (and MultiPolygon adds another nesting level).
+        const lines = geometry.type === 'LineString' ? [geometry.coordinates] : geometry.type === 'MultiLineString' ? geometry.coordinates : polygons.flat();
+        return lines.filter(line => line.length >= 2).map(line => new this.AMap.Polyline({ path: path(line), strokeColor: value('line-color', '#4c88a5'), strokeWeight: value('line-width', 2), strokeOpacity: value('line-opacity', 1), strokeStyle: paint['line-dasharray'] ? 'dashed' : 'solid', strokeDasharray: paint['line-dasharray'] }));
+      }
+      if (layer.type === 'fill') return polygons.filter(polygon => polygon[0]?.length >= 3).map(polygon => new this.AMap.Polygon({ path: polygon.map(path), strokeWeight: 0, strokeOpacity: 0, fillColor: value('fill-color', '#5bb6df'), fillOpacity: value('fill-opacity', 1) }));
+      const points = geometry.type === 'Point' ? [geometry.coordinates] : geometry.type === 'MultiPoint' ? geometry.coordinates : [];
+      if (layer.type === 'circle' || layer.type === 'heatmap') return points.map(point => new this.AMap.CircleMarker({ center: this.toAmap(point), radius: value('circle-radius', layer.type === 'heatmap' ? 22 : 5), strokeColor: value('circle-stroke-color', '#fff'), strokeWeight: value('circle-stroke-width', 0), strokeOpacity: value('circle-opacity', 1), fillColor: value('circle-color', properties.color || '#4c88a5'), fillOpacity: value('circle-opacity', layer.type === 'heatmap' ? .26 : .9) }));
+      if (layer.type === 'symbol') return points.map(point => new this.AMap.Text({ text: properties.label || `${properties.level || ''}级风圈`, position: this.toAmap(point), anchor: 'center', style: { color: windCircleStyles[properties.level]?.color || '#fff', background: 'rgba(8,24,35,.82)', border: `1px solid ${windCircleStyles[properties.level]?.color || '#ffd60a'}`, padding: '2px 5px', 'border-radius': '10px', 'font-size': '10px', 'line-height': '16px' } }));
+      return [];
+    }
+  }
 
   const el = id => document.getElementById(id);
   const hasNumber = value => value !== null && value !== undefined && value !== '' && Number.isFinite(Number(value));
@@ -530,6 +871,8 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
   }
 
   function ensureWindCircleLabelImages(map) {
+    // AMap uses native Text overlays; only MapLibre needs sprite images.
+    if (map.isAmap) return;
     Object.entries(windCircleStyles).forEach(([level, style]) => {
       const imageId = `wind-circle-label-${level}`;
       if (map.hasImage(imageId)) return;
@@ -1098,6 +1441,12 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     points.forEach(point => {
       if (hasNumber(point?.position?.lon) && hasNumber(point?.position?.lat)) bounds.extend([Number(point.position.lon), Number(point.position.lat)]);
     });
+    (state.detail.eventGeometry?.features || [])
+      .filter(feature => ['Polygon', 'MultiPolygon'].includes(feature.geometry?.type)
+        && /cone|forecast.*(area|uncertainty)/i.test(feature.properties?.featureType || ''))
+      .flatMap(amapFeatureCoordinates)
+      .forEach(position => bounds.extend(position));
+    windCircleCollection(state.windCirclePoint).features.flatMap(amapFeatureCoordinates).forEach(position => bounds.extend(position));
     if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), retainPadding: false, maxZoom: 7, duration: 700 });
   }
 
@@ -1106,6 +1455,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     const generation = state.styleGeneration;
     addTrackLayers();
     renderMarkers();
+    if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
     // Delegated MapLibre listeners survive setStyle; bind each layer id only once.
     bindPointInteractions();
     await addWeatherLayers(generation);
@@ -1130,7 +1480,9 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
 
   function updateBasemapAttribution() {
     const provider = state.basemapProvider;
-    el('basemapAttribution').innerHTML = provider === 'openfreemap'
+    el('basemapAttribution').innerHTML = provider === 'amap'
+      ? `高德地图${state.basemap === 'satellite' ? ' · 卫星影像 · 路网' : ''}`
+      : provider === 'openfreemap'
       ? `${BASEMAP_ATTRIBUTION}${state.basemap === 'satellite' ? ' · NASA GIBS Blue Marble' : ''}`
       : provider === 'esri'
         ? `${state.basemap === 'satellite' ? 'Esri World Imagery · ' : ''}${ESRI_ATTRIBUTION}`
@@ -1238,52 +1590,120 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     }
   }
 
+  async function fetchAmapConfig() {
+    let timer;
+    try {
+      const response = await Promise.race([
+        fetch('/api/amap-config', { headers: { accept: 'application/json' } }),
+        new Promise((resolve, reject) => { timer = setTimeout(() => reject(new Error('AMap config timed out')), AMAP_TIMEOUT_MS); })
+      ]);
+      if (!response.ok) throw new Error(`AMap config failed (${response.status})`);
+      return parseAmapConfig(await response.json());
+    } finally { clearTimeout(timer); }
+  }
+
+  class AmapLngLatBounds {
+    constructor() { this.points = []; }
+    extend(position) { this.points.push([Number(position[0]), Number(position[1])]); return this; }
+    isEmpty() { return !this.points.length; }
+    getSouthWest() { return this.points.reduce((result, point) => [Math.min(result[0], point[0]), Math.min(result[1], point[1])], this.points[0]); }
+    getNorthEast() { return this.points.reduce((result, point) => [Math.max(result[0], point[0]), Math.max(result[1], point[1])], this.points[0]); }
+  }
+
+  async function initializeAmapMap() {
+    const config = await fetchAmapConfig();
+    if (!config.key) throw new Error('AMap key unavailable');
+    const browserWindow = globalThis.window || globalThis;
+    const origin = globalThis.location?.origin || browserWindow.location?.origin || '';
+    browserWindow._AMapSecurityConfig = { serviceHost: `${origin}${config.serviceHost}` };
+    const AMap = await loadAmapScript({ document, window: browserWindow, key: config.key, timeoutMs: AMAP_TIMEOUT_MS });
+    const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
+    const adapter = new AmapMapAdapter(AMap, { container: 'typhoonMap', mapStyle: amapStyleForTheme(state.theme), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2 });
+    let readyTimer;
+    try {
+      await new Promise((resolve, reject) => {
+        readyTimer = setTimeout(() => reject(new Error('AMap map timed out')), AMAP_TIMEOUT_MS);
+        (adapter.ready || Promise.resolve()).then(resolve, reject);
+      });
+    } catch (error) {
+      adapter.remove();
+      throw error;
+    } finally { clearTimeout(readyTimer); }
+    // Theme and basemap can change while the SDK is loading. Replay the latest
+    // state after complete so startup choices cannot be overwritten by the
+    // constructor's older values.
+    adapter.syncBasemap(state.theme, state.basemap);
+    globalThis.maplibregl = { Marker: AmapMarker, LngLatBounds: AmapLngLatBounds };
+    state.map = adapter;
+    state.styleReady = true;
+    state.rendererUnavailable = false;
+    state.basemapProvider = 'amap';
+    state.basemapSourceIds = [];
+    state.basemapLoadedSources.clear();
+    basemapNotice();
+    el('mapFallback').hidden = true;
+    await hydrateMapStyle();
+    adapter.scheduleResizeAfterLayout();
+    if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+    if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
+  }
+
+  async function initializeMapLibre() {
+    const renderer = await loadMapLibre();
+    if (!hasWebGLContext()) throw new Error('WebGL unavailable');
+    globalThis.maplibregl = renderer;
+    const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
+    state.map = new renderer.Map({ container: 'typhoonMap', style: createFallbackStyle(state.theme), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2, attributionControl: false, maxZoom: 10, dragRotate: false, touchPitch: false });
+    state.map.touchZoomRotate.disableRotation();
+    state.map.addControl(new renderer.NavigationControl({ showCompass: false }), 'bottom-right');
+    state.map.on('style.load', () => {
+      if (state.map.getStyle().metadata?.['pulse:generation'] !== state.basemapGeneration) return;
+      state.styleReady = true;
+      el('mapFallback').hidden = true;
+      hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error));
+      if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+      if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
+    });
+    state.map.on('sourcedataloading', event => {
+      if (!state.basemapSourceIds.includes(event.sourceId)) return;
+      state.basemapLoadedSources.delete(event.sourceId);
+      armBasemapTimeout();
+    });
+    state.map.on('sourcedata', event => {
+      if (!state.basemapSourceIds.includes(event.sourceId) || !event.tile || (event.sourceDataType && event.sourceDataType !== 'content')) return;
+      state.basemapLoadedSources.add(event.sourceId);
+      if (state.basemapSourceIds.every(id => state.basemapLoadedSources.has(id))) {
+        clearTimeout(state.basemapTimer);
+        state.basemapTimer = null;
+      }
+    });
+    state.map.on('error', event => {
+      const message = String(event?.error?.message || '');
+      const styleError = !event.sourceId && !event.source && (!state.styleReady || /tiles\.openfreemap\.org/.test(event?.error?.url || message));
+      if (state.basemapFailureMonitor(event) || styleError) {
+        const generation = state.basemapGeneration;
+        queueMicrotask(() => { if (generation === state.basemapGeneration) fallbackBasemap(); });
+      }
+      if (!/Failed to fetch|AJAXError/.test(message)) console.warn('Map error:', event?.error || event);
+    });
+    state.map.on('webglcontextlost', showOutlineFallback);
+    await reloadMapStyle();
+  }
+
   async function initializeMap() {
     if (state.map || state.rendererLoading) return;
     renderOutlineMap();
     if (state.rendererUnavailable) return;
     state.rendererLoading = true;
     try {
-      const renderer = await loadMapLibre();
-      if (!hasWebGLContext()) throw new Error('WebGL unavailable');
-      globalThis.maplibregl = renderer;
-      const position = state.detail?.storm?.position || { lon: 128, lat: 22 };
-      state.map = new renderer.Map({ container: 'typhoonMap', style: createFallbackStyle(state.theme), center: [position.lon, position.lat], zoom: state.detail ? 5.2 : 3.2, attributionControl: false, maxZoom: 10, dragRotate: false, touchPitch: false });
-      state.map.touchZoomRotate.disableRotation();
-      state.map.addControl(new renderer.NavigationControl({ showCompass: false }), 'bottom-right');
-      state.map.on('style.load', () => {
-        if (state.map.getStyle().metadata?.['pulse:generation'] !== state.basemapGeneration) return;
-        state.styleReady = true;
-        el('mapFallback').hidden = true;
-        hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error));
-        if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
-        if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
-      });
-      state.map.on('sourcedataloading', event => {
-        if (!state.basemapSourceIds.includes(event.sourceId)) return;
-        state.basemapLoadedSources.delete(event.sourceId);
-        armBasemapTimeout();
-      });
-      state.map.on('sourcedata', event => {
-        if (!state.basemapSourceIds.includes(event.sourceId) || !event.tile || (event.sourceDataType && event.sourceDataType !== 'content')) return;
-        state.basemapLoadedSources.add(event.sourceId);
-        if (state.basemapSourceIds.every(id => state.basemapLoadedSources.has(id))) {
-          clearTimeout(state.basemapTimer);
-          state.basemapTimer = null;
-        }
-      });
-      state.map.on('error', event => {
-        const message = String(event?.error?.message || '');
-        const styleError = !event.sourceId && !event.source && (!state.styleReady || /tiles\.openfreemap\.org/.test(event?.error?.url || message));
-        if (state.basemapFailureMonitor(event) || styleError) {
-          // Avoid replacing a style in the middle of its own event dispatch.
-          const generation = state.basemapGeneration;
-          queueMicrotask(() => { if (generation === state.basemapGeneration) fallbackBasemap(); });
-        }
-        if (!/Failed to fetch|AJAXError/.test(message)) console.warn('Map error:', event?.error || event);
-      });
-      state.map.on('webglcontextlost', showOutlineFallback);
-      await reloadMapStyle();
+      try {
+        await initializeAmapMap();
+      } catch (amapError) {
+        console.warn(isAmapAuthError(amapError) ? 'AMap authorization failed, using MapLibre fallback' : 'AMap unavailable, using MapLibre fallback:', amapError?.message || amapError);
+        state.map = null;
+        state.styleReady = false;
+        await initializeMapLibre();
+      }
     } catch (error) {
       console.warn('Map renderer unavailable:', error);
       showOutlineFallback();
@@ -1293,6 +1713,14 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
   async function reloadMapStyle() {
     if (!state.map) {
       if (state.rendererUnavailable) renderOutlineMap();
+      return;
+    }
+    if (state.map.isAmap) {
+      state.map.syncBasemap(state.theme, state.basemap);
+      state.map.scheduleResizeAfterLayout?.();
+      state.basemapProvider = 'amap';
+      state.styleReady = true;
+      basemapNotice();
       return;
     }
     const request = ++state.basemapRequest;
@@ -1316,9 +1744,14 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
   }
 
   function setBasemap(id) {
-    if (!['standard', 'satellite'].includes(id) || id === state.basemap) return;
+    if (!['standard', 'satellite'].includes(id)) return;
+    const changed = id !== state.basemap;
     state.basemap = id;
     document.querySelectorAll('[data-basemap]').forEach(button => button.classList.toggle('active', button.dataset.basemap === id));
+    if (!changed) {
+      if (state.map?.isAmap) state.map.syncBasemap(state.theme, state.basemap);
+      return;
+    }
     reloadMapStyle();
   }
 
@@ -1326,7 +1759,10 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     if (!['light', 'dark'].includes(theme)) theme = resolveTheme();
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]').content = theme === 'light' ? '#dfe8ef' : '#07131d';
-    if (theme === state.theme) return;
+    if (theme === state.theme) {
+      if (state.map?.isAmap) state.map.syncBasemap(theme, state.basemap);
+      return;
+    }
     state.theme = theme;
     reloadMapStyle();
   }
@@ -1645,14 +2081,17 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
   function refreshMapForStorm() {
     const position = state.detail?.storm?.position;
     if (!state.map || !position) return;
-    state.map.flyTo({ center: [position.lon, position.lat], zoom: Math.max(state.map.getZoom(), 5.4), padding: mapPadding(), retainPadding: false, duration: 700 });
     if (state.styleReady) rebuildStormLayers().catch(error => console.warn('Storm layer rebuild failed:', error));
-    else state.needsTrackFit = true;
+    else {
+      state.needsTrackFit = true;
+      state.map.flyTo({ center: [position.lon, position.lat], zoom: Math.max(state.map.getZoom(), 5.4), padding: mapPadding(), retainPadding: false, duration: 0 });
+    }
   }
 
   async function rebuildStormLayers() {
     const map = state.map;
     if (!map || !state.styleReady) return;
+    state.needsTrackFit = true;
     ++state.styleGeneration;
     removeMarkers();
     removeOtherStormMarkers();
@@ -1662,7 +2101,6 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     removable.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
     Object.keys(map.getStyle().sources).filter(id => stormLayer.test(id)).forEach(sourceId => map.removeSource(sourceId));
     await hydrateMapStyle();
-    fitTracks();
   }
 
   async function renderOtherStormTracks() {
@@ -1801,8 +2239,13 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       const opening = el('layerPanel').hidden;
       el('layerPanel').hidden = !opening;
       el('layerButton').setAttribute('aria-expanded', String(opening));
+      state.map?.scheduleResizeAfterLayout?.();
     });
-    el('closeLayerButton').addEventListener('click', () => { el('layerPanel').hidden = true; el('layerButton').setAttribute('aria-expanded', 'false'); });
+    el('closeLayerButton').addEventListener('click', () => {
+      el('layerPanel').hidden = true;
+      el('layerButton').setAttribute('aria-expanded', 'false');
+      state.map?.scheduleResizeAfterLayout?.();
+    });
     el('closeNodeButton').addEventListener('click', () => { el('nodeCard').hidden = true; setWindCirclePoint(state.detail?.tracks?.observed?.at(-1) || state.detail?.storm); });
     el('windFieldButton').addEventListener('click', () => { setWeatherVisible('wind-field', !state.activeWeather.has('wind-field')); });
     el('waveHeightButton').addEventListener('click', () => { setWeatherVisible('wave-height', !state.activeWeather.has('wave-height')); });

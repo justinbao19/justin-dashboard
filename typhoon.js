@@ -5,7 +5,7 @@ import {
   chooseSynchronizedFrame
 } from '/typhoon-layer-clock.mjs';
 import { createFieldRenderer } from '/typhoon-field-renderer.mjs';
-import { AMAP_TIMEOUT_MS, BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, amapStyleForTheme, clampAmapWorldView, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, loadAmapScript, loadMapLibre, nextBasemapProvider, parseAmapConfig, wgs84ToGcj02 } from '/typhoon-basemap.mjs';
+import { AMAP_TIMEOUT_MS, BASEMAP_ATTRIBUTION, ESRI_ATTRIBUTION, BASEMAP_PALETTES, BASEMAP_TIMEOUT_MS, OPENFREEMAP_STYLES, amapStyleForTheme, amapPaddingOffset, normalizeMapPadding, createBasemapStyle, createFallbackStyle, createBasemapFailureMonitor, isAmapAuthError, loadAmapScript, loadMapLibre, nextBasemapProvider, parseAmapConfig, wgs84ToGcj02 } from '/typhoon-basemap.mjs';
 import { createOutlineProjection } from '/typhoon-land.mjs';
 
 (() => {
@@ -120,15 +120,18 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       this.AMap = AMap;
       this.isAmap = true;
       this.container = document.getElementById(options.container);
-      const initialWidth = Number(this.container?.clientWidth || this.container?.width || 0);
-      const initialView = clampAmapWorldView(0, options.zoom, initialWidth);
       this.native = new AMap.Map(this.container, {
         viewMode: '2D',
         lang: 'zh_cn',
         mapStyle: options.mapStyle,
         center: this.toAmap(options.center),
-        zoom: Math.max(Number(options.zoom) || initialView.minZoom, initialView.minZoom),
-        zooms: [initialView.minZoom, 18]
+        zoom: Math.max(Number(options.zoom) || 3, 3),
+        zooms: [3, 18],
+        dragEnable: true,
+        zoomEnable: true,
+        scrollWheel: true,
+        touchZoom: true,
+        doubleClickZoom: true
       });
       this.sources = {};
       this.layers = [];
@@ -149,12 +152,9 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
         this.resizeObserver.observe(this.container);
       }
       this.touchZoomRotate = { disableRotation() {} };
-      this.native.on?.('moveend', () => this.constrainWorldView());
-      this.native.on?.('zoomend', () => this.constrainWorldView());
       this.ready = new Promise((resolve, reject) => {
         this.native.on?.('complete', event => {
           this.complete = true;
-          this.constrainWorldView();
           this.scheduleResizeAfterLayout();
           this.emit('load', event);
           resolve(event);
@@ -218,7 +218,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       this.refreshLayer(id);
     }
     addControl() {}
-    resize() { this.native?.resize?.(); this.constrainWorldView(); this.emit('resize'); }
+    resize() { this.native?.resize?.(); this.emit('resize'); }
     scheduleResize() {
       if (this.resizePending) return;
       this.resizePending = true;
@@ -248,49 +248,37 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       this.native?.destroy?.();
     }
     getZoom() { return this.native.getZoom?.() || 3; }
-    viewportWidth() {
-      const size = this.native.getSize?.();
-      return Number(size?.width || this.container?.clientWidth || this.container?.width || 0);
-    }
-    currentCenter() {
-      const center = this.native.getCenter?.();
-      if (center) return { longitude: Number(center.lng ?? center.lon ?? center.getLng?.() ?? center[0]), latitude: Number(center.lat ?? center.getLat?.() ?? center[1]) };
-      const bounds = this.native.getBounds?.();
-      const southWest = bounds?.getSouthWest?.(), northEast = bounds?.getNorthEast?.();
-      if (!southWest || !northEast) return null;
-      return {
-        longitude: (Number(southWest.lng ?? southWest.getLng?.() ?? southWest[0]) + Number(northEast.lng ?? northEast.getLng?.() ?? northEast[0])) / 2,
-        latitude: (Number(southWest.lat ?? southWest.getLat?.() ?? southWest[1]) + Number(northEast.lat ?? northEast.getLat?.() ?? northEast[1])) / 2
-      };
-    }
-    constrainWorldView() {
-      const width = this.viewportWidth();
-      const center = this.currentCenter();
-      const zoom = Number(this.native.getZoom?.());
-      if (!(width > 0) || !center || !Number.isFinite(center.longitude) || !Number.isFinite(center.latitude) || !Number.isFinite(zoom)) return;
-      const view = clampAmapWorldView(center.longitude, zoom, width);
-      if (view.zoom > zoom + 1e-6) this.native.setZoom?.(view.zoom, true);
-      if (Math.abs(view.center - center.longitude) <= 1e-6) return;
-      // `center.longitude` came from AMap, so it is already in the SDK's
-      // coordinate system. Convert only application coordinates at the SDK
-      // boundary; converting this correction again would drift on every event.
-      this.native.setCenter?.([view.center, center.latitude], true);
-    }
     getBounds() {
       const bounds = this.native.getBounds?.();
       return bounds ? { contains: position => bounds.contains?.(this.toAmap(position)) ?? false } : null;
     }
-    flyTo({ center, zoom = this.getZoom(), duration = 0 }) {
-      const [longitude, latitude] = Array.isArray(center) ? center : [center?.lon ?? center?.lng, center?.lat];
-      const view = clampAmapWorldView(longitude, zoom, this.viewportWidth());
-      this.native.setZoomAndCenter?.(view.zoom, this.toAmap([view.center, latitude]), duration === 0, duration);
-      this.constrainWorldView();
+    flyTo({ center, zoom = this.getZoom(), padding, duration = 0 }) {
+      const target = this.toAmap(center);
+      const { dx, dy } = amapPaddingOffset(padding);
+      const size = this.native.getSize?.();
+      if ((!dx && !dy) || !size || !this.native.containerToLngLat) {
+        this.native.setZoomAndCenter(zoom, target, duration === 0, duration);
+        return;
+      }
+      const previousCenter = this.native.getCenter?.();
+      const previousZoom = this.getZoom();
+      // Project only after the target and zoom are committed synchronously.
+      // The resulting center is already GCJ-02: never convert it a second time.
+      this.native.setZoomAndCenter(zoom, target, true);
+      const finalCenter = this.native.containerToLngLat(new this.AMap.Pixel(size.width / 2 - dx, size.height / 2 - dy));
+      if (duration > 0 && previousCenter) {
+        this.native.setZoomAndCenter(previousZoom, previousCenter, true);
+        this.native.setZoomAndCenter(zoom, finalCenter, false, duration);
+      } else {
+        this.native.setCenter(finalCenter, true);
+      }
     }
     easeTo(options) { this.flyTo(options); }
     fitBounds(bounds, options = {}) {
       if (bounds?.isEmpty?.()) return;
       // AMap 2.0 uses [top, bottom, left, right], unlike CSS/MapLibre padding.
-      const padding = ['top', 'bottom', 'left', 'right'].map(side => typeof options.padding === 'number' ? options.padding : options.padding?.[side] || 0);
+      const normalizedPadding = normalizeMapPadding(options.padding);
+      const padding = ['top', 'bottom', 'left', 'right'].map(side => normalizedPadding[side]);
       const southWest = this.toAmap(bounds.getSouthWest()), northEast = this.toAmap(bounds.getNorthEast());
       this.native.setBounds?.(
         new this.AMap.Bounds(southWest, northEast),
@@ -300,7 +288,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       const maxZoom = Number(options.maxZoom);
       // Raster 2D can round a fractional zoom up on its next render frame.
       // Commit an integer zoom now so the fit remains valid after rendering.
-      this.native.setZoom(Math.max(2, Math.floor(Math.min(this.getZoom(), Number.isFinite(maxZoom) ? maxZoom : 18))), true);
+      this.native.setZoom(Math.max(3, Math.floor(Math.min(this.getZoom(), Number.isFinite(maxZoom) ? maxZoom : 18))), true);
       // The SDK's projection may also change when that zoom is committed.
       // Check its actual projected extent, zoom out if needed, then recenter at
       // the middle of the unobscured viewport at that final zoom.
@@ -310,7 +298,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       const width = Math.max(1, size.width - left - right), height = Math.max(1, size.height - top - bottom);
       let sw = this.native.lngLatToContainer(southWest), ne = this.native.lngLatToContainer(northEast);
       const overflow = Math.max(Math.abs(ne.x - sw.x) / width, Math.abs(ne.y - sw.y) / height);
-      if (overflow > 1) this.native.setZoom(Math.max(2, Math.floor(this.getZoom() - Math.log2(overflow))), true);
+      if (overflow > 1) this.native.setZoom(Math.max(3, Math.floor(this.getZoom() - Math.log2(overflow))), true);
       sw = this.native.lngLatToContainer(southWest);
       ne = this.native.lngLatToContainer(northEast);
       const centerPixel = new this.AMap.Pixel(
@@ -318,7 +306,6 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
         size.height / 2 + (sw.y + ne.y) / 2 - (top + height / 2)
       );
       this.native.setCenter(this.native.containerToLngLat(centerPixel), true);
-      this.constrainWorldView();
     }
     project(position) { const point = this.native.lngLatToContainer?.(this.toAmap(position)); return { x: point?.x || 0, y: point?.y || 0 }; }
     getCanvas() { return this.container; }
@@ -1395,6 +1382,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     const panelRect = el('insightPanel')?.getBoundingClientRect();
     const stripRect = el('sourceStrip')?.getBoundingClientRect();
     const playbackRect = el('trackPlayback')?.getBoundingClientRect();
+    const cardRect = el('nodeCard')?.getBoundingClientRect();
     const toolbarRect = document.querySelector('.map-toolbar')?.getBoundingClientRect();
     const padding = {
       top: Math.max(24, Math.round((topbarRect?.bottom || mapRect.top + 64) - mapRect.top + 12)),
@@ -1407,7 +1395,8 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       const visibleBottom = Math.min(
         panelRect.top,
         stripRect?.height ? stripRect.top : panelRect.top,
-        playbackRect?.height ? playbackRect.top : panelRect.top
+        playbackRect?.height ? playbackRect.top : panelRect.top,
+        cardRect?.height ? cardRect.top : panelRect.top
       ) - 12;
       padding.bottom = Math.max(38, Math.round(mapRect.bottom - visibleBottom));
       if (toolbarRect?.width) padding.right = Math.max(padding.right, mapRect.right - toolbarRect.left + 12);
@@ -1450,12 +1439,20 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     if (!bounds.isEmpty()) state.map.fitBounds(bounds, { padding: mapPadding(), retainPadding: false, maxZoom: 7, duration: 700 });
   }
 
+  function focusStormOnLoad() {
+    if (!state.map || !state.detail) return;
+    state.needsTrackFit = false;
+    const position = state.detail.storm?.position;
+    if (!hasNumber(position?.lon) || !hasNumber(position?.lat)) { fitTracks(); return; }
+    state.map.flyTo({ center: [Number(position.lon), Number(position.lat)], zoom: 5.4, padding: mapPadding(), retainPadding: false, duration: 0 });
+  }
+
   async function hydrateMapStyle() {
     if (!state.styleReady || !state.detail) return;
     const generation = state.styleGeneration;
     addTrackLayers();
     renderMarkers();
-    if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+    if (state.needsTrackFit) focusStormOnLoad();
     // Delegated MapLibre listeners survive setStyle; bind each layer id only once.
     bindPointInteractions();
     await addWeatherLayers(generation);
@@ -1644,7 +1641,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     el('mapFallback').hidden = true;
     await hydrateMapStyle();
     adapter.scheduleResizeAfterLayout();
-    if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+    if (state.needsTrackFit) focusStormOnLoad();
     if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
   }
 
@@ -1661,7 +1658,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
       state.styleReady = true;
       el('mapFallback').hidden = true;
       hydrateMapStyle().catch(error => console.warn('Map style restore failed:', error));
-      if (state.needsTrackFit) { state.needsTrackFit = false; fitTracks(); }
+      if (state.needsTrackFit) focusStormOnLoad();
       if (state.detail && !state.layerClock) resolveAndLoadWeatherLayers();
     });
     state.map.on('sourcedataloading', event => {
@@ -2084,7 +2081,7 @@ import { createOutlineProjection } from '/typhoon-land.mjs';
     if (state.styleReady) rebuildStormLayers().catch(error => console.warn('Storm layer rebuild failed:', error));
     else {
       state.needsTrackFit = true;
-      state.map.flyTo({ center: [position.lon, position.lat], zoom: Math.max(state.map.getZoom(), 5.4), padding: mapPadding(), retainPadding: false, duration: 0 });
+      state.map.flyTo({ center: [position.lon, position.lat], zoom: 5.4, padding: mapPadding(), retainPadding: false, duration: 0 });
     }
   }
 

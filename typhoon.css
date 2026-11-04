@@ -60,8 +60,14 @@ button:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px soli
 #typhoonMap .amap-markers { width: 100% !important; height: 100% !important; max-width: none; max-height: none; }
 #typhoonMap .amap-container { font-family: inherit; }
 #typhoonMap .amap-logo, #typhoonMap .amap-copyright { z-index: 4; }
-#typhoonMap.amap-theme-dark .amap-layers img[src*="appmaptile"][src*="style=8"] {
+/* Composite the standard raster once: filtering individual tile textures leaves
+   light seams at fractional zooms. Keep weather rasters and SDK overlays out. */
+#typhoonMap.amap-theme-dark .amap-layer:has(img[src*="appmaptile"][src*="style=8"]) {
   filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6);
+}
+#typhoonMap.amap-theme-dark .amap-layer img[src*="appmaptile"][src*="style=8"] {
+  /* About one pixel of overlap per 256px tile, without replacing AMap's transform. */
+  scale: 1.004;
 }
 .amap-overlay-canvas-container { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 .amap-overlay-canvas-container canvas { position: absolute; inset: 0; pointer-events: none; }

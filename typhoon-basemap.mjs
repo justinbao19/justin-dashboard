@@ -31,21 +31,17 @@ export function amapStyleForTheme(theme = 'dark') {
   return theme === 'light' ? 'amap://styles/normal' : 'amap://styles/dark';
 }
 
-export function clampAmapWorldView(center, zoom, width, minimumZoom = 2) {
-  const viewportWidth = Number(width);
-  const requestedZoom = Number(zoom);
-  const baseMinimumZoom = Number.isFinite(Number(minimumZoom)) ? Number(minimumZoom) : 2;
-  const minZoom = Math.max(2, baseMinimumZoom, viewportWidth > 0 ? Math.ceil(Math.log2(viewportWidth / 256)) : 2);
-  const safeZoom = Math.max(Number.isFinite(requestedZoom) ? requestedZoom : minZoom, minZoom);
-  const worldWidth = 256 * 2 ** safeZoom;
-  const halfLongitudeSpan = viewportWidth > 0 ? 180 * viewportWidth / worldWidth : 0;
-  const maxCenter = Math.max(0, 180 - halfLongitudeSpan);
-  const requestedCenter = Number(center);
-  return {
-    center: Number.isFinite(requestedCenter) ? Math.max(-maxCenter, Math.min(maxCenter, requestedCenter)) : 0,
-    minZoom,
-    zoom: safeZoom
-  };
+export function normalizeMapPadding(padding = 0) {
+  return Object.fromEntries(['top', 'bottom', 'left', 'right'].map(side => {
+    const value = Number(typeof padding === 'number' ? padding : padding?.[side] ?? 0);
+    return [side, Number.isFinite(value) ? Math.max(0, value) : 0];
+  }));
+}
+
+// Target displacement from the container center, in screen pixels.
+export function amapPaddingOffset(padding) {
+  const { top, bottom, left, right } = normalizeMapPadding(padding);
+  return { dx: (left - right) / 2, dy: (top - bottom) / 2 };
 }
 
 export function nextBasemapProvider(provider, rendererAvailable = true) {

@@ -21,6 +21,14 @@ export default async function handler(req, res) {
   }
 
   const { path, query } = readAmapRequest(req);
+  if (query.get('__amap_config') === '1' || (!path && req.method !== 'HEAD')) {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60');
+    res.status(200).json({
+      key: process.env.AMAP_JS_KEY || null,
+      serviceHost: '/api/_AMapService'
+    });
+    return;
+  }
   if (!isValidAmapPath(path)) {
     res.status(400).json({ error: 'Invalid AMap path' });
     return;

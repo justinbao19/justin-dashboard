@@ -10,6 +10,7 @@
     }
   ],
   "routes": [
+    { "src": "/api/amap-config", "dest": "/api/amap-service?__amap_config=1" },
     { "src": "/api/_AMapService/(.*)", "dest": "/api/amap-service?__amap_path=$1" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/tracks/(.*)", "dest": "/tracks/$1" },
